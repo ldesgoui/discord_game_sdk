@@ -2,12 +2,12 @@ use discord_game_sdk_sys as sys;
 
 //
 
-pub struct Discord {
+pub struct GameSDK {
     client_id: i64,
     core_ptr: *mut sys::IDiscordCore,
 }
 
-impl Discord {
+impl GameSDK {
     #[allow(clippy::cast_possible_wrap)]
     pub fn new(client_id: i64, flags: &CreateFlags) -> Result<Self> {
         let mut params = sys::DiscordCreateParams::default();
@@ -66,7 +66,7 @@ impl Discord {
     }
 }
 
-impl Drop for Discord {
+impl Drop for GameSDK {
     fn drop(&mut self) {
         debug_assert!(self.core().destroy.is_some());
         unsafe {
@@ -255,7 +255,7 @@ mod test {
             })
             .init();
 
-        Discord::new(1, &Default::default());
+        GameSDK::new(1, &Default::default());
     }
 
 }
