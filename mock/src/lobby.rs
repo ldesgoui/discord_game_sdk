@@ -1,14 +1,14 @@
 use discord_game_sdk_sys as sys;
 use std::os::raw::{c_char, c_void};
 
-pub(crate) unsafe extern "C" fn get_lobby_create_transaction(
+pub unsafe extern "C" fn get_lobby_create_transaction(
     manager: *mut sys::IDiscordLobbyManager,
     transaction: *mut *mut sys::IDiscordLobbyTransaction,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_lobby_update_transaction(
+pub unsafe extern "C" fn get_lobby_update_transaction(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     transaction: *mut *mut sys::IDiscordLobbyTransaction,
@@ -16,7 +16,7 @@ pub(crate) unsafe extern "C" fn get_lobby_update_transaction(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_member_update_transaction(
+pub unsafe extern "C" fn get_member_update_transaction(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     user_id: sys::DiscordUserId,
@@ -25,7 +25,7 @@ pub(crate) unsafe extern "C" fn get_member_update_transaction(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn create_lobby(
+pub unsafe extern "C" fn create_lobby(
     manager: *mut sys::IDiscordLobbyManager,
     transaction: *mut sys::IDiscordLobbyTransaction,
     callback_data: *mut c_void,
@@ -39,7 +39,7 @@ pub(crate) unsafe extern "C" fn create_lobby(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn update_lobby(
+pub unsafe extern "C" fn update_lobby(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     transaction: *mut sys::IDiscordLobbyTransaction,
@@ -48,7 +48,7 @@ pub(crate) unsafe extern "C" fn update_lobby(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn delete_lobby(
+pub unsafe extern "C" fn delete_lobby(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     callback_data: *mut c_void,
@@ -56,7 +56,7 @@ pub(crate) unsafe extern "C" fn delete_lobby(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn connect_lobby(
+pub unsafe extern "C" fn connect_lobby(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     secret: *mut c_char,
@@ -71,7 +71,7 @@ pub(crate) unsafe extern "C" fn connect_lobby(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn connect_lobby_with_activity_secret(
+pub unsafe extern "C" fn connect_lobby_with_activity_secret(
     manager: *mut sys::IDiscordLobbyManager,
     activity_secret: *mut c_char,
     callback_data: *mut c_void,
@@ -85,7 +85,7 @@ pub(crate) unsafe extern "C" fn connect_lobby_with_activity_secret(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn disconnect_lobby(
+pub unsafe extern "C" fn disconnect_lobby(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     callback_data: *mut c_void,
@@ -93,7 +93,7 @@ pub(crate) unsafe extern "C" fn disconnect_lobby(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn get_lobby(
+pub unsafe extern "C" fn get_lobby(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     lobby: *mut sys::DiscordLobby,
@@ -101,7 +101,7 @@ pub(crate) unsafe extern "C" fn get_lobby(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_lobby_activity_secret(
+pub unsafe extern "C" fn get_lobby_activity_secret(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     secret: *mut sys::DiscordLobbySecret,
@@ -109,7 +109,7 @@ pub(crate) unsafe extern "C" fn get_lobby_activity_secret(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_lobby_metadata_value(
+pub unsafe extern "C" fn get_lobby_metadata_value(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     key: *mut c_char,
@@ -118,7 +118,7 @@ pub(crate) unsafe extern "C" fn get_lobby_metadata_value(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_lobby_metadata_key(
+pub unsafe extern "C" fn get_lobby_metadata_key(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     index: i32,
@@ -127,7 +127,7 @@ pub(crate) unsafe extern "C" fn get_lobby_metadata_key(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn lobby_metadata_count(
+pub unsafe extern "C" fn lobby_metadata_count(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     count: *mut i32,
@@ -135,7 +135,7 @@ pub(crate) unsafe extern "C" fn lobby_metadata_count(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn member_count(
+pub unsafe extern "C" fn member_count(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     count: *mut i32,
@@ -143,7 +143,7 @@ pub(crate) unsafe extern "C" fn member_count(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_member_user_id(
+pub unsafe extern "C" fn get_member_user_id(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     index: i32,
@@ -152,7 +152,7 @@ pub(crate) unsafe extern "C" fn get_member_user_id(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_member_user(
+pub unsafe extern "C" fn get_member_user(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     user_id: sys::DiscordUserId,
@@ -161,7 +161,7 @@ pub(crate) unsafe extern "C" fn get_member_user(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_member_metadata_value(
+pub unsafe extern "C" fn get_member_metadata_value(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     user_id: sys::DiscordUserId,
@@ -171,7 +171,7 @@ pub(crate) unsafe extern "C" fn get_member_metadata_value(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_member_metadata_key(
+pub unsafe extern "C" fn get_member_metadata_key(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     user_id: sys::DiscordUserId,
@@ -181,7 +181,7 @@ pub(crate) unsafe extern "C" fn get_member_metadata_key(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn member_metadata_count(
+pub unsafe extern "C" fn member_metadata_count(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     user_id: sys::DiscordUserId,
@@ -190,7 +190,7 @@ pub(crate) unsafe extern "C" fn member_metadata_count(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn update_member(
+pub unsafe extern "C" fn update_member(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     user_id: sys::DiscordUserId,
@@ -200,7 +200,7 @@ pub(crate) unsafe extern "C" fn update_member(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn send_lobby_message(
+pub unsafe extern "C" fn send_lobby_message(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     data: *mut u8,
@@ -210,14 +210,14 @@ pub(crate) unsafe extern "C" fn send_lobby_message(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn get_search_query(
+pub unsafe extern "C" fn get_search_query(
     manager: *mut sys::IDiscordLobbyManager,
     query: *mut *mut sys::IDiscordLobbySearchQuery,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn search(
+pub unsafe extern "C" fn search(
     manager: *mut sys::IDiscordLobbyManager,
     query: *mut sys::IDiscordLobbySearchQuery,
     callback_data: *mut c_void,
@@ -225,13 +225,9 @@ pub(crate) unsafe extern "C" fn search(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn lobby_count(
-    manager: *mut sys::IDiscordLobbyManager,
-    count: *mut i32,
-) {
-}
+pub unsafe extern "C" fn lobby_count(manager: *mut sys::IDiscordLobbyManager, count: *mut i32) {}
 
-pub(crate) unsafe extern "C" fn get_lobby_id(
+pub unsafe extern "C" fn get_lobby_id(
     manager: *mut sys::IDiscordLobbyManager,
     index: i32,
     lobby_id: *mut sys::DiscordLobbyId,
@@ -239,7 +235,7 @@ pub(crate) unsafe extern "C" fn get_lobby_id(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn connect_voice(
+pub unsafe extern "C" fn connect_voice(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     callback_data: *mut c_void,
@@ -247,7 +243,7 @@ pub(crate) unsafe extern "C" fn connect_voice(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn disconnect_voice(
+pub unsafe extern "C" fn disconnect_voice(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     callback_data: *mut c_void,
@@ -255,27 +251,27 @@ pub(crate) unsafe extern "C" fn disconnect_voice(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn connect_network(
+pub unsafe extern "C" fn connect_network(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn disconnect_network(
+pub unsafe extern "C" fn disconnect_network(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn flush_network(
+pub unsafe extern "C" fn flush_network(
     manager: *mut sys::IDiscordLobbyManager,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn open_network_channel(
+pub unsafe extern "C" fn open_network_channel(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     channel_id: u8,
@@ -284,7 +280,7 @@ pub(crate) unsafe extern "C" fn open_network_channel(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn send_network_message(
+pub unsafe extern "C" fn send_network_message(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     user_id: sys::DiscordUserId,

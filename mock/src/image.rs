@@ -1,7 +1,7 @@
 use discord_game_sdk_sys as sys;
 use std::os::raw::{c_char, c_void};
 
-pub(crate) unsafe extern "C" fn fetch(
+pub unsafe extern "C" fn fetch(
     manager: *mut sys::IDiscordImageManager,
     handle: sys::DiscordImageHandle,
     refresh: bool,
@@ -16,7 +16,7 @@ pub(crate) unsafe extern "C" fn fetch(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn get_dimensions(
+pub unsafe extern "C" fn get_dimensions(
     manager: *mut sys::IDiscordImageManager,
     handle: sys::DiscordImageHandle,
     dimensions: *mut sys::DiscordImageDimensions,
@@ -24,7 +24,7 @@ pub(crate) unsafe extern "C" fn get_dimensions(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_data(
+pub unsafe extern "C" fn get_data(
     manager: *mut sys::IDiscordImageManager,
     handle: sys::DiscordImageHandle,
     data: *mut u8,

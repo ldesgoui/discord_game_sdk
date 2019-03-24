@@ -3,7 +3,6 @@ use discord_game_sdk_sys as sys;
 //
 
 pub struct GameSDK {
-    client_id: i64,
     core_ptr: *mut sys::IDiscordCore,
 }
 
@@ -39,12 +38,7 @@ impl GameSDK {
         Error::guard(res).map(|_| {
             debug_assert!(!core_ptr.is_null());
 
-            let mut d = Self {
-                client_id,
-                core_ptr,
-            };
-            d.set_log_hook();
-            d
+            Self { core_ptr }
         })
     }
 
@@ -52,7 +46,7 @@ impl GameSDK {
         unsafe { &*self.core_ptr }
     }
 
-    fn set_log_hook(&mut self) {
+    pub fn set_log_hook(&mut self) {
         debug_assert!(self.core().set_log_hook.is_some());
 
         unsafe {
@@ -125,6 +119,7 @@ impl CreateFlags {
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[allow(clippy::pub_enum_variant_names)]
+#[derive(Debug)]
 pub enum Error {
     ServiceUnavailable,
     InvalidVersion,
@@ -255,7 +250,8 @@ mod test {
             })
             .init();
 
-        GameSDK::new(1, &Default::default());
+        let mut gsdk = GameSDK::new(1, &Default::default()).unwrap();
+        gsdk.set_log_hook();
     }
 
 }

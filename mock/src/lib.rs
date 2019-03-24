@@ -1,11 +1,9 @@
 #![allow(dead_code)]
-#![allow(unused_variables)]
 #![allow(unused_imports)]
+#![allow(unused_variables)]
 
 use discord_game_sdk_sys as sys;
-use log::{debug, error, info, log, trace, warn};
-
-//
+use std::os::raw::{c_char, c_void};
 
 mod achievement;
 mod activity;
@@ -21,38 +19,65 @@ mod store;
 mod user;
 mod voice;
 
-//
-
 #[no_mangle]
 unsafe extern "C" fn DiscordCreate(
     version: sys::DiscordVersion,
     params: *mut sys::DiscordCreateParams,
     result: *mut *mut sys::IDiscordCore,
 ) -> sys::EDiscordResult {
-    *result = &mut INTERFACES.core as *mut _;
+    let inst = Instance {
+        interfaces: INTERFACES,
+        state: State {
+            version,
+            log_hook_data: std::ptr::null_mut(),
+            log_hook: None,
+        },
+    };
+
+    *result = Box::into_raw(Box::new(inst)) as *mut _;
+
+    log::info!("Instance at {:p}", *result);
 
     sys::DiscordResult_Ok
 }
 
-//
-
-pub(crate) struct Interfaces {
-    core: sys::IDiscordCore,
-    application: sys::IDiscordApplicationManager,
-    user: sys::IDiscordUserManager,
-    image: sys::IDiscordImageManager,
-    activity: sys::IDiscordActivityManager,
-    relationship: sys::IDiscordRelationshipManager,
-    lobby: sys::IDiscordLobbyManager,
-    network: sys::IDiscordNetworkManager,
-    overlay: sys::IDiscordOverlayManager,
-    storage: sys::IDiscordStorageManager,
-    store: sys::IDiscordStoreManager,
-    voice: sys::IDiscordVoiceManager,
-    achievement: sys::IDiscordAchievementManager,
+#[repr(C)]
+pub struct Instance {
+    pub interfaces: Interfaces,
+    pub state: State,
 }
 
-pub(crate) static mut INTERFACES: Interfaces = Interfaces {
+#[repr(C)]
+pub struct State {
+    pub version: sys::DiscordVersion,
+    pub log_hook_data: *mut c_void,
+    pub log_hook: Option<
+        unsafe extern "C" fn(
+            hook_data: *mut c_void,
+            level: sys::EDiscordLogLevel,
+            message: *const c_char,
+        ),
+    >,
+}
+
+#[repr(C)]
+pub struct Interfaces {
+    pub core: sys::IDiscordCore,
+    pub application: sys::IDiscordApplicationManager,
+    pub user: sys::IDiscordUserManager,
+    pub image: sys::IDiscordImageManager,
+    pub activity: sys::IDiscordActivityManager,
+    pub relationship: sys::IDiscordRelationshipManager,
+    pub lobby: sys::IDiscordLobbyManager,
+    pub network: sys::IDiscordNetworkManager,
+    pub overlay: sys::IDiscordOverlayManager,
+    pub storage: sys::IDiscordStorageManager,
+    pub store: sys::IDiscordStoreManager,
+    pub voice: sys::IDiscordVoiceManager,
+    pub achievement: sys::IDiscordAchievementManager,
+}
+
+pub const INTERFACES: Interfaces = Interfaces {
     core: sys::IDiscordCore {
         destroy: Some(core::destroy),
         run_callbacks: Some(core::run_callbacks),
@@ -201,3 +226,28 @@ pub(crate) static mut INTERFACES: Interfaces = Interfaces {
         get_user_achievement_at: Some(achievement::get_user_achievement_at),
     },
 };
+
+macro_rules! from_ptr {
+    ($name:ident, $typ:path, $($field:tt)+) => {
+        unsafe fn $name<'a>(ptr: *mut $typ) -> &'a mut Self {
+            &mut *(ptr.sub(memoffset::offset_of!(Self, $($field)+)) as *mut _)
+        }
+    };
+}
+
+#[rustfmt::skip]
+impl Instance {
+    from_ptr!(from_core, sys::IDiscordCore, interfaces.core);
+    from_ptr!(from_application, sys::IDiscordApplicationManager, interfaces.application);
+    from_ptr!(from_user, sys::IDiscordUserManager, interfaces.user);
+    from_ptr!(from_image, sys::IDiscordImageManager, interfaces.image);
+    from_ptr!(from_activity, sys::IDiscordActivityManager, interfaces.activity);
+    from_ptr!(from_relationship, sys::IDiscordRelationshipManager, interfaces.relationship);
+    from_ptr!(from_lobby, sys::IDiscordLobbyManager, interfaces.lobby);
+    from_ptr!(from_network, sys::IDiscordNetworkManager, interfaces.network);
+    from_ptr!(from_overlay, sys::IDiscordOverlayManager, interfaces.overlay);
+    from_ptr!(from_storage, sys::IDiscordStorageManager, interfaces.storage);
+    from_ptr!(from_store, sys::IDiscordStoreManager, interfaces.store);
+    from_ptr!(from_voice, sys::IDiscordVoiceManager, interfaces.voice);
+    from_ptr!(from_achievement, sys::IDiscordAchievementManager, interfaces.achievement);
+}

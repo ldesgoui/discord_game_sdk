@@ -10,6 +10,7 @@ crate-type = ["dylib"]
 
 [dependencies]
 log = "0.4.6"
+memoffset = "0.3.0"
 
 [dependencies.discord-game-sdk-sys]
 path = "../sys"

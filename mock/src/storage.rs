@@ -1,7 +1,7 @@
 use discord_game_sdk_sys as sys;
 use std::os::raw::{c_char, c_void};
 
-pub(crate) unsafe extern "C" fn read(
+pub unsafe extern "C" fn read(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
     data: *mut u8,
@@ -11,7 +11,7 @@ pub(crate) unsafe extern "C" fn read(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn read_async(
+pub unsafe extern "C" fn read_async(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
     callback_data: *mut c_void,
@@ -26,7 +26,7 @@ pub(crate) unsafe extern "C" fn read_async(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn read_async_partial(
+pub unsafe extern "C" fn read_async_partial(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
     offset: u64,
@@ -43,7 +43,7 @@ pub(crate) unsafe extern "C" fn read_async_partial(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn write(
+pub unsafe extern "C" fn write(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
     data: *mut u8,
@@ -52,7 +52,7 @@ pub(crate) unsafe extern "C" fn write(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn write_async(
+pub unsafe extern "C" fn write_async(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
     data: *mut u8,
@@ -62,14 +62,14 @@ pub(crate) unsafe extern "C" fn write_async(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn delete_(
+pub unsafe extern "C" fn delete_(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn exists(
+pub unsafe extern "C" fn exists(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
     exists: *mut bool,
@@ -77,9 +77,9 @@ pub(crate) unsafe extern "C" fn exists(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn count(manager: *mut sys::IDiscordStorageManager, count: *mut i32) {}
+pub unsafe extern "C" fn count(manager: *mut sys::IDiscordStorageManager, count: *mut i32) {}
 
-pub(crate) unsafe extern "C" fn stat(
+pub unsafe extern "C" fn stat(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
     stat: *mut sys::DiscordFileStat,
@@ -87,7 +87,7 @@ pub(crate) unsafe extern "C" fn stat(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn stat_at(
+pub unsafe extern "C" fn stat_at(
     manager: *mut sys::IDiscordStorageManager,
     index: i32,
     stat: *mut sys::DiscordFileStat,
@@ -95,7 +95,7 @@ pub(crate) unsafe extern "C" fn stat_at(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_path(
+pub unsafe extern "C" fn get_path(
     manager: *mut sys::IDiscordStorageManager,
     path: *mut sys::DiscordPath,
 ) -> sys::EDiscordResult {

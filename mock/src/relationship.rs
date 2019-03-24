@@ -1,7 +1,7 @@
 use discord_game_sdk_sys as sys;
 use std::os::raw::{c_char, c_void};
 
-pub(crate) unsafe extern "C" fn filter(
+pub unsafe extern "C" fn filter(
     manager: *mut sys::IDiscordRelationshipManager,
     filter_data: *mut c_void,
     filter: Option<
@@ -13,14 +13,14 @@ pub(crate) unsafe extern "C" fn filter(
 ) {
 }
 
-pub(crate) unsafe extern "C" fn count(
+pub unsafe extern "C" fn count(
     manager: *mut sys::IDiscordRelationshipManager,
     count: *mut i32,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get(
+pub unsafe extern "C" fn get(
     manager: *mut sys::IDiscordRelationshipManager,
     user_id: sys::DiscordUserId,
     relationship: *mut sys::DiscordRelationship,
@@ -28,7 +28,7 @@ pub(crate) unsafe extern "C" fn get(
     sys::DiscordResult_Ok
 }
 
-pub(crate) unsafe extern "C" fn get_at(
+pub unsafe extern "C" fn get_at(
     manager: *mut sys::IDiscordRelationshipManager,
     index: u32,
     relationship: *mut sys::DiscordRelationship,
