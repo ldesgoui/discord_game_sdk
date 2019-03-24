@@ -24,7 +24,6 @@ unsafe extern "C" fn DiscordCreate(
 
 //
 
-#[derive(Default)]
 pub(crate) struct Interfaces {
     core: sys::IDiscordCore,
     application: sys::IDiscordApplicationManager,
