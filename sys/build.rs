@@ -14,7 +14,4 @@ fn main() {
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("bindgen: could not write");
-    bindings
-        .write_to_file("/tmp/run.rs")
-        .expect("bindgen: could not write");
 }
