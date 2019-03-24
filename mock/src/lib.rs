@@ -52,13 +52,11 @@ unsafe extern "C" fn DiscordCreate(
     sys::DiscordResult_Ok
 }
 
-#[repr(C)]
 pub struct Instance {
     pub interfaces: Interfaces,
     pub state: State,
 }
 
-#[repr(C)]
 pub struct State {
     pub version: sys::DiscordVersion,
     pub log_min_level: sys::EDiscordLogLevel,
@@ -76,7 +74,6 @@ pub struct State {
     pub voice_self_deaf: bool,
 }
 
-#[repr(C)]
 pub struct Interfaces {
     pub core: sys::IDiscordCore,
     pub application: sys::IDiscordApplicationManager,
