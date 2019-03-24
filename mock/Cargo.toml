@@ -1,0 +1,16 @@
+[package]
+name = "discord-game-sdk-mock"
+version = "0.1.0"
+authors = ["ldesgoui <ldesgoui@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "discord_game_sdk"
+crate-type = ["dylib"]
+
+[dependencies]
+log = "0.4.6"
+
+[dependencies.discord-game-sdk-sys]
+path = "../sys"
+version = "0.1.0"

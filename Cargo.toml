@@ -1,0 +1,20 @@
+[workspace]
+members = ["sys", "mock"]
+
+[package]
+name = "discord-game-sdk"
+version = "0.1.0"
+authors = ["ldesgoui <ldesgoui@gmail.com>"]
+edition = "2018"
+description = "Rust bindings to the Discord Game SDK"
+license = "MIT/Apache 2.0"
+
+[dependencies]
+log = "0.4.6"
+
+[dependencies.discord-game-sdk-sys]
+path = "sys"
+version = "0.1.0"
+
+[dev-dependencies]
+env_logger = "*"
