@@ -1,5 +1,5 @@
 use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use std::os::raw::c_char;
 
 pub unsafe extern "C" fn get_peer_id(
     manager: *mut sys::IDiscordNetworkManager,

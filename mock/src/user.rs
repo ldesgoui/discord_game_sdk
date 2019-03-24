@@ -1,5 +1,5 @@
 use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use std::os::raw::c_void;
 
 pub unsafe extern "C" fn get_current_user(
     manager: *mut sys::IDiscordUserManager,
@@ -22,17 +22,23 @@ pub unsafe extern "C" fn get_user(
 ) {
 }
 
+/// Complete
 pub unsafe extern "C" fn get_current_user_premium_type(
-    manager: *mut sys::IDiscordUserManager,
+    _: *mut sys::IDiscordUserManager,
     premium_type: *mut sys::EDiscordPremiumType,
 ) -> sys::EDiscordResult {
+    *premium_type = sys::DiscordPremiumType_None;
+
     sys::DiscordResult_Ok
 }
 
+/// Complete
 pub unsafe extern "C" fn current_user_has_flag(
-    manager: *mut sys::IDiscordUserManager,
-    flag: sys::EDiscordUserFlag,
+    _: *mut sys::IDiscordUserManager,
+    _: sys::EDiscordUserFlag,
     has_flag: *mut bool,
 ) -> sys::EDiscordResult {
+    *has_flag = false;
+
     sys::DiscordResult_Ok
 }

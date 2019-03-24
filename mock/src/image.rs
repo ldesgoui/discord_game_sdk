@@ -1,5 +1,5 @@
 use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use std::os::raw::c_void;
 
 pub unsafe extern "C" fn fetch(
     manager: *mut sys::IDiscordImageManager,

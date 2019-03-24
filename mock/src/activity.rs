@@ -1,16 +1,18 @@
 use discord_game_sdk_sys as sys;
 use std::os::raw::{c_char, c_void};
 
+/// Complete
 pub unsafe extern "C" fn register_command(
-    manager: *mut sys::IDiscordActivityManager,
-    command: *const c_char,
+    _: *mut sys::IDiscordActivityManager,
+    _: *const c_char,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
 
+/// Complete
 pub unsafe extern "C" fn register_steam(
-    manager: *mut sys::IDiscordActivityManager,
-    steam_id: u32,
+    _: *mut sys::IDiscordActivityManager,
+    _: u32,
 ) -> sys::EDiscordResult {
     sys::DiscordResult_Ok
 }
@@ -21,6 +23,8 @@ pub unsafe extern "C" fn update_activity(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    // TODO: save activity state
+    // TODO: calc rate limit (5/20s)
 }
 
 pub unsafe extern "C" fn clear_activity(

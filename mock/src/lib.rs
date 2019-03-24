@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-#![allow(unused_imports)]
 #![allow(unused_variables)]
 
 use discord_game_sdk_sys as sys;
@@ -29,14 +28,26 @@ unsafe extern "C" fn DiscordCreate(
         interfaces: INTERFACES,
         state: State {
             version,
+            log_min_level: 0,
             log_hook_data: std::ptr::null_mut(),
             log_hook: None,
+            overlay_locked: false,
+            voice_input_mode: sys::DiscordInputMode {
+                type_: sys::DiscordInputModeType_VoiceActivity,
+                shortcut: [0; 256],
+            },
+            voice_self_mute: false,
+            voice_self_deaf: false,
         },
     };
 
     *result = Box::into_raw(Box::new(inst)) as *mut _;
 
-    log::info!("Instance at {:p}", *result);
+    log::trace!(
+        "Instance at {:p} is {} bytes wide",
+        *result,
+        std::mem::size_of::<Instance>()
+    );
 
     sys::DiscordResult_Ok
 }
@@ -50,6 +61,7 @@ pub struct Instance {
 #[repr(C)]
 pub struct State {
     pub version: sys::DiscordVersion,
+    pub log_min_level: sys::EDiscordLogLevel,
     pub log_hook_data: *mut c_void,
     pub log_hook: Option<
         unsafe extern "C" fn(
@@ -58,6 +70,10 @@ pub struct State {
             message: *const c_char,
         ),
     >,
+    pub overlay_locked: bool,
+    pub voice_input_mode: sys::DiscordInputMode,
+    pub voice_self_mute: bool,
+    pub voice_self_deaf: bool,
 }
 
 #[repr(C)]
@@ -75,6 +91,32 @@ pub struct Interfaces {
     pub store: sys::IDiscordStoreManager,
     pub voice: sys::IDiscordVoiceManager,
     pub achievement: sys::IDiscordAchievementManager,
+}
+
+impl Instance {
+    fn log(&self, message: &str, level: sys::EDiscordLogLevel) {
+        log::log!(
+            match level {
+                1 => log::Level::Error,
+                2 => log::Level::Warn,
+                3 => log::Level::Info,
+                4 => log::Level::Debug,
+                _ => log::Level::Trace,
+            },
+            "{}",
+            message
+        );
+
+        if self.state.log_hook.is_none() || level > self.state.log_min_level {
+            return;
+        }
+
+        let c_str = std::ffi::CString::new(message).unwrap();
+
+        unsafe {
+            self.state.log_hook.unwrap()(self.state.log_hook_data, level, c_str.as_ptr());
+        }
+    }
 }
 
 pub const INTERFACES: Interfaces = Interfaces {
