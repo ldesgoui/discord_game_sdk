@@ -255,7 +255,7 @@ mod test {
             })
             .init();
 
-        Discord::new(523192579425173515, &Default::default());
+        Discord::new(1, &Default::default());
     }
 
 }
