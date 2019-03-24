@@ -16,7 +16,7 @@ pub unsafe extern "C" fn get_current_locale(
     locale: *mut sys::DiscordLocale,
 ) {
     let src = std::ffi::CString::new("en-US").unwrap();
-    (*locale).clone_from_slice(std::mem::transmute(src.as_bytes_with_nul()));
+    (*locale).clone_from_slice(&*(src.as_bytes_with_nul() as *const [u8] as *const [i8]));
 }
 
 /// Complete
@@ -25,7 +25,7 @@ pub unsafe extern "C" fn get_current_branch(
     branch: *mut sys::DiscordBranch,
 ) {
     let src = std::ffi::CString::new("mocking_test").unwrap();
-    (*branch).clone_from_slice(std::mem::transmute(src.as_bytes_with_nul()));
+    (*branch).clone_from_slice(&*(src.as_bytes_with_nul() as *const [u8] as *const [i8]));
 }
 
 pub unsafe extern "C" fn get_oauth2_token(

@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 #![allow(unused_variables)]
 
 use discord_game_sdk_sys as sys;
@@ -28,6 +27,7 @@ unsafe extern "C" fn DiscordCreate(
         interfaces: INTERFACES,
         state: State {
             version,
+            params: sys::DiscordCreateParams { ..*params },
             log_min_level: 0,
             log_hook_data: std::ptr::null_mut(),
             log_hook: None,
@@ -59,6 +59,7 @@ pub struct Instance {
 
 pub struct State {
     pub version: sys::DiscordVersion,
+    pub params: sys::DiscordCreateParams,
     pub log_min_level: sys::EDiscordLogLevel,
     pub log_hook_data: *mut c_void,
     pub log_hook: Option<
@@ -274,6 +275,7 @@ macro_rules! from_ptr {
     };
 }
 
+#[allow(dead_code)]
 #[rustfmt::skip]
 impl Instance {
     from_ptr!(from_core, sys::IDiscordCore, interfaces.core);
