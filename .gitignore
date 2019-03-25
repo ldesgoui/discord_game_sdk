@@ -17,6 +17,5 @@ Cargo.lock
 #**/*.rs.bk
 #Cargo.lock
 
-sys/discord_game_sdk.h
 shell.nix
-
+discord_game_sdk.dll

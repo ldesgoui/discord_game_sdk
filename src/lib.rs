@@ -51,7 +51,7 @@ impl GameSDK {
 fn create_params(client_id: i64, flags: &CreateFlags) -> sys::DiscordCreateParams {
     sys::DiscordCreateParams {
         client_id: client_id,
-        flags: u64::from(flags.to_sys()),
+        flags: flags.to_sys() as u64,
         application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION as i32,
         user_version: sys::DISCORD_USER_MANAGER_VERSION as i32,
         image_version: sys::DISCORD_IMAGE_MANAGER_VERSION as i32,
@@ -107,7 +107,7 @@ impl GameSDK {
 
 unsafe extern "C" fn log_hook(
     hook_data: *mut std::ffi::c_void,
-    level: u32,
+    level: sys::EDiscordLogLevel,
     message: *const std::os::raw::c_char,
 ) {
     debug_assert!(hook_data.is_null());
@@ -160,8 +160,11 @@ mod test {
     fn test() {
         let _ = pretty_env_logger::try_init_custom_env("TEST_LOG");
 
+        log::info!("running tests");
         let mut gsdk = GameSDK::new(1, &Default::default()).unwrap();
+        log::info!("setting log hook");
         gsdk.set_log_hook();
+        log::info!("bye");
     }
 
 }
