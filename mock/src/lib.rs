@@ -27,7 +27,7 @@ unsafe extern "C" fn DiscordCreate(
     result: *mut *mut sys::IDiscordCore,
 ) -> sys::EDiscordResult {
     prevent_unwind!();
-    SET_LOG.call_once(setup_log);
+    setup_log();
 
     logged_assert!(!params.is_null());
     logged_assert!(!result.is_null());
@@ -282,8 +282,6 @@ impl Instance {
 }
 
 //
-
-static SET_LOG: std::sync::Once = std::sync::Once::new();
 
 fn setup_log() {
     let _ = pretty_env_logger::try_init_custom_env("MOCK_LOG");
