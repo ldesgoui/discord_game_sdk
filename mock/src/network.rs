@@ -5,9 +5,11 @@ pub unsafe extern "C" fn get_peer_id(
     manager: *mut sys::IDiscordNetworkManager,
     peer_id: *mut sys::DiscordNetworkPeerId,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn flush(manager: *mut sys::IDiscordNetworkManager) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -16,6 +18,7 @@ pub unsafe extern "C" fn open_peer(
     peer_id: sys::DiscordNetworkPeerId,
     route_data: *const c_char,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -24,6 +27,7 @@ pub unsafe extern "C" fn update_peer(
     peer_id: sys::DiscordNetworkPeerId,
     route_data: *const c_char,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -31,6 +35,7 @@ pub unsafe extern "C" fn close_peer(
     manager: *mut sys::IDiscordNetworkManager,
     peer_id: sys::DiscordNetworkPeerId,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -40,6 +45,7 @@ pub unsafe extern "C" fn open_channel(
     channel_id: sys::DiscordNetworkChannelId,
     reliable: bool,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -48,6 +54,7 @@ pub unsafe extern "C" fn close_channel(
     peer_id: sys::DiscordNetworkPeerId,
     channel_id: sys::DiscordNetworkChannelId,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -58,5 +65,6 @@ pub unsafe extern "C" fn send_message(
     data: *mut u8,
     data_length: u32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }

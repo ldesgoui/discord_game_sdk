@@ -4,10 +4,12 @@ use std::os::raw::{c_char, c_void};
 
 /// Complete
 pub unsafe extern "C" fn destroy(core: *mut sys::IDiscordCore) {
+    prevent_unwind!();
     let _inst: Box<Instance> = Box::from_raw(Instance::from_core(core));
 }
 
 pub unsafe extern "C" fn run_callbacks(core: *mut sys::IDiscordCore) -> sys::EDiscordResult {
+    prevent_unwind!();
     // TODO: store callbacks when calling async functions and run them here
     // TODO: add random delay?
 
@@ -27,6 +29,7 @@ pub unsafe extern "C" fn set_log_hook(
         ),
     >,
 ) {
+    prevent_unwind!();
     let mut inst = Instance::from_core(core);
 
     inst.state.log_min_level = min_level;
@@ -43,6 +46,7 @@ pub unsafe extern "C" fn set_log_hook(
 pub unsafe extern "C" fn get_application_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordApplicationManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.application as *mut _
 }
 
@@ -50,6 +54,7 @@ pub unsafe extern "C" fn get_application_manager(
 pub unsafe extern "C" fn get_user_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordUserManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.user as *mut _
 }
 
@@ -57,6 +62,7 @@ pub unsafe extern "C" fn get_user_manager(
 pub unsafe extern "C" fn get_image_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordImageManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.image as *mut _
 }
 
@@ -64,6 +70,7 @@ pub unsafe extern "C" fn get_image_manager(
 pub unsafe extern "C" fn get_activity_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordActivityManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.activity as *mut _
 }
 
@@ -71,6 +78,7 @@ pub unsafe extern "C" fn get_activity_manager(
 pub unsafe extern "C" fn get_relationship_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordRelationshipManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.relationship as *mut _
 }
 
@@ -78,6 +86,7 @@ pub unsafe extern "C" fn get_relationship_manager(
 pub unsafe extern "C" fn get_lobby_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordLobbyManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.lobby as *mut _
 }
 
@@ -85,6 +94,7 @@ pub unsafe extern "C" fn get_lobby_manager(
 pub unsafe extern "C" fn get_network_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordNetworkManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.network as *mut _
 }
 
@@ -92,6 +102,7 @@ pub unsafe extern "C" fn get_network_manager(
 pub unsafe extern "C" fn get_overlay_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordOverlayManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.overlay as *mut _
 }
 
@@ -99,6 +110,7 @@ pub unsafe extern "C" fn get_overlay_manager(
 pub unsafe extern "C" fn get_storage_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordStorageManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.storage as *mut _
 }
 
@@ -106,6 +118,7 @@ pub unsafe extern "C" fn get_storage_manager(
 pub unsafe extern "C" fn get_store_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordStoreManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.store as *mut _
 }
 
@@ -113,6 +126,7 @@ pub unsafe extern "C" fn get_store_manager(
 pub unsafe extern "C" fn get_voice_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordVoiceManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.voice as *mut _
 }
 
@@ -120,5 +134,6 @@ pub unsafe extern "C" fn get_voice_manager(
 pub unsafe extern "C" fn get_achievement_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordAchievementManager {
+    prevent_unwind!();
     &mut Instance::from_core(core).interfaces.achievement as *mut _
 }

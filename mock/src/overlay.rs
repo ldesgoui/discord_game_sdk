@@ -6,11 +6,13 @@ use std::os::raw::{c_char, c_void};
 
 /// Complete
 pub unsafe extern "C" fn is_enabled(_: *mut sys::IDiscordOverlayManager, enabled: *mut bool) {
+    prevent_unwind!();
     *enabled = true;
 }
 
 /// Complete
 pub unsafe extern "C" fn is_locked(manager: *mut sys::IDiscordOverlayManager, locked: *mut bool) {
+    prevent_unwind!();
     let inst = Instance::from_overlay(manager);
 
     *locked = inst.state.overlay_locked;
@@ -23,6 +25,7 @@ pub unsafe extern "C" fn set_locked(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
     let inst = Instance::from_overlay(manager);
 
     inst.state.overlay_locked = locked;
@@ -37,6 +40,7 @@ pub unsafe extern "C" fn open_activity_invite(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
     let inst = Instance::from_overlay(manager);
 
     callback.unwrap()(
@@ -56,6 +60,7 @@ pub unsafe extern "C" fn open_guild_invite(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
     let inst = Instance::from_overlay(manager);
 
     callback.unwrap()(
@@ -74,6 +79,7 @@ pub unsafe extern "C" fn open_voice_settings(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
     let inst = Instance::from_overlay(manager);
 
     callback.unwrap()(

@@ -5,6 +5,7 @@ pub unsafe extern "C" fn get_lobby_create_transaction(
     manager: *mut sys::IDiscordLobbyManager,
     transaction: *mut *mut sys::IDiscordLobbyTransaction,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -13,6 +14,7 @@ pub unsafe extern "C" fn get_lobby_update_transaction(
     lobby_id: sys::DiscordLobbyId,
     transaction: *mut *mut sys::IDiscordLobbyTransaction,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -22,6 +24,7 @@ pub unsafe extern "C" fn get_member_update_transaction(
     user_id: sys::DiscordUserId,
     transaction: *mut *mut sys::IDiscordLobbyMemberTransaction,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -37,6 +40,7 @@ pub unsafe extern "C" fn create_lobby(
         ),
     >,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn update_lobby(
@@ -46,6 +50,7 @@ pub unsafe extern "C" fn update_lobby(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn delete_lobby(
@@ -54,6 +59,7 @@ pub unsafe extern "C" fn delete_lobby(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn connect_lobby(
@@ -69,6 +75,7 @@ pub unsafe extern "C" fn connect_lobby(
         ),
     >,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn connect_lobby_with_activity_secret(
@@ -83,6 +90,7 @@ pub unsafe extern "C" fn connect_lobby_with_activity_secret(
         ),
     >,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn disconnect_lobby(
@@ -91,6 +99,7 @@ pub unsafe extern "C" fn disconnect_lobby(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn get_lobby(
@@ -98,6 +107,7 @@ pub unsafe extern "C" fn get_lobby(
     lobby_id: sys::DiscordLobbyId,
     lobby: *mut sys::DiscordLobby,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -106,6 +116,7 @@ pub unsafe extern "C" fn get_lobby_activity_secret(
     lobby_id: sys::DiscordLobbyId,
     secret: *mut sys::DiscordLobbySecret,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -115,6 +126,7 @@ pub unsafe extern "C" fn get_lobby_metadata_value(
     key: *mut c_char,
     value: *mut sys::DiscordMetadataValue,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -124,6 +136,7 @@ pub unsafe extern "C" fn get_lobby_metadata_key(
     index: i32,
     key: *mut sys::DiscordMetadataKey,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -132,6 +145,7 @@ pub unsafe extern "C" fn lobby_metadata_count(
     lobby_id: sys::DiscordLobbyId,
     count: *mut i32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -140,6 +154,7 @@ pub unsafe extern "C" fn member_count(
     lobby_id: sys::DiscordLobbyId,
     count: *mut i32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -149,6 +164,7 @@ pub unsafe extern "C" fn get_member_user_id(
     index: i32,
     user_id: *mut sys::DiscordUserId,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -158,6 +174,7 @@ pub unsafe extern "C" fn get_member_user(
     user_id: sys::DiscordUserId,
     user: *mut sys::DiscordUser,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -168,6 +185,7 @@ pub unsafe extern "C" fn get_member_metadata_value(
     key: *mut c_char,
     value: *mut sys::DiscordMetadataValue,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -178,6 +196,7 @@ pub unsafe extern "C" fn get_member_metadata_key(
     index: i32,
     key: *mut sys::DiscordMetadataKey,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -187,6 +206,7 @@ pub unsafe extern "C" fn member_metadata_count(
     user_id: sys::DiscordUserId,
     count: *mut i32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -198,6 +218,7 @@ pub unsafe extern "C" fn update_member(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn send_lobby_message(
@@ -208,12 +229,14 @@ pub unsafe extern "C" fn send_lobby_message(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn get_search_query(
     manager: *mut sys::IDiscordLobbyManager,
     query: *mut *mut sys::IDiscordLobbySearchQuery,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -223,6 +246,7 @@ pub unsafe extern "C" fn search(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn lobby_count(manager: *mut sys::IDiscordLobbyManager, count: *mut i32) {}
@@ -232,6 +256,7 @@ pub unsafe extern "C" fn get_lobby_id(
     index: i32,
     lobby_id: *mut sys::DiscordLobbyId,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -241,6 +266,7 @@ pub unsafe extern "C" fn connect_voice(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn disconnect_voice(
@@ -249,12 +275,14 @@ pub unsafe extern "C" fn disconnect_voice(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn connect_network(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -262,12 +290,14 @@ pub unsafe extern "C" fn disconnect_network(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
 pub unsafe extern "C" fn flush_network(
     manager: *mut sys::IDiscordLobbyManager,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -277,6 +307,7 @@ pub unsafe extern "C" fn open_network_channel(
     channel_id: u8,
     reliable: bool,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -288,5 +319,6 @@ pub unsafe extern "C" fn send_network_message(
     data: *mut u8,
     data_length: u32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }

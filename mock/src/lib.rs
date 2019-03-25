@@ -3,6 +3,9 @@
 use discord_game_sdk_sys as sys;
 use std::os::raw::{c_char, c_void};
 
+#[macro_use]
+mod macros;
+
 mod achievement;
 mod activity;
 mod application;
@@ -17,15 +20,36 @@ mod store;
 mod user;
 mod voice;
 
-static SET_LOG: std::sync::Once = std::sync::Once::new();
-
 #[no_mangle]
 unsafe extern "C" fn DiscordCreate(
     version: sys::DiscordVersion,
     params: *mut sys::DiscordCreateParams,
     result: *mut *mut sys::IDiscordCore,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     SET_LOG.call_once(setup_log);
+
+    logged_assert!(!params.is_null());
+    logged_assert!(!result.is_null());
+
+    let params = &mut *params as &mut sys::DiscordCreateParams;
+
+    log::trace!(target: "MOCK", "called DiscordCreate:");
+    log::trace!(target: "MOCK", "  - Client ID: {}", params.client_id);
+    log::trace!(target: "MOCK", "  - Requires Discord to be running: {}", params.flags == 0);
+    log::trace!(target: "MOCK", "  - SDK Version: {}", version);
+    log::trace!(target: "MOCK", "  - Application Manager Version: {}", params.application_version);
+    log::trace!(target: "MOCK", "  - User Manager Version: {}", params.user_version);
+    log::trace!(target: "MOCK", "  - Image Manager Version: {}", params.image_version);
+    log::trace!(target: "MOCK", "  - Activity Manager Version: {}", params.activity_version);
+    log::trace!(target: "MOCK", "  - Relationship Manager Version: {}", params.relationship_version);
+    log::trace!(target: "MOCK", "  - Lobby Manager Version: {}", params.lobby_version);
+    log::trace!(target: "MOCK", "  - Network Manager Version: {}", params.network_version);
+    log::trace!(target: "MOCK", "  - Overlay Manager Version: {}", params.overlay_version);
+    log::trace!(target: "MOCK", "  - Storage Manager Version: {}", params.storage_version);
+    log::trace!(target: "MOCK", "  - Store Manager Version: {}", params.store_version);
+    log::trace!(target: "MOCK", "  - Voice Manager Version: {}", params.voice_version);
+    log::trace!(target: "MOCK", "  - Achievement Manager Version: {}", params.achievement_version);
 
     let inst = Instance {
         interfaces: INTERFACES,
@@ -46,12 +70,6 @@ unsafe extern "C" fn DiscordCreate(
     };
 
     *result = Box::into_raw(Box::new(inst)) as *mut _;
-
-    log::trace!(
-        "Instance at {:p} is {} bytes wide",
-        *result,
-        std::mem::size_of::<Instance>()
-    );
 
     sys::DiscordResult_Ok
 }
@@ -244,14 +262,6 @@ pub const INTERFACES: Interfaces = Interfaces {
         get_user_achievement_at: Some(achievement::get_user_achievement_at),
     },
 };
-
-macro_rules! from_ptr {
-    ($name:ident, $typ:path, $($field:tt)+) => {
-        unsafe fn $name<'a>(ptr: *mut $typ) -> &'a mut Self {
-            &mut *(ptr.sub(memoffset::offset_of!(Self, $($field)+)) as *mut _)
-        }
-    };
-}
 
 #[allow(dead_code)]
 #[rustfmt::skip]

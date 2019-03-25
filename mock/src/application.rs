@@ -7,6 +7,7 @@ pub unsafe extern "C" fn validate_or_exit(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
     callback.unwrap()(callback_data, sys::DiscordResult_Ok);
 }
 
@@ -15,6 +16,7 @@ pub unsafe extern "C" fn get_current_locale(
     _: *mut sys::IDiscordApplicationManager,
     locale: *mut sys::DiscordLocale,
 ) {
+    prevent_unwind!();
     let src = std::ffi::CString::new("en-US").unwrap();
     (*locale).clone_from_slice(&*(src.as_bytes_with_nul() as *const [u8] as *const [i8]));
 }
@@ -24,6 +26,7 @@ pub unsafe extern "C" fn get_current_branch(
     _: *mut sys::IDiscordApplicationManager,
     branch: *mut sys::DiscordBranch,
 ) {
+    prevent_unwind!();
     let src = std::ffi::CString::new("mocking_test").unwrap();
     (*branch).clone_from_slice(&*(src.as_bytes_with_nul() as *const [u8] as *const [i8]));
 }
@@ -39,6 +42,7 @@ pub unsafe extern "C" fn get_oauth2_token(
         ),
     >,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn get_ticket(
@@ -52,4 +56,5 @@ pub unsafe extern "C" fn get_ticket(
         ),
     >,
 ) {
+    prevent_unwind!();
 }

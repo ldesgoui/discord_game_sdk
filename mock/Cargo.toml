@@ -12,6 +12,7 @@ crate-type = ["dylib"]
 pretty_env_logger = "0.3.0"
 log = "0.4.6"
 memoffset = "0.3.0"
+scopeguard = "1.0.0"
 
 [dependencies.discord-game-sdk-sys]
 path = "../sys"

@@ -6,6 +6,7 @@ pub unsafe extern "C" fn register_command(
     _: *mut sys::IDiscordActivityManager,
     _: *const c_char,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -14,6 +15,7 @@ pub unsafe extern "C" fn register_steam(
     _: *mut sys::IDiscordActivityManager,
     _: u32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -23,6 +25,7 @@ pub unsafe extern "C" fn update_activity(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
     // TODO: save activity state
     // TODO: calc rate limit (5/20s)
 }
@@ -32,6 +35,7 @@ pub unsafe extern "C" fn clear_activity(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn send_request_reply(
@@ -41,6 +45,7 @@ pub unsafe extern "C" fn send_request_reply(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn send_invite(
@@ -51,6 +56,7 @@ pub unsafe extern "C" fn send_invite(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn accept_invite(
@@ -59,4 +65,5 @@ pub unsafe extern "C" fn accept_invite(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }

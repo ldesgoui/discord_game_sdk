@@ -14,6 +14,7 @@ pub unsafe extern "C" fn fetch(
         ),
     >,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn get_dimensions(
@@ -21,6 +22,7 @@ pub unsafe extern "C" fn get_dimensions(
     handle: sys::DiscordImageHandle,
     dimensions: *mut sys::DiscordImageDimensions,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -30,5 +32,6 @@ pub unsafe extern "C" fn get_data(
     data: *mut u8,
     data_length: u32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }

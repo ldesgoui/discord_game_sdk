@@ -11,12 +11,14 @@ pub unsafe extern "C" fn filter(
         ) -> bool,
     >,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn count(
     manager: *mut sys::IDiscordRelationshipManager,
     count: *mut i32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -25,6 +27,7 @@ pub unsafe extern "C" fn get(
     user_id: sys::DiscordUserId,
     relationship: *mut sys::DiscordRelationship,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -33,5 +36,6 @@ pub unsafe extern "C" fn get_at(
     index: u32,
     relationship: *mut sys::DiscordRelationship,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }

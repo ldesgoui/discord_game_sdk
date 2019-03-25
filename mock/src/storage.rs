@@ -8,6 +8,7 @@ pub unsafe extern "C" fn read(
     data_length: u32,
     read: *mut u32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -24,6 +25,7 @@ pub unsafe extern "C" fn read_async(
         ),
     >,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn read_async_partial(
@@ -41,6 +43,7 @@ pub unsafe extern "C" fn read_async_partial(
         ),
     >,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn write(
@@ -49,6 +52,7 @@ pub unsafe extern "C" fn write(
     data: *mut u8,
     data_length: u32,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -60,12 +64,14 @@ pub unsafe extern "C" fn write_async(
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
+    prevent_unwind!();
 }
 
 pub unsafe extern "C" fn delete_(
     manager: *mut sys::IDiscordStorageManager,
     name: *const c_char,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -74,6 +80,7 @@ pub unsafe extern "C" fn exists(
     name: *const c_char,
     exists: *mut bool,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -84,6 +91,7 @@ pub unsafe extern "C" fn stat(
     name: *const c_char,
     stat: *mut sys::DiscordFileStat,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -92,6 +100,7 @@ pub unsafe extern "C" fn stat_at(
     index: i32,
     stat: *mut sys::DiscordFileStat,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
 
@@ -99,5 +108,6 @@ pub unsafe extern "C" fn get_path(
     manager: *mut sys::IDiscordStorageManager,
     path: *mut sys::DiscordPath,
 ) -> sys::EDiscordResult {
+    prevent_unwind!();
     sys::DiscordResult_Ok
 }
