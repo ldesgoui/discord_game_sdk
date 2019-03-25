@@ -95,32 +95,6 @@ pub struct Interfaces {
     pub achievement: sys::IDiscordAchievementManager,
 }
 
-impl Instance {
-    fn log(&self, message: &str, level: sys::EDiscordLogLevel) {
-        log::log!(
-            match level {
-                1 => log::Level::Error,
-                2 => log::Level::Warn,
-                3 => log::Level::Info,
-                4 => log::Level::Debug,
-                _ => log::Level::Trace,
-            },
-            "{}",
-            message
-        );
-
-        if self.state.log_hook.is_none() || level > self.state.log_min_level {
-            return;
-        }
-
-        let c_str = std::ffi::CString::new(message).unwrap();
-
-        unsafe {
-            self.state.log_hook.unwrap()(self.state.log_hook_data, level, c_str.as_ptr());
-        }
-    }
-}
-
 pub const INTERFACES: Interfaces = Interfaces {
     core: sys::IDiscordCore {
         destroy: Some(core::destroy),
@@ -297,20 +271,37 @@ impl Instance {
     from_ptr!(from_achievement, sys::IDiscordAchievementManager, interfaces.achievement);
 }
 
+//
+
+static SET_LOG: std::sync::Once = std::sync::Once::new();
+
 fn setup_log() {
-    if std::env::var("MOCK_LOG").is_ok() {
-        env_logger::Builder::from_env("MOCK_LOG")
-            .format(|buf, record| {
-                use std::io::Write;
-                writeln!(
-                    buf,
-                    "{:>20}:{:<3} {:>5}: {}",
-                    record.file().unwrap(),
-                    record.line().unwrap(),
-                    buf.default_styled_level(record.level()),
-                    record.args()
-                )
-            })
-            .init();
+    let _ = pretty_env_logger::try_init_custom_env("MOCK_LOG");
+}
+
+impl Instance {
+    fn log(&self, message: &str, level: sys::EDiscordLogLevel) {
+        log::log!(
+            target: "MOCK",
+            match level {
+                1 => log::Level::Error,
+                2 => log::Level::Warn,
+                3 => log::Level::Info,
+                4 => log::Level::Debug,
+                _ => log::Level::Trace,
+            },
+            "{}",
+            message
+        );
+
+        if self.state.log_hook.is_none() || level > self.state.log_min_level {
+            return;
+        }
+
+        let c_str = std::ffi::CString::new(message).unwrap();
+
+        unsafe {
+            self.state.log_hook.unwrap()(self.state.log_hook_data, level, c_str.as_ptr());
+        }
     }
 }

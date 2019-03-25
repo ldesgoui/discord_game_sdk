@@ -236,19 +236,7 @@ mod test {
 
     #[test]
     fn test() {
-        use std::io::Write;
-        env_logger::Builder::from_env("TEST_LOG")
-            .format(|buf, record| {
-                writeln!(
-                    buf,
-                    "{:>20}:{:<3} {:>5}: {}",
-                    record.file().unwrap(),
-                    record.line().unwrap(),
-                    buf.default_styled_level(record.level()),
-                    record.args()
-                )
-            })
-            .init();
+        let _ = pretty_env_logger::try_init_custom_env("TEST_LOG");
 
         let mut gsdk = GameSDK::new(1, &Default::default()).unwrap();
         gsdk.set_log_hook();
