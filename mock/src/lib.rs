@@ -71,6 +71,8 @@ unsafe extern "C" fn DiscordCreate(
 
     *result = Box::into_raw(Box::new(inst)) as *mut _;
 
+    log::trace!(target: "MOCK", "returning pointer to {:p}", *result);
+
     sys::DiscordResult_Ok
 }
 
