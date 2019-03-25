@@ -36,10 +36,10 @@ pub unsafe extern "C" fn set_log_hook(
     inst.state.log_hook = hook;
     inst.state.log_hook_data = hook_data;
 
-    inst.log("Log example: Debug", sys::DiscordLogLevel_Debug);
-    inst.log("Log example: Info", sys::DiscordLogLevel_Info);
-    inst.log("Log example: Warn", sys::DiscordLogLevel_Warn);
-    inst.log("Log example: Error", sys::DiscordLogLevel_Error);
+    inst.log(sys::DiscordLogLevel_Debug, "Log example: Debug");
+    inst.log(sys::DiscordLogLevel_Info, "Log example: Info");
+    inst.log(sys::DiscordLogLevel_Warn, "Log example: Warn");
+    inst.log(sys::DiscordLogLevel_Error, "Log example: Error");
 }
 
 /// Complete

@@ -290,7 +290,7 @@ fn setup_log() {
 }
 
 impl Instance {
-    fn log(&self, message: &str, level: sys::EDiscordLogLevel) {
+    fn log(&self, level: sys::EDiscordLogLevel, message: &str) {
         log::log!(
             target: "MOCK",
             match level {
