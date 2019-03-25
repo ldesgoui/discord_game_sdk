@@ -11,7 +11,7 @@ https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
 
 Once you have downloaded it, extract the contents to a folder and set the environment variable `DISCORD_GAME_SDK_PATH` to its path.
 
-# export DISCORD_GAME_SDK_PATH=$PWD/../Downloads/discord_game_sdk/
+# export DISCORD_GAME_SDK_PATH=$HOME/Downloads/discord_game_sdk/
 
 From there, everything should compile when you run `cargo build` again.
 
