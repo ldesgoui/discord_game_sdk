@@ -17,12 +17,16 @@ mod store;
 mod user;
 mod voice;
 
+static SET_LOG: std::sync::Once = std::sync::Once::new();
+
 #[no_mangle]
 unsafe extern "C" fn DiscordCreate(
     version: sys::DiscordVersion,
     params: *mut sys::DiscordCreateParams,
     result: *mut *mut sys::IDiscordCore,
 ) -> sys::EDiscordResult {
+    SET_LOG.call_once(setup_log);
+
     let inst = Instance {
         interfaces: INTERFACES,
         state: State {
@@ -291,4 +295,22 @@ impl Instance {
     from_ptr!(from_store, sys::IDiscordStoreManager, interfaces.store);
     from_ptr!(from_voice, sys::IDiscordVoiceManager, interfaces.voice);
     from_ptr!(from_achievement, sys::IDiscordAchievementManager, interfaces.achievement);
+}
+
+fn setup_log() {
+    if std::env::var("MOCK_LOG").is_ok() {
+        env_logger::Builder::from_env("MOCK_LOG")
+            .format(|buf, record| {
+                use std::io::Write;
+                writeln!(
+                    buf,
+                    "{:>20}:{:<3} {:>5}: {}",
+                    record.file().unwrap(),
+                    record.line().unwrap(),
+                    buf.default_styled_level(record.level()),
+                    record.args()
+                )
+            })
+            .init();
+    }
 }

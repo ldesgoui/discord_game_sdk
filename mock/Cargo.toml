@@ -9,6 +9,7 @@ name = "discord_game_sdk"
 crate-type = ["dylib"]
 
 [dependencies]
+env_logger = "0.6.1"
 log = "0.4.6"
 memoffset = "0.3.0"
 
