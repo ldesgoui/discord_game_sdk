@@ -2,7 +2,7 @@
 members = ["sys", "mock"]
 
 [package]
-name = "discord-game-sdk"
+name = "discord_game_sdk"
 version = "0.1.0"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
@@ -12,7 +12,12 @@ license = "MIT/Apache 2.0"
 [dependencies]
 log = "0.4.6"
 
-[dependencies.discord-game-sdk-sys]
+[features]
+default = ["using_mock"]
+using_mock = ["discord_game_sdk_sys/using_mock"]
+no_linking = ["discord_game_sdk_sys/no_linking"]
+
+[dependencies.discord_game_sdk_sys]
 path = "sys"
 version = "0.1.0"
 

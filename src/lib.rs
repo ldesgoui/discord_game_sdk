@@ -17,11 +17,7 @@ impl GameSDK {
         let mut params = create_params(client_id, flags);
 
         let res = unsafe {
-            sys::DiscordCreate(
-                sys::DISCORD_VERSION as i32,
-                &mut params as *mut _,
-                &mut core_ptr,
-            )
+            sys::DiscordCreate(sys::DISCORD_VERSION, &mut params as *mut _, &mut core_ptr)
         };
 
         Error::guard(res).map(|_| {
@@ -35,7 +31,7 @@ impl GameSDK {
         unsafe { &*self.core_ptr }
     }
 
-    pub fn set_log_hook(&mut self) {
+    pub fn set_log_hook(&self) {
         debug_assert!(self.core().set_log_hook.is_some());
         unsafe {
             self.core().set_log_hook.unwrap()(
@@ -52,18 +48,18 @@ fn create_params(client_id: i64, flags: &CreateFlags) -> sys::DiscordCreateParam
     sys::DiscordCreateParams {
         client_id: client_id,
         flags: flags.to_sys() as u64,
-        application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION as i32,
-        user_version: sys::DISCORD_USER_MANAGER_VERSION as i32,
-        image_version: sys::DISCORD_IMAGE_MANAGER_VERSION as i32,
-        activity_version: sys::DISCORD_ACTIVITY_MANAGER_VERSION as i32,
-        relationship_version: sys::DISCORD_RELATIONSHIP_MANAGER_VERSION as i32,
-        lobby_version: sys::DISCORD_LOBBY_MANAGER_VERSION as i32,
-        network_version: sys::DISCORD_NETWORK_MANAGER_VERSION as i32,
-        overlay_version: sys::DISCORD_OVERLAY_MANAGER_VERSION as i32,
-        storage_version: sys::DISCORD_STORAGE_MANAGER_VERSION as i32,
-        store_version: sys::DISCORD_STORE_MANAGER_VERSION as i32,
-        voice_version: sys::DISCORD_VOICE_MANAGER_VERSION as i32,
-        achievement_version: sys::DISCORD_ACHIEVEMENT_MANAGER_VERSION as i32,
+        application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
+        user_version: sys::DISCORD_USER_MANAGER_VERSION,
+        image_version: sys::DISCORD_IMAGE_MANAGER_VERSION,
+        activity_version: sys::DISCORD_ACTIVITY_MANAGER_VERSION,
+        relationship_version: sys::DISCORD_RELATIONSHIP_MANAGER_VERSION,
+        lobby_version: sys::DISCORD_LOBBY_MANAGER_VERSION,
+        network_version: sys::DISCORD_NETWORK_MANAGER_VERSION,
+        overlay_version: sys::DISCORD_OVERLAY_MANAGER_VERSION,
+        storage_version: sys::DISCORD_STORAGE_MANAGER_VERSION,
+        store_version: sys::DISCORD_STORE_MANAGER_VERSION,
+        voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
+        achievement_version: sys::DISCORD_ACHIEVEMENT_MANAGER_VERSION,
         ..Default::default()
     }
 }

@@ -20,3 +20,4 @@ Cargo.lock
 shell.nix
 discord_game_sdk.dll
 sdk/
+build.rs
