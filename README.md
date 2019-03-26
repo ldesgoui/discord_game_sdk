@@ -20,6 +20,8 @@ In your `Cargo.toml`, add the lines
 
 Note: you might need to add git/path if the crate isn't published yet (most likely)
 
-In your environment, set the variables
+In your project's build.rs, add the following to your `fn main()`:
 
-    # export DISCORD_GAME_SDK_MOCK_PATH=$PWD/target/debug/deps
+    println!("cargo:rustc-link-lib=discord_game_sdk");
+    println!("cargo:rustc-link-search=./target/debug");
+
