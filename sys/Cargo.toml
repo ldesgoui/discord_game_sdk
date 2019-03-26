@@ -8,5 +8,4 @@ edition = "2018"
 bindgen = "0.48.1"
 
 [features]
-using_mock = []
 no_linking = []

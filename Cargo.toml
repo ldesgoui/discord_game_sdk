@@ -14,7 +14,6 @@ log = "0.4.6"
 
 [features]
 default = ["using_mock"]
-using_mock = ["discord_game_sdk_sys/using_mock"]
 no_linking = ["discord_game_sdk_sys/no_linking"]
 
 [dependencies.discord_game_sdk_sys]

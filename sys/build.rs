@@ -47,17 +47,11 @@ fn main() {
         .write_to_file(out_path.join("bindings.rs"))
         .expect("discord_game_sdk_sys: could not write bindings to file");
 
-    if cfg!(feature = "no-linking") {
+    if cfg!(feature = "no_linking") {
         return;
     }
 
     match target.as_ref() {
-        _ if cfg!(feature = "using_mock") => {
-            println!(
-                "cargo:warning=discord_game_sdk_sys: {}",
-                "You are linking against the mock library for the Discord Game SDK"
-            );
-        }
         "i686-pc-windows-gnu" | "i686-pc-windows-msvc" => {
             println!("cargo:rustc-link-search={:?}", sdk_path.join("lib/x86"));
             println!("cargo:rustc-link-lib=discord_game_sdk.dll");
