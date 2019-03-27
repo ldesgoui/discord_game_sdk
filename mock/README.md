@@ -25,4 +25,4 @@ In your project's build.rs, add the following to your `fn main()`:
     println!("cargo:rustc-link-lib=discord_game_sdk");
     println!("cargo:rustc-link-search=./target/debug");
 
-License: MIT OR Apache 2.0
+License: MIT OR Apache-2.0
