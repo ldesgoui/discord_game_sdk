@@ -1,6 +1,6 @@
 [package]
 name = "discord_game_sdk"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Safe wrapper for the Discord Game SDK"
@@ -9,6 +9,9 @@ repository = "https://github.com/ldesgoui/discord_game_sdk"
 keywords = [ "discord", "sdk", "gamedev" ]
 categories = [ "api-bindings", "game-engines" ]
 
+[package.metadata.docs.rs]
+features = ["no_linking"]
+
 [features]
 no_linking = ["discord_game_sdk_sys/no_linking"]
 
@@ -16,7 +19,7 @@ no_linking = ["discord_game_sdk_sys/no_linking"]
 log = "0.4.6"
 
 [dependencies.discord_game_sdk_sys]
-version = "0.1.0"
+version = "0.1.1"
 path = "./sys"
 
 [dev-dependencies]
