@@ -14,11 +14,8 @@ The plan is to provide an interface for the developer to build scenarios, allowi
 In your `Cargo.toml`, add the lines
 
     [dependencies]
-    discord_game_sdk = "0.1.0"
+    discord_game_sdk = { version = "0.1.0", features = ["no_linking"] }
     discord_game_sdk_mock = "0.1.0"
-
-    [dependencies.discord_game_sdk]
-    features = ["no_linking"]
 
 In your project's build.rs, add the following to your `fn main()`:
 
