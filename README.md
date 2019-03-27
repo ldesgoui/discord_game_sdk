@@ -23,5 +23,5 @@ Note: you might need to add git/path if the crate isn't published yet (most like
 In your project's build.rs, add the following to your `fn main()`:
 
     println!("cargo:rustc-link-lib=discord_game_sdk");
-    println!("cargo:rustc-link-search=./target/debug");
+    println!("cargo:rustc-link-search=./target/debug/deps");
 
