@@ -3,6 +3,11 @@ name = "discord_game_sdk_sys"
 version = "0.1.0"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
+description = "Raw Rust bindings to the Discord Game SDK"
+license = "MIT OR Apache 2.0"
+repository = "https://github.com/ldesgoui/discord_game_sdk"
+keywords = [ "discord", "sdk", "gamedev" ]
+categories = [ "external-ffi-bindings", "game-engines" ]
 
 [build-dependencies]
 bindgen = "0.48.1"

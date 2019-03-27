@@ -3,18 +3,23 @@ name = "discord_game_sdk_mock"
 version = "0.1.0"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
+description = "Mock library of the Discord Game SDK"
+license = "MIT OR Apache 2.0"
+repository = "https://github.com/ldesgoui/discord_game_sdk"
+keywords = [ "discord", "sdk", "gamedev" ]
+categories = [ "development-tools::testing", "development-tools::ffi" ]
 
 [lib]
 name = "discord_game_sdk"
 crate-type = ["dylib"]
 
 [dependencies]
-pretty_env_logger = "0.3.0"
+discord_game_sdk_sys = "0.1.0"
 log = "0.4.6"
 memoffset = "0.3.0"
+pretty_env_logger = "0.3.0"
 scopeguard = "1.0.0"
 
 [dependencies.discord_game_sdk_sys]
-path = "../sys"
-version = "0.1.0"
 features = ["no_linking"]
+path = "../sys"

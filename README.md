@@ -1,13 +1,16 @@
-# Rust bindings for the Discord Game SDK
+# discord_game_sdk
 
-### And a mock library for testing (on Linux)
+Safe wrapper and bindings for the [Discord Game SDK](https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide).
 
-I don't think this currently qualifies as "open source software" as the Discord Game SDK header files are not published under open source licenses. I am not going to redistribute those files. You should see instructions on how to set that up in your first use of the crate.
+## Status
+This library is currently in very early stages, most of the API is missing.
 
+## "Legal" note
+This wrapper was informally allowed for publication and distribution by Discord Staff.
+I cannot redistribute the SDK files until it is made open-source or is licensed for redistribution. You will have to follow some instructions when first setting up your project.
+If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
-## Using the mock in a Rust project
-
-(TODO)
+### Using the mock in a Rust project
 
 In your `Cargo.toml`, add the lines
 
@@ -18,10 +21,9 @@ In your `Cargo.toml`, add the lines
     [dependencies.discord_game_sdk]
     features = ["no_linking"]
 
-Note: you might need to add git/path if the crate isn't published yet (most likely)
-
 In your project's build.rs, add the following to your `fn main()`:
 
     println!("cargo:rustc-link-lib=discord_game_sdk");
     println!("cargo:rustc-link-search=./target/debug");
 
+License: MIT OR Apache 2.0

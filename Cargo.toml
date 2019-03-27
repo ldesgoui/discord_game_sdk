@@ -1,23 +1,26 @@
-[workspace]
-members = ["sys", "mock"]
-
 [package]
 name = "discord_game_sdk"
 version = "0.1.0"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Rust bindings to the Discord Game SDK"
-license = "MIT/Apache 2.0"
-
-[dependencies]
-log = "0.4.6"
+license = "MIT OR Apache 2.0"
+repository = "https://github.com/ldesgoui/discord_game_sdk"
+keywords = [ "discord", "sdk", "gamedev" ]
+categories = [ "api-bindings", "game-engines" ]
 
 [features]
 no_linking = ["discord_game_sdk_sys/no_linking"]
 
+[dependencies]
+discord_game_sdk_sys = "0.1.0"
+log = "0.4.6"
+
 [dependencies.discord_game_sdk_sys]
-path = "sys"
-version = "0.1.0"
+path = "./sys"
 
 [dev-dependencies]
 pretty_env_logger = "0.3.0"
+
+[workspace]
+members = ["sys", "mock"]
