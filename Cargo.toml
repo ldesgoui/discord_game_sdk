@@ -13,10 +13,10 @@ categories = [ "api-bindings", "game-engines" ]
 no_linking = ["discord_game_sdk_sys/no_linking"]
 
 [dependencies]
-discord_game_sdk_sys = "0.1.0"
 log = "0.4.6"
 
 [dependencies.discord_game_sdk_sys]
+version = "0.1.0"
 path = "./sys"
 
 [dev-dependencies]
