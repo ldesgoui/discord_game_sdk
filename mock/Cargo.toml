@@ -10,8 +10,9 @@ keywords = [ "discord", "sdk", "gamedev" ]
 categories = [ "development-tools::testing", "development-tools::ffi" ]
 
 [lib]
-name = "discord_game_sdk"
 crate-type = ["dylib"]
+name = "discord_game_sdk"
+path = "src/lib.rs"
 
 [dependencies]
 log = "0.4.6"
