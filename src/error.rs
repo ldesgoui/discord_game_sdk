@@ -48,16 +48,16 @@ pub enum Error {
     InvalidGiftCode,
     PurchaseError,
     TransactionAborted,
-    /// 44..u32::MAX
-    Undefined,
+    #[doc(hidden)]
+    __Undefined,
 }
 
 impl Error {
-    pub(crate) fn guard(source: sys::EDiscordResult) -> Result<()> {
+    pub(crate) fn from(source: sys::EDiscordResult) -> Option<Self> {
         use Error::*;
 
-        Err(match source {
-            sys::DiscordResult_Ok => return Ok(()),
+        Some(match source {
+            sys::DiscordResult_Ok => return None,
             sys::DiscordResult_ServiceUnavailable => ServiceUnavailable,
             sys::DiscordResult_InvalidVersion => InvalidVersion,
             sys::DiscordResult_LockFailed => LockFailed,
@@ -106,8 +106,15 @@ impl Error {
                     "EDiscordResult could not be matched with our definitions: {}",
                     val
                 );
-                Undefined
+                __Undefined
             }
         })
+    }
+
+    pub(crate) fn guard(source: sys::EDiscordResult) -> Result<()> {
+        match Self::from(source) {
+            None => Ok(()),
+            Some(e) => Err(e),
+        }
     }
 }
