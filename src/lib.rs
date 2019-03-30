@@ -15,6 +15,9 @@
 
 use discord_game_sdk_sys as sys;
 
+#[macro_use]
+pub(crate) mod macros;
+
 pub mod error;
 pub mod events;
 
@@ -47,69 +50,42 @@ impl Discord {
         };
 
         Error::guard(res).map(|_| {
-            debug_assert!(!sdk.core_ptr.is_null());
-
             sdk.set_log_hook();
             sdk
         })
     }
 
     pub fn run_callbacks(&mut self) -> Result<()> {
-        unsafe { Error::guard(self.core().run_callbacks.unwrap()(self.core_ptr)) }
+        Error::guard(ffi!(self.run_callbacks()))
     }
 
     fn set_log_hook(&self) {
-        debug_assert!(self.core().set_log_hook.is_some());
-        unsafe {
-            self.core().set_log_hook.unwrap()(
-                self.core_ptr,
-                sys::DiscordLogLevel_Debug,
-                std::ptr::null_mut(),
-                Some(log_hook),
-            );
-        }
+        ffi!(self.set_log_hook(
+            sys::DiscordLogLevel_Debug,
+            std::ptr::null_mut(),
+            Some(log_hook),
+        ));
+    }
+
+    pub fn get_current_locale(&self) -> String {
+        let &mut mut locale: &mut sys::DiscordLocale = &mut [0; 128];
+
+        ffi!(self
+            .get_application_manager()
+            .get_current_locale(&mut locale as *mut _));
+
+        std::ffi::CStr::from_bytes_with_nul(unsafe { std::mem::transmute(&locale[..]) })
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string()
     }
 }
 
 impl Drop for Discord {
     fn drop(&mut self) {
-        debug_assert!(self.core().destroy.is_some());
-        unsafe {
-            self.core().destroy.unwrap()(self.core_ptr);
-        }
+        ffi!(self.destroy());
     }
-}
-
-macro_rules! get_manager {
-    ($name:ident, $typ:path, $func:ident) => {
-        fn $name(&self) -> &$typ {
-            debug_assert!(self.core().$func.is_some());
-            unsafe {
-                &*self.core().$func.unwrap()(self.core_ptr)
-            }
-        }
-    }
-}
-
-#[rustfmt::skip]
-#[allow(dead_code)]
-impl Discord {
-    fn core(&self) -> &sys::IDiscordCore {
-        unsafe { &*self.core_ptr }
-    }
-
-    get_manager!(application, sys::IDiscordApplicationManager, get_application_manager);
-    get_manager!(user, sys::IDiscordUserManager, get_user_manager);
-    get_manager!(image, sys::IDiscordImageManager, get_image_manager);
-    get_manager!(activity, sys::IDiscordActivityManager, get_activity_manager);
-    get_manager!(relationship, sys::IDiscordRelationshipManager, get_relationship_manager);
-    get_manager!(lobby, sys::IDiscordLobbyManager, get_lobby_manager);
-    get_manager!(network, sys::IDiscordNetworkManager, get_network_manager);
-    get_manager!(overlay, sys::IDiscordOverlayManager, get_overlay_manager);
-    get_manager!(storage, sys::IDiscordStorageManager, get_storage_manager);
-    get_manager!(store, sys::IDiscordStoreManager, get_store_manager);
-    get_manager!(voice, sys::IDiscordVoiceManager, get_voice_manager);
-    get_manager!(achievement, sys::IDiscordAchievementManager, get_achievement_manager);
 }
 
 fn create_params(
