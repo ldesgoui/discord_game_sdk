@@ -26,11 +26,12 @@ impl Discord {
         );
 
         unsafe {
-            discord_result(sys::DiscordCreate(
+            sys::DiscordCreate(
                 sys::DISCORD_VERSION,
                 &mut params as *mut _,
                 &mut sdk.core_ptr,
-            ))?;
+            )
+            .to_result()?;
         }
 
         sdk.set_log_hook()?;
@@ -43,13 +44,13 @@ impl Discord {
             sys::DiscordLogLevel_Debug,
             std::ptr::null_mut(),
             Some(log_hook),
-        ));
+        ))?;
 
         Ok(())
     }
 
     pub fn run_callbacks(&mut self) -> Result<()> {
-        ffi!(self.run_callbacks()?);
+        ffi!(self.run_callbacks())?;
 
         Ok(())
     }
@@ -57,7 +58,7 @@ impl Discord {
 
 impl Drop for Discord {
     fn drop(&mut self) {
-        match || -> Result<()> { Ok(ffi!(self.destroy())) }() {
+        match ffi!(self.destroy()) {
             Err(err) => log::error!("error while dropping: {}", err),
             _ => {}
         }

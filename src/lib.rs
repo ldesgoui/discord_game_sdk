@@ -42,28 +42,10 @@ mod smoke {
     fn compiles() {
         let _ = pretty_env_logger::try_init_custom_env("TEST_LOG");
 
-        // let mut gsdk = Discord::new(0).unwrap();
-        // gsdk.run_callbacks().unwrap();
-        // log::info!("{:?}", gsdk.get_current_locale());
-        // log::info!("{:?}", gsdk.get_current_branch());
+        let mut gsdk = Discord::new(0).unwrap();
+        gsdk.run_callbacks().unwrap();
+        log::info!("{:?}", gsdk.get_current_locale());
+        log::info!("{:?}", gsdk.get_current_branch());
     }
 
-}
-
-fn non() {}
-
-trait ToResult {
-    fn to_result(&self) -> Result<()>;
-}
-
-impl ToResult for u32 {
-    fn to_result(&self) -> Result<()> {
-        Ok(error::discord_result(*self)?)
-    }
-}
-
-impl ToResult for () {
-    fn to_result(&self) -> Result<()> {
-        Ok(())
-    }
 }

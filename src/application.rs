@@ -10,7 +10,7 @@ impl Discord {
 
         ffi!(self
             .get_application_manager()
-            .get_current_locale(&mut locale as *mut _));
+            .get_current_locale(&mut locale as *mut _))?;
 
         Ok(
             unsafe { std::ffi::CStr::from_ptr(&locale as *const _ as *const _) }
@@ -24,7 +24,7 @@ impl Discord {
 
         ffi!(self
             .get_application_manager()
-            .get_current_branch(&mut branch as *mut _));
+            .get_current_branch(&mut branch as *mut _))?;
 
         Ok(
             unsafe { std::ffi::CStr::from_ptr(&branch as *const _ as *const _) }
@@ -33,39 +33,36 @@ impl Discord {
         )
     }
 
-    //pub fn validate_or_exit<F>(&self, callback: &mut F)
-    //where
-    //    F: FnMut(Result<()>),
-    //{
-    //    || -> Result<()> {
+    pub fn validate_or_exit<F>(&self, callback: &mut F)
+    where
+        F: FnMut(Result<()>),
+    {
+        let _ = ffi!(self
+            .get_application_manager()
+            .validate_or_exit(std::mem::transmute(callback), Some(validate_or_exit::<F>)));
+    }
+
+    //
+    //    pub fn get_oauth2_token<F>(&self, callback: &mut F)
+    //    where
+    //        F: FnMut(Result<DiscordOAuth2Token>),
+    //    {
     //        ffi!(self
     //            .get_application_manager()
-    //            .validate_or_exit(std::mem::transmute(callback), Some(validate_or_exit::<F>)));
-    //        Ok(())
-    //    }()
-    //    .map_err(|e| callback(Err(e)));
-    //}
-
-    //pub fn get_oauth2_token<F>(&self, callback: &mut F)
-    //where
-    //    F: FnMut(Result<DiscordOAuth2Token>),
-    //{
-    //    ffi!(self
-    //        .get_application_manager()
-    //        .get_oauth2_token(std::mem::transmute(callback), Some(get_oauth2_token::<F>)))
-    //}
+    //            .get_oauth2_token(std::mem::transmute(callback), Some(get_oauth2_token::<F>)))
+    //    }
 }
 
-//extern "C" fn validate_or_exit<F>(data: *mut c_void, res: sys::EDiscordResult)
-//where
-//    F: FnMut(Result<()>) + Sized,
-//{
-//    // debug_assert!(!data.is_null());
-//    // let callback: *mut F = std::mem::transmute(data);
-//
-//    // (*callback)(Error::from(res));
-//}
-//
+extern "C" fn validate_or_exit<F>(data: *mut c_void, res: sys::EDiscordResult)
+where
+    F: FnMut(Result<()>) + Sized,
+{
+    // debug_assert!(!data.is_null());
+    // let callback: *mut F = std::mem::transmute(data);
+
+    // (*callback)(Error::from(res));
+}
+
 //extern "C" fn get_oauth2_token<F>(
 //    data: *mut c_void,
 //    res: sys::EDiscordResult,
