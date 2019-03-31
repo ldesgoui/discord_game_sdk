@@ -33,24 +33,24 @@ impl Discord {
         )
     }
 
-    pub fn validate_or_exit<F>(&self, callback: &mut F)
+    pub fn validate_or_exit<F>(&self, callback: F)
     where
         F: FnMut(Result<()>),
     {
         // TODO: catch ffi! errors and send them to callback
         let _ = ffi!(self
             .get_application_manager()
-            .validate_or_exit(callback as *mut _ as *mut _, Some(validate_or_exit::<F>)));
+            .validate_or_exit(&callback as *const _ as *mut _, Some(validate_or_exit::<F>)));
     }
 
-    pub fn get_oauth2_token<F>(&self, callback: &mut F)
+    pub fn get_oauth2_token<F>(&self, callback: F)
     where
         F: FnMut(Result<DiscordOAuth2Token>),
     {
         // TODO: catch ffi! errors and send them to callback
         let _ = ffi!(self
             .get_application_manager()
-            .get_oauth2_token(callback as *mut _ as *mut _, Some(get_oauth2_token::<F>)));
+            .get_oauth2_token(&callback as *const _ as *mut _, Some(get_oauth2_token::<F>)));
     }
 }
 
