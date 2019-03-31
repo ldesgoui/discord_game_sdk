@@ -67,7 +67,7 @@ impl Drop for Discord {
 }
 
 impl std::fmt::Debug for Discord {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("Discord")
             .field("client_id", &self.client_id)
             .finish()
@@ -150,7 +150,7 @@ fn create_params(
 }
 
 extern "C" fn log_hook(
-    _: *mut std::ffi::c_void,
+    _: *mut c_void,
     level: sys::EDiscordLogLevel,
     message: *const std::os::raw::c_char,
 ) {

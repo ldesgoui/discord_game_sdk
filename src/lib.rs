@@ -13,21 +13,7 @@
 //!
 //! If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
-#![warn(
-    clippy::all,
-    clippy::nursery,
-    clippy::pedantic,
-    clippy::restriction,
-    // missing_docs
-)]
-#![allow(
-    clippy::implicit_return,
-    clippy::missing_docs_in_private_items,
-    clippy::missing_inline_in_public_items,
-    clippy::module_name_repetitions,
-    clippy::multiple_inherent_impl,
-    unused_variables
-)]
+#![allow(unused_variables)]
 
 //
 
