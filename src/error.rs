@@ -2,7 +2,7 @@ use discord_game_sdk_sys as sys;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, err_derive::Error)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, err_derive::Error)]
 pub enum Error {
     #[error(display = "Discord SDK broke API contract")]
     ContractViolation(#[error(cause)] ContractViolation),
@@ -29,7 +29,7 @@ impl From<std::str::Utf8Error> for Error {
     }
 }
 
-#[derive(Debug, err_derive::Error)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, err_derive::Error)]
 pub enum ContractViolation {
     #[error(display = "pointer to null")]
     NullPointer,
@@ -47,7 +47,7 @@ impl From<std::str::Utf8Error> for ContractViolation {
     }
 }
 
-#[derive(Debug, err_derive::Error)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, err_derive::Error)]
 pub enum DiscordError {
     #[error(display = "service unavailable")]
     ServiceUnavailable,

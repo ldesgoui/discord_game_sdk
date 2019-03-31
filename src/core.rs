@@ -4,17 +4,19 @@ use std::os::raw::c_void;
 
 pub struct Discord {
     pub(crate) core_ptr: *mut sys::IDiscordCore,
+    pub(crate) client_id: i64,
 }
 
 /// Core
 impl Discord {
     pub fn new(client_id: i64) -> Result<Self> {
-        Self::with_create_flags(client_id, &Default::default())
+        Self::with_create_flags(client_id, CreateFlags::default())
     }
 
-    pub fn with_create_flags(client_id: i64, flags: &CreateFlags) -> Result<Self> {
-        let mut sdk = Discord {
+    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
+        let mut sdk = Self {
             core_ptr: std::ptr::null_mut(),
+            client_id,
         };
 
         let mut params = create_params(
@@ -58,13 +60,21 @@ impl Discord {
 
 impl Drop for Discord {
     fn drop(&mut self) {
-        match ffi!(self.destroy()) {
-            Err(err) => log::error!("error while dropping: {}", err),
-            _ => {}
+        if let Err(err) = ffi!(self.destroy()) {
+            log::error!("error while dropping: {}", err);
         }
     }
 }
 
+impl std::fmt::Debug for Discord {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.debug_struct("Discord")
+            .field("client_id", &self.client_id)
+            .finish()
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CreateFlags {
     /// Requires Discord to be running to play the game
     Default,
@@ -79,7 +89,7 @@ impl Default for CreateFlags {
 }
 
 impl CreateFlags {
-    fn to_sys(&self) -> sys::EDiscordCreateFlags {
+    fn to_sys(self) -> sys::EDiscordCreateFlags {
         match self {
             CreateFlags::Default => sys::DiscordCreateFlags_Default,
             CreateFlags::NoRequireDiscord => sys::DiscordCreateFlags_NoRequireDiscord,
@@ -89,14 +99,14 @@ impl CreateFlags {
 
 fn create_params(
     client_id: i64,
-    flags: &CreateFlags,
+    flags: CreateFlags,
     ptr: *mut Discord,
 ) -> sys::DiscordCreateParams {
     use crate::events::*;
 
     sys::DiscordCreateParams {
         client_id,
-        flags: flags.to_sys() as u64,
+        flags: u64::from(flags.to_sys()),
         //
         events: std::ptr::null_mut(),
         event_data: ptr as *mut c_void,
@@ -140,7 +150,7 @@ fn create_params(
 }
 
 extern "C" fn log_hook(
-    hook_data: *mut std::ffi::c_void,
+    _: *mut std::ffi::c_void,
     level: sys::EDiscordLogLevel,
     message: *const std::os::raw::c_char,
 ) {

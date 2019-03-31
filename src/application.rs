@@ -1,7 +1,7 @@
 use crate::error::*;
 use crate::Discord;
 use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use std::os::raw::c_void;
 
 /// Application
 impl Discord {
@@ -40,7 +40,7 @@ impl Discord {
         // TODO: catch ffi! errors and send them to callback
         let _ = ffi!(self
             .get_application_manager()
-            .validate_or_exit(std::mem::transmute(callback), Some(validate_or_exit::<F>)));
+            .validate_or_exit(callback as *mut _ as *mut _, Some(validate_or_exit::<F>)));
     }
 
     pub fn get_oauth2_token<F>(&self, callback: &mut F)
@@ -50,7 +50,7 @@ impl Discord {
         // TODO: catch ffi! errors and send them to callback
         let _ = ffi!(self
             .get_application_manager()
-            .get_oauth2_token(std::mem::transmute(callback), Some(get_oauth2_token::<F>)));
+            .get_oauth2_token(callback as *mut _ as *mut _, Some(get_oauth2_token::<F>)));
     }
 }
 
@@ -62,7 +62,7 @@ where
         log::error!("SDK invoked callback with null");
         return;
     }
-    let callback: &mut F = unsafe { std::mem::transmute(data) };
+    let callback: &mut F = unsafe { &mut *(data as *mut _) };
 
     callback(res.to_result());
 }
@@ -78,7 +78,7 @@ extern "C" fn get_oauth2_token<F>(
         log::error!("SDK invoked callback with null");
         return;
     }
-    let callback: &mut F = unsafe { std::mem::transmute(data) };
+    let callback: &mut F = unsafe { &mut *(data as *mut _) };
 
     match res.to_result() {
         Err(err) => callback(Err(err)),
@@ -94,8 +94,8 @@ pub struct DiscordOAuth2Token {
 }
 
 impl DiscordOAuth2Token {
-    fn from_sys(source: *const sys::DiscordOAuth2Token) -> Result<Self> {
-        let source = unsafe { source.as_ref() }.ok_or(ContractViolation::NullPointer)?;
+    fn from_sys(ptr: *const sys::DiscordOAuth2Token) -> Result<Self> {
+        let source = unsafe { ptr.as_ref() }.ok_or(ContractViolation::NullPointer)?;
 
         let access_token = unsafe { std::ffi::CStr::from_ptr(&source.access_token as *const _) }
             .to_str()?
@@ -109,7 +109,7 @@ impl DiscordOAuth2Token {
 
         let expires = chrono::NaiveDateTime::from_timestamp(source.expires, 0);
 
-        Ok(DiscordOAuth2Token {
+        Ok(Self {
             access_token,
             scopes,
             expires,

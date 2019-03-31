@@ -13,7 +13,21 @@
 //!
 //! If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
-#![allow(dead_code, unused_variables, unused_imports)] // TODO: remove this at some point
+#![warn(
+    clippy::all,
+    clippy::nursery,
+    clippy::pedantic,
+    clippy::restriction,
+    // missing_docs
+)]
+#![allow(
+    clippy::implicit_return,
+    clippy::missing_docs_in_private_items,
+    clippy::missing_inline_in_public_items,
+    clippy::module_name_repetitions,
+    clippy::multiple_inherent_impl,
+    unused_variables
+)]
 
 //
 
@@ -24,13 +38,13 @@ mod core;
 
 mod application;
 
-mod error;
+pub mod error;
 mod events;
 
 //
 
 pub use crate::core::{CreateFlags, Discord};
-pub use crate::error::{DiscordError, Error, Result};
+pub use crate::error::{Error, Result};
 
 //
 
@@ -43,6 +57,7 @@ mod smoke {
         let _ = pretty_env_logger::try_init_custom_env("TEST_LOG");
 
         let mut gsdk = Discord::new(0).unwrap();
+        log::info!("{:?}", gsdk);
         gsdk.run_callbacks().unwrap();
         gsdk.validate_or_exit(&mut |r| match r {
             Ok(()) => log::info!("Validated"),
