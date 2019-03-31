@@ -17,8 +17,11 @@ pub unsafe extern "C" fn get_current_locale(
     locale: *mut sys::DiscordLocale,
 ) {
     prevent_unwind!();
-    let src = std::ffi::CString::new("en-US").unwrap();
-    (*locale).clone_from_slice(&*(src.as_bytes_with_nul() as *const [u8] as *const [i8]));
+    (*locale)[0] = 'e' as i8;
+    (*locale)[1] = 'n' as i8;
+    (*locale)[2] = '-' as i8;
+    (*locale)[3] = 'U' as i8;
+    (*locale)[4] = 'S' as i8;
 }
 
 /// Complete
@@ -27,8 +30,10 @@ pub unsafe extern "C" fn get_current_branch(
     branch: *mut sys::DiscordBranch,
 ) {
     prevent_unwind!();
-    let src = std::ffi::CString::new("mocking_test").unwrap();
-    (*branch).clone_from_slice(&*(src.as_bytes_with_nul() as *const [u8] as *const [i8]));
+    (*branch)[0] = 'm' as i8;
+    (*branch)[1] = 'o' as i8;
+    (*branch)[2] = 'c' as i8;
+    (*branch)[3] = 'k' as i8;
 }
 
 pub unsafe extern "C" fn get_oauth2_token(
