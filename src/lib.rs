@@ -44,6 +44,10 @@ mod smoke {
 
         let mut gsdk = Discord::new(0).unwrap();
         gsdk.run_callbacks().unwrap();
+        gsdk.validate_or_exit(&mut |r| match r {
+            Ok(()) => log::info!("Validated"),
+            Err(err) => log::error!("Exiting! {}", err),
+        });
         log::info!("{:?}", gsdk.get_current_locale());
         log::info!("{:?}", gsdk.get_current_branch());
     }

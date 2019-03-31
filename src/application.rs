@@ -37,49 +37,82 @@ impl Discord {
     where
         F: FnMut(Result<()>),
     {
+        // TODO: catch ffi! errors and send them to callback
         let _ = ffi!(self
             .get_application_manager()
             .validate_or_exit(std::mem::transmute(callback), Some(validate_or_exit::<F>)));
     }
 
-    //
-    //    pub fn get_oauth2_token<F>(&self, callback: &mut F)
-    //    where
-    //        F: FnMut(Result<DiscordOAuth2Token>),
-    //    {
-    //        ffi!(self
-    //            .get_application_manager()
-    //            .get_oauth2_token(std::mem::transmute(callback), Some(get_oauth2_token::<F>)))
-    //    }
+    pub fn get_oauth2_token<F>(&self, callback: &mut F)
+    where
+        F: FnMut(Result<DiscordOAuth2Token>),
+    {
+        // TODO: catch ffi! errors and send them to callback
+        let _ = ffi!(self
+            .get_application_manager()
+            .get_oauth2_token(std::mem::transmute(callback), Some(get_oauth2_token::<F>)));
+    }
 }
 
 extern "C" fn validate_or_exit<F>(data: *mut c_void, res: sys::EDiscordResult)
 where
     F: FnMut(Result<()>) + Sized,
 {
-    // debug_assert!(!data.is_null());
-    // let callback: *mut F = std::mem::transmute(data);
+    if data.is_null() {
+        log::error!("SDK invoked callback with null");
+        return;
+    }
+    let callback: &mut F = unsafe { std::mem::transmute(data) };
 
-    // (*callback)(Error::from(res));
+    callback(res.to_result());
 }
 
-//extern "C" fn get_oauth2_token<F>(
-//    data: *mut c_void,
-//    res: sys::EDiscordResult,
-//    token: *mut sys::DiscordOAuth2Token,
-//) where
-//    F: FnMut(Result<DiscordOAuth2Token>) + Sized,
-//{
-//    // debug_assert!(!data.is_null());
-//    // let callback: *mut F = std::mem::transmute(data);
-//
-//    //match Error::from(res) {
-//    //    Some(err) => (*callback)(Err(err)),
-//    //    None => {
-//    //        let token = token.as_ref().unwrap();
-//    //        (*callback)(DiscordOAuth2Token::from(token))
-//    //    }
-//    //}
-//}
-//
-//type DiscordOAuth2Token = ();
+extern "C" fn get_oauth2_token<F>(
+    data: *mut c_void,
+    res: sys::EDiscordResult,
+    token: *mut sys::DiscordOAuth2Token,
+) where
+    F: FnMut(Result<DiscordOAuth2Token>) + Sized,
+{
+    if data.is_null() {
+        log::error!("SDK invoked callback with null");
+        return;
+    }
+    let callback: &mut F = unsafe { std::mem::transmute(data) };
+
+    match res.to_result() {
+        Err(err) => callback(Err(err)),
+        Ok(()) => callback(DiscordOAuth2Token::from_sys(token)),
+    }
+}
+
+#[derive(Debug)]
+pub struct DiscordOAuth2Token {
+    pub access_token: String,
+    pub scopes: Vec<String>,
+    pub expires: chrono::NaiveDateTime,
+}
+
+impl DiscordOAuth2Token {
+    fn from_sys(source: *const sys::DiscordOAuth2Token) -> Result<Self> {
+        let source = unsafe { source.as_ref() }.ok_or(Error::NullResult)?;
+
+        let access_token = unsafe { std::ffi::CStr::from_ptr(&source.access_token as *const _) }
+            .to_str()?
+            .to_string();
+
+        let scopes = unsafe { std::ffi::CStr::from_ptr(&source.scopes as *const _) }
+            .to_str()?
+            .split(' ')
+            .map(String::from)
+            .collect();
+
+        let expires = chrono::NaiveDateTime::from_timestamp(source.expires, 0);
+
+        Ok(DiscordOAuth2Token {
+            access_token,
+            scopes,
+            expires,
+        })
+    }
+}
