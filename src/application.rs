@@ -95,7 +95,7 @@ pub struct DiscordOAuth2Token {
 
 impl DiscordOAuth2Token {
     fn from_sys(source: *const sys::DiscordOAuth2Token) -> Result<Self> {
-        let source = unsafe { source.as_ref() }.ok_or(Error::NullResult)?;
+        let source = unsafe { source.as_ref() }.ok_or(ContractViolation::NullPointer)?;
 
         let access_token = unsafe { std::ffi::CStr::from_ptr(&source.access_token as *const _) }
             .to_str()?
