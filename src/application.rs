@@ -40,23 +40,20 @@ impl Discord {
     where
         F: FnMut(Result<()>),
     {
-        // TODO: catch ffi! errors and send them to callback
-        if let Err(err) = ffi!(self
-            .get_application_manager()
-            .validate_or_exit(&callback as *const _ as *mut _, Some(simple_callback::<F>)))
-        {
-            callback(Err(err))
-        }
-    }
-
-    pub fn get_oauth2_token<F>(&self, callback: F)
-    where
-        F: FnMut(Result<DiscordOAuth2Token>),
-    {
-        // TODO: catch ffi! errors and send them to callback
         let _ = ffi!(self
             .get_application_manager()
-            .get_oauth2_token(&callback as *const _ as *mut _, Some(get_oauth2_token::<F>)));
+            .validate_or_exit(&callback as *const _ as *mut _, Some(simple_callback::<F>)))
+        .map_err(|e| callback(Err(e)));
+    }
+
+    pub fn get_oauth2_token<F>(&self, mut callback: F)
+    where
+        F: FnMut(Result<OAuth2Token>),
+    {
+        let _ = ffi!(self
+            .get_application_manager()
+            .get_oauth2_token(&callback as *const _ as *mut _, Some(get_oauth2_token::<F>)))
+        .map_err(|e| callback(Err(e)));
     }
 }
 
@@ -65,7 +62,7 @@ extern "C" fn get_oauth2_token<F>(
     res: sys::EDiscordResult,
     token: *mut sys::DiscordOAuth2Token,
 ) where
-    F: FnMut(Result<DiscordOAuth2Token>) + Sized,
+    F: FnMut(Result<OAuth2Token>) + Sized,
 {
     if data.is_null() {
         log::error!("SDK invoked callback with null");
@@ -75,18 +72,18 @@ extern "C" fn get_oauth2_token<F>(
 
     match res.to_result() {
         Err(err) => callback(Err(err)),
-        Ok(()) => callback(DiscordOAuth2Token::from_sys(token)),
+        Ok(()) => callback(OAuth2Token::from_sys(token)),
     }
 }
 
 #[derive(Debug)]
-pub struct DiscordOAuth2Token {
+pub struct OAuth2Token {
     pub access_token: String,
     pub scopes: Vec<String>,
     pub expires: chrono::NaiveDateTime,
 }
 
-impl DiscordOAuth2Token {
+impl OAuth2Token {
     fn from_sys(ptr: *const sys::DiscordOAuth2Token) -> Result<Self> {
         let source = unsafe { ptr.as_ref() }.ok_or(BindingsViolation::NullPointer)?;
 
