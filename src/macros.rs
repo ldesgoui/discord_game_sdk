@@ -1,30 +1,48 @@
 macro_rules! ffi {
-    // ffi!(self.get_application_manager().get_current_locale()) -> Result<()>
-    ($self:ident . $method:ident ( $( $args:expr, )* ) ) => { unsafe {
-        || -> Result<()> {
-            let core = $self.core_ptr.as_ref().ok_or(BindingsViolation::NullPointer)?;
-            let method = core.$method.ok_or(BindingsViolation::MissingMethod)?;
-            method($self.core_ptr, $( $args ),*).to_result()
-        }()
+    // ffi!(self.destroy()) -> Result<()>
+    (
+        $self:ident
+        .
+        $method:ident
+        (
+            $( $args:expr ),*
+            $( , )?
+        )
+    ) => { unsafe {
+        use crate::error::{BindingsViolation::*, ToResult};
+
+        match $self.core_ptr.as_ref().ok_or(NullPointer)
+            .and_then(|c| c.$method.ok_or(MissingMethod))
+        {
+            Err(err) => Err(err.into()),
+            Ok(method) => method($self.core_ptr, $( $args ),* ).to_result(),
+        }
     }};
 
     // ffi!(self.get_application_manager().get_current_locale()) -> Result<()>
-    ($self:ident . $get_manager:ident () . $method:ident ( $( $args:expr, )* ) ) => { unsafe {
-        || -> Result<()> {
-            let core = $self.core_ptr.as_ref().ok_or(BindingsViolation::NullPointer)?;
-            let get_manager = core.$get_manager.ok_or(BindingsViolation::MissingMethod)?;
-            let manager_ptr = get_manager($self.core_ptr);
-            let manager = manager_ptr.as_ref().ok_or(BindingsViolation::NullPointer)?;
-            let method = manager.$method.ok_or(BindingsViolation::MissingMethod)?;
-            method(manager_ptr, $( $args ),*).to_result()
-        }()
+    (
+        $self:ident
+        .
+        $get_manager:ident
+        ()
+        .
+        $method:ident
+        (
+            $( $args:expr ),*
+            $( , )?
+        )
+    ) => { unsafe {
+        use crate::error::{BindingsViolation::*, ToResult};
+
+        match $self.core_ptr.as_ref().ok_or(NullPointer)
+            .and_then(|c| c.$get_manager.ok_or(MissingMethod))
+            .and_then(|f| f($self.core_ptr).as_mut().ok_or(NullPointer))
+        {
+            Err(err) => Err(err.into()),
+            Ok(mgr) => match mgr.$method {
+                None => Err(MissingMethod.into()),
+                Some(method) => method(mgr as *mut _, $( $args ),* ).to_result(),
+            },
+        }
     }};
-
-    ($self:ident . $method:ident ( $( $args:expr ),* ) ) => {
-        ffi!($self.$method( $( $args ),* ,))
-    };
-
-    ($self:ident . $get_manager:ident () . $method:ident ( $( $args:expr ),* ) ) => {
-        ffi!($self.$get_manager().$method( $( $args ),* ,))
-    };
 }

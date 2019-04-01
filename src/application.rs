@@ -36,14 +36,17 @@ impl Discord {
         )
     }
 
-    pub fn validate_or_exit<F>(&self, callback: F)
+    pub fn validate_or_exit<F>(&self, mut callback: F)
     where
         F: FnMut(Result<()>),
     {
         // TODO: catch ffi! errors and send them to callback
-        let _ = ffi!(self
+        if let Err(err) = ffi!(self
             .get_application_manager()
-            .validate_or_exit(&callback as *const _ as *mut _, Some(simple_callback::<F>)));
+            .validate_or_exit(&callback as *const _ as *mut _, Some(simple_callback::<F>)))
+        {
+            callback(Err(err))
+        }
     }
 
     pub fn get_oauth2_token<F>(&self, callback: F)
