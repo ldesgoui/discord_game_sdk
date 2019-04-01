@@ -15,51 +15,21 @@
 
 #![allow(unused_variables, unused_imports)]
 
-//
-
+// This absolutely needs to come first
 #[macro_use]
 mod macros;
-mod utils;
 
+// We'd like to have this come second so that the methods show up first in the documentation
 mod core;
 
+mod activities;
 mod application;
-
 pub mod error;
 mod events;
+mod relationships;
+mod utils;
 
-//
-
+pub use crate::activities::{Action, ActivityChange, RequestReply};
+pub use crate::application::OAuth2Token;
 pub use crate::core::{CreateFlags, Discord};
 pub use crate::error::{Error, Result};
-
-//
-
-#[cfg(test)]
-mod smoke {
-    use super::*;
-
-    #[test]
-    fn compiles() {
-        let _ = pretty_env_logger::try_init_custom_env("TEST_LOG");
-
-        let mut gsdk = Discord::new(0).unwrap();
-        log::info!("{:?}", gsdk);
-
-        println!("rcb {:?}", gsdk.run_callbacks().unwrap());
-
-        let mut flag = false;
-        gsdk.validate_or_exit(|r| match r {
-            Ok(()) => {
-                flag = true;
-            }
-            Err(err) => log::error!("Exiting! {}", err),
-        });
-        log::info!("validated {:?}", flag);
-
-        log::info!("{:?}", gsdk.get_current_locale());
-        log::info!("{:?}", gsdk.get_current_branch());
-        log::info!("reg {:?}", gsdk.register_launch_command("tmp"));
-    }
-
-}

@@ -36,6 +36,9 @@ impl From<DiscordError> for Error {
 pub enum DeveloperViolation {
     #[error(display = "passed a string containing a nul")]
     NulInString(#[error(cause)] std::ffi::NulError),
+
+    #[error(display = "string is too large to fit in SDK structs")]
+    StringTooLarge,
 }
 
 impl From<std::ffi::NulError> for DeveloperViolation {

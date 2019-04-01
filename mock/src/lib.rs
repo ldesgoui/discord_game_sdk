@@ -286,7 +286,7 @@ impl Instance {
 //
 
 fn setup_log() {
-    let _ = pretty_env_logger::try_init_custom_env("MOCK_LOG");
+    let _ = pretty_env_logger::try_init_custom_env("DISCORD_GAME_SDK_MOCK_LOG");
 }
 
 impl Instance {
