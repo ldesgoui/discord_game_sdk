@@ -1,10 +1,12 @@
 use crate::error::*;
+use crate::events::ActivityEvent;
 use discord_game_sdk_sys as sys;
 use std::os::raw::c_void;
 
 pub struct Discord {
     pub(crate) core_ptr: *mut sys::IDiscordCore,
     pub(crate) client_id: i64,
+    pub(crate) activity_events: shrev::EventChannel<ActivityEvent>,
 }
 
 /// Core
@@ -17,6 +19,7 @@ impl Discord {
         let mut sdk = Self {
             core_ptr: std::ptr::null_mut(),
             client_id,
+            activity_events: shrev::EventChannel::new(),
         };
 
         let mut params = create_params(

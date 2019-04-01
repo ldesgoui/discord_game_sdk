@@ -8,11 +8,17 @@ pub(crate) const USER: sys::IDiscordUserEvents = sys::IDiscordUserEvents {
     on_current_user_update: Some(on_current_user_update),
 };
 
-extern "C" fn on_current_user_update(event_data: *mut c_void) {
-    let core = event_data as *mut Discord;
-}
+extern "C" fn on_current_user_update(event_data: *mut c_void) {}
 
 //
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ActivityEvent {
+    Join { secret: String },
+    Spectate { secret: String },
+    Request { user: () },
+    Invite { user: (), activity: () },
+}
 
 pub(crate) const ACTIVITY: sys::IDiscordActivityEvents = sys::IDiscordActivityEvents {
     on_activity_join: Some(on_activity_join),
@@ -21,11 +27,36 @@ pub(crate) const ACTIVITY: sys::IDiscordActivityEvents = sys::IDiscordActivityEv
     on_activity_invite: Some(on_activity_invite),
 };
 
-extern "C" fn on_activity_join(event_data: *mut c_void, secret: *const c_char) {}
+extern "C" fn on_activity_join(event_data: *mut c_void, secret: *const c_char) {
+    let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
 
-extern "C" fn on_activity_spectate(event_data: *mut c_void, secret: *const c_char) {}
+    let secret = unsafe { std::ffi::CStr::from_ptr(secret) }
+        .to_str()
+        .unwrap()
+        .to_string();
 
-extern "C" fn on_activity_join_request(event_data: *mut c_void, user: *mut sys::DiscordUser) {}
+    core.activity_events
+        .single_write(ActivityEvent::Join { secret })
+}
+
+extern "C" fn on_activity_spectate(event_data: *mut c_void, secret: *const c_char) {
+    let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
+
+    let secret = unsafe { std::ffi::CStr::from_ptr(secret) }
+        .to_str()
+        .unwrap()
+        .to_string();
+
+    core.activity_events
+        .single_write(ActivityEvent::Spectate { secret })
+}
+
+extern "C" fn on_activity_join_request(event_data: *mut c_void, user: *mut sys::DiscordUser) {
+    let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
+
+    core.activity_events
+        .single_write(ActivityEvent::Request { user: () })
+}
 
 extern "C" fn on_activity_invite(
     event_data: *mut c_void,
@@ -33,6 +64,12 @@ extern "C" fn on_activity_invite(
     user: *mut sys::DiscordUser,
     activity: *mut sys::DiscordActivity,
 ) {
+    let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
+
+    core.activity_events.single_write(ActivityEvent::Invite {
+        user: (),
+        activity: (),
+    })
 }
 
 //

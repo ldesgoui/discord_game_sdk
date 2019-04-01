@@ -13,9 +13,10 @@ categories = [ "api-bindings", "game-engines" ]
 no_linking = ["discord_game_sdk_sys/no_linking"]
 
 [dependencies]
-log = "0.4.6"
 chrono = "0.4.6"
 err-derive = "0.1.5"
+log = "0.4.6"
+shrev = "1.0.1"
 
 [dependencies.discord_game_sdk_sys]
 version = "0.1.0"

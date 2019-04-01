@@ -88,39 +88,6 @@ impl Discord {
         .map_err(|e| callback(Err(e)));
     }
 }
-
-#[derive(Copy, Debug, Clone, PartialEq, Eq)]
-pub enum Action {
-    Join,
-    Spectate,
-}
-
-impl Action {
-    fn to_sys(self) -> sys::EDiscordActivityActionType {
-        match self {
-            Action::Join => sys::DiscordActivityActionType_Join,
-            Action::Spectate => sys::DiscordActivityActionType_Spectate,
-        }
-    }
-}
-
-#[derive(Copy, Debug, Clone, PartialEq, Eq)]
-pub enum RequestReply {
-    Yes,
-    No,
-    Ignore,
-}
-
-impl RequestReply {
-    fn to_sys(self) -> sys::EDiscordActivityJoinRequestReply {
-        match self {
-            RequestReply::Yes => sys::DiscordActivityJoinRequestReply_Yes,
-            RequestReply::No => sys::DiscordActivityJoinRequestReply_No,
-            RequestReply::Ignore => sys::DiscordActivityJoinRequestReply_Ignore,
-        }
-    }
-}
-
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct ActivityChange<'a> {
     pub state: Option<&'a str>,
@@ -185,4 +152,36 @@ fn write_to_array(source: &Option<&str>, destination: &mut [i8]) -> Result<()> {
     }
 
     Ok(())
+}
+
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+pub enum Action {
+    Join,
+    Spectate,
+}
+
+impl Action {
+    fn to_sys(self) -> sys::EDiscordActivityActionType {
+        match self {
+            Action::Join => sys::DiscordActivityActionType_Join,
+            Action::Spectate => sys::DiscordActivityActionType_Spectate,
+        }
+    }
+}
+
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+pub enum RequestReply {
+    Yes,
+    No,
+    Ignore,
+}
+
+impl RequestReply {
+    fn to_sys(self) -> sys::EDiscordActivityJoinRequestReply {
+        match self {
+            RequestReply::Yes => sys::DiscordActivityJoinRequestReply_Yes,
+            RequestReply::No => sys::DiscordActivityJoinRequestReply_No,
+            RequestReply::Ignore => sys::DiscordActivityJoinRequestReply_Ignore,
+        }
+    }
 }
