@@ -1,4 +1,5 @@
 use crate::error::*;
+use crate::utils::*;
 use crate::Discord;
 use discord_game_sdk_sys as sys;
 use std::os::raw::c_void;
@@ -14,7 +15,8 @@ impl Discord {
 
         Ok(
             unsafe { std::ffi::CStr::from_ptr(&locale as *const _ as *const _) }
-                .to_str()?
+                .to_str()
+                .map_err(BindingsViolation::from)?
                 .to_string(),
         )
     }
@@ -28,7 +30,8 @@ impl Discord {
 
         Ok(
             unsafe { std::ffi::CStr::from_ptr(&branch as *const _ as *const _) }
-                .to_str()?
+                .to_str()
+                .map_err(BindingsViolation::from)?
                 .to_string(),
         )
     }
@@ -40,7 +43,7 @@ impl Discord {
         // TODO: catch ffi! errors and send them to callback
         let _ = ffi!(self
             .get_application_manager()
-            .validate_or_exit(&callback as *const _ as *mut _, Some(validate_or_exit::<F>)));
+            .validate_or_exit(&callback as *const _ as *mut _, Some(simple_callback::<F>)));
     }
 
     pub fn get_oauth2_token<F>(&self, callback: F)
@@ -52,19 +55,6 @@ impl Discord {
             .get_application_manager()
             .get_oauth2_token(&callback as *const _ as *mut _, Some(get_oauth2_token::<F>)));
     }
-}
-
-extern "C" fn validate_or_exit<F>(data: *mut c_void, res: sys::EDiscordResult)
-where
-    F: FnMut(Result<()>) + Sized,
-{
-    if data.is_null() {
-        log::error!("SDK invoked callback with null");
-        return;
-    }
-    let callback: &mut F = unsafe { &mut *(data as *mut _) };
-
-    callback(res.to_result());
 }
 
 extern "C" fn get_oauth2_token<F>(
@@ -95,14 +85,16 @@ pub struct DiscordOAuth2Token {
 
 impl DiscordOAuth2Token {
     fn from_sys(ptr: *const sys::DiscordOAuth2Token) -> Result<Self> {
-        let source = unsafe { ptr.as_ref() }.ok_or(ContractViolation::NullPointer)?;
+        let source = unsafe { ptr.as_ref() }.ok_or(BindingsViolation::NullPointer)?;
 
         let access_token = unsafe { std::ffi::CStr::from_ptr(&source.access_token as *const _) }
-            .to_str()?
+            .to_str()
+            .map_err(BindingsViolation::from)?
             .to_string();
 
         let scopes = unsafe { std::ffi::CStr::from_ptr(&source.scopes as *const _) }
-            .to_str()?
+            .to_str()
+            .map_err(BindingsViolation::from)?
             .split(' ')
             .map(String::from)
             .collect();

@@ -2,35 +2,50 @@ use discord_game_sdk_sys as sys;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, err_derive::Error)]
+#[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
 pub enum Error {
+    #[error(display = "Developer broke API contract")]
+    DeveloperViolation(#[error(cause)] DeveloperViolation),
+
     #[error(display = "Discord SDK broke API contract")]
-    ContractViolation(#[error(cause)] ContractViolation),
+    BindingsViolation(#[error(cause)] BindingsViolation),
 
     #[error(display = "Discord SDK returned error")]
-    Discord(#[error(cause)] DiscordError),
+    DiscordError(#[error(cause)] DiscordError),
+}
+
+impl From<DeveloperViolation> for Error {
+    fn from(e: DeveloperViolation) -> Self {
+        Error::DeveloperViolation(e)
+    }
+}
+
+impl From<BindingsViolation> for Error {
+    fn from(e: BindingsViolation) -> Self {
+        Error::BindingsViolation(e)
+    }
 }
 
 impl From<DiscordError> for Error {
     fn from(e: DiscordError) -> Self {
-        Error::Discord(e)
+        Error::DiscordError(e)
     }
 }
 
-impl From<ContractViolation> for Error {
-    fn from(e: ContractViolation) -> Self {
-        Error::ContractViolation(e)
+#[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
+pub enum DeveloperViolation {
+    #[error(display = "passed a string containing a nul")]
+    NulInString(#[error(cause)] std::ffi::NulError),
+}
+
+impl From<std::ffi::NulError> for DeveloperViolation {
+    fn from(e: std::ffi::NulError) -> Self {
+        DeveloperViolation::NulInString(e)
     }
 }
 
-impl From<std::str::Utf8Error> for Error {
-    fn from(e: std::str::Utf8Error) -> Self {
-        ContractViolation::Utf8(e).into()
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, err_derive::Error)]
-pub enum ContractViolation {
+#[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
+pub enum BindingsViolation {
     #[error(display = "pointer to null")]
     NullPointer,
 
@@ -41,13 +56,13 @@ pub enum ContractViolation {
     Utf8(#[error(cause)] std::str::Utf8Error),
 }
 
-impl From<std::str::Utf8Error> for ContractViolation {
+impl From<std::str::Utf8Error> for BindingsViolation {
     fn from(e: std::str::Utf8Error) -> Self {
-        ContractViolation::Utf8(e)
+        BindingsViolation::Utf8(e)
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, err_derive::Error)]
+#[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
 pub enum DiscordError {
     #[error(display = "service unavailable")]
     ServiceUnavailable,
@@ -195,7 +210,7 @@ impl ToResult for sys::EDiscordResult {
     fn to_result(self) -> Result<()> {
         use DiscordError::*;
 
-        Err(Error::Discord(match self {
+        Err(Error::DiscordError(match self {
             sys::DiscordResult_Ok => return Ok(()),
             sys::DiscordResult_ServiceUnavailable => ServiceUnavailable,
             sys::DiscordResult_InvalidVersion => InvalidVersion,

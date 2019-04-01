@@ -13,12 +13,13 @@
 //!
 //! If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
-#![allow(unused_variables)]
+#![allow(unused_variables, unused_imports)]
 
 //
 
 #[macro_use]
 mod macros;
+mod utils;
 
 mod core;
 
@@ -44,13 +45,21 @@ mod smoke {
 
         let mut gsdk = Discord::new(0).unwrap();
         log::info!("{:?}", gsdk);
-        gsdk.run_callbacks().unwrap();
-        gsdk.validate_or_exit(&mut |r| match r {
-            Ok(()) => log::info!("Validated"),
+
+        println!("rcb {:?}", gsdk.run_callbacks().unwrap());
+
+        let mut flag = false;
+        gsdk.validate_or_exit(|r| match r {
+            Ok(()) => {
+                flag = true;
+            }
             Err(err) => log::error!("Exiting! {}", err),
         });
+        log::info!("validated {:?}", flag);
+
         log::info!("{:?}", gsdk.get_current_locale());
         log::info!("{:?}", gsdk.get_current_branch());
+        log::info!("reg {:?}", gsdk.register_launch_command("tmp"));
     }
 
 }
