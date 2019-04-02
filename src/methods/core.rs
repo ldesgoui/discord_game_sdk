@@ -12,6 +12,7 @@ impl Discord {
             client_id,
             activity_events: shrev::EventChannel::new(),
             user_events: shrev::EventChannel::new(),
+            voice_events: shrev::EventChannel::new(),
         };
 
         let mut params = create_params(
@@ -108,7 +109,7 @@ fn create_params(
         voice_events: &mut VOICE as *mut _,
         voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
         //
-        achievement_events: &mut ACHIEVEMENT as *mut _,
+        achievement_events: &mut Default::default() as *mut _,
         achievement_version: sys::DISCORD_ACHIEVEMENT_MANAGER_VERSION,
     }
 }

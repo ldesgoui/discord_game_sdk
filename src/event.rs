@@ -185,20 +185,17 @@ extern "C" fn on_entitlement_delete(
 
 //
 
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+pub enum VoiceEvent {
+    SettingsUpdated,
+}
+
 pub(crate) const VOICE: sys::IDiscordVoiceEvents = sys::IDiscordVoiceEvents {
     on_settings_update: Some(on_settings_update),
 };
 
-extern "C" fn on_settings_update(event_data: *mut c_void) {}
+extern "C" fn on_settings_update(event_data: *mut c_void) {
+    let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
 
-//
-
-pub(crate) const ACHIEVEMENT: sys::IDiscordAchievementEvents = sys::IDiscordAchievementEvents {
-    on_user_achievement_update: Some(on_user_achievement_update),
-};
-
-extern "C" fn on_user_achievement_update(
-    event_data: *mut c_void,
-    achievement: *mut sys::DiscordUserAchievement,
-) {
+    core.voice_events.single_write(VoiceEvent::SettingsUpdated)
 }

@@ -1,3 +1,4 @@
+use crate::event::VoiceEvent;
 use crate::prelude::*;
 
 /// # Voice
@@ -57,5 +58,16 @@ impl Discord {
 
     pub fn set_local_volume(&self, user_id: i64, volume: u8) -> Result<()> {
         ffi!(self.get_voice_manager().set_local_volume(user_id, volume))
+    }
+
+    pub fn voice_events_reader(&mut self) -> shrev::ReaderId<VoiceEvent> {
+        self.voice_events.register_reader()
+    }
+
+    pub fn voice_events(
+        &self,
+        reader: &mut shrev::ReaderId<VoiceEvent>,
+    ) -> shrev::EventIterator<VoiceEvent> {
+        self.voice_events.read(reader)
     }
 }
