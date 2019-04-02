@@ -1,4 +1,4 @@
-use discord_game_sdk_sys as sys;
+use crate::prelude::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
 

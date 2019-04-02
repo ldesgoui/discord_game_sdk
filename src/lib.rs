@@ -19,17 +19,38 @@
 #[macro_use]
 mod macros;
 
-// We'd like to have this come second so that the methods show up first in the documentation
-mod core;
-
-mod activities;
-mod application;
+mod action;
+mod activity_change;
+mod create_flags;
+mod discord;
 pub mod error;
-pub mod events;
-mod users;
+pub mod event;
+mod oauth2_token;
+mod premium_type;
+mod request_reply;
+mod user;
 mod utils;
+mod methods {
+    mod core;
 
-pub use crate::activities::{Action, ActivityChange, RequestReply};
-pub use crate::application::OAuth2Token;
-pub use crate::core::{CreateFlags, Discord};
-pub use crate::error::{Error, Result};
+    mod activities;
+    mod applications;
+    mod users;
+}
+
+mod prelude {
+    pub(crate) use crate::discord::Discord;
+    pub(crate) use crate::error::{
+        BindingsViolation, DeveloperViolation, DiscordError, Error, Result, ToResult as _,
+    };
+    pub(crate) use crate::user::User;
+    pub(crate) use crate::utils::simple_callback;
+    pub(crate) use discord_game_sdk_sys as sys;
+    pub(crate) use std::os::raw::{c_char, c_void};
+}
+
+pub use create_flags::CreateFlags;
+pub use discord::Discord;
+pub use error::{Error, Result};
+pub use premium_type::PremiumType;
+pub use user::User;

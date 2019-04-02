@@ -1,14 +1,5 @@
-use crate::error::*;
-use crate::events::*;
-use discord_game_sdk_sys as sys;
-use std::os::raw::c_void;
-
-pub struct Discord {
-    pub(crate) core_ptr: *mut sys::IDiscordCore,
-    pub(crate) client_id: i64,
-    pub(crate) activity_events: shrev::EventChannel<ActivityEvent>,
-    pub(crate) user_events: shrev::EventChannel<UserEvent>,
-}
+use crate::create_flags::CreateFlags;
+use crate::prelude::*;
 
 /// Core
 impl Discord {
@@ -50,7 +41,7 @@ impl Discord {
         ffi!(self.set_log_hook(
             sys::DiscordLogLevel_Debug,
             std::ptr::null_mut(),
-            Some(log_hook),
+            Some(log_hook_callback),
         ))?;
 
         Ok(())
@@ -71,43 +62,12 @@ impl Drop for Discord {
     }
 }
 
-impl std::fmt::Debug for Discord {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Discord")
-            .field("client_id", &self.client_id)
-            .finish()
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum CreateFlags {
-    /// Requires Discord to be running to play the game
-    Default,
-    /// Does not require Discord to be running, use this on other platforms
-    NoRequireDiscord,
-}
-
-impl Default for CreateFlags {
-    fn default() -> Self {
-        CreateFlags::Default
-    }
-}
-
-impl CreateFlags {
-    fn to_sys(self) -> sys::EDiscordCreateFlags {
-        match self {
-            CreateFlags::Default => sys::DiscordCreateFlags_Default,
-            CreateFlags::NoRequireDiscord => sys::DiscordCreateFlags_NoRequireDiscord,
-        }
-    }
-}
-
 fn create_params(
     client_id: i64,
     flags: CreateFlags,
     ptr: *mut Discord,
 ) -> sys::DiscordCreateParams {
-    use crate::events::*;
+    use crate::event::*;
 
     sys::DiscordCreateParams {
         client_id,
@@ -154,7 +114,7 @@ fn create_params(
     }
 }
 
-extern "C" fn log_hook(
+extern "C" fn log_hook_callback(
     _: *mut c_void,
     level: sys::EDiscordLogLevel,
     message: *const std::os::raw::c_char,

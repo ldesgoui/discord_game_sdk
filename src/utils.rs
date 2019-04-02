@@ -1,6 +1,4 @@
-use crate::error::*;
-use discord_game_sdk_sys as sys;
-use std::os::raw::c_void;
+use crate::prelude::*;
 
 pub(crate) extern "C" fn simple_callback<F>(data: *mut c_void, res: sys::EDiscordResult)
 where

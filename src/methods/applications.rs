@@ -1,8 +1,5 @@
-use crate::error::*;
-use crate::utils::*;
-use crate::Discord;
-use discord_game_sdk_sys as sys;
-use std::os::raw::c_void;
+use crate::oauth2_token::OAuth2Token;
+use crate::prelude::*;
 
 /// Application
 impl Discord {
@@ -72,37 +69,4 @@ extern "C" fn get_oauth2_token_callback<F>(
     let callback: &mut F = unsafe { &mut *(data as *mut _) };
 
     callback(res.to_result().and_then(|_| OAuth2Token::from_sys(token)))
-}
-
-#[derive(Debug)]
-pub struct OAuth2Token {
-    pub access_token: String,
-    pub scopes: Vec<String>,
-    pub expires: chrono::NaiveDateTime,
-}
-
-impl OAuth2Token {
-    fn from_sys(ptr: *const sys::DiscordOAuth2Token) -> Result<Self> {
-        let source = unsafe { ptr.as_ref() }.ok_or(BindingsViolation::NullPointer)?;
-
-        let access_token = unsafe { std::ffi::CStr::from_ptr(&source.access_token as *const _) }
-            .to_str()
-            .map_err(BindingsViolation::from)?
-            .to_string();
-
-        let scopes = unsafe { std::ffi::CStr::from_ptr(&source.scopes as *const _) }
-            .to_str()
-            .map_err(BindingsViolation::from)?
-            .split(' ')
-            .map(String::from)
-            .collect();
-
-        let expires = chrono::NaiveDateTime::from_timestamp(source.expires, 0);
-
-        Ok(Self {
-            access_token,
-            scopes,
-            expires,
-        })
-    }
 }
