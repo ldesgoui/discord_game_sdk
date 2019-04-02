@@ -19,18 +19,12 @@
 #[macro_use]
 mod macros;
 
-mod action;
 mod activity;
-mod activity_change;
-mod create_flags;
 mod discord;
 pub mod error;
 pub mod event;
 mod oauth2_token;
-mod premium_type;
-mod presence;
 mod relationship;
-mod request_reply;
 mod user;
 mod utils;
 
@@ -51,26 +45,20 @@ mod methods {
 }
 
 mod prelude {
-    pub(crate) use crate::discord::Discord;
-    pub(crate) use crate::error::{
-        BindingsViolation, DeveloperViolation, DiscordError, Error, Result, ToResult as _,
+    pub(crate) use crate::{
+        error::{BindingsViolation, DeveloperViolation, DiscordError, ToResult as _},
+        utils::simple_callback,
+        *,
     };
-    pub(crate) use crate::utils::simple_callback;
     pub(crate) use discord_game_sdk_sys as sys;
     pub(crate) use std::os::raw::{c_char, c_void};
 }
 
 pub use crate::{
-    action::Action,
-    activity::{Activity, ActivityKind},
-    activity_change::ActivityChange,
-    create_flags::CreateFlags,
-    discord::Discord,
+    activity::{Action, Activity, ActivityChange, ActivityKind, RequestReply},
+    discord::{CreateFlags, Discord},
     error::{Error, Result},
     oauth2_token::OAuth2Token,
-    premium_type::PremiumType,
-    presence::Presence,
-    relationship::Relationship,
-    request_reply::RequestReply,
-    user::User,
+    relationship::{Presence, Relationship, RelationshipKind, Status},
+    user::{PremiumType, User},
 };

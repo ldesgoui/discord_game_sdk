@@ -1,8 +1,5 @@
-use crate::action::Action;
-use crate::activity_change::ActivityChange;
 use crate::event::ActivityEvent;
 use crate::prelude::*;
-use crate::request_reply::RequestReply;
 
 /// # Activities
 impl Discord {

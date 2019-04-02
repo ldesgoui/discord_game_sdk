@@ -1,7 +1,5 @@
 use crate::event::UserEvent;
 use crate::prelude::*;
-use crate::premium_type::PremiumType;
-use crate::user::User;
 
 /// # Users
 impl Discord {
