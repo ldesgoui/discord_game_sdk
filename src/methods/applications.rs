@@ -4,7 +4,7 @@ use crate::prelude::*;
 /// # Application
 impl Discord {
     pub fn get_current_locale(&self) -> Result<String> {
-        let &mut mut locale: &mut sys::DiscordLocale = &mut [0; 128];
+        let mut locale: sys::DiscordLocale = [0; 128];
 
         ffi!(self
             .get_application_manager()
@@ -14,7 +14,7 @@ impl Discord {
     }
 
     pub fn get_current_branch(&self) -> Result<String> {
-        let &mut mut branch: &mut sys::DiscordBranch = &mut [0; 4096];
+        let mut branch: sys::DiscordBranch = [0; 4096];
 
         ffi!(self
             .get_application_manager()
