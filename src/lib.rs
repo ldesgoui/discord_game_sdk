@@ -26,7 +26,7 @@ mod activities;
 mod application;
 pub mod error;
 pub mod events;
-mod relationships;
+mod users;
 mod utils;
 
 pub use crate::activities::{Action, ActivityChange, RequestReply};

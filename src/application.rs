@@ -50,14 +50,15 @@ impl Discord {
     where
         F: FnMut(Result<OAuth2Token>),
     {
-        let _ = ffi!(self
-            .get_application_manager()
-            .get_oauth2_token(&callback as *const _ as *mut _, Some(get_oauth2_token::<F>)))
+        let _ = ffi!(self.get_application_manager().get_oauth2_token(
+            &callback as *const _ as *mut _,
+            Some(get_oauth2_token_callback::<F>)
+        ))
         .map_err(|e| callback(Err(e)));
     }
 }
 
-extern "C" fn get_oauth2_token<F>(
+extern "C" fn get_oauth2_token_callback<F>(
     data: *mut c_void,
     res: sys::EDiscordResult,
     token: *mut sys::DiscordOAuth2Token,
@@ -70,10 +71,7 @@ extern "C" fn get_oauth2_token<F>(
     }
     let callback: &mut F = unsafe { &mut *(data as *mut _) };
 
-    match res.to_result() {
-        Err(err) => callback(Err(err)),
-        Ok(()) => callback(OAuth2Token::from_sys(token)),
-    }
+    callback(res.to_result().and_then(|_| OAuth2Token::from_sys(token)))
 }
 
 #[derive(Debug)]

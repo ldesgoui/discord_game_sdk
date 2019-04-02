@@ -57,6 +57,9 @@ pub enum BindingsViolation {
 
     #[error(display = "utf8 conversion error")]
     Utf8(#[error(cause)] std::str::Utf8Error),
+
+    #[error(display = "passed undefined enum value")]
+    Enum,
 }
 
 impl From<std::str::Utf8Error> for BindingsViolation {
@@ -195,10 +198,6 @@ pub enum DiscordError {
 
     #[error(display = "transaction aborted")]
     TransactionAborted,
-
-    #[error(display = "undefined error")]
-    #[doc(hidden)]
-    _Undefined,
 }
 
 pub(crate) trait ToResult: Sized {
@@ -258,10 +257,7 @@ impl ToResult for sys::EDiscordResult {
             sys::DiscordResult_InvalidGiftCode => InvalidGiftCode,
             sys::DiscordResult_PurchaseError => PurchaseError,
             sys::DiscordResult_TransactionAborted => TransactionAborted,
-            val => {
-                log::warn!("EDiscordResult returned something undefined: {}", val);
-                _Undefined
-            }
+            _ => Err(BindingsViolation::Enum)?,
         }))
     }
 }
