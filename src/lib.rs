@@ -25,7 +25,7 @@ mod core;
 mod activities;
 mod application;
 pub mod error;
-mod events;
+pub mod events;
 mod relationships;
 mod utils;
 

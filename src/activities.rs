@@ -1,4 +1,5 @@
 use crate::error::*;
+use crate::events::ActivityEvent;
 use crate::utils::*;
 use crate::Discord;
 use discord_game_sdk_sys as sys;
@@ -86,6 +87,17 @@ impl Discord {
             Some(simple_callback::<F>)
         ))
         .map_err(|e| callback(Err(e)));
+    }
+
+    pub fn activity_events_reader(&mut self) -> shrev::ReaderId<ActivityEvent> {
+        self.activity_events.register_reader()
+    }
+
+    pub fn activity_events(
+        &self,
+        reader: &mut shrev::ReaderId<ActivityEvent>,
+    ) -> shrev::EventIterator<ActivityEvent> {
+        self.activity_events.read(reader)
     }
 }
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
