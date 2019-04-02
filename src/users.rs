@@ -1,5 +1,5 @@
 use crate::error::*;
-// use crate::events::UserEvent;
+use crate::events::UserEvent;
 use crate::utils::*;
 use crate::Discord;
 use discord_game_sdk_sys as sys;
@@ -37,6 +37,17 @@ impl Discord {
             .get_current_user_premium_type(&mut premium_type as *mut _))?;
 
         PremiumType::from_sys(premium_type)
+    }
+
+    pub fn user_events_reader(&mut self) -> shrev::ReaderId<UserEvent> {
+        self.user_events.register_reader()
+    }
+
+    pub fn user_events(
+        &self,
+        reader: &mut shrev::ReaderId<UserEvent>,
+    ) -> shrev::EventIterator<UserEvent> {
+        self.user_events.read(reader)
     }
 }
 

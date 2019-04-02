@@ -4,11 +4,20 @@ use std::os::raw::{c_char, c_void};
 
 //
 
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+pub enum UserEvent {
+    CurrentUserUpdated,
+}
+
 pub(crate) const USER: sys::IDiscordUserEvents = sys::IDiscordUserEvents {
     on_current_user_update: Some(on_current_user_update),
 };
 
-extern "C" fn on_current_user_update(event_data: *mut c_void) {}
+extern "C" fn on_current_user_update(event_data: *mut c_void) {
+    let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
+
+    core.user_events.single_write(UserEvent::CurrentUserUpdated)
+}
 
 //
 
