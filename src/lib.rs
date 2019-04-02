@@ -23,6 +23,7 @@ mod activity;
 mod discord;
 pub mod error;
 pub mod event;
+mod file;
 mod oauth2_token;
 mod relationship;
 mod user;
@@ -58,6 +59,7 @@ pub use crate::{
     activity::{Action, Activity, ActivityChange, ActivityKind, RequestReply},
     discord::{CreateFlags, Discord},
     error::{Error, Result},
+    file::FileStat,
     oauth2_token::OAuth2Token,
     relationship::{Presence, Relationship, RelationshipKind, Status},
     user::{PremiumType, User},
