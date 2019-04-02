@@ -1,4 +1,4 @@
-use crate::event::{ActivityEvent, UserEvent, VoiceEvent};
+use crate::event::{ActivityEvent, OverlayEvent, UserEvent, VoiceEvent};
 use crate::prelude::*;
 
 pub struct Discord {
@@ -6,6 +6,7 @@ pub struct Discord {
     pub(crate) client_id: i64,
     pub(crate) activity_events: shrev::EventChannel<ActivityEvent>,
     pub(crate) user_events: shrev::EventChannel<UserEvent>,
+    pub(crate) overlay_events: shrev::EventChannel<OverlayEvent>,
     pub(crate) voice_events: shrev::EventChannel<VoiceEvent>,
 }
 

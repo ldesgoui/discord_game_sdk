@@ -1,4 +1,5 @@
 use crate::activity::Action;
+use crate::event::OverlayEvent;
 use crate::prelude::*;
 
 /// # Overlay
@@ -13,20 +14,20 @@ impl Discord {
         Ok(enabled)
     }
 
-    pub fn is_overlay_locked(&self) -> Result<bool> {
-        let mut locked = false;
+    pub fn is_overlay_opened(&self) -> Result<bool> {
+        let mut opened = false;
 
-        ffi!(self.get_overlay_manager().is_locked(&mut locked as *mut _))?;
+        ffi!(self.get_overlay_manager().is_locked(&mut opened as *mut _))?;
 
-        Ok(locked)
+        Ok(opened)
     }
 
-    pub fn set_overlay_locked<F>(&self, locked: bool, mut callback: F)
+    pub fn set_overlay_opened<F>(&self, opened: bool, mut callback: F)
     where
         F: FnMut(Result<()>),
     {
         let _ = ffi!(self.get_overlay_manager().set_locked(
-            locked,
+            opened,
             &mut callback as *mut _ as *mut _,
             Some(simple_callback::<F>)
         ))
@@ -72,5 +73,16 @@ impl Discord {
             Some(simple_callback::<F>)
         ))
         .map_err(|e| callback(Err(e)));
+    }
+
+    pub fn overlay_events_reader(&mut self) -> shrev::ReaderId<OverlayEvent> {
+        self.overlay_events.register_reader()
+    }
+
+    pub fn overlay_events(
+        &self,
+        reader: &mut shrev::ReaderId<OverlayEvent>,
+    ) -> shrev::EventIterator<OverlayEvent> {
+        self.overlay_events.read(reader)
     }
 }

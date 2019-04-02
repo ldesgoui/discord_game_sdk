@@ -12,6 +12,7 @@ impl Discord {
             client_id,
             activity_events: shrev::EventChannel::new(),
             user_events: shrev::EventChannel::new(),
+            overlay_events: shrev::EventChannel::new(),
             voice_events: shrev::EventChannel::new(),
         };
 

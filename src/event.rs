@@ -158,11 +158,25 @@ extern "C" fn on_route_update(event_data: *mut c_void, route_data: *const c_char
 
 //
 
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+pub enum OverlayEvent {
+    Opened,
+    Closed,
+}
+
 pub(crate) const OVERLAY: sys::IDiscordOverlayEvents = sys::IDiscordOverlayEvents {
     on_toggle: Some(on_toggle),
 };
 
-extern "C" fn on_toggle(event_data: *mut c_void, locked: bool) {}
+extern "C" fn on_toggle(event_data: *mut c_void, locked: bool) {
+    let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
+
+    core.overlay_events.single_write(if locked {
+        OverlayEvent::Opened
+    } else {
+        OverlayEvent::Closed
+    })
+}
 
 //
 
