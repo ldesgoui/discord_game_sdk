@@ -1,7 +1,7 @@
 use crate::create_flags::CreateFlags;
 use crate::prelude::*;
 
-/// Core
+/// # Core
 impl Discord {
     pub fn new(client_id: i64) -> Result<Self> {
         Self::with_create_flags(client_id, CreateFlags::default())

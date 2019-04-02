@@ -4,7 +4,7 @@ use crate::event::ActivityEvent;
 use crate::prelude::*;
 use crate::request_reply::RequestReply;
 
-/// Activities
+/// # Activities
 impl Discord {
     pub fn register_launch_command<S>(&self, command: S) -> Result<()>
     where

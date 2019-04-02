@@ -1,7 +1,7 @@
 use crate::oauth2_token::OAuth2Token;
 use crate::prelude::*;
 
-/// Application
+/// # Application
 impl Discord {
     pub fn get_current_locale(&self) -> Result<String> {
         let &mut mut locale: &mut sys::DiscordLocale = &mut [0; 128];

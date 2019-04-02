@@ -1,8 +1,9 @@
 use crate::event::UserEvent;
 use crate::prelude::*;
 use crate::premium_type::PremiumType;
+use crate::user::User;
 
-/// Activities
+/// # Users
 impl Discord {
     pub fn get_current_user(&self) -> Result<User> {
         let mut user = sys::DiscordUser::default();
