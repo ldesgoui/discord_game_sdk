@@ -23,8 +23,8 @@ extern "C" fn on_current_user_update(event_data: *mut c_void) {
 pub enum ActivityEvent {
     Join { secret: String },
     Spectate { secret: String },
-    Request { user: () },
-    Invite { user: (), activity: () },
+    Request { user: User },
+    Invite { user: User, activity: Activity },
 }
 
 pub(crate) const ACTIVITY: sys::IDiscordActivityEvents = sys::IDiscordActivityEvents {
@@ -37,32 +37,41 @@ pub(crate) const ACTIVITY: sys::IDiscordActivityEvents = sys::IDiscordActivityEv
 extern "C" fn on_activity_join(event_data: *mut c_void, secret: *const c_char) {
     let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
 
-    let secret = unsafe { std::ffi::CStr::from_ptr(secret) }
-        .to_str()
-        .unwrap()
-        .to_string();
+    let _ = || -> Result<()> {
+        core.activity_events.single_write(ActivityEvent::Join {
+            secret: from_cstr(secret)?.to_string(),
+        });
 
-    core.activity_events
-        .single_write(ActivityEvent::Join { secret })
+        Ok(())
+    }()
+    .map_err(|e| log::error!("TODO {}", e));
 }
 
 extern "C" fn on_activity_spectate(event_data: *mut c_void, secret: *const c_char) {
     let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
 
-    let secret = unsafe { std::ffi::CStr::from_ptr(secret) }
-        .to_str()
-        .unwrap()
-        .to_string();
+    let _ = || -> Result<()> {
+        core.activity_events.single_write(ActivityEvent::Spectate {
+            secret: from_cstr(secret)?.to_string(),
+        });
 
-    core.activity_events
-        .single_write(ActivityEvent::Spectate { secret })
+        Ok(())
+    }()
+    .map_err(|e| log::error!("TODO {}", e));
 }
 
 extern "C" fn on_activity_join_request(event_data: *mut c_void, user: *mut sys::DiscordUser) {
     let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
 
-    core.activity_events
-        .single_write(ActivityEvent::Request { user: () })
+    let _ = || -> Result<()> {
+        let user = User::from_sys(user)?;
+
+        core.activity_events
+            .single_write(ActivityEvent::Request { user });
+
+        Ok(())
+    }()
+    .map_err(|err| log::error!("TODO {}", err));
 }
 
 extern "C" fn on_activity_invite(
@@ -73,10 +82,16 @@ extern "C" fn on_activity_invite(
 ) {
     let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
 
-    core.activity_events.single_write(ActivityEvent::Invite {
-        user: (),
-        activity: (),
-    })
+    let _ = || -> Result<()> {
+        let user = User::from_sys(user)?;
+        let activity = Activity::from_sys(activity)?;
+
+        core.activity_events
+            .single_write(ActivityEvent::Invite { user, activity });
+
+        Ok(())
+    }()
+    .map_err(|err| log::error!("TODO {}", err));
 }
 
 //

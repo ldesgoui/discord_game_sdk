@@ -22,12 +22,51 @@ pub struct Activity {
     pub spectate_secret: String,
 }
 
+impl Activity {
+    pub(crate) fn from_sys(source: *const sys::DiscordActivity) -> Result<Self> {
+        let source = unsafe { source.as_ref() }.ok_or(BindingsViolation::NullPointer)?;
+
+        Ok(Self {
+            kind: ActivityKind::from_sys(source.type_)?,
+            application_id: source.application_id,
+            name: from_cstr(&source.name as *const _)?.to_string(),
+            state: from_cstr(&source.state as *const _)?.to_string(),
+            details: from_cstr(&source.state as *const _)?.to_string(),
+            start_time: chrono::NaiveDateTime::from_timestamp(source.timestamps.start, 0),
+            end_time: chrono::NaiveDateTime::from_timestamp(source.timestamps.end, 0),
+            large_image_key: from_cstr(&source.assets.large_image as *const _)?.to_string(),
+            large_image_tooltip: from_cstr(&source.assets.large_text as *const _)?.to_string(),
+            small_image_key: from_cstr(&source.assets.small_image as *const _)?.to_string(),
+            small_image_tooltip: from_cstr(&source.assets.small_text as *const _)?.to_string(),
+            party_id: from_cstr(&source.party.id as *const _)?.to_string(),
+            party_amount: source.party.size.current_size,
+            party_capacity: source.party.size.max_size,
+            instance: source.instance,
+            match_secret: from_cstr(&source.secrets.match_ as *const _)?.to_string(),
+            join_secret: from_cstr(&source.secrets.join as *const _)?.to_string(),
+            spectate_secret: from_cstr(&source.secrets.spectate as *const _)?.to_string(),
+        })
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ActivityKind {
     Listening,
     Playing,
     Streaming,
     Watching,
+}
+
+impl ActivityKind {
+    pub(crate) fn from_sys(source: sys::EDiscordActivityType) -> Result<Self> {
+        Ok(match source {
+            sys::DiscordActivityType_Listening => ActivityKind::Listening,
+            sys::DiscordActivityType_Playing => ActivityKind::Playing,
+            sys::DiscordActivityType_Streaming => ActivityKind::Streaming,
+            sys::DiscordActivityType_Watching => ActivityKind::Watching,
+            _ => Err(BindingsViolation::Enum)?,
+        })
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

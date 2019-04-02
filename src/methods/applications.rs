@@ -10,12 +10,7 @@ impl Discord {
             .get_application_manager()
             .get_current_locale(&mut locale as *mut _))?;
 
-        Ok(
-            unsafe { std::ffi::CStr::from_ptr(&locale as *const _ as *const _) }
-                .to_str()
-                .map_err(BindingsViolation::from)?
-                .to_string(),
-        )
+        Ok(from_cstr(&locale as *const _)?.to_string())
     }
 
     pub fn get_current_branch(&self) -> Result<String> {
@@ -25,12 +20,7 @@ impl Discord {
             .get_application_manager()
             .get_current_branch(&mut branch as *mut _))?;
 
-        Ok(
-            unsafe { std::ffi::CStr::from_ptr(&branch as *const _ as *const _) }
-                .to_str()
-                .map_err(BindingsViolation::from)?
-                .to_string(),
-        )
+        Ok(from_cstr(&branch as *const _)?.to_string())
     }
 
     pub fn validate_or_exit<F>(&self, mut callback: F)

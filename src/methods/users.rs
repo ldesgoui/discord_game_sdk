@@ -60,9 +60,5 @@ extern "C" fn get_user_callback<F>(
     }
     let callback: &mut F = unsafe { &mut *(data as *mut _) };
 
-    callback(
-        res.to_result()
-            .and_then(|_| unsafe { user.as_ref() }.ok_or(BindingsViolation::NullPointer.into()))
-            .and_then(|user| User::from_sys(user)),
-    )
+    callback(res.to_result().and_then(|_| User::from_sys(user)))
 }

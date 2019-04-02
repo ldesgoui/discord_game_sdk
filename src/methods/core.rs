@@ -136,9 +136,7 @@ extern "C" fn log_hook_callback(
         }
     };
 
-    let c_str = unsafe { std::ffi::CStr::from_ptr(message) };
-
-    match c_str.to_str() {
+    match from_cstr(message) {
         Ok(message) => log::log!(level, "{}", message),
         Err(err) => log::error!("log_hook was passed an invalid UTF8 string: {}", err),
     }

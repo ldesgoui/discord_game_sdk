@@ -10,29 +10,14 @@ pub struct User {
 }
 
 impl User {
-    pub(crate) fn from_sys(source: &sys::DiscordUser) -> Result<Self> {
-        let username =
-            unsafe { std::ffi::CStr::from_ptr(&source.username as *const _ as *const _) }
-                .to_str()
-                .map_err(BindingsViolation::from)?
-                .to_string();
-
-        let discriminator =
-            unsafe { std::ffi::CStr::from_ptr(&source.discriminator as *const _ as *const _) }
-                .to_str()
-                .map_err(BindingsViolation::from)?
-                .to_string();
-
-        let avatar = unsafe { std::ffi::CStr::from_ptr(&source.avatar as *const _ as *const _) }
-            .to_str()
-            .map_err(BindingsViolation::from)?
-            .to_string();
+    pub(crate) fn from_sys(source: *const sys::DiscordUser) -> Result<Self> {
+        let source = unsafe { source.as_ref() }.ok_or(BindingsViolation::NullPointer)?;
 
         Ok(Self {
             id: source.id,
-            username,
-            discriminator,
-            avatar,
+            username: from_cstr(&source.username as *const _)?.to_string(),
+            discriminator: from_cstr(&source.discriminator as *const _)?.to_string(),
+            avatar: from_cstr(&source.avatar as *const _)?.to_string(),
             bot: source.bot,
         })
     }
