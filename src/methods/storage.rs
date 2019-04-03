@@ -134,7 +134,7 @@ impl Discord {
             .get_storage_manager()
             .stat(filename.as_ptr(), &mut stat))?;
 
-        FileStat::from_sys(stat)
+        FileStat::from_sys(&stat)
     }
 
     pub fn folder_path(&self) -> Result<String> {

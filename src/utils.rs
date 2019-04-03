@@ -1,5 +1,15 @@
 use crate::prelude::*;
 
+pub(crate) trait FromSys: Sized {
+    type Source;
+
+    fn from_sys(source: &Self::Source) -> Result<Self>;
+
+    fn from_sys_ptr(source: *const Self::Source) -> Result<Self> {
+        Self::from_sys(unsafe { source.as_ref() }.ok_or(BindingsViolation::NullPointer)?)
+    }
+}
+
 pub(crate) fn from_cstr<'a>(cstr: *const c_char) -> Result<&'a str> {
     unsafe { std::ffi::CStr::from_ptr(cstr) }
         .to_str()

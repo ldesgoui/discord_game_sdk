@@ -9,10 +9,10 @@ pub struct User {
     pub bot: bool,
 }
 
-impl User {
-    pub(crate) fn from_sys(source: *const sys::DiscordUser) -> Result<Self> {
-        let source = unsafe { source.as_ref() }.ok_or(BindingsViolation::NullPointer)?;
+impl FromSys for User {
+    type Source = sys::DiscordUser;
 
+    fn from_sys(source: &Self::Source) -> Result<Self> {
         Ok(Self {
             id: source.id,
             username: from_cstr(&source.username as *const _)?.to_string(),
@@ -33,9 +33,11 @@ pub enum PremiumType {
     Tier2,
 }
 
-impl PremiumType {
-    pub(crate) fn from_sys(source: sys::EDiscordPremiumType) -> Result<Self> {
-        Ok(match source {
+impl FromSys for PremiumType {
+    type Source = sys::EDiscordPremiumType;
+
+    fn from_sys(source: &Self::Source) -> Result<Self> {
+        Ok(match *source {
             sys::DiscordPremiumType_None => PremiumType::None,
             sys::DiscordPremiumType_Tier1 => PremiumType::Tier1,
             sys::DiscordPremiumType_Tier2 => PremiumType::Tier2,

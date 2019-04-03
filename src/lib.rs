@@ -48,7 +48,7 @@ mod methods {
 mod prelude {
     pub(crate) use crate::{
         error::{BindingsViolation, DeveloperViolation, DiscordError, ToResult as _},
-        utils::{from_cstr, simple_callback},
+        utils::{from_cstr, simple_callback, FromSys},
         *,
     };
     pub(crate) use discord_game_sdk_sys as sys;

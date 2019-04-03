@@ -22,12 +22,12 @@ pub struct Activity {
     pub spectate_secret: String,
 }
 
-impl Activity {
-    pub(crate) fn from_sys(source: *const sys::DiscordActivity) -> Result<Self> {
-        let source = unsafe { source.as_ref() }.ok_or(BindingsViolation::NullPointer)?;
+impl FromSys for Activity {
+    type Source = sys::DiscordActivity;
 
+    fn from_sys(source: &Self::Source) -> Result<Self> {
         Ok(Self {
-            kind: ActivityKind::from_sys(source.type_)?,
+            kind: ActivityKind::from_sys(&source.type_)?,
             application_id: source.application_id,
             name: from_cstr(&source.name as *const _)?.to_string(),
             state: from_cstr(&source.state as *const _)?.to_string(),
@@ -57,9 +57,11 @@ pub enum ActivityKind {
     Watching,
 }
 
-impl ActivityKind {
-    pub(crate) fn from_sys(source: sys::EDiscordActivityType) -> Result<Self> {
-        Ok(match source {
+impl FromSys for ActivityKind {
+    type Source = sys::EDiscordActivityType;
+
+    fn from_sys(source: &Self::Source) -> Result<Self> {
+        Ok(match *source {
             sys::DiscordActivityType_Listening => ActivityKind::Listening,
             sys::DiscordActivityType_Playing => ActivityKind::Playing,
             sys::DiscordActivityType_Streaming => ActivityKind::Streaming,

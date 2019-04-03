@@ -32,7 +32,7 @@ impl Discord {
             .get_user_manager()
             .get_current_user_premium_type(&mut premium_type as *mut _))?;
 
-        PremiumType::from_sys(premium_type)
+        PremiumType::from_sys(&premium_type)
     }
 
     pub fn user_events_reader(&mut self) -> shrev::ReaderId<UserEvent> {
@@ -60,5 +60,5 @@ extern "C" fn get_user_callback<F>(
     }
     let callback: &mut F = unsafe { &mut *(data as *mut _) };
 
-    callback(res.to_result().and_then(|_| User::from_sys(user)))
+    callback(res.to_result().and_then(|_| User::from_sys_ptr(user)))
 }

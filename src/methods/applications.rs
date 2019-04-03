@@ -58,5 +58,8 @@ extern "C" fn get_oauth2_token_callback<F>(
     }
     let callback: &mut F = unsafe { &mut *(data as *mut _) };
 
-    callback(res.to_result().and_then(|_| OAuth2Token::from_sys(token)))
+    callback(
+        res.to_result()
+            .and_then(|_| OAuth2Token::from_sys_ptr(token)),
+    )
 }

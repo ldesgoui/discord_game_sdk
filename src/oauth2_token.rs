@@ -7,10 +7,10 @@ pub struct OAuth2Token {
     pub expires: chrono::NaiveDateTime,
 }
 
-impl OAuth2Token {
-    pub(crate) fn from_sys(ptr: *const sys::DiscordOAuth2Token) -> Result<Self> {
-        let source = unsafe { ptr.as_ref() }.ok_or(BindingsViolation::NullPointer)?;
+impl FromSys for OAuth2Token {
+    type Source = sys::DiscordOAuth2Token;
 
+    fn from_sys(source: &Self::Source) -> Result<Self> {
         Ok(Self {
             access_token: from_cstr(&source.access_token as *const _)?.to_string(),
             scopes: from_cstr(&source.scopes as *const _)?

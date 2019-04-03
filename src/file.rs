@@ -7,8 +7,10 @@ pub struct FileStat {
     pub last_modified: chrono::NaiveDateTime,
 }
 
-impl FileStat {
-    pub(crate) fn from_sys(source: sys::DiscordFileStat) -> Result<Self> {
+impl FromSys for FileStat {
+    type Source = sys::DiscordFileStat;
+
+    fn from_sys(source: &Self::Source) -> Result<Self> {
         Ok(Self {
             filename: from_cstr(&source.filename as *const _)?.to_string(),
             size: source.size,

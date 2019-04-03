@@ -64,7 +64,7 @@ extern "C" fn on_activity_join_request(event_data: *mut c_void, user: *mut sys::
     let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
 
     let _ = || -> Result<()> {
-        let user = User::from_sys(user)?;
+        let user = User::from_sys_ptr(user)?;
 
         core.activity_events
             .single_write(ActivityEvent::Request { user });
@@ -83,8 +83,8 @@ extern "C" fn on_activity_invite(
     let core: &mut Discord = unsafe { (event_data as *mut Discord).as_mut() }.unwrap();
 
     let _ = || -> Result<()> {
-        let user = User::from_sys(user)?;
-        let activity = Activity::from_sys(activity)?;
+        let user = User::from_sys_ptr(user)?;
+        let activity = Activity::from_sys_ptr(activity)?;
 
         core.activity_events
             .single_write(ActivityEvent::Invite { user, activity });
