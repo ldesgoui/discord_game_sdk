@@ -19,8 +19,6 @@ impl<'a> Discord<'a> {
     where
         F: FnMut(Relationship) -> bool,
     {
-        let mut relationship = sys::DiscordRelationship::default();
-
         unsafe {
             ffi!(self.get_relationship_manager().filter(
                 &mut filter as *mut _ as *mut _,
@@ -29,9 +27,12 @@ impl<'a> Discord<'a> {
         }
 
         let mut count = 0;
+
         unsafe { ffi!(self.get_relationship_manager().count(&mut count)) }.to_result()?;
 
         let mut result = Vec::with_capacity(count as usize);
+        let mut relationship = sys::DiscordRelationship::default();
+
         for index in 0..count {
             unsafe {
                 ffi!(self
