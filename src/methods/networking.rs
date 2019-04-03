@@ -1,4 +1,4 @@
 use crate::prelude::*;
 
 /// # Networking
-impl Discord {}
+impl<'a> Discord<'a> {}

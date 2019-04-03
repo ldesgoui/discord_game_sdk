@@ -3,29 +3,13 @@ use crate::prelude::*;
 pub(crate) trait FromSys: Sized {
     type Source;
 
-    fn from_sys(source: &Self::Source) -> Result<Self>;
+    fn from_sys(source: &Self::Source) -> Self;
 
-    fn from_sys_ptr(source: *const Self::Source) -> Result<Self> {
-        Self::from_sys(unsafe { source.as_ref() }.ok_or(BindingsViolation::NullPointer)?)
+    unsafe fn from_sys_ptr(source: *const Self::Source) -> Self {
+        Self::from_sys(source.as_ref().unwrap())
     }
 }
 
-pub(crate) fn from_cstr<'a>(cstr: *const c_char) -> Result<&'a str> {
-    unsafe { std::ffi::CStr::from_ptr(cstr) }
-        .to_str()
-        .map_err(BindingsViolation::from)
-        .map_err(Error::from)
-}
-
-pub(crate) extern "C" fn simple_callback<F>(data: *mut c_void, res: sys::EDiscordResult)
-where
-    F: FnMut(Result<()>) + Sized,
-{
-    if data.is_null() {
-        log::error!("SDK invoked callback with null");
-        return;
-    }
-    let callback: &mut F = unsafe { &mut *(data as *mut _) };
-
-    callback(res.to_result());
+pub(crate) unsafe fn string_from_cstr(ptr: *const c_char) -> String {
+    CStr::from_ptr(ptr).to_str().unwrap().to_string()
 }

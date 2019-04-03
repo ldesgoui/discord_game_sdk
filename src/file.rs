@@ -10,11 +10,16 @@ pub struct FileStat {
 impl FromSys for FileStat {
     type Source = sys::DiscordFileStat;
 
-    fn from_sys(source: &Self::Source) -> Result<Self> {
-        Ok(Self {
-            filename: from_cstr(&source.filename as *const _)?.to_string(),
+    fn from_sys(source: &Self::Source) -> Self {
+        let filename = unsafe { std::ffi::CStr::from_ptr(&source.filename as *const _) }
+            .to_str()
+            .unwrap()
+            .to_string();
+
+        Self {
+            filename,
             size: source.size,
             last_modified: chrono::NaiveDateTime::from_timestamp(source.last_modified as i64, 0),
-        })
+        }
     }
 }

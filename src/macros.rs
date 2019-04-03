@@ -1,48 +1,21 @@
 macro_rules! ffi {
-    // ffi!(self.destroy()) -> Result<()>
-    (
-        $self:ident
-        .
-        $method:ident
-        (
-            $( $args:expr ),*
-            $( , )?
-        )
-    ) => { unsafe {
-        use crate::error::{BindingsViolation::*, ToResult};
-
-        match $self.core_ptr.as_ref().ok_or(NullPointer)
-            .and_then(|c| c.$method.ok_or(MissingMethod))
+    // ffi!(self.destroy())
+    ($self:ident . $method:ident ( $($args:expr),* $(,)? )) => {
         {
-            Err(err) => Err(err.into()),
-            Ok(method) => method($self.core_ptr, $( $args ),* ).to_result(),
+            debug_assert!($self.core.$method.is_some());
+
+            $self.core.$method.unwrap()($self.core as *mut _, $( $args ),*)
         }
-    }};
+    };
 
-    // ffi!(self.get_application_manager().get_current_locale()) -> Result<()>
-    (
-        $self:ident
-        .
-        $get_manager:ident
-        ()
-        .
-        $method:ident
-        (
-            $( $args:expr ),*
-            $( , )?
-        )
-    ) => { unsafe {
-        use crate::error::{BindingsViolation::*, ToResult};
-
-        match $self.core_ptr.as_ref().ok_or(NullPointer)
-            .and_then(|c| c.$get_manager.ok_or(MissingMethod))
-            .and_then(|f| f($self.core_ptr).as_mut().ok_or(NullPointer))
+    // ffi!(self.get_application_manager().get_current_locale())
+    ($self:ident . $get_manager:ident () . $method:ident ( $($args:expr),* $(,)? )) => {
         {
-            Err(err) => Err(err.into()),
-            Ok(mgr) => match mgr.$method {
-                None => Err(MissingMethod.into()),
-                Some(method) => method(mgr as *mut _, $( $args ),* ).to_result(),
-            },
+            let manager = ffi!($self.$get_manager()).as_mut().unwrap();
+
+            debug_assert!(manager.$method.is_some());
+
+            manager.$method.unwrap()(manager as *mut _, $( $args ),*)
         }
-    }};
+    };
 }

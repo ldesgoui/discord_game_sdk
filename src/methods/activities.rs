@@ -1,98 +1,103 @@
-use crate::event::ActivityEvent;
 use crate::prelude::*;
 
 /// # Activities
-impl Discord {
-    pub fn register_launch_command<S>(&self, command: S) -> Result<()>
+impl<'a> Discord<'a> {
+    pub fn register_launch_command<S>(&mut self, command: S) -> Result<()>
     where
         S: AsRef<str>,
     {
-        let cstring = std::ffi::CString::new(command.as_ref()).map_err(DeveloperViolation::from)?;
+        let cstring = std::ffi::CString::new(command.as_ref()).unwrap();
 
-        ffi!(self
-            .get_activity_manager()
-            .register_command(cstring.as_ptr()))
+        unsafe {
+            ffi!(self
+                .get_activity_manager()
+                .register_command(cstring.as_ptr()))
+        }
+        .to_result()
     }
 
     /// # Rate limit
     /// 5 updates per 20 seconds
-    pub fn update_activity<F>(&self, activity_change: &ActivityChange, mut callback: F)
+    pub fn update_activity<F>(&mut self, activity_change: &ActivityChange, mut callback: F)
     where
         F: FnMut(Result<()>),
     {
-        let mut activity = activity_change.to_sys().unwrap();
+        let mut activity = activity_change.to_sys();
 
-        let _ = ffi!(self.get_activity_manager().update_activity(
-            &mut activity as *mut _,
-            &callback as *const _ as *mut _,
-            Some(simple_callback::<F>)
-        ))
-        .map_err(|e| callback(Err(e)));
+        unsafe {
+            ffi!(self.get_activity_manager().update_activity(
+                &mut activity as *mut _,
+                &mut callback as *mut _ as *mut _,
+                Some(across_ffi::callbacks::result::<F>)
+            ))
+        };
     }
 
-    pub fn clear_activity<F>(&self, mut callback: F)
+    pub fn clear_activity<F>(&mut self, mut callback: F)
     where
         F: FnMut(Result<()>),
     {
-        let _ = ffi!(self
-            .get_activity_manager()
-            .clear_activity(&callback as *const _ as *mut _, Some(simple_callback::<F>)))
-        .map_err(|e| callback(Err(e)));
+        unsafe {
+            ffi!(self.get_activity_manager().clear_activity(
+                &mut callback as *mut _ as *mut _,
+                Some(across_ffi::callbacks::result::<F>)
+            ))
+        };
     }
 
-    pub fn send_request_reply<F>(&self, user_id: i64, reply: RequestReply, mut callback: F)
+    pub fn send_request_reply<F>(&mut self, user_id: i64, reply: RequestReply, mut callback: F)
     where
         F: FnMut(Result<()>),
     {
-        let _ = ffi!(self.get_activity_manager().send_request_reply(
-            user_id,
-            reply.to_sys(),
-            &callback as *const _ as *mut _,
-            Some(simple_callback::<F>)
-        ))
-        .map_err(|e| callback(Err(e)));
+        unsafe {
+            ffi!(self.get_activity_manager().send_request_reply(
+                user_id,
+                reply.to_sys(),
+                &mut callback as *mut _ as *mut _,
+                Some(across_ffi::callbacks::result::<F>)
+            ))
+        };
     }
 
-    pub fn send_invite<S, F>(&self, user_id: i64, action: Action, content: S, mut callback: F)
+    pub fn send_invite<S, F>(&mut self, user_id: i64, action: Action, content: S, mut callback: F)
     where
         S: AsRef<str>,
         F: FnMut(Result<()>),
     {
-        let _ = std::ffi::CString::new(content.as_ref())
-            .map_err(DeveloperViolation::from)
-            .map_err(Error::from)
-            .and_then(|cstring| {
-                ffi!(self.get_activity_manager().send_invite(
-                    user_id,
-                    action.to_sys(),
-                    cstring.as_ptr(),
-                    &callback as *const _ as *mut _,
-                    Some(simple_callback::<F>)
-                ))
-            })
-            .map_err(|e| callback(Err(e)));
+        let content = std::ffi::CString::new(content.as_ref()).unwrap();
+
+        unsafe {
+            ffi!(self.get_activity_manager().send_invite(
+                user_id,
+                action.to_sys(),
+                content.as_ptr(),
+                &mut callback as *mut _ as *mut _,
+                Some(across_ffi::callbacks::result::<F>)
+            ))
+        };
     }
 
-    pub fn accept_invite<F>(&self, user_id: i64, mut callback: F)
+    pub fn accept_invite<F>(&mut self, user_id: i64, mut callback: F)
     where
         F: FnMut(Result<()>),
     {
-        let _ = ffi!(self.get_activity_manager().accept_invite(
-            user_id,
-            &callback as *const _ as *mut _,
-            Some(simple_callback::<F>)
-        ))
-        .map_err(|e| callback(Err(e)));
+        unsafe {
+            ffi!(self.get_activity_manager().accept_invite(
+                user_id,
+                &mut callback as *mut _ as *mut _,
+                Some(across_ffi::callbacks::result::<F>)
+            ))
+        }
     }
 
-    pub fn activity_events_reader(&mut self) -> shrev::ReaderId<ActivityEvent> {
+    pub fn activity_events_reader(&mut self) -> shrev::ReaderId<event::Activity> {
         self.activity_events.register_reader()
     }
 
     pub fn activity_events(
         &self,
-        reader: &mut shrev::ReaderId<ActivityEvent>,
-    ) -> shrev::EventIterator<ActivityEvent> {
+        reader: &mut shrev::ReaderId<event::Activity>,
+    ) -> shrev::EventIterator<event::Activity> {
         self.activity_events.read(reader)
     }
 }

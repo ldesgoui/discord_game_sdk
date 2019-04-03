@@ -25,27 +25,29 @@ pub struct Activity {
 impl FromSys for Activity {
     type Source = sys::DiscordActivity;
 
-    fn from_sys(source: &Self::Source) -> Result<Self> {
-        Ok(Self {
-            kind: ActivityKind::from_sys(&source.type_)?,
-            application_id: source.application_id,
-            name: from_cstr(&source.name as *const _)?.to_string(),
-            state: from_cstr(&source.state as *const _)?.to_string(),
-            details: from_cstr(&source.state as *const _)?.to_string(),
-            start_time: chrono::NaiveDateTime::from_timestamp(source.timestamps.start, 0),
-            end_time: chrono::NaiveDateTime::from_timestamp(source.timestamps.end, 0),
-            large_image_key: from_cstr(&source.assets.large_image as *const _)?.to_string(),
-            large_image_tooltip: from_cstr(&source.assets.large_text as *const _)?.to_string(),
-            small_image_key: from_cstr(&source.assets.small_image as *const _)?.to_string(),
-            small_image_tooltip: from_cstr(&source.assets.small_text as *const _)?.to_string(),
-            party_id: from_cstr(&source.party.id as *const _)?.to_string(),
-            party_amount: source.party.size.current_size,
-            party_capacity: source.party.size.max_size,
-            instance: source.instance,
-            match_secret: from_cstr(&source.secrets.match_ as *const _)?.to_string(),
-            join_secret: from_cstr(&source.secrets.join as *const _)?.to_string(),
-            spectate_secret: from_cstr(&source.secrets.spectate as *const _)?.to_string(),
-        })
+    fn from_sys(source: &Self::Source) -> Self {
+        unsafe {
+            Self {
+                kind: ActivityKind::from_sys(&source.type_),
+                application_id: source.application_id,
+                name: string_from_cstr(&source.name as *const _),
+                state: string_from_cstr(&source.state as *const _),
+                details: string_from_cstr(&source.state as *const _),
+                start_time: chrono::NaiveDateTime::from_timestamp(source.timestamps.start, 0),
+                end_time: chrono::NaiveDateTime::from_timestamp(source.timestamps.end, 0),
+                large_image_key: string_from_cstr(&source.assets.large_image as *const _),
+                large_image_tooltip: string_from_cstr(&source.assets.large_text as *const _),
+                small_image_key: string_from_cstr(&source.assets.small_image as *const _),
+                small_image_tooltip: string_from_cstr(&source.assets.small_text as *const _),
+                party_id: string_from_cstr(&source.party.id as *const _),
+                party_amount: source.party.size.current_size,
+                party_capacity: source.party.size.max_size,
+                instance: source.instance,
+                match_secret: string_from_cstr(&source.secrets.match_ as *const _),
+                join_secret: string_from_cstr(&source.secrets.join as *const _),
+                spectate_secret: string_from_cstr(&source.secrets.spectate as *const _),
+            }
+        }
     }
 }
 
@@ -60,14 +62,14 @@ pub enum ActivityKind {
 impl FromSys for ActivityKind {
     type Source = sys::EDiscordActivityType;
 
-    fn from_sys(source: &Self::Source) -> Result<Self> {
-        Ok(match *source {
+    fn from_sys(source: &Self::Source) -> Self {
+        match *source {
             sys::DiscordActivityType_Listening => ActivityKind::Listening,
             sys::DiscordActivityType_Playing => ActivityKind::Playing,
             sys::DiscordActivityType_Streaming => ActivityKind::Streaming,
             sys::DiscordActivityType_Watching => ActivityKind::Watching,
-            _ => Err(BindingsViolation::Enum)?,
-        })
+            _ => panic!("enum"),
+        }
     }
 }
 
@@ -122,19 +124,19 @@ pub struct ActivityChange<'a> {
 }
 
 impl<'a> ActivityChange<'a> {
-    pub(crate) fn to_sys(&self) -> Result<sys::DiscordActivity> {
+    pub(crate) fn to_sys(&self) -> sys::DiscordActivity {
         let mut activity = sys::DiscordActivity::default();
 
-        write_to_array(&self.state, &mut activity.state)?;
-        write_to_array(&self.details, &mut activity.details)?;
-        write_to_array(&self.large_image_key, &mut activity.assets.large_image)?;
-        write_to_array(&self.large_image_tooltip, &mut activity.assets.large_text)?;
-        write_to_array(&self.small_image_key, &mut activity.assets.small_image)?;
-        write_to_array(&self.small_image_tooltip, &mut activity.assets.small_text)?;
-        write_to_array(&self.party_id, &mut activity.party.id)?;
-        write_to_array(&self.match_secret, &mut activity.secrets.match_)?;
-        write_to_array(&self.join_secret, &mut activity.secrets.join)?;
-        write_to_array(&self.spectate_secret, &mut activity.secrets.spectate)?;
+        write_to_array(&self.state, &mut activity.state);
+        write_to_array(&self.details, &mut activity.details);
+        write_to_array(&self.large_image_key, &mut activity.assets.large_image);
+        write_to_array(&self.large_image_tooltip, &mut activity.assets.large_text);
+        write_to_array(&self.small_image_key, &mut activity.assets.small_image);
+        write_to_array(&self.small_image_tooltip, &mut activity.assets.small_text);
+        write_to_array(&self.party_id, &mut activity.party.id);
+        write_to_array(&self.match_secret, &mut activity.secrets.match_);
+        write_to_array(&self.join_secret, &mut activity.secrets.join);
+        write_to_array(&self.spectate_secret, &mut activity.secrets.spectate);
 
         if let Some(start_time) = self.start_time {
             activity.timestamps.start = start_time.timestamp();
@@ -152,19 +154,22 @@ impl<'a> ActivityChange<'a> {
             activity.party.size.max_size = party_capacity;
         }
 
-        Ok(activity)
+        activity
     }
 }
 
-fn write_to_array(source: &Option<&str>, destination: &mut [i8]) -> Result<()> {
-    if let &Some(src) = source {
-        let cstring = std::ffi::CString::new(src).map_err(DeveloperViolation::from)?;
-        let bytes: &[i8] = unsafe { std::mem::transmute(cstring.as_bytes_with_nul()) };
+fn write_to_array(source: &Option<&str>, destination: &mut [i8]) {
+    if let Some(src) = *source {
+        let cstring = std::ffi::CString::new(src).unwrap();
+
+        let bytes: &[i8] =
+            unsafe { (cstring.as_bytes_with_nul() as *const [u8] as *const [i8]).as_ref() }
+                .unwrap();
+
         if bytes.len() > destination.len() {
-            Err(DeveloperViolation::StringTooLarge)?;
+            panic!("2large");
         }
+
         destination[..bytes.len()].copy_from_slice(bytes);
     }
-
-    Ok(())
 }

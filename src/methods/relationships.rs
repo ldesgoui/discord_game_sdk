@@ -1,41 +1,48 @@
 use crate::prelude::*;
 
 /// # Relationships
-impl Discord {
-    pub fn get_relationship(&self, user_id: i64) -> Result<Relationship> {
+impl<'a> Discord<'a> {
+    pub fn relationship_with(&mut self, user_id: i64) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
-        ffi!(self
-            .get_relationship_manager()
-            .get(user_id, &mut relationship))?;
+        unsafe {
+            ffi!(self
+                .get_relationship_manager()
+                .get(user_id, &mut relationship))
+        }
+        .to_result()?;
 
-        Relationship::from_sys(&relationship)
+        Ok(Relationship::from_sys(&relationship))
     }
 
-    pub fn relationship_filter<F>(&self, mut filter: F) -> Result<()>
+    pub fn relationships<F>(&mut self, mut filter: F) -> Result<Vec<Relationship>>
     where
-        F: FnMut(&Relationship) -> bool,
+        F: FnMut(Relationship) -> bool,
     {
-        ffi!(self
-            .get_relationship_manager()
-            .filter(&mut filter as *mut _ as *mut _, Some(filter_callback::<F>)))
-    }
-}
+        let mut count = 0;
+        let mut relationship = sys::DiscordRelationship::default();
+        let mut result = Vec::new();
 
-extern "C" fn filter_callback<F>(
-    data: *mut c_void,
-    relationship: *mut sys::DiscordRelationship,
-) -> bool
-where
-    F: FnMut(&Relationship) -> bool,
-{
-    if data.is_null() {
-        log::error!("SDK invoked callback with null");
-        return false;
-    }
-    let callback: &mut F = unsafe { &mut *(data as *mut _) };
+        unsafe {
+            ffi!(self.get_relationship_manager().filter(
+                &mut filter as *mut _ as *mut _,
+                Some(across_ffi::callbacks::filter_relationship::<F>)
+            ))
+        }
 
-    Relationship::from_sys_ptr(relationship)
-        .map(|r| callback(&r))
-        .unwrap_or(false)
+        unsafe { ffi!(self.get_relationship_manager().count(&mut count)) }.to_result()?;
+
+        for index in 0..count {
+            unsafe {
+                ffi!(self
+                    .get_relationship_manager()
+                    .get_at(index as u32, &mut relationship))
+            }
+            .to_result()?;
+
+            result.push(Relationship::from_sys(&relationship))
+        }
+
+        Ok(result)
+    }
 }

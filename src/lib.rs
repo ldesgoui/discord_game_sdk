@@ -45,13 +45,29 @@ mod methods {
     mod voice;
 }
 
+mod across_ffi {
+    pub(crate) mod callbacks;
+    pub(crate) mod events {
+        pub(crate) mod activity;
+        pub(crate) mod lobby;
+        pub(crate) mod network;
+        pub(crate) mod overlay;
+        pub(crate) mod relationship;
+        pub(crate) mod store;
+        pub(crate) mod user;
+        pub(crate) mod voice;
+    }
+}
+
 mod prelude {
     pub(crate) use crate::{
-        error::{BindingsViolation, DeveloperViolation, DiscordError, ToResult as _},
-        utils::{from_cstr, simple_callback, FromSys},
+        across_ffi,
+        error::{DiscordError, ToResult as _},
+        utils::{string_from_cstr, FromSys},
         *,
     };
     pub(crate) use discord_game_sdk_sys as sys;
+    pub(crate) use std::ffi::{CStr, CString};
     pub(crate) use std::os::raw::{c_char, c_void};
 }
 

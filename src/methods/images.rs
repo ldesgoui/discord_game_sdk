@@ -1,4 +1,4 @@
 use crate::prelude::*;
 
 /// # Images
-impl Discord {}
+impl<'a> Discord<'a> {}

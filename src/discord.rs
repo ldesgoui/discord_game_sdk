@@ -1,16 +1,18 @@
-use crate::event::{ActivityEvent, OverlayEvent, UserEvent, VoiceEvent};
 use crate::prelude::*;
 
-pub struct Discord {
-    pub(crate) core_ptr: *mut sys::IDiscordCore,
+pub struct Discord<'a> {
+    pub(crate) core: &'a mut sys::IDiscordCore,
     pub(crate) client_id: i64,
-    pub(crate) activity_events: shrev::EventChannel<ActivityEvent>,
-    pub(crate) user_events: shrev::EventChannel<UserEvent>,
-    pub(crate) overlay_events: shrev::EventChannel<OverlayEvent>,
-    pub(crate) voice_events: shrev::EventChannel<VoiceEvent>,
+    pub(crate) activity_events: shrev::EventChannel<event::Activity>,
+    pub(crate) lobby_events: shrev::EventChannel<event::Lobby>,
+    pub(crate) network_events: shrev::EventChannel<event::Network>,
+    pub(crate) overlay_events: shrev::EventChannel<event::Overlay>,
+    pub(crate) relationship_events: shrev::EventChannel<event::Relationship>,
+    pub(crate) user_events: shrev::EventChannel<event::User>,
+    pub(crate) voice_events: shrev::EventChannel<event::Voice>,
 }
 
-impl std::fmt::Debug for Discord {
+impl<'a> std::fmt::Debug for Discord<'a> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("Discord")
             .field("client_id", &self.client_id)

@@ -4,67 +4,13 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
 pub enum Error {
-    #[error(display = "Developer broke API contract")]
-    DeveloperViolation(#[error(cause)] DeveloperViolation),
-
-    #[error(display = "Discord SDK broke API contract")]
-    BindingsViolation(#[error(cause)] BindingsViolation),
-
     #[error(display = "Discord SDK returned error")]
     DiscordError(#[error(cause)] DiscordError),
-}
-
-impl From<DeveloperViolation> for Error {
-    fn from(e: DeveloperViolation) -> Self {
-        Error::DeveloperViolation(e)
-    }
-}
-
-impl From<BindingsViolation> for Error {
-    fn from(e: BindingsViolation) -> Self {
-        Error::BindingsViolation(e)
-    }
 }
 
 impl From<DiscordError> for Error {
     fn from(e: DiscordError) -> Self {
         Error::DiscordError(e)
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
-pub enum DeveloperViolation {
-    #[error(display = "passed a string containing a nul")]
-    NulInString(#[error(cause)] std::ffi::NulError),
-
-    #[error(display = "string is too large to fit in SDK structs")]
-    StringTooLarge,
-}
-
-impl From<std::ffi::NulError> for DeveloperViolation {
-    fn from(e: std::ffi::NulError) -> Self {
-        DeveloperViolation::NulInString(e)
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
-pub enum BindingsViolation {
-    #[error(display = "pointer to null")]
-    NullPointer,
-
-    #[error(display = "pointer to method was null")]
-    MissingMethod,
-
-    #[error(display = "utf8 conversion error")]
-    Utf8(#[error(cause)] std::str::Utf8Error),
-
-    #[error(display = "passed undefined enum value")]
-    Enum,
-}
-
-impl From<std::str::Utf8Error> for BindingsViolation {
-    fn from(e: std::str::Utf8Error) -> Self {
-        BindingsViolation::Utf8(e)
     }
 }
 
@@ -201,12 +147,8 @@ pub enum DiscordError {
 }
 
 pub(crate) trait ToResult: Sized {
-    fn to_result(self) -> Result<()> {
-        Ok(())
-    }
+    fn to_result(self) -> Result<()>;
 }
-
-impl ToResult for () {}
 
 impl ToResult for sys::EDiscordResult {
     fn to_result(self) -> Result<()> {
@@ -257,7 +199,7 @@ impl ToResult for sys::EDiscordResult {
             sys::DiscordResult_InvalidGiftCode => InvalidGiftCode,
             sys::DiscordResult_PurchaseError => PurchaseError,
             sys::DiscordResult_TransactionAborted => TransactionAborted,
-            _ => Err(BindingsViolation::Enum)?,
+            _ => panic!("enum"),
         }))
     }
 }

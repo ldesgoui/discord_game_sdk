@@ -1,4 +1,4 @@
 use crate::prelude::*;
 
 /// # Lobbies
-impl Discord {}
+impl<'a> Discord<'a> {}

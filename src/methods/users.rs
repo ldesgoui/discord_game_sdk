@@ -1,64 +1,54 @@
-use crate::event::UserEvent;
 use crate::prelude::*;
 
 /// # Users
-impl Discord {
-    pub fn get_current_user(&self) -> Result<User> {
+impl<'a> Discord<'a> {
+    pub fn get_current_user(&mut self) -> Result<User> {
         let mut user = sys::DiscordUser::default();
 
-        ffi!(self
-            .get_user_manager()
-            .get_current_user(&mut user as *mut _))?;
+        unsafe {
+            ffi!(self
+                .get_user_manager()
+                .get_current_user(&mut user as *mut _))
+        }
+        .to_result()?;
 
-        User::from_sys(&user)
+        Ok(User::from_sys(&user))
     }
 
-    pub fn get_user<F>(&self, user_id: i64, mut callback: F)
+    pub fn get_user<F>(&mut self, user_id: i64, mut callback: F)
     where
         F: FnMut(Result<User>),
     {
-        let _ = ffi!(self.get_user_manager().get_user(
-            user_id,
-            &callback as *const _ as *mut _,
-            Some(get_user_callback::<F>)
-        ))
-        .map_err(|e| callback(Err(e)));
+        unsafe {
+            ffi!(self.get_user_manager().get_user(
+                user_id,
+                &mut callback as *mut _ as *mut _,
+                Some(across_ffi::callbacks::result_from_sys::<F, User>)
+            ))
+        }
     }
 
-    pub fn get_current_user_premium_type(&self) -> Result<PremiumType> {
+    pub fn get_current_user_premium_type(&mut self) -> Result<PremiumType> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
-        ffi!(self
-            .get_user_manager()
-            .get_current_user_premium_type(&mut premium_type as *mut _))?;
+        unsafe {
+            ffi!(self
+                .get_user_manager()
+                .get_current_user_premium_type(&mut premium_type as *mut _))
+        }
+        .to_result()?;
 
-        PremiumType::from_sys(&premium_type)
+        Ok(PremiumType::from_sys(&premium_type))
     }
 
-    pub fn user_events_reader(&mut self) -> shrev::ReaderId<UserEvent> {
+    pub fn user_events_reader(&mut self) -> shrev::ReaderId<event::User> {
         self.user_events.register_reader()
     }
 
     pub fn user_events(
-        &self,
-        reader: &mut shrev::ReaderId<UserEvent>,
-    ) -> shrev::EventIterator<UserEvent> {
+        &mut self,
+        reader: &mut shrev::ReaderId<event::User>,
+    ) -> shrev::EventIterator<event::User> {
         self.user_events.read(reader)
     }
-}
-
-extern "C" fn get_user_callback<F>(
-    data: *mut c_void,
-    res: sys::EDiscordResult,
-    user: *mut sys::DiscordUser,
-) where
-    F: FnMut(Result<User>),
-{
-    if data.is_null() {
-        log::error!("SDK invoked callback with null");
-        return;
-    }
-    let callback: &mut F = unsafe { &mut *(data as *mut _) };
-
-    callback(res.to_result().and_then(|_| User::from_sys_ptr(user)))
 }

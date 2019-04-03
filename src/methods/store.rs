@@ -1,4 +1,4 @@
 use crate::prelude::*;
 
 /// # Store
-impl Discord {}
+impl<'a> Discord<'a> {}

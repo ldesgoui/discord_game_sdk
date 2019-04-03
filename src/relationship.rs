@@ -12,12 +12,12 @@ pub struct Relationship {
 impl FromSys for Relationship {
     type Source = sys::DiscordRelationship;
 
-    fn from_sys(source: &Self::Source) -> Result<Self> {
-        Ok(Self {
-            kind: RelationshipKind::from_sys(&source.type_)?,
-            user: User::from_sys(&source.user)?,
-            presence: Presence::from_sys(&source.presence)?,
-        })
+    fn from_sys(source: &Self::Source) -> Self {
+        Self {
+            kind: RelationshipKind::from_sys(&source.type_),
+            user: User::from_sys(&source.user),
+            presence: Presence::from_sys(&source.presence),
+        }
     }
 }
 
@@ -34,16 +34,16 @@ pub enum RelationshipKind {
 impl FromSys for RelationshipKind {
     type Source = sys::EDiscordRelationshipType;
 
-    fn from_sys(source: &Self::Source) -> Result<Self> {
-        Ok(match *source {
+    fn from_sys(source: &Self::Source) -> Self {
+        match *source {
             sys::DiscordRelationshipType_Blocked => RelationshipKind::Blocked,
             sys::DiscordRelationshipType_Friend => RelationshipKind::Friend,
             sys::DiscordRelationshipType_Implicit => RelationshipKind::Implicit,
             sys::DiscordRelationshipType_None => RelationshipKind::None,
             sys::DiscordRelationshipType_PendingIncoming => RelationshipKind::PendingIncoming,
             sys::DiscordRelationshipType_PendingOutgoing => RelationshipKind::PendingOutgoing,
-            _ => Err(BindingsViolation::Enum)?,
-        })
+            _ => panic!("enum"),
+        }
     }
 }
 
@@ -56,11 +56,11 @@ pub struct Presence {
 impl FromSys for Presence {
     type Source = sys::DiscordPresence;
 
-    fn from_sys(source: &Self::Source) -> Result<Self> {
-        Ok(Self {
-            status: Status::from_sys(&source.status)?,
-            activity: Activity::from_sys(&source.activity)?,
-        })
+    fn from_sys(source: &Self::Source) -> Self {
+        Self {
+            status: Status::from_sys(&source.status),
+            activity: Activity::from_sys(&source.activity),
+        }
     }
 }
 
@@ -75,13 +75,13 @@ pub enum Status {
 impl FromSys for Status {
     type Source = sys::EDiscordStatus;
 
-    fn from_sys(source: &Self::Source) -> Result<Self> {
-        Ok(match *source {
+    fn from_sys(source: &Self::Source) -> Self {
+        match *source {
             sys::DiscordStatus_DoNotDisturb => Status::DoNotDisturb,
             sys::DiscordStatus_Idle => Status::Idle,
             sys::DiscordStatus_Offline => Status::Offline,
             sys::DiscordStatus_Online => Status::Online,
-            _ => Err(BindingsViolation::Enum)?,
-        })
+            _ => panic!("enum"),
+        }
     }
 }
