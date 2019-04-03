@@ -46,17 +46,15 @@ mod methods {
 }
 
 mod across_ffi {
+    pub(crate) mod activity;
     pub(crate) mod callbacks;
-    pub(crate) mod events {
-        pub(crate) mod activity;
-        pub(crate) mod lobby;
-        pub(crate) mod network;
-        pub(crate) mod overlay;
-        pub(crate) mod relationship;
-        pub(crate) mod store;
-        pub(crate) mod user;
-        pub(crate) mod voice;
-    }
+    pub(crate) mod lobby;
+    pub(crate) mod network;
+    pub(crate) mod overlay;
+    pub(crate) mod relationship;
+    pub(crate) mod store;
+    pub(crate) mod user;
+    pub(crate) mod voice;
 }
 
 mod prelude {
