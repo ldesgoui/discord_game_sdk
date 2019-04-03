@@ -1,12 +1,28 @@
 use crate::prelude::*;
 
 pub(crate) extern "C" fn on_message(
-    event_data: *mut c_void,
+    core_ptr: *mut c_void,
     peer_id: sys::DiscordNetworkPeerId,
-    channel_id: sys::DiscordNetworkChannelId,
+    chan_id: sys::DiscordNetworkChannelId,
     data: *mut u8,
-    data_length: u32,
+    len: u32,
 ) {
+    let core: &mut Discord = unsafe { (core_ptr as *mut Discord).as_mut() }.unwrap();
+
+    let buffer = unsafe { std::slice::from_raw_parts(data, len as usize) }.to_vec();
+
+    core.network_channel.single_write(event::Network::Message {
+        peer_id,
+        chan_id,
+        buffer,
+    })
 }
 
-pub(crate) extern "C" fn on_route_update(event_data: *mut c_void, route_data: *const c_char) {}
+pub(crate) extern "C" fn on_route_update(core_ptr: *mut c_void, route: *const c_char) {
+    let core: &mut Discord = unsafe { (core_ptr as *mut Discord).as_mut() }.unwrap();
+
+    let route = unsafe { string_from_cstr(route) };
+
+    core.network_channel
+        .single_write(event::Network::RouteUpdate { route })
+}

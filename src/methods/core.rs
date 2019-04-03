@@ -6,17 +6,19 @@ impl<'a> Discord<'a> {
         Self::with_create_flags(client_id, CreateFlags::default())
     }
 
+    // pub fn with_config(client_id: i64, config: &Config) -> Result<Self> {
     pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
         let mut sdk = Self {
             core: unsafe { std::mem::uninitialized() },
             client_id,
-            activity_events: shrev::EventChannel::new(),
-            lobby_events: shrev::EventChannel::new(),
-            network_events: shrev::EventChannel::new(),
-            overlay_events: shrev::EventChannel::new(),
-            relationship_events: shrev::EventChannel::new(),
-            user_events: shrev::EventChannel::new(),
-            voice_events: shrev::EventChannel::new(),
+            activity_channel: shrev::EventChannel::new(),
+            lobby_channel: shrev::EventChannel::new(),
+            network_channel: shrev::EventChannel::new(),
+            overlay_channel: shrev::EventChannel::new(),
+            relationship_channel: shrev::EventChannel::new(),
+            store_channel: shrev::EventChannel::new(),
+            user_channel: shrev::EventChannel::new(),
+            voice_channel: shrev::EventChannel::new(),
         };
 
         let mut params = create_params(client_id, flags, &mut sdk as *mut _);
@@ -36,10 +38,10 @@ impl<'a> Discord<'a> {
     fn set_log_hook(&mut self) {
         unsafe {
             ffi!(self.set_log_hook(
-                    sys::DiscordLogLevel_Debug,
-                    std::ptr::null_mut(),
-                    Some(across_ffi::callbacks::log),
-                    ))
+                sys::DiscordLogLevel_Debug,
+                std::ptr::null_mut(),
+                Some(across_ffi::callbacks::log),
+            ))
         };
     }
 
@@ -58,7 +60,7 @@ fn create_params(
     client_id: i64,
     flags: CreateFlags,
     ptr: *mut Discord,
-    ) -> sys::DiscordCreateParams {
+) -> sys::DiscordCreateParams {
     sys::DiscordCreateParams {
         client_id,
         flags: u64::from(flags.to_sys()),

@@ -80,6 +80,12 @@ pub enum Relationship {
     Update { relationship: crate::Relationship },
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Store {
+    EntitlementCreate { entitlement: Entitlement },
+    EntitlementDelete { entitlement: Entitlement },
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum User {
     CurrentUserUpdated,

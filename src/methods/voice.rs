@@ -69,13 +69,13 @@ impl<'a> Discord<'a> {
     }
 
     pub fn voice_events_reader(&mut self) -> shrev::ReaderId<event::Voice> {
-        self.voice_events.register_reader()
+        self.voice_channel.register_reader()
     }
 
     pub fn voice_events(
         &self,
         reader: &mut shrev::ReaderId<event::Voice>,
     ) -> shrev::EventIterator<event::Voice> {
-        self.voice_events.read(reader)
+        self.voice_channel.read(reader)
     }
 }

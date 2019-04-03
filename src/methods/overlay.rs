@@ -77,13 +77,13 @@ impl<'a> Discord<'a> {
     }
 
     pub fn overlay_events_reader(&mut self) -> shrev::ReaderId<event::Overlay> {
-        self.overlay_events.register_reader()
+        self.overlay_channel.register_reader()
     }
 
     pub fn overlay_events(
         &self,
         reader: &mut shrev::ReaderId<event::Overlay>,
     ) -> shrev::EventIterator<event::Overlay> {
-        self.overlay_events.read(reader)
+        self.overlay_channel.read(reader)
     }
 }

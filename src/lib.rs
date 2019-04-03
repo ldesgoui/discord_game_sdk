@@ -21,6 +21,7 @@ mod macros;
 
 mod activity;
 mod discord;
+mod entitlement;
 pub mod error;
 pub mod event;
 mod file;
@@ -72,6 +73,7 @@ mod prelude {
 pub use crate::{
     activity::{Action, Activity, ActivityChange, ActivityKind, RequestReply},
     discord::{CreateFlags, Discord},
+    entitlement::{Entitlement, EntitlementKind},
     error::{Error, Result},
     file::FileStat,
     oauth2_token::OAuth2Token,
