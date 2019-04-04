@@ -15,7 +15,7 @@ impl<'a> Discord<'a> {
         Ok(Relationship::from_sys(&relationship))
     }
 
-    pub fn relationships<F>(&mut self, mut filter: F) -> Result<Vec<Relationship>>
+    pub fn all_relationships<F>(&mut self, mut filter: F) -> Result<Vec<Relationship>>
     where
         F: FnMut(Relationship) -> bool,
     {
