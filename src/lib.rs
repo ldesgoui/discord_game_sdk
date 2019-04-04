@@ -27,6 +27,7 @@ pub mod event;
 mod file;
 mod oauth2_token;
 mod relationship;
+mod sku;
 mod user;
 mod utils;
 
@@ -78,5 +79,6 @@ pub use crate::{
     file::FileStat,
     oauth2_token::OAuth2Token,
     relationship::{Presence, Relationship, RelationshipKind, Status},
+    sku::{Sku, SkuKind},
     user::{PremiumType, User},
 };
