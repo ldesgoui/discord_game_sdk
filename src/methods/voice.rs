@@ -5,7 +5,7 @@ impl<'a> Discord<'a> {
     // TODO: get_input_mode (no idea how im supposed to deal with shortcuts)
     // TODO: set_input_mode
 
-    pub fn is_self_mute(&mut self) -> Result<bool> {
+    pub fn self_mute(&mut self) -> Result<bool> {
         let mut muted = false;
 
         unsafe { ffi!(self.get_voice_manager().is_self_mute(&mut muted as *mut _)) }.to_result()?;
@@ -13,7 +13,7 @@ impl<'a> Discord<'a> {
         Ok(muted)
     }
 
-    pub fn is_self_deaf(&mut self) -> Result<bool> {
+    pub fn self_deaf(&mut self) -> Result<bool> {
         let mut deafened = false;
 
         unsafe {
@@ -34,7 +34,7 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_voice_manager().set_self_deaf(deafened)) }.to_result()
     }
 
-    pub fn is_local_mute(&mut self, user_id: i64) -> Result<bool> {
+    pub fn local_mute(&mut self, user_id: i64) -> Result<bool> {
         let mut muted = false;
 
         unsafe {
@@ -47,7 +47,7 @@ impl<'a> Discord<'a> {
         Ok(muted)
     }
 
-    pub fn get_local_volume(&mut self, user_id: i64) -> Result<u8> {
+    pub fn local_volume(&mut self, user_id: i64) -> Result<u8> {
         let mut volume = 0u8;
 
         unsafe {

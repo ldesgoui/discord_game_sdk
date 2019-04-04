@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// # Users
 impl<'a> Discord<'a> {
-    pub fn get_current_user(&mut self) -> Result<User> {
+    pub fn current_user(&mut self) -> Result<User> {
         let mut user = sys::DiscordUser::default();
 
         unsafe {
@@ -15,7 +15,7 @@ impl<'a> Discord<'a> {
         Ok(User::from_sys(&user))
     }
 
-    pub fn get_user<F>(&mut self, user_id: i64, mut callback: F)
+    pub fn user<F>(&mut self, user_id: i64, mut callback: F)
     where
         F: FnMut(Result<User>),
     {
@@ -28,7 +28,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn get_current_user_premium_type(&mut self) -> Result<PremiumType> {
+    pub fn current_user_premium_type(&mut self) -> Result<PremiumType> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
         unsafe {

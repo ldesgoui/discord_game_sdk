@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// # Application
 impl<'a> Discord<'a> {
-    pub fn get_current_locale(&mut self) -> String {
+    pub fn current_locale(&mut self) -> String {
         let mut locale: sys::DiscordLocale = [0; 128];
 
         unsafe {
@@ -14,7 +14,7 @@ impl<'a> Discord<'a> {
         unsafe { string_from_cstr(&locale as *const _) }
     }
 
-    pub fn get_current_branch(&mut self) -> String {
+    pub fn current_branch(&mut self) -> String {
         let mut branch: sys::DiscordBranch = [0; 4096];
 
         unsafe {
@@ -38,7 +38,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn get_oauth2_token<F>(&mut self, mut callback: F)
+    pub fn oauth2_token<F>(&mut self, mut callback: F)
     where
         F: FnMut(Result<OAuth2Token>),
     {

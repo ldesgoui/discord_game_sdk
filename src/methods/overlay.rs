@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// # Overlay
 impl<'a> Discord<'a> {
-    pub fn is_overlay_enabled(&mut self) -> bool {
+    pub fn overlay_enabled(&mut self) -> bool {
         let mut enabled = false;
 
         unsafe {
@@ -14,7 +14,7 @@ impl<'a> Discord<'a> {
         enabled
     }
 
-    pub fn is_overlay_opened(&mut self) -> bool {
+    pub fn overlay_opened(&mut self) -> bool {
         let mut opened = false;
 
         unsafe { ffi!(self.get_overlay_manager().is_locked(&mut opened as *mut _)) }
