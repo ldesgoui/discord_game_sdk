@@ -25,6 +25,7 @@ mod entitlement;
 pub mod error;
 pub mod event;
 mod file;
+mod lobby;
 mod oauth2_token;
 mod relationship;
 mod sku;
@@ -77,6 +78,7 @@ pub use crate::{
     entitlement::{Entitlement, EntitlementKind},
     error::{Error, Result},
     file::FileStat,
+    lobby::{Lobby, LobbyKind},
     oauth2_token::OAuth2Token,
     relationship::{Presence, Relationship, RelationshipKind, Status},
     sku::{Sku, SkuKind},
