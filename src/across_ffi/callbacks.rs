@@ -4,7 +4,7 @@ pub(crate) extern "C" fn result<F>(callback_ptr: *mut c_void, res: sys::EDiscord
 where
     F: FnMut(Result<()>),
 {
-    let callback: &mut F = unsafe { (callback_ptr as *mut F).as_mut().unwrap() };
+    let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
 
     callback(res.to_result())
 }
@@ -17,7 +17,7 @@ pub(crate) extern "C" fn result_from_sys<F, S>(
     F: FnMut(Result<S>),
     S: FromSys,
 {
-    let callback: &mut F = unsafe { (callback_ptr as *mut F).as_mut().unwrap() };
+    let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
 
     callback(
         res.to_result()
@@ -33,7 +33,7 @@ pub(crate) extern "C" fn slice<F>(
 ) where
     F: FnMut(Result<&[u8]>) + Sized,
 {
-    let callback: &mut F = unsafe { (callback_ptr as *mut F).as_mut().unwrap() };
+    let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
 
     callback(
         res.to_result()
@@ -48,7 +48,7 @@ pub(crate) extern "C" fn filter_relationship<F>(
 where
     F: FnMut(Relationship) -> bool,
 {
-    let callback: &mut F = unsafe { (callback_ptr as *mut F).as_mut().unwrap() };
+    let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
 
     callback(unsafe { Relationship::from_sys_ptr(relationship_ptr) })
 }
@@ -74,5 +74,5 @@ pub(crate) extern "C" fn log(
         .to_str()
         .unwrap();
 
-    log::log!(level, "{}", message);
+    log::log!(target: "discord_game_sdk", level, "{}", message);
 }

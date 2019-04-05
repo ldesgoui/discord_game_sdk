@@ -18,7 +18,7 @@ impl<'a> Discord<'a> {
 
     /// # Rate limit
     /// 5 updates per 20 seconds
-    pub fn update_activity<F>(&mut self, activity_change: &ActivityChange, mut callback: F)
+    pub fn update_activity<F>(&mut self, activity_change: &ActivityChange, callback: F)
     where
         F: FnMut(Result<()>),
     {
@@ -27,25 +27,25 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_activity_manager().update_activity(
                 &mut activity as *mut _,
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         };
     }
 
-    pub fn clear_activity<F>(&mut self, mut callback: F)
+    pub fn clear_activity<F>(&mut self, callback: F)
     where
         F: FnMut(Result<()>),
     {
         unsafe {
             ffi!(self.get_activity_manager().clear_activity(
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         };
     }
 
-    pub fn send_request_reply<F>(&mut self, user_id: i64, reply: RequestReply, mut callback: F)
+    pub fn send_request_reply<F>(&mut self, user_id: i64, reply: RequestReply, callback: F)
     where
         F: FnMut(Result<()>),
     {
@@ -53,13 +53,13 @@ impl<'a> Discord<'a> {
             ffi!(self.get_activity_manager().send_request_reply(
                 user_id,
                 reply.to_sys(),
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         };
     }
 
-    pub fn send_invite<S, F>(&mut self, user_id: i64, action: Action, content: S, mut callback: F)
+    pub fn send_invite<S, F>(&mut self, user_id: i64, action: Action, content: S, callback: F)
     where
         S: AsRef<str>,
         F: FnMut(Result<()>),
@@ -71,20 +71,20 @@ impl<'a> Discord<'a> {
                 user_id,
                 action.to_sys(),
                 content.as_ptr(),
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         };
     }
 
-    pub fn accept_invite<F>(&mut self, user_id: i64, mut callback: F)
+    pub fn accept_invite<F>(&mut self, user_id: i64, callback: F)
     where
         F: FnMut(Result<()>),
     {
         unsafe {
             ffi!(self.get_activity_manager().accept_invite(
                 user_id,
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         }

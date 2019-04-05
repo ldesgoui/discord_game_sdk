@@ -22,33 +22,33 @@ impl<'a> Discord<'a> {
         opened
     }
 
-    pub fn set_overlay_opened<F>(&mut self, opened: bool, mut callback: F)
+    pub fn set_overlay_opened<F>(&mut self, opened: bool, callback: F)
     where
         F: FnMut(Result<()>),
     {
         unsafe {
             ffi!(self.get_overlay_manager().set_locked(
                 opened,
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         }
     }
 
-    pub fn open_invite_overlay<F>(&mut self, action: Action, mut callback: F)
+    pub fn open_invite_overlay<F>(&mut self, action: Action, callback: F)
     where
         F: FnMut(Result<()>),
     {
         unsafe {
             ffi!(self.get_overlay_manager().open_activity_invite(
                 action.to_sys(),
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         }
     }
 
-    pub fn open_guild_invite_overlay<S, F>(&mut self, code: S, mut callback: F)
+    pub fn open_guild_invite_overlay<S, F>(&mut self, code: S, callback: F)
     where
         S: AsRef<str>,
         F: FnMut(Result<()>),
@@ -58,19 +58,19 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_overlay_manager().open_guild_invite(
                 code.as_ptr(),
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         }
     }
 
-    pub fn open_voice_settings<F>(&mut self, mut callback: F)
+    pub fn open_voice_settings<F>(&mut self, callback: F)
     where
         F: FnMut(Result<()>),
     {
         unsafe {
             ffi!(self.get_overlay_manager().open_voice_settings(
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         }

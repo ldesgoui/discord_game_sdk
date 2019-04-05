@@ -15,14 +15,14 @@ impl<'a> Discord<'a> {
         Ok(User::from_sys(&user))
     }
 
-    pub fn user<F>(&mut self, user_id: i64, mut callback: F)
+    pub fn user<F>(&mut self, user_id: i64, callback: F)
     where
         F: FnMut(Result<User>),
     {
         unsafe {
             ffi!(self.get_user_manager().get_user(
                 user_id,
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result_from_sys::<F, User>)
             ))
         }

@@ -26,25 +26,25 @@ impl<'a> Discord<'a> {
         unsafe { string_from_cstr(&branch as *const _) }
     }
 
-    pub fn validate_or_exit<F>(&mut self, mut callback: F)
+    pub fn validate_or_exit<F>(&mut self, callback: F)
     where
         F: FnMut(Result<()>),
     {
         unsafe {
             ffi!(self.get_application_manager().validate_or_exit(
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         }
     }
 
-    pub fn oauth2_token<F>(&mut self, mut callback: F)
+    pub fn oauth2_token<F>(&mut self, callback: F)
     where
         F: FnMut(Result<OAuth2Token>),
     {
         unsafe {
             ffi!(self.get_application_manager().get_oauth2_token(
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result_from_sys::<F, OAuth2Token>)
             ))
         }

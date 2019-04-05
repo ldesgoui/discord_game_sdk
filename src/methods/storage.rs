@@ -22,7 +22,7 @@ impl<'a> Discord<'a> {
         Ok(read)
     }
 
-    pub fn read_file_async<S, F>(&mut self, filename: S, mut callback: F)
+    pub fn read_file_async<S, F>(&mut self, filename: S, callback: F)
     where
         S: AsRef<str>,
         F: FnMut(Result<&[u8]>),
@@ -32,7 +32,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_storage_manager().read_async(
                 filename.as_ptr(),
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::slice::<F>)
             ))
         }
@@ -43,7 +43,7 @@ impl<'a> Discord<'a> {
         filename: S,
         offset: u64,
         length: u64,
-        mut callback: F,
+        callback: F,
     ) where
         S: AsRef<str>,
         F: FnMut(Result<&[u8]>),
@@ -55,7 +55,7 @@ impl<'a> Discord<'a> {
                 filename.as_ptr(),
                 offset,
                 length,
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::slice::<F>)
             ))
         }
@@ -77,7 +77,7 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
-    pub fn write_file_async<S, F>(&mut self, filename: S, buffer: &[u8], mut callback: F)
+    pub fn write_file_async<S, F>(&mut self, filename: S, buffer: &[u8], callback: F)
     where
         S: AsRef<str>,
         F: FnMut(Result<()>),
@@ -89,7 +89,7 @@ impl<'a> Discord<'a> {
                 filename.as_ptr(),
                 buffer.as_ptr() as *mut _,
                 buffer.len() as u32,
-                &mut callback as *mut _ as *mut _,
+                Box::into_raw(Box::new(callback)) as *mut _,
                 Some(across_ffi::callbacks::result::<F>)
             ))
         }
