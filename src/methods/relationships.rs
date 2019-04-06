@@ -15,13 +15,13 @@ impl<'a> Discord<'a> {
         Ok(Relationship::from_sys(&relationship))
     }
 
-    pub fn all_relationships<F>(&mut self, mut filter: F) -> Result<Vec<Relationship>>
+    pub fn all_relationships<F>(&mut self, filter: F) -> Result<Vec<Relationship>>
     where
         F: FnMut(Relationship) -> bool,
     {
         unsafe {
             ffi!(self.get_relationship_manager().filter(
-                &mut filter as *mut _ as *mut _,
+                Box::into_raw(Box::new(filter)) as *mut _,
                 Some(across_ffi::callbacks::filter_relationship::<F>)
             ))
         }

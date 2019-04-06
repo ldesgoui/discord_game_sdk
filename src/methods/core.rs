@@ -2,13 +2,18 @@ use crate::prelude::*;
 
 /// # Core
 impl<'a> Discord<'a> {
-    pub fn new(client_id: i64) -> Result<Self> {
+    pub fn new(client_id: i64) -> Result<Box<Self>> {
         Self::with_create_flags(client_id, CreateFlags::default())
     }
 
-    // pub fn with_config(client_id: i64, config: &Config) -> Result<Self> {
-    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
-        let mut sdk = Self {
+    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Box<Self>> {
+        // TODO: REFACTOR
+        // - event channels move to Arc<{a: Mutex<Channel<_>>, ..}>
+        // - event handlers are given this pointer and refcount during their use
+        // - go back to Result<Self>
+        // - Self can be built after DiscordCreate again
+
+        let result = Box::new(Self {
             core: unsafe { std::mem::uninitialized() },
             client_id,
             activity_channel: shrev::EventChannel::new(),
@@ -19,20 +24,23 @@ impl<'a> Discord<'a> {
             store_channel: shrev::EventChannel::new(),
             user_channel: shrev::EventChannel::new(),
             voice_channel: shrev::EventChannel::new(),
-        };
+        });
 
-        let mut params = create_params(client_id, flags, &mut sdk as *mut _);
+        let raw = Box::into_raw(result);
+        let mut params = create_params(client_id, flags, raw as *mut _);
+        let mut result = unsafe { Box::from_raw(raw) };
 
         let mut core_ptr = std::ptr::null_mut();
 
         unsafe {
-            sys::DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core_ptr).to_result()?
-        };
+            sys::DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core_ptr)
+        }
+        .to_result()?;
 
-        sdk.core = unsafe { core_ptr.as_mut() }.unwrap();
-        sdk.set_log_hook();
+        result.core = unsafe { core_ptr.as_mut() }.unwrap();
+        result.set_log_hook();
 
-        Ok(sdk)
+        Ok(result)
     }
 
     fn set_log_hook(&mut self) {
@@ -59,14 +67,14 @@ impl<'a> Drop for Discord<'a> {
 fn create_params(
     client_id: i64,
     flags: CreateFlags,
-    ptr: *mut Discord,
+    event_data: *mut c_void
 ) -> sys::DiscordCreateParams {
     sys::DiscordCreateParams {
         client_id,
         flags: flags.to_sys() as u64,
 
         events: std::ptr::null_mut(),
-        event_data: ptr as *mut c_void,
+        event_data,
 
         application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
         application_events: std::ptr::null_mut(),
@@ -101,7 +109,7 @@ fn create_params(
         voice_events: &mut VOICE,
         voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
 
-        achievement_events: &mut sys::IDiscordAchievementEvents::default(),
+        achievement_events: std::ptr::null_mut(),
         achievement_version: sys::DISCORD_ACHIEVEMENT_MANAGER_VERSION,
     }
 }
