@@ -63,7 +63,7 @@ fn create_params(
 ) -> sys::DiscordCreateParams {
     sys::DiscordCreateParams {
         client_id,
-        flags: u64::from(flags.to_sys()),
+        flags: flags.to_sys() as u64,
 
         events: std::ptr::null_mut(),
         event_data: ptr as *mut c_void,

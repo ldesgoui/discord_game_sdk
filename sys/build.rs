@@ -34,7 +34,7 @@ fn main() {
         std::path::PathBuf::from(std::env::var("DISCORD_GAME_SDK_PATH").expect(MISSING_SDK_PATH));
 
     bindgen::builder()
-        .header(sdk_path.join("c/discord_game_sdk.h").to_string_lossy())
+        .header(sdk_path.join("c/discord_game_sdk.h").to_str().unwrap())
         .blacklist_type("__u?int(8|16|32|64)_t")
         .derive_default(true)
         .parse_callbacks(Box::new(Callbacks))
@@ -53,15 +53,15 @@ fn main() {
 
     match target.as_ref() {
         "i686-pc-windows-gnu" | "i686-pc-windows-msvc" => {
-            println!("cargo:rustc-link-search={:?}", sdk_path.join("lib/x86"));
+            println!("cargo:rustc-link-search={}", sdk_path.join("lib/x86").to_str().unwrap());
             println!("cargo:rustc-link-lib=discord_game_sdk.dll");
         }
         "x86_64-pc-windows-gnu" | "x86_64-pc-windows-msvc" => {
-            println!("cargo:rustc-link-search={:?}", sdk_path.join("lib/x86_64"));
+            println!("cargo:rustc-link-search={}", sdk_path.join("lib/x86_64").to_str().unwrap());
             println!("cargo:rustc-link-lib=discord_game_sdk.dll");
         }
         "x86_64-apple-darwin" => {
-            println!("cargo:rustc-link-search={:?}", sdk_path.join("lib/x86_64"));
+            println!("cargo:rustc-link-search={}", sdk_path.join("lib/x86_64").to_str().unwrap());
             println!("cargo:rustc-link-lib=discord_game_sdk");
         }
         _ => {
