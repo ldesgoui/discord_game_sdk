@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub(crate) extern "C" fn on_activity_join(core_ptr: *mut c_void, secret: *const c_char) {
+pub(crate) extern "C" fn on_activity_join(core_ptr: *mut c_void, secret: *const i8) {
     let core: &mut Discord = unsafe { (core_ptr as *mut Discord).as_mut() }.unwrap();
 
     let secret = unsafe { std::ffi::CStr::from_ptr(secret) }
@@ -12,7 +12,7 @@ pub(crate) extern "C" fn on_activity_join(core_ptr: *mut c_void, secret: *const 
         .single_write(event::Activity::Join { secret });
 }
 
-pub(crate) extern "C" fn on_activity_spectate(core_ptr: *mut c_void, secret: *const c_char) {
+pub(crate) extern "C" fn on_activity_spectate(core_ptr: *mut c_void, secret: *const i8) {
     let core: &mut Discord = unsafe { (core_ptr as *mut Discord).as_mut() }.unwrap();
 
     let secret = unsafe { std::ffi::CStr::from_ptr(secret) }

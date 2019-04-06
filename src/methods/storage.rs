@@ -157,7 +157,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn folder_path(&mut self) -> Result<String> {
-        let mut path: sys::DiscordPath = [0; 4096];
+        let mut path: sys::DiscordPath = [0; size_of::<sys::DiscordPath>()];
 
         unsafe { ffi!(self.get_storage_manager().get_path(&mut path)) }.to_result()?;
 

@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// # Application
 impl<'a> Discord<'a> {
     pub fn current_locale(&mut self) -> String {
-        let mut locale: sys::DiscordLocale = [0; 128];
+        let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
 
         unsafe {
             ffi!(self
@@ -15,7 +15,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn current_branch(&mut self) -> String {
-        let mut branch: sys::DiscordBranch = [0; 4096];
+        let mut branch: sys::DiscordBranch = [0; size_of::<sys::DiscordBranch>()];
 
         unsafe {
             ffi!(self

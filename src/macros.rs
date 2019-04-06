@@ -2,8 +2,9 @@ macro_rules! ffi {
     // ffi!(self.destroy())
     ($self:ident . $method:ident ( $($args:expr),* $(,)? )) => {
         {
-            debug_assert!($self.core.$method.is_some());
+            assert!($self.core.$method.is_some());
 
+            log::trace!(target: "discord_game_sdk", "calling FFI: {}", stringify!($method));
             $self.core.$method.unwrap()($self.core as *mut _, $( $args ),*)
         }
     };
@@ -13,8 +14,9 @@ macro_rules! ffi {
         {
             let manager = ffi!($self.$get_manager()).as_mut().unwrap();
 
-            debug_assert!(manager.$method.is_some());
+            assert!(manager.$method.is_some());
 
+            log::trace!(target: "discord_game_sdk", "calling FFI manager method: {}", stringify!($method));
             manager.$method.unwrap()(manager as *mut _, $( $args ),*)
         }
     };

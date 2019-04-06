@@ -10,6 +10,6 @@ pub(crate) trait FromSys: Sized {
     }
 }
 
-pub(crate) unsafe fn string_from_cstr(ptr: *const c_char) -> String {
+pub(crate) unsafe fn string_from_cstr(ptr: *const i8) -> String {
     CStr::from_ptr(ptr).to_str().unwrap().to_string()
 }

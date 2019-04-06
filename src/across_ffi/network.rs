@@ -18,7 +18,7 @@ pub(crate) extern "C" fn on_message(
     })
 }
 
-pub(crate) extern "C" fn on_route_update(core_ptr: *mut c_void, route: *const c_char) {
+pub(crate) extern "C" fn on_route_update(core_ptr: *mut c_void, route: *const i8) {
     let core: &mut Discord = unsafe { (core_ptr as *mut Discord).as_mut() }.unwrap();
 
     let route = unsafe { string_from_cstr(route) };

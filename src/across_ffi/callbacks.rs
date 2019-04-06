@@ -53,11 +53,7 @@ where
     callback(unsafe { Relationship::from_sys_ptr(relationship_ptr) })
 }
 
-pub(crate) extern "C" fn log(
-    _: *mut c_void,
-    level: sys::EDiscordLogLevel,
-    message: *const std::os::raw::c_char,
-) {
+pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, message: *const i8) {
     if message.is_null() {
         panic!("log_hook was passed a null pointer");
     }
@@ -74,5 +70,5 @@ pub(crate) extern "C" fn log(
         .to_str()
         .unwrap();
 
-    log::log!(target: "discord_game_sdk", level, "{}", message);
+    log::log!(target: "discord_game_sdk", level, "[SDK] {}", message);
 }

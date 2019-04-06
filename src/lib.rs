@@ -26,6 +26,7 @@ pub mod error;
 pub mod event;
 mod file;
 mod lobby;
+mod lobby_transaction;
 mod oauth2_token;
 mod relationship;
 mod sku;
@@ -68,8 +69,11 @@ mod prelude {
         *,
     };
     pub(crate) use discord_game_sdk_sys as sys;
-    pub(crate) use std::ffi::{CStr, CString};
-    pub(crate) use std::os::raw::{c_char, c_void};
+    pub(crate) use std::{
+        collections::HashMap,
+        ffi::{c_void, CStr, CString},
+        mem::size_of,
+    };
 }
 
 pub use crate::{
@@ -79,6 +83,7 @@ pub use crate::{
     error::{Error, Result},
     file::FileStat,
     lobby::{Lobby, LobbyKind},
+    lobby_transaction::{LobbyMemberTransaction, LobbyTransaction},
     oauth2_token::OAuth2Token,
     relationship::{Presence, Relationship, RelationshipKind, Status},
     sku::{Sku, SkuKind},
