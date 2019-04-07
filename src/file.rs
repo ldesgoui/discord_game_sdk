@@ -4,13 +4,15 @@ use crate::prelude::*;
 pub struct FileStat {
     pub filename: String,
     pub size: u64,
-    pub last_modified: chrono::NaiveDateTime,
+    pub last_modified: chrono::DateTime<chrono::Utc>,
 }
 
 impl FromSys for FileStat {
     type Source = sys::DiscordFileStat;
 
     fn from_sys(source: &Self::Source) -> Self {
+        use chrono::offset::TimeZone;
+
         let filename = unsafe { std::ffi::CStr::from_ptr(&source.filename as *const _) }
             .to_str()
             .unwrap()
@@ -19,7 +21,7 @@ impl FromSys for FileStat {
         Self {
             filename,
             size: source.size,
-            last_modified: chrono::NaiveDateTime::from_timestamp(source.last_modified as i64, 0),
+            last_modified: chrono::Utc.timestamp(source.last_modified as i64, 0),
         }
     }
 }

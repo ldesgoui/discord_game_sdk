@@ -7,8 +7,8 @@ pub struct Activity {
     pub name: String,
     pub state: String,
     pub details: String,
-    pub start_time: chrono::NaiveDateTime,
-    pub end_time: chrono::NaiveDateTime,
+    pub start_time: chrono::DateTime<chrono::Utc>,
+    pub end_time: chrono::DateTime<chrono::Utc>,
     pub large_image_key: String,
     pub large_image_tooltip: String,
     pub small_image_key: String,
@@ -26,6 +26,8 @@ impl FromSys for Activity {
     type Source = sys::DiscordActivity;
 
     fn from_sys(source: &Self::Source) -> Self {
+        use chrono::offset::TimeZone;
+
         unsafe {
             Self {
                 kind: ActivityKind::from_sys(&source.type_),
@@ -33,8 +35,8 @@ impl FromSys for Activity {
                 name: string_from_cstr(&source.name as *const _),
                 state: string_from_cstr(&source.state as *const _),
                 details: string_from_cstr(&source.state as *const _),
-                start_time: chrono::NaiveDateTime::from_timestamp(source.timestamps.start, 0),
-                end_time: chrono::NaiveDateTime::from_timestamp(source.timestamps.end, 0),
+                start_time: chrono::Utc.timestamp(source.timestamps.start, 0),
+                end_time: chrono::Utc.timestamp(source.timestamps.end, 0),
                 large_image_key: string_from_cstr(&source.assets.large_image as *const _),
                 large_image_tooltip: string_from_cstr(&source.assets.large_text as *const _),
                 small_image_key: string_from_cstr(&source.assets.small_image as *const _),
