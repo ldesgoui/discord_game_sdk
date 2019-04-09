@@ -90,6 +90,18 @@ impl Action {
     }
 }
 
+impl FromSys for Action {
+    type Source = sys::EDiscordActivityActionType;
+
+    fn from_sys(source: &Self::Source) -> Self {
+        match *source {
+            sys::DiscordActivityActionType_Join => Action::Join,
+            sys::DiscordActivityActionType_Spectate => Action::Spectate,
+            _ => panic!("enum"),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RequestReply {
     Yes,
