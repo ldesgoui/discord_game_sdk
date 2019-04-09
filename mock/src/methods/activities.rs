@@ -1,10 +1,9 @@
-use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use crate::prelude::*;
 
 /// Complete
 pub unsafe extern "C" fn register_command(
     _: *mut sys::IDiscordActivityManager,
-    _: *const c_char,
+    _: *const i8,
 ) -> sys::EDiscordResult {
     prevent_unwind!();
     sys::DiscordResult_Ok
@@ -52,7 +51,7 @@ pub unsafe extern "C" fn send_invite(
     manager: *mut sys::IDiscordActivityManager,
     user_id: sys::DiscordUserId,
     type_: sys::EDiscordActivityActionType,
-    content: *const c_char,
+    content: *const i8,
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {

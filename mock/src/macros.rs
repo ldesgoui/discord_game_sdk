@@ -1,25 +1,29 @@
 macro_rules! prevent_unwind {
     () => {
-        scopeguard::defer_on_unwind!({
-            log::error!(target: "MOCK", "mock library has panicked, aborting");
-            std::process::abort();
-        });
+        // scopeguard::defer_on_unwind!({
+        //     log::error!(target: "MOCK", "mock library has panicked, aborting");
+        //     std::process::abort();
+        // });
     };
 }
 
 macro_rules! logged_assert {
     ($cond:expr) => {
         if !$cond {
-            log::error!(target: "MOCK", "assertion error: {}", stringify!($cond));
+            log::error!("assertion error: {}", stringify!($cond));
             std::process::abort();
         }
-    }
+    };
 }
 
 macro_rules! from_ptr {
     ($name:ident, $typ:path, $($field:tt)+) => {
-        unsafe fn $name<'a>(ptr: *mut $typ) -> &'a mut Self {
-            &mut *(ptr.sub(memoffset::offset_of!(Self, $($field)+)) as *mut _)
+        pub unsafe fn $name<'a>(ptr: *mut $typ) -> &'a mut Self {
+            let offset = memoffset::offset_of!(Self, $($field)+);
+            let ptr = ptr as *const u8;
+            let ptr = ptr.sub(offset);
+            let ptr = ptr as *mut Self;
+            ptr.as_mut().unwrap()
         }
     };
 }

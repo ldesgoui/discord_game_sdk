@@ -1,12 +1,9 @@
-//! COMPLETE COMPLETE COMPLETE
-
-use crate::Instance;
-use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use crate::prelude::*;
 
 /// Complete
 pub unsafe extern "C" fn is_enabled(_: *mut sys::IDiscordOverlayManager, enabled: *mut bool) {
     prevent_unwind!();
+
     *enabled = true;
 }
 
@@ -15,7 +12,7 @@ pub unsafe extern "C" fn is_locked(manager: *mut sys::IDiscordOverlayManager, lo
     prevent_unwind!();
     let inst = Instance::from_overlay(manager);
 
-    *locked = inst.state.overlay_locked;
+    *locked = inst.state.overlay_opened;
 }
 
 /// Complete
@@ -28,66 +25,45 @@ pub unsafe extern "C" fn set_locked(
     prevent_unwind!();
     let inst = Instance::from_overlay(manager);
 
-    inst.state.overlay_locked = locked;
+    inst.state.overlay_opened = locked;
 
-    callback.unwrap()(callback_data, sys::DiscordResult_Ok);
+    inst.state.queue(1, move |i| {
+        log::info!("WOW IM HNERE");
+        callback.unwrap()(callback_data, sys::DiscordResult_Ok);
+    })
 }
 
 /// Complete
 pub unsafe extern "C" fn open_activity_invite(
-    manager: *mut sys::IDiscordOverlayManager,
+    _: *mut sys::IDiscordOverlayManager,
     _: sys::EDiscordActivityActionType,
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
     prevent_unwind!();
-    let inst = Instance::from_overlay(manager);
 
-    callback.unwrap()(
-        callback_data,
-        if inst.state.overlay_locked {
-            sys::DiscordResult_InvalidCommand
-        } else {
-            sys::DiscordResult_Ok
-        },
-    );
+    callback.unwrap()(callback_data, sys::DiscordResult_Ok);
 }
 
 /// Complete
 pub unsafe extern "C" fn open_guild_invite(
-    manager: *mut sys::IDiscordOverlayManager,
-    _: *const c_char,
+    _: *mut sys::IDiscordOverlayManager,
+    _: *const i8,
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
     prevent_unwind!();
-    let inst = Instance::from_overlay(manager);
 
-    callback.unwrap()(
-        callback_data,
-        if inst.state.overlay_locked {
-            sys::DiscordResult_InvalidCommand
-        } else {
-            sys::DiscordResult_Ok
-        },
-    );
+    callback.unwrap()(callback_data, sys::DiscordResult_Ok);
 }
 
 /// Complete
 pub unsafe extern "C" fn open_voice_settings(
-    manager: *mut sys::IDiscordOverlayManager,
+    _: *mut sys::IDiscordOverlayManager,
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
     prevent_unwind!();
-    let inst = Instance::from_overlay(manager);
 
-    callback.unwrap()(
-        callback_data,
-        if inst.state.overlay_locked {
-            sys::DiscordResult_InvalidCommand
-        } else {
-            sys::DiscordResult_Ok
-        },
-    );
+    callback.unwrap()(callback_data, sys::DiscordResult_Ok);
 }

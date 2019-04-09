@@ -1,5 +1,4 @@
-use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use crate::prelude::*;
 
 pub unsafe extern "C" fn get_lobby_create_transaction(
     manager: *mut sys::IDiscordLobbyManager,
@@ -65,7 +64,7 @@ pub unsafe extern "C" fn delete_lobby(
 pub unsafe extern "C" fn connect_lobby(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
-    secret: *mut c_char,
+    secret: *mut i8,
     callback_data: *mut c_void,
     callback: Option<
         unsafe extern "C" fn(
@@ -80,7 +79,7 @@ pub unsafe extern "C" fn connect_lobby(
 
 pub unsafe extern "C" fn connect_lobby_with_activity_secret(
     manager: *mut sys::IDiscordLobbyManager,
-    activity_secret: *mut c_char,
+    activity_secret: *mut i8,
     callback_data: *mut c_void,
     callback: Option<
         unsafe extern "C" fn(
@@ -123,7 +122,7 @@ pub unsafe extern "C" fn get_lobby_activity_secret(
 pub unsafe extern "C" fn get_lobby_metadata_value(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
-    key: *mut c_char,
+    key: *mut i8,
     value: *mut sys::DiscordMetadataValue,
 ) -> sys::EDiscordResult {
     prevent_unwind!();
@@ -182,7 +181,7 @@ pub unsafe extern "C" fn get_member_metadata_value(
     manager: *mut sys::IDiscordLobbyManager,
     lobby_id: sys::DiscordLobbyId,
     user_id: sys::DiscordUserId,
-    key: *mut c_char,
+    key: *mut i8,
     value: *mut sys::DiscordMetadataValue,
 ) -> sys::EDiscordResult {
     prevent_unwind!();

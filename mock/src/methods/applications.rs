@@ -1,14 +1,17 @@
-use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use crate::prelude::*;
 
 /// Complete
 pub unsafe extern "C" fn validate_or_exit(
-    _: *mut sys::IDiscordApplicationManager,
+    core: *mut sys::IDiscordApplicationManager,
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
     prevent_unwind!();
-    callback.unwrap()(callback_data, sys::DiscordResult_Ok);
+    let mut inst = Instance::from_application(core);
+
+    inst.state.queue(1, move |i| {
+        callback.unwrap()(callback_data, sys::DiscordResult_Ok);
+    })
 }
 
 /// Complete
@@ -57,7 +60,7 @@ pub unsafe extern "C" fn get_ticket(
         unsafe extern "C" fn(
             callback_data: *mut c_void,
             result: sys::EDiscordResult,
-            data: *const c_char,
+            data: *const i8,
         ),
     >,
 ) {

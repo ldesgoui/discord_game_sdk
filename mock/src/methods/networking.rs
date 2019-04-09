@@ -1,5 +1,4 @@
-use discord_game_sdk_sys as sys;
-use std::os::raw::c_char;
+use crate::prelude::*;
 
 pub unsafe extern "C" fn get_peer_id(
     manager: *mut sys::IDiscordNetworkManager,
@@ -16,7 +15,7 @@ pub unsafe extern "C" fn flush(manager: *mut sys::IDiscordNetworkManager) -> sys
 pub unsafe extern "C" fn open_peer(
     manager: *mut sys::IDiscordNetworkManager,
     peer_id: sys::DiscordNetworkPeerId,
-    route_data: *const c_char,
+    route_data: *const i8,
 ) -> sys::EDiscordResult {
     prevent_unwind!();
     sys::DiscordResult_Ok
@@ -25,7 +24,7 @@ pub unsafe extern "C" fn open_peer(
 pub unsafe extern "C" fn update_peer(
     manager: *mut sys::IDiscordNetworkManager,
     peer_id: sys::DiscordNetworkPeerId,
-    route_data: *const c_char,
+    route_data: *const i8,
 ) -> sys::EDiscordResult {
     prevent_unwind!();
     sys::DiscordResult_Ok

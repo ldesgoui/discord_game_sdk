@@ -1,6 +1,4 @@
-use crate::Instance;
-use discord_game_sdk_sys as sys;
-use std::os::raw::c_void;
+use crate::prelude::*;
 
 pub unsafe extern "C" fn fetch_skus(
     manager: *mut sys::IDiscordStoreManager,
@@ -74,20 +72,12 @@ pub unsafe extern "C" fn has_sku_entitlement(
 
 /// Complete
 pub unsafe extern "C" fn start_purchase(
-    manager: *mut sys::IDiscordStoreManager,
+    _: *mut sys::IDiscordStoreManager,
     _: sys::DiscordSnowflake,
     callback_data: *mut c_void,
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
     prevent_unwind!();
-    let inst = Instance::from_store(manager);
 
-    callback.unwrap()(
-        callback_data,
-        if inst.state.overlay_locked {
-            sys::DiscordResult_InvalidCommand
-        } else {
-            sys::DiscordResult_Ok
-        },
-    );
+    callback.unwrap()(callback_data, sys::DiscordResult_Ok);
 }

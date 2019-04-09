@@ -1,9 +1,8 @@
-use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use crate::prelude::*;
 
 pub unsafe extern "C" fn read(
     manager: *mut sys::IDiscordStorageManager,
-    name: *const c_char,
+    name: *const i8,
     data: *mut u8,
     data_length: u32,
     read: *mut u32,
@@ -14,7 +13,7 @@ pub unsafe extern "C" fn read(
 
 pub unsafe extern "C" fn read_async(
     manager: *mut sys::IDiscordStorageManager,
-    name: *const c_char,
+    name: *const i8,
     callback_data: *mut c_void,
     callback: Option<
         unsafe extern "C" fn(
@@ -30,7 +29,7 @@ pub unsafe extern "C" fn read_async(
 
 pub unsafe extern "C" fn read_async_partial(
     manager: *mut sys::IDiscordStorageManager,
-    name: *const c_char,
+    name: *const i8,
     offset: u64,
     length: u64,
     callback_data: *mut c_void,
@@ -48,7 +47,7 @@ pub unsafe extern "C" fn read_async_partial(
 
 pub unsafe extern "C" fn write(
     manager: *mut sys::IDiscordStorageManager,
-    name: *const c_char,
+    name: *const i8,
     data: *mut u8,
     data_length: u32,
 ) -> sys::EDiscordResult {
@@ -58,7 +57,7 @@ pub unsafe extern "C" fn write(
 
 pub unsafe extern "C" fn write_async(
     manager: *mut sys::IDiscordStorageManager,
-    name: *const c_char,
+    name: *const i8,
     data: *mut u8,
     data_length: u32,
     callback_data: *mut c_void,
@@ -69,7 +68,7 @@ pub unsafe extern "C" fn write_async(
 
 pub unsafe extern "C" fn delete_(
     manager: *mut sys::IDiscordStorageManager,
-    name: *const c_char,
+    name: *const i8,
 ) -> sys::EDiscordResult {
     prevent_unwind!();
     sys::DiscordResult_Ok
@@ -77,7 +76,7 @@ pub unsafe extern "C" fn delete_(
 
 pub unsafe extern "C" fn exists(
     manager: *mut sys::IDiscordStorageManager,
-    name: *const c_char,
+    name: *const i8,
     exists: *mut bool,
 ) -> sys::EDiscordResult {
     prevent_unwind!();
@@ -88,7 +87,7 @@ pub unsafe extern "C" fn count(manager: *mut sys::IDiscordStorageManager, count:
 
 pub unsafe extern "C" fn stat(
     manager: *mut sys::IDiscordStorageManager,
-    name: *const c_char,
+    name: *const i8,
     stat: *mut sys::DiscordFileStat,
 ) -> sys::EDiscordResult {
     prevent_unwind!();

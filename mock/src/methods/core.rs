@@ -1,6 +1,55 @@
-use crate::Instance;
-use discord_game_sdk_sys as sys;
-use std::os::raw::{c_char, c_void};
+use crate::prelude::*;
+
+#[no_mangle]
+pub unsafe extern "C" fn DiscordCreate(
+    version: sys::DiscordVersion,
+    params: *mut sys::DiscordCreateParams,
+    result: *mut *mut sys::IDiscordCore,
+) -> sys::EDiscordResult {
+    prevent_unwind!();
+
+    let _ = pretty_env_logger::try_init_custom_env("DISCORD_GAME_SDK_MOCK_LOG");
+
+    logged_assert!(!result.is_null());
+
+    let params = params.as_ref().unwrap();
+
+    log::trace!("called DiscordCreate:");
+    log::trace!("  - Client ID: {}", params.client_id);
+    log::trace!(
+        "  - Requires Discord to be running: {}",
+        params.flags == sys::DiscordCreateFlags_Default as u64
+    );
+    log::trace!("  - SDK Version: {}", version);
+    log::trace!(
+        "  - Application Manager Version: {}",
+        params.application_version
+    );
+    log::trace!("  - User Manager Version: {}", params.user_version);
+    log::trace!("  - Image Manager Version: {}", params.image_version);
+    log::trace!("  - Activity Manager Version: {}", params.activity_version);
+    log::trace!(
+        "  - Relationship Manager Version: {}",
+        params.relationship_version
+    );
+    log::trace!("  - Lobby Manager Version: {}", params.lobby_version);
+    log::trace!("  - Network Manager Version: {}", params.network_version);
+    log::trace!("  - Overlay Manager Version: {}", params.overlay_version);
+    log::trace!("  - Storage Manager Version: {}", params.storage_version);
+    log::trace!("  - Store Manager Version: {}", params.store_version);
+    log::trace!("  - Voice Manager Version: {}", params.voice_version);
+    log::trace!(
+        "  - Achievement Manager Version: {}",
+        params.achievement_version
+    );
+
+    let mut inst = Instance::new(version, params);
+    *result = Box::into_raw(Box::new(inst)) as *mut _;
+
+    log::trace!("returning pointer to {:p}", *result);
+
+    sys::DiscordResult_Ok
+}
 
 /// Complete
 pub unsafe extern "C" fn destroy(core: *mut sys::IDiscordCore) {
@@ -10,8 +59,19 @@ pub unsafe extern "C" fn destroy(core: *mut sys::IDiscordCore) {
 
 pub unsafe extern "C" fn run_callbacks(core: *mut sys::IDiscordCore) -> sys::EDiscordResult {
     prevent_unwind!();
-    // TODO: store callbacks when calling async functions and run them here
-    // TODO: add random delay?
+
+    let mut inst = Instance::from_core(core);
+    inst.state.tick += 1;
+
+    let mut i = 0;
+    while i < inst.state.callbacks.len() {
+        if inst.state.callbacks[i].0 <= inst.state.tick {
+            let (_, mut cb) = inst.state.callbacks.remove(i);
+            cb(inst)
+        } else {
+            i += 1
+        }
+    }
 
     sys::DiscordResult_Ok
 }
@@ -25,7 +85,7 @@ pub unsafe extern "C" fn set_log_hook(
         unsafe extern "C" fn(
             hook_data: *mut c_void,
             level: sys::EDiscordLogLevel,
-            message: *const c_char,
+            message: *const i8,
         ),
     >,
 ) {
@@ -47,7 +107,7 @@ pub unsafe extern "C" fn get_application_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordApplicationManager {
     prevent_unwind!();
-    &mut Instance::from_core(core).interfaces.application as *mut _
+    &mut Instance::from_core(core).interfaces.applications as *mut _
 }
 
 /// Complete
@@ -55,7 +115,7 @@ pub unsafe extern "C" fn get_user_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordUserManager {
     prevent_unwind!();
-    &mut Instance::from_core(core).interfaces.user as *mut _
+    &mut Instance::from_core(core).interfaces.users as *mut _
 }
 
 /// Complete
@@ -63,7 +123,7 @@ pub unsafe extern "C" fn get_image_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordImageManager {
     prevent_unwind!();
-    &mut Instance::from_core(core).interfaces.image as *mut _
+    &mut Instance::from_core(core).interfaces.images as *mut _
 }
 
 /// Complete
@@ -71,7 +131,7 @@ pub unsafe extern "C" fn get_activity_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordActivityManager {
     prevent_unwind!();
-    &mut Instance::from_core(core).interfaces.activity as *mut _
+    &mut Instance::from_core(core).interfaces.activities as *mut _
 }
 
 /// Complete
@@ -79,7 +139,7 @@ pub unsafe extern "C" fn get_relationship_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordRelationshipManager {
     prevent_unwind!();
-    &mut Instance::from_core(core).interfaces.relationship as *mut _
+    &mut Instance::from_core(core).interfaces.relationships as *mut _
 }
 
 /// Complete
@@ -87,7 +147,7 @@ pub unsafe extern "C" fn get_lobby_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordLobbyManager {
     prevent_unwind!();
-    &mut Instance::from_core(core).interfaces.lobby as *mut _
+    &mut Instance::from_core(core).interfaces.lobbies as *mut _
 }
 
 /// Complete
@@ -95,7 +155,7 @@ pub unsafe extern "C" fn get_network_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordNetworkManager {
     prevent_unwind!();
-    &mut Instance::from_core(core).interfaces.network as *mut _
+    &mut Instance::from_core(core).interfaces.networking as *mut _
 }
 
 /// Complete
@@ -135,5 +195,5 @@ pub unsafe extern "C" fn get_achievement_manager(
     core: *mut sys::IDiscordCore,
 ) -> *mut sys::IDiscordAchievementManager {
     prevent_unwind!();
-    &mut Instance::from_core(core).interfaces.achievement as *mut _
+    &mut Instance::from_core(core).interfaces.achievements as *mut _
 }
