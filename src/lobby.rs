@@ -14,16 +14,11 @@ impl FromSys for Lobby {
     type Source = sys::DiscordLobby;
 
     fn from_sys(source: &Self::Source) -> Self {
-        let secret = unsafe { std::ffi::CStr::from_ptr(&source.secret as *const _) }
-            .to_str()
-            .unwrap()
-            .to_string();
-
         Self {
             id: source.id,
             kind: LobbyKind::from_sys(&source.type_),
             owner_id: source.owner_id,
-            secret,
+            secret: unsafe { string_from_cstr(&source.secret as *const _) },
             capacity: source.capacity,
             locked: source.locked,
         }

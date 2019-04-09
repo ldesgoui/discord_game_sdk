@@ -13,13 +13,8 @@ impl FromSys for FileStat {
     fn from_sys(source: &Self::Source) -> Self {
         use chrono::offset::TimeZone;
 
-        let filename = unsafe { std::ffi::CStr::from_ptr(&source.filename as *const _) }
-            .to_str()
-            .unwrap()
-            .to_string();
-
         Self {
-            filename,
+            filename: unsafe { string_from_cstr(&source.filename as *const _) },
             size: source.size,
             last_modified: chrono::Utc.timestamp(source.last_modified as i64, 0),
         }

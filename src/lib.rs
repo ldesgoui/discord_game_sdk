@@ -50,7 +50,7 @@ mod methods {
 
 pub mod event {
     pub mod activities;
-    pub mod channels;
+    mod channels;
     pub mod lobbies;
     pub mod networking;
     pub mod overlay;
@@ -60,7 +60,7 @@ pub mod event {
     pub mod voice;
 
     pub use self::channels::Receivers;
-    pub(crate) use self::channels::{create_channels, Senders};
+    pub(crate) use self::channels::*;
 }
 
 mod across_ffi {
@@ -81,7 +81,7 @@ mod prelude {
     pub(crate) use crate::{
         across_ffi::{self, callbacks},
         event,
-        utils::{string_from_cstr, FromSys},
+        utils::*,
         *,
     };
     pub(crate) use crossbeam_channel::{Receiver, Sender};
@@ -94,16 +94,16 @@ mod prelude {
 }
 
 pub use crate::{
-    activity::{Action, Activity, ActivityChange, ActivityKind, RequestReply},
-    discord::{CreateFlags, Discord},
-    entitlement::{Entitlement, EntitlementKind},
+    activity::*,
+    discord::*,
+    entitlement::*,
     error::{Error, Result},
-    file::FileStat,
-    lobby::{Lobby, LobbyKind},
-    lobby_transaction::{LobbyMemberTransaction, LobbyTransaction},
-    oauth2_token::OAuth2Token,
-    relationship::{Presence, Relationship, RelationshipKind, Status},
-    search_query::SearchQuery,
-    sku::{Sku, SkuKind},
-    user::{PremiumType, User},
+    file::*,
+    lobby::*,
+    lobby_transaction::*,
+    oauth2_token::*,
+    relationship::*,
+    search_query::*,
+    sku::*,
+    user::*,
 };

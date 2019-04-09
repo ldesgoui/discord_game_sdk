@@ -28,7 +28,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn current_user_premium_type(&mut self) -> Result<PremiumType> {
+    pub fn current_user_premium_type(&mut self) -> Result<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
         unsafe {
@@ -38,6 +38,6 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(PremiumType::from_sys(&premium_type))
+        Ok(PremiumKind::from_sys(&premium_type))
     }
 }

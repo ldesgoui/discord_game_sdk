@@ -1,10 +1,7 @@
 use crate::prelude::*;
 
 pub(crate) extern "C" fn on_activity_join(senders: *mut c_void, secret: *const i8) {
-    let secret = unsafe { std::ffi::CStr::from_ptr(secret) }
-        .to_str()
-        .unwrap()
-        .to_string();
+    let secret = unsafe { string_from_cstr(secret) };
 
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
@@ -14,10 +11,7 @@ pub(crate) extern "C" fn on_activity_join(senders: *mut c_void, secret: *const i
 }
 
 pub(crate) extern "C" fn on_activity_spectate(senders: *mut c_void, secret: *const i8) {
-    let secret = unsafe { std::ffi::CStr::from_ptr(secret) }
-        .to_str()
-        .unwrap()
-        .to_string();
+    let secret = unsafe { string_from_cstr(secret) };
 
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()

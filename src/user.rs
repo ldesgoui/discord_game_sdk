@@ -13,33 +13,18 @@ impl FromSys for User {
     type Source = sys::DiscordUser;
 
     fn from_sys(source: &Self::Source) -> Self {
-        let username = unsafe { std::ffi::CStr::from_ptr(&source.username as *const _) }
-            .to_str()
-            .unwrap()
-            .to_string();
-
-        let discriminator = unsafe { std::ffi::CStr::from_ptr(&source.discriminator as *const _) }
-            .to_str()
-            .unwrap()
-            .to_string();
-
-        let avatar = unsafe { std::ffi::CStr::from_ptr(&source.avatar as *const _) }
-            .to_str()
-            .unwrap()
-            .to_string();
-
         Self {
             id: source.id,
-            username,
-            discriminator,
-            avatar,
+            username: unsafe { string_from_cstr(&source.username as *const _) },
+            discriminator: unsafe { string_from_cstr(&source.discriminator as *const _) },
+            avatar: unsafe { string_from_cstr(&source.avatar as *const _) },
             bot: source.bot,
         }
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum PremiumType {
+pub enum PremiumKind {
     /// Not a Nitro subscriber
     None,
     /// Nitro Classic subscriber
@@ -48,14 +33,14 @@ pub enum PremiumType {
     Tier2,
 }
 
-impl FromSys for PremiumType {
+impl FromSys for PremiumKind {
     type Source = sys::EDiscordPremiumType;
 
     fn from_sys(source: &Self::Source) -> Self {
         match *source {
-            sys::DiscordPremiumType_None => PremiumType::None,
-            sys::DiscordPremiumType_Tier1 => PremiumType::Tier1,
-            sys::DiscordPremiumType_Tier2 => PremiumType::Tier2,
+            sys::DiscordPremiumType_None => PremiumKind::None,
+            sys::DiscordPremiumType_Tier1 => PremiumKind::Tier1,
+            sys::DiscordPremiumType_Tier2 => PremiumKind::Tier2,
             _ => panic!("enum"),
         }
     }
