@@ -1,41 +1,43 @@
 use crate::prelude::*;
 
-pub(crate) extern "C" fn result<F>(callback_ptr: *mut c_void, res: sys::EDiscordResult)
+pub(crate) extern "C" fn result<F>(ptr: *mut c_void, res: sys::EDiscordResult)
 where
-    F: FnMut(Result<()>),
+    F: FnMut(&mut Discord, Result<()>),
 {
-    let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
+    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
 
-    callback(res.to_result())
+    boxed.1(unsafe { boxed.0.as_mut() }.unwrap(), res.to_result())
 }
 
 pub(crate) extern "C" fn result_from_sys<F, S>(
-    callback_ptr: *mut c_void,
+    ptr: *mut c_void,
     res: sys::EDiscordResult,
     source_ptr: *mut S::Source,
 ) where
-    F: FnMut(Result<S>),
+    F: FnMut(&mut Discord, Result<S>),
     S: FromSys,
 {
-    let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
+    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
 
-    callback(
+    boxed.1(
+        unsafe { boxed.0.as_mut() }.unwrap(),
         res.to_result()
             .map(|()| unsafe { S::from_sys_ptr(source_ptr) }),
     )
 }
 
 pub(crate) extern "C" fn slice<F>(
-    callback_ptr: *mut c_void,
+    ptr: *mut c_void,
     res: sys::EDiscordResult,
     buffer_ptr: *mut u8,
     len: u32,
 ) where
-    F: FnMut(Result<&[u8]>) + Sized,
+    F: FnMut(&mut Discord, Result<&[u8]>) + Sized,
 {
-    let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
+    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
 
-    callback(
+    boxed.1(
+        unsafe { boxed.0.as_mut() }.unwrap(),
         res.to_result()
             .map(|()| unsafe { std::slice::from_raw_parts(buffer_ptr, len as usize) }),
     )

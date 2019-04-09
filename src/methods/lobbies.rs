@@ -20,12 +20,12 @@ impl<'a> Discord<'a> {
 
     pub fn create_lobby<F>(&mut self, tx: LobbyTransaction<'a>, callback: F)
     where
-        F: FnMut(Result<Lobby>),
+        F: FnMut(&mut Discord, Result<Lobby>),
     {
         unsafe {
             ffi!(self.get_lobby_manager().create_lobby(
                 tx.core,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result_from_sys::<F, Lobby>)
             ))
         }
@@ -48,13 +48,13 @@ impl<'a> Discord<'a> {
 
     pub fn update_lobby<F>(&mut self, lobby_id: i64, tx: LobbyTransaction<'a>, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
             ffi!(self.get_lobby_manager().update_lobby(
                 lobby_id,
                 tx.core,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
         }
@@ -62,12 +62,12 @@ impl<'a> Discord<'a> {
 
     pub fn delete_lobby<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
             ffi!(self.get_lobby_manager().delete_lobby(
                 lobby_id,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
         }
@@ -75,7 +75,7 @@ impl<'a> Discord<'a> {
 
     pub fn connect_lobby<F>(&mut self, lobby_id: i64, secret: impl AsRef<str>, callback: F)
     where
-        F: FnMut(Result<Lobby>),
+        F: FnMut(&mut Discord, Result<Lobby>),
     {
         let secret = CString::new(secret.as_ref()).unwrap();
 
@@ -83,7 +83,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().connect_lobby(
                 lobby_id,
                 secret.as_ptr() as *mut _,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result_from_sys::<F, Lobby>)
             ))
         }
@@ -94,14 +94,14 @@ impl<'a> Discord<'a> {
         activity_secret: impl AsRef<str>,
         callback: F,
     ) where
-        F: FnMut(Result<Lobby>),
+        F: FnMut(&mut Discord, Result<Lobby>),
     {
         let activity_secret = CString::new(activity_secret.as_ref()).unwrap();
 
         unsafe {
             ffi!(self.get_lobby_manager().connect_lobby_with_activity_secret(
                 activity_secret.as_ptr() as *mut _,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result_from_sys::<F, Lobby>)
             ))
         }
@@ -109,12 +109,12 @@ impl<'a> Discord<'a> {
 
     pub fn disconnect_lobby<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
             ffi!(self.get_lobby_manager().disconnect_lobby(
                 lobby_id,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
         }
@@ -232,14 +232,14 @@ impl<'a> Discord<'a> {
         tx: LobbyMemberTransaction<'a>,
         callback: F,
     ) where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
             ffi!(self.get_lobby_manager().update_member(
                 lobby_id,
                 user_id,
                 tx.core,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
         }
@@ -328,7 +328,7 @@ impl<'a> Discord<'a> {
 
     pub fn send_lobby_message<F>(&mut self, lobby_id: i64, buf: &[u8], callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         assert!(buf.len() <= u32::max_value() as usize);
 
@@ -337,7 +337,7 @@ impl<'a> Discord<'a> {
                 lobby_id,
                 buf.as_ptr() as *mut _,
                 buf.len() as u32,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>),
             ))
         }
@@ -363,12 +363,12 @@ impl<'a> Discord<'a> {
 
     // pub fn lobby_search<F>(&mut self, query: SearchQuery<'a>, callback: F)
     // where
-    //     F: FnMut(Result<Vec<i64>>),
+    //     F: FnMut(&mut Discord, Result<Vec<i64>>),
     // {
     //     unsafe {
     //         ffi!(self.get_lobby_manager().search(
     //             tx.core,
-    //             Box::into_raw(Box::new(callback)) as *mut _,
+    //             self.wrap_callback(callback),
     //             Some(callbacks::result_from_sys::<F, Lobby>)
     //         ))
     //     }
@@ -380,12 +380,12 @@ impl<'a> Discord<'a> {
 
     pub fn connect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
             ffi!(self.get_lobby_manager().connect_voice(
                 lobby_id,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>),
             ))
         }
@@ -393,12 +393,12 @@ impl<'a> Discord<'a> {
 
     pub fn disconnect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
             ffi!(self.get_lobby_manager().disconnect_voice(
                 lobby_id,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>),
             ))
         }

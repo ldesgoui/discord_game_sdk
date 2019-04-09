@@ -21,14 +21,14 @@ impl<'a> Discord<'a> {
 
     pub fn read_file_async<F>(&mut self, filename: impl AsRef<str>, callback: F)
     where
-        F: FnMut(Result<&[u8]>),
+        F: FnMut(&mut Discord, Result<&[u8]>),
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
 
         unsafe {
             ffi!(self.get_storage_manager().read_async(
                 filename.as_ptr(),
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::slice::<F>)
             ))
         }
@@ -41,7 +41,7 @@ impl<'a> Discord<'a> {
         length: u64,
         callback: F,
     ) where
-        F: FnMut(Result<&[u8]>),
+        F: FnMut(&mut Discord, Result<&[u8]>),
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
 
@@ -50,7 +50,7 @@ impl<'a> Discord<'a> {
                 filename.as_ptr(),
                 offset,
                 length,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::slice::<F>)
             ))
         }
@@ -71,7 +71,7 @@ impl<'a> Discord<'a> {
 
     pub fn write_file_async<F>(&mut self, filename: impl AsRef<str>, buffer: &[u8], callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
 
@@ -80,7 +80,7 @@ impl<'a> Discord<'a> {
                 filename.as_ptr(),
                 buffer.as_ptr() as *mut _,
                 buffer.len() as u32,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
         }

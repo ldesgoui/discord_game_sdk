@@ -24,12 +24,12 @@ impl<'a> Discord<'a> {
 
     pub fn set_overlay_opened<F>(&mut self, opened: bool, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
             ffi!(self.get_overlay_manager().set_locked(
                 opened,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
         }
@@ -37,12 +37,12 @@ impl<'a> Discord<'a> {
 
     pub fn open_invite_overlay<F>(&mut self, action: Action, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
             ffi!(self.get_overlay_manager().open_activity_invite(
                 action.to_sys(),
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
         }
@@ -50,14 +50,14 @@ impl<'a> Discord<'a> {
 
     pub fn open_guild_invite_overlay<F>(&mut self, code: impl AsRef<str>, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         let code = std::ffi::CString::new(code.as_ref()).unwrap();
 
         unsafe {
             ffi!(self.get_overlay_manager().open_guild_invite(
                 code.as_ptr(),
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
         }
@@ -65,13 +65,12 @@ impl<'a> Discord<'a> {
 
     pub fn open_voice_settings<F>(&mut self, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
-            ffi!(self.get_overlay_manager().open_voice_settings(
-                Box::into_raw(Box::new(callback)) as *mut _,
-                Some(callbacks::result::<F>)
-            ))
+            ffi!(self
+                .get_overlay_manager()
+                .open_voice_settings(self.wrap_callback(callback), Some(callbacks::result::<F>)))
         }
     }
 }

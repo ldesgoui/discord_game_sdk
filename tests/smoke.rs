@@ -3,10 +3,11 @@ use discord_game_sdk::*;
 #[test]
 fn compiles() {
     let mut gsdk = Discord::new(0).unwrap();
-    let mut reader = gsdk.activity_events_reader();
 
-    log::info!(
-        "{:?}",
-        gsdk.activity_events(&mut reader).collect::<Vec<_>>()
-    );
+    gsdk.validate_or_exit(|gsdk, res| {
+        log::info!("{:?}", gsdk.current_branch());
+    });
+
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    gsdk.run_callbacks();
 }

@@ -17,12 +17,12 @@ impl<'a> Discord<'a> {
 
     pub fn user<F>(&mut self, user_id: i64, callback: F)
     where
-        F: FnMut(Result<User>),
+        F: FnMut(&mut Discord, Result<User>),
     {
         unsafe {
             ffi!(self.get_user_manager().get_user(
                 user_id,
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result_from_sys::<F, User>)
             ))
         }

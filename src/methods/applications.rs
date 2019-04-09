@@ -28,23 +28,22 @@ impl<'a> Discord<'a> {
 
     pub fn validate_or_exit<F>(&mut self, callback: F)
     where
-        F: FnMut(Result<()>),
+        F: FnMut(&mut Discord, Result<()>),
     {
         unsafe {
-            ffi!(self.get_application_manager().validate_or_exit(
-                Box::into_raw(Box::new(callback)) as *mut _,
-                Some(callbacks::result::<F>)
-            ))
+            ffi!(self
+                .get_application_manager()
+                .validate_or_exit(self.wrap_callback(callback), Some(callbacks::result::<F>)))
         }
     }
 
     pub fn oauth2_token<F>(&mut self, callback: F)
     where
-        F: FnMut(Result<OAuth2Token>),
+        F: FnMut(&mut Discord, Result<OAuth2Token>),
     {
         unsafe {
             ffi!(self.get_application_manager().get_oauth2_token(
-                Box::into_raw(Box::new(callback)) as *mut _,
+                self.wrap_callback(callback),
                 Some(callbacks::result_from_sys::<F, OAuth2Token>)
             ))
         }
