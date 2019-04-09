@@ -4,7 +4,7 @@ use crate::prelude::*;
 impl<'a> Discord<'a> {
     pub fn read_file(&mut self, filename: impl AsRef<str>, buffer: &mut [u8]) -> Result<u32> {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
-        let mut read = 0u32;
+        let mut read = 0;
 
         unsafe {
             ffi!(self.get_storage_manager().read(

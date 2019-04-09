@@ -48,7 +48,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn local_volume(&mut self, user_id: i64) -> Result<u8> {
-        let mut volume = 0u8;
+        let mut volume = 0;
 
         unsafe {
             ffi!(self
