@@ -8,7 +8,7 @@ pub unsafe extern "C" fn DiscordCreate(
 ) -> sys::EDiscordResult {
     prevent_unwind!();
 
-    let _ = pretty_env_logger::try_init_custom_env("DISCORD_GAME_SDK_MOCK_LOG");
+    let _ = env_logger::try_init_from_env("DISCORD_GAME_SDK_MOCK_LOG");
 
     logged_assert!(!result.is_null());
 
