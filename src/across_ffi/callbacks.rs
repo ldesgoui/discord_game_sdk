@@ -12,6 +12,22 @@ where
 pub(crate) extern "C" fn result_from_sys<F, S>(
     ptr: *mut c_void,
     res: sys::EDiscordResult,
+    source: S::Source,
+) where
+    F: FnMut(&mut Discord, Result<S>),
+    S: FromSys,
+{
+    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
+
+    boxed.1(
+        unsafe { boxed.0.as_mut() }.unwrap(),
+        res.to_result().map(|()| S::from_sys(&source)),
+    )
+}
+
+pub(crate) extern "C" fn result_from_sys_ptr<F, S>(
+    ptr: *mut c_void,
+    res: sys::EDiscordResult,
     source_ptr: *mut S::Source,
 ) where
     F: FnMut(&mut Discord, Result<S>),

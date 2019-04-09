@@ -26,7 +26,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().create_lobby(
                 tx.core,
                 self.wrap_callback(callback),
-                Some(callbacks::result_from_sys::<F, Lobby>)
+                Some(callbacks::result_from_sys_ptr::<F, Lobby>)
             ))
         }
     }
@@ -84,7 +84,7 @@ impl<'a> Discord<'a> {
                 lobby_id,
                 secret.as_ptr() as *mut _,
                 self.wrap_callback(callback),
-                Some(callbacks::result_from_sys::<F, Lobby>)
+                Some(callbacks::result_from_sys_ptr::<F, Lobby>)
             ))
         }
     }
@@ -102,7 +102,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().connect_lobby_with_activity_secret(
                 activity_secret.as_ptr() as *mut _,
                 self.wrap_callback(callback),
-                Some(callbacks::result_from_sys::<F, Lobby>)
+                Some(callbacks::result_from_sys_ptr::<F, Lobby>)
             ))
         }
     }

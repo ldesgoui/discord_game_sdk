@@ -44,7 +44,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_application_manager().get_oauth2_token(
                 self.wrap_callback(callback),
-                Some(callbacks::result_from_sys::<F, OAuth2Token>)
+                Some(callbacks::result_from_sys_ptr::<F, OAuth2Token>)
             ))
         }
     }

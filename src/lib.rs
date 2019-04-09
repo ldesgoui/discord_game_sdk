@@ -22,7 +22,8 @@ mod activity;
 mod discord;
 mod entitlement;
 pub mod error;
-mod file;
+mod file_stat;
+mod image_handle;
 mod lobby;
 mod lobby_transaction;
 mod oauth2_token;
@@ -98,7 +99,8 @@ pub use crate::{
     discord::*,
     entitlement::*,
     error::{Error, Result},
-    file::*,
+    file_stat::*,
+    image_handle::*,
     lobby::*,
     lobby_transaction::*,
     oauth2_token::*,
