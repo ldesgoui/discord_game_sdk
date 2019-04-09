@@ -53,15 +53,24 @@ fn main() {
 
     match target.as_ref() {
         "i686-pc-windows-gnu" | "i686-pc-windows-msvc" => {
-            println!("cargo:rustc-link-search={}", sdk_path.join("lib/x86").to_str().unwrap());
+            println!(
+                "cargo:rustc-link-search={}",
+                sdk_path.join("lib/x86").to_str().unwrap()
+            );
             println!("cargo:rustc-link-lib=discord_game_sdk.dll");
         }
         "x86_64-pc-windows-gnu" | "x86_64-pc-windows-msvc" => {
-            println!("cargo:rustc-link-search={}", sdk_path.join("lib/x86_64").to_str().unwrap());
+            println!(
+                "cargo:rustc-link-search={}",
+                sdk_path.join("lib/x86_64").to_str().unwrap()
+            );
             println!("cargo:rustc-link-lib=discord_game_sdk.dll");
         }
         "x86_64-apple-darwin" => {
-            println!("cargo:rustc-link-search={}", sdk_path.join("lib/x86_64").to_str().unwrap());
+            println!(
+                "cargo:rustc-link-search={}",
+                sdk_path.join("lib/x86_64").to_str().unwrap()
+            );
             println!("cargo:rustc-link-lib=discord_game_sdk");
         }
         _ => {
