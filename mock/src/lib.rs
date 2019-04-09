@@ -21,7 +21,7 @@ mod user;
 mod voice;
 
 #[no_mangle]
-unsafe extern "C" fn DiscordCreate(
+pub unsafe extern "C" fn DiscordCreate(
     version: sys::DiscordVersion,
     params: *mut sys::DiscordCreateParams,
     result: *mut *mut sys::IDiscordCore,

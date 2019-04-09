@@ -25,6 +25,24 @@ Thanks, and apologies for the inconvenience
 
 "#;
 
+const INCOMPATIBLE_PLATFORM: &str = r#"
+
+discord_game_sdk_sys: Hello,
+
+You are trying to compile the bindings for the Discord Game SDK.
+Unfortunately, the platform you are trying to target is not
+supported by the Discord Game SDK.
+
+A drop-in replacement mock library was built to test this crate,
+you may also use it for your projects.
+You can find more information at:
+
+https://github.com/ldesgoui/discord_game_sdk
+
+Thanks, and apologies for the inconvenience
+
+"#;
+
 fn main() {
     println!("cargo:rerun-if-env-changed=DISCORD_GAME_SDK_PATH");
 
@@ -47,7 +65,7 @@ fn main() {
         .write_to_file(out_path.join("bindings.rs"))
         .expect("discord_game_sdk_sys: could not write bindings to file");
 
-    if cfg!(feature = "no_linking") {
+    if cfg!(feature = "mock") {
         return;
     }
 
@@ -73,17 +91,7 @@ fn main() {
             );
             println!("cargo:rustc-link-lib=discord_game_sdk");
         }
-        _ => {
-            println!(
-                "cargo:warning=discord_game_sdk_sys: {}",
-                "The target you are building for is not supported by the Discord Game SDK"
-            );
-            println!(
-                "cargo:warning=discord_game_sdk_sys: {}{}",
-                "However, a mock library is available, read more at ",
-                "https://github.com/ldesgoui/discord_game_sdk"
-            );
-        }
+        _ => panic!(INCOMPATIBLE_PLATFORM),
     }
 }
 

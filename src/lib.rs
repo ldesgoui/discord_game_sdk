@@ -15,6 +15,10 @@
 
 #![recursion_limit = "128"]
 
+#[cfg(feature = "mock")]
+#[link(name = "discord_game_sdk_mock")]
+extern "C" {}
+
 #[macro_use]
 mod macros;
 

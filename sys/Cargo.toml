@@ -6,11 +6,11 @@ edition = "2018"
 description = "Low-level bindings for the Discord Game SDK"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ldesgoui/discord_game_sdk"
-keywords = [ "discord", "sdk", "gamedev" ]
-categories = [ "external-ffi-bindings", "game-engines" ]
+keywords = ["discord", "sdk", "gamedev"]
+categories = ["external-ffi-bindings", "game-engines"]
+
+[features]
+mock = []
 
 [build-dependencies]
 bindgen = "0.48.1"
-
-[features]
-no_linking = []
