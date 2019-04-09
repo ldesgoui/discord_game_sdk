@@ -27,6 +27,7 @@ mod lobby;
 mod lobby_transaction;
 mod oauth2_token;
 mod relationship;
+mod search_query;
 mod sku;
 mod user;
 mod utils;
@@ -102,6 +103,7 @@ pub use crate::{
     lobby_transaction::{LobbyMemberTransaction, LobbyTransaction},
     oauth2_token::OAuth2Token,
     relationship::{Presence, Relationship, RelationshipKind, Status},
+    search_query::SearchQuery,
     sku::{Sku, SkuKind},
     user::{PremiumType, User},
 };

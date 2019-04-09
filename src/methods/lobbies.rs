@@ -346,37 +346,61 @@ impl<'a> Discord<'a> {
     // TODO: blocked because we kinda would like lobby_search to do the aggregation by itself but
     // it can't as it requires &mut self
     //
-    // pub fn lobby_search_query(&mut self) -> Result<SearchQuery<'a>> {
-    //     let mut query: *mut sys::IDiscordSearchQuery = std::ptr::null_mut();
+    pub fn lobby_search_query(&mut self) -> Result<SearchQuery<'a>> {
+        let mut query: *mut sys::IDiscordLobbySearchQuery = std::ptr::null_mut();
 
-    //     unsafe {
-    //         ffi!(self
-    //             .get_lobby_manager()
-    //             .get_search_query(&mut query))
-    //     }
-    //     .to_result()?;
+        unsafe { ffi!(self.get_lobby_manager().get_search_query(&mut query)) }.to_result()?;
 
-    //     let core = unsafe { query.as_mut() }.unwrap();
+        let core = unsafe { query.as_mut() }.unwrap();
 
-    //     Ok(SearchQuery { core })
-    // }
+        Ok(SearchQuery { core })
+    }
 
-    // pub fn lobby_search<F>(&mut self, query: SearchQuery<'a>, callback: F)
-    // where
-    //     F: FnMut(&mut Discord, Result<Vec<i64>>),
-    // {
-    //     unsafe {
-    //         ffi!(self.get_lobby_manager().search(
-    //             tx.core,
-    //             self.wrap_callback(callback),
-    //             Some(callbacks::result_from_sys::<F, Lobby>)
-    //         ))
-    //     }
-    // }
-    // get_search_query: query: *mut *mut IDiscordLobbySearchQuery) -> EDiscordResult>,
-    // search: query: *mut IDiscordLobbySearchQuery, callback_data: *mut c_void, callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: EDiscordResult)>)>,
-    // lobby_count: count: *mut i32)>,
-    // get_lobby_id: index: i32, lobby_id: *mut u64) -> EDiscordResult>,
+    pub fn lobby_search<F>(&mut self, query: SearchQuery<'a>, mut callback: F)
+    where
+        F: FnMut(&mut Discord, Result<Vec<i64>>),
+    {
+        // yikes
+        self.lobby_search_inner(query, |gsdk, res| {
+            if res.is_err() {
+                return callback(gsdk, res.map(|_| unreachable!()));
+            }
+
+            let mut count = 0;
+
+            unsafe { ffi!(gsdk.get_lobby_manager().lobby_count(&mut count)) }
+
+            let mut vec = Vec::with_capacity(count as usize);
+            let mut lobby_id = 0;
+
+            for index in 0..count {
+                let res =
+                    unsafe { ffi!(gsdk.get_lobby_manager().get_lobby_id(index, &mut lobby_id)) }
+                        .to_result();
+
+                if res.is_err() {
+                    return callback(gsdk, res.map(|_| unreachable!()));
+                }
+
+                vec.push(lobby_id);
+            }
+
+            callback(gsdk, Ok(vec))
+        })
+    }
+
+    fn lobby_search_inner<F>(&mut self, query: SearchQuery<'a>, callback: F)
+    where
+        F: FnMut(&mut Discord, Result<()>),
+    {
+        unsafe {
+            ffi!(self.get_lobby_manager().search(
+                query.core,
+                self.wrap_callback(callback),
+                Some(callbacks::result::<F>)
+            ))
+        }
+    }
 
     pub fn connect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
     where

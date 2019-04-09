@@ -17,6 +17,7 @@ impl<'a> std::fmt::Debug for Discord<'a> {
 }
 
 impl<'a> Discord<'a> {
+    // yikes
     pub(crate) fn wrap_callback(&mut self, callback: impl Sized) -> *mut c_void {
         Box::into_raw(Box::new((self as *mut _, callback))) as *mut _
     }
