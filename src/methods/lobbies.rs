@@ -73,9 +73,8 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn connect_lobby<S, F>(&mut self, lobby_id: i64, secret: S, callback: F)
+    pub fn connect_lobby<F>(&mut self, lobby_id: i64, secret: impl AsRef<str>, callback: F)
     where
-        S: AsRef<str>,
         F: FnMut(Result<Lobby>),
     {
         let secret = CString::new(secret.as_ref()).unwrap();
@@ -90,9 +89,11 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn connect_lobby_with_activity_secret<S, F>(&mut self, activity_secret: S, callback: F)
-    where
-        S: AsRef<str>,
+    pub fn connect_lobby_with_activity_secret<F>(
+        &mut self,
+        activity_secret: impl AsRef<str>,
+        callback: F,
+    ) where
         F: FnMut(Result<Lobby>),
     {
         let activity_secret = CString::new(activity_secret.as_ref()).unwrap();
@@ -145,10 +146,7 @@ impl<'a> Discord<'a> {
         Ok(unsafe { string_from_cstr(&secret as *const _) })
     }
 
-    pub fn lobby_metadata<S>(&mut self, lobby_id: i64, key: S) -> Result<String>
-    where
-        S: AsRef<str>,
-    {
+    pub fn lobby_metadata(&mut self, lobby_id: i64, key: impl AsRef<str>) -> Result<String> {
         let key = CString::new(key.as_ref()).unwrap();
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 

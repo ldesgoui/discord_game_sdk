@@ -2,10 +2,7 @@ use crate::prelude::*;
 
 /// # Storage
 impl<'a> Discord<'a> {
-    pub fn read_file<S>(&mut self, filename: S, buffer: &mut [u8]) -> Result<u32>
-    where
-        S: AsRef<str>,
-    {
+    pub fn read_file(&mut self, filename: impl AsRef<str>, buffer: &mut [u8]) -> Result<u32> {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
         let mut read = 0u32;
 
@@ -22,9 +19,8 @@ impl<'a> Discord<'a> {
         Ok(read)
     }
 
-    pub fn read_file_async<S, F>(&mut self, filename: S, callback: F)
+    pub fn read_file_async<F>(&mut self, filename: impl AsRef<str>, callback: F)
     where
-        S: AsRef<str>,
         F: FnMut(Result<&[u8]>),
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
@@ -38,14 +34,13 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn read_file_async_partial<S, F>(
+    pub fn read_file_async_partial<F>(
         &mut self,
-        filename: S,
+        filename: impl AsRef<str>,
         offset: u64,
         length: u64,
         callback: F,
     ) where
-        S: AsRef<str>,
         F: FnMut(Result<&[u8]>),
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
@@ -61,10 +56,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn write_file<S>(&mut self, filename: S, buffer: &[u8]) -> Result<()>
-    where
-        S: AsRef<str>,
-    {
+    pub fn write_file(&mut self, filename: impl AsRef<str>, buffer: &[u8]) -> Result<()> {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
 
         unsafe {
@@ -77,9 +69,8 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
-    pub fn write_file_async<S, F>(&mut self, filename: S, buffer: &[u8], callback: F)
+    pub fn write_file_async<F>(&mut self, filename: impl AsRef<str>, buffer: &[u8], callback: F)
     where
-        S: AsRef<str>,
         F: FnMut(Result<()>),
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
@@ -95,19 +86,13 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn delete_file<S>(&mut self, filename: S) -> Result<()>
-    where
-        S: AsRef<str>,
-    {
+    pub fn delete_file(&mut self, filename: impl AsRef<str>) -> Result<()> {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
 
         unsafe { ffi!(self.get_storage_manager().delete_(filename.as_ptr())) }.to_result()
     }
 
-    pub fn file_exists<S>(&mut self, filename: S) -> Result<bool>
-    where
-        S: AsRef<str>,
-    {
+    pub fn file_exists(&mut self, filename: impl AsRef<str>) -> Result<bool> {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
         let mut exists = false;
 
@@ -121,10 +106,7 @@ impl<'a> Discord<'a> {
         Ok(exists)
     }
 
-    pub fn file_stat<S>(&mut self, filename: S) -> Result<FileStat>
-    where
-        S: AsRef<str>,
-    {
+    pub fn file_stat(&mut self, filename: impl AsRef<str>) -> Result<FileStat> {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
         let mut stat = sys::DiscordFileStat::default();
 

@@ -2,10 +2,7 @@ use crate::prelude::*;
 
 /// # Activities
 impl<'a> Discord<'a> {
-    pub fn register_launch_command<S>(&mut self, command: S) -> Result<()>
-    where
-        S: AsRef<str>,
-    {
+    pub fn register_launch_command(&mut self, command: impl AsRef<str>) -> Result<()> {
         let cstring = std::ffi::CString::new(command.as_ref()).unwrap();
 
         unsafe {
@@ -59,9 +56,13 @@ impl<'a> Discord<'a> {
         };
     }
 
-    pub fn send_invite<S, F>(&mut self, user_id: i64, action: Action, content: S, callback: F)
-    where
-        S: AsRef<str>,
+    pub fn send_invite<F>(
+        &mut self,
+        user_id: i64,
+        action: Action,
+        content: impl AsRef<str>,
+        callback: F,
+    ) where
         F: FnMut(Result<()>),
     {
         let content = std::ffi::CString::new(content.as_ref()).unwrap();

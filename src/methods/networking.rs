@@ -14,10 +14,7 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_network_manager().flush()) }.to_result()
     }
 
-    pub fn open_peer<S>(&mut self, peer_id: u64, route: S) -> Result<()>
-    where
-        S: AsRef<str>,
-    {
+    pub fn open_peer(&mut self, peer_id: u64, route: impl AsRef<str>) -> Result<()> {
         let route = CString::new(route.as_ref()).unwrap();
 
         unsafe {
@@ -28,10 +25,7 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
-    pub fn update_peer<S>(&mut self, peer_id: u64, route: S) -> Result<()>
-    where
-        S: AsRef<str>,
-    {
+    pub fn update_peer(&mut self, peer_id: u64, route: impl AsRef<str>) -> Result<()> {
         let route = CString::new(route.as_ref()).unwrap();
 
         unsafe {

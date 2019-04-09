@@ -48,9 +48,8 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn open_guild_invite_overlay<S, F>(&mut self, code: S, callback: F)
+    pub fn open_guild_invite_overlay<F>(&mut self, code: impl AsRef<str>, callback: F)
     where
-        S: AsRef<str>,
         F: FnMut(Result<()>),
     {
         let code = std::ffi::CString::new(code.as_ref()).unwrap();

@@ -17,11 +17,7 @@ impl<'a> LobbyTransaction<'a> {
         unsafe { ffi!(self.set_capacity(capacity)) }.to_result()
     }
 
-    pub fn set_metadata<S1, S2>(&mut self, key: S1, value: S2) -> Result<()>
-    where
-        S1: AsRef<str>,
-        S2: AsRef<str>,
-    {
+    pub fn set_metadata(&mut self, key: impl AsRef<str>, value: impl AsRef<str>) -> Result<()> {
         let key = CString::new(key.as_ref()).unwrap();
         let value = CString::new(value.as_ref()).unwrap();
 
@@ -29,10 +25,7 @@ impl<'a> LobbyTransaction<'a> {
             .to_result()
     }
 
-    pub fn delete_metadata<S>(&mut self, key: S) -> Result<()>
-    where
-        S: AsRef<str>,
-    {
+    pub fn delete_metadata<S>(&mut self, key: impl AsRef<str>) -> Result<()> {
         let key = CString::new(key.as_ref()).unwrap();
 
         unsafe { ffi!(self.delete_metadata(key.as_ptr() as *mut _)) }.to_result()
@@ -48,11 +41,7 @@ pub struct LobbyMemberTransaction<'a> {
 }
 
 impl<'a> LobbyMemberTransaction<'a> {
-    pub fn set_metadata<S1, S2>(&mut self, key: S1, value: S2) -> Result<()>
-    where
-        S1: AsRef<str>,
-        S2: AsRef<str>,
-    {
+    pub fn set_metadata(&mut self, key: impl AsRef<str>, value: impl AsRef<str>) -> Result<()> {
         let key = CString::new(key.as_ref()).unwrap();
         let value = CString::new(value.as_ref()).unwrap();
 
@@ -60,10 +49,7 @@ impl<'a> LobbyMemberTransaction<'a> {
             .to_result()
     }
 
-    pub fn delete_metadata<S>(&mut self, key: S) -> Result<()>
-    where
-        S: AsRef<str>,
-    {
+    pub fn delete_metadata<S>(&mut self, key: impl AsRef<str>) -> Result<()> {
         let key = CString::new(key.as_ref()).unwrap();
 
         unsafe { ffi!(self.delete_metadata(key.as_ptr() as *mut _)) }.to_result()
