@@ -89,15 +89,4 @@ impl<'a> Discord<'a> {
             ))
         }
     }
-
-    pub fn activity_events_reader(&mut self) -> shrev::ReaderId<event::Activity> {
-        self.activity_channel.register_reader()
-    }
-
-    pub fn activity_events(
-        &self,
-        reader: &mut shrev::ReaderId<event::Activity>,
-    ) -> shrev::EventIterator<event::Activity> {
-        self.activity_channel.read(reader)
-    }
 }

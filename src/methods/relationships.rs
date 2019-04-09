@@ -46,15 +46,4 @@ impl<'a> Discord<'a> {
 
         Ok(result)
     }
-
-    pub fn relationship_events_reader(&mut self) -> shrev::ReaderId<event::Relationship> {
-        self.relationship_channel.register_reader()
-    }
-
-    pub fn relationship_events(
-        &self,
-        reader: &mut shrev::ReaderId<event::Relationship>,
-    ) -> shrev::EventIterator<event::Relationship> {
-        self.relationship_channel.read(reader)
-    }
 }

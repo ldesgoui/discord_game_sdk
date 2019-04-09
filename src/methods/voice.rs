@@ -67,15 +67,4 @@ impl<'a> Discord<'a> {
     pub fn set_local_volume(&mut self, user_id: i64, volume: u8) -> Result<()> {
         unsafe { ffi!(self.get_voice_manager().set_local_volume(user_id, volume)) }.to_result()
     }
-
-    pub fn voice_events_reader(&mut self) -> shrev::ReaderId<event::Voice> {
-        self.voice_channel.register_reader()
-    }
-
-    pub fn voice_events(
-        &self,
-        reader: &mut shrev::ReaderId<event::Voice>,
-    ) -> shrev::EventIterator<event::Voice> {
-        self.voice_channel.read(reader)
-    }
 }
