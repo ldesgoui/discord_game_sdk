@@ -23,7 +23,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_user_manager().get_user(
                 user_id,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result_from_sys::<F, User>)
+                Some(callbacks::result_from_sys::<F, User>)
             ))
         }
     }

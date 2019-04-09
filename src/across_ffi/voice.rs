@@ -1,8 +1,9 @@
 use crate::prelude::*;
 
-pub(crate) extern "C" fn on_settings_update(core_ptr: *mut c_void) {
-    let core: &mut Discord = unsafe { (core_ptr as *mut Discord).as_mut() }.unwrap();
-
-    core.voice_channel
-        .single_write(event::Voice::SettingsUpdated)
+pub(crate) extern "C" fn on_settings_update(senders: *mut c_void) {
+    unsafe { (senders as *mut event::Senders).as_ref() }
+        .unwrap()
+        .voice_settings_update
+        .try_send(event::voice::SettingsUpdate)
+        .unwrap()
 }

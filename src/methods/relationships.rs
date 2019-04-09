@@ -22,7 +22,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_relationship_manager().filter(
                 Box::into_raw(Box::new(filter)) as *mut _,
-                Some(across_ffi::callbacks::filter_relationship::<F>)
+                Some(callbacks::filter_relationship::<F>)
             ))
         }
 

@@ -13,9 +13,8 @@
 //!
 //! If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
-#![allow(unused_variables, unused_imports)]
+#![recursion_limit = "128"]
 
-// This absolutely needs to come first
 #[macro_use]
 mod macros;
 
@@ -23,7 +22,6 @@ mod activity;
 mod discord;
 mod entitlement;
 pub mod error;
-pub mod event;
 mod file;
 mod lobby;
 mod lobby_transaction;
@@ -49,25 +47,43 @@ mod methods {
     mod voice;
 }
 
+pub mod event {
+    pub mod activities;
+    pub mod channels;
+    pub mod lobbies;
+    pub mod networking;
+    pub mod overlay;
+    pub mod relationships;
+    pub mod store;
+    pub mod users;
+    pub mod voice;
+
+    pub use self::channels::Receivers;
+    pub(crate) use self::channels::{create_channels, Senders};
+}
+
 mod across_ffi {
-    pub(crate) mod activity;
+    pub(crate) mod activities;
     pub(crate) mod callbacks;
-    pub(crate) mod lobby;
-    pub(crate) mod network;
+    pub(crate) mod lobbies;
+    pub(crate) mod networking;
     pub(crate) mod overlay;
-    pub(crate) mod relationship;
+    pub(crate) mod relationships;
     pub(crate) mod store;
-    pub(crate) mod user;
+    pub(crate) mod users;
     pub(crate) mod voice;
 }
 
 mod prelude {
+    #[allow(unused_imports)]
+    pub(crate) use crate::error::ToResult;
     pub(crate) use crate::{
-        across_ffi,
-        error::{DiscordError, ToResult as _},
+        across_ffi::{self, callbacks},
+        event,
         utils::{string_from_cstr, FromSys},
         *,
     };
+    pub(crate) use crossbeam_channel::{Receiver, Sender};
     pub(crate) use discord_game_sdk_sys as sys;
     pub(crate) use std::{
         collections::HashMap,

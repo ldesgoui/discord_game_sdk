@@ -2,42 +2,31 @@ use crate::prelude::*;
 
 /// # Core
 impl<'a> Discord<'a> {
-    pub fn new(client_id: i64) -> Result<Box<Self>> {
+    pub fn new(client_id: i64) -> Result<Self> {
         Self::with_create_flags(client_id, CreateFlags::default())
     }
 
-    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Box<Self>> {
-        // TODO: REFACTOR
-        // - event channels move to Arc<{a: Mutex<Channel<_>>, ..}>
-        // - event handlers are given this pointer and refcount during their use
-        // - go back to Result<Self>
-        // - Self can be built after DiscordCreate again
+    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
+        let (senders, receivers) = event::create_channels();
+        let senders_ptr = Box::into_raw(Box::new(senders));
+        let senders = unsafe { Box::from_raw(senders_ptr) };
 
-        let result = Box::new(Self {
-            core: unsafe { std::mem::uninitialized() },
-            client_id,
-            activity_channel: shrev::EventChannel::new(),
-            lobby_channel: shrev::EventChannel::new(),
-            network_channel: shrev::EventChannel::new(),
-            overlay_channel: shrev::EventChannel::new(),
-            relationship_channel: shrev::EventChannel::new(),
-            store_channel: shrev::EventChannel::new(),
-            user_channel: shrev::EventChannel::new(),
-            voice_channel: shrev::EventChannel::new(),
-        });
-
-        let raw = Box::into_raw(result);
-        let mut params = create_params(client_id, flags, raw as *mut _);
-        let mut result = unsafe { Box::from_raw(raw) };
+        let mut params = create_params(client_id, flags, senders_ptr as *mut _);
 
         let mut core_ptr = std::ptr::null_mut();
 
-        unsafe {
-            sys::DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core_ptr)
-        }
-        .to_result()?;
+        unsafe { sys::DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core_ptr) }
+            .to_result()?;
 
-        result.core = unsafe { core_ptr.as_mut() }.unwrap();
+        let core = unsafe { core_ptr.as_mut() }.unwrap();
+
+        let mut result = Self {
+            core,
+            client_id,
+            senders,
+            receivers,
+        };
+
         result.set_log_hook();
 
         Ok(result)
@@ -48,13 +37,21 @@ impl<'a> Discord<'a> {
             ffi!(self.set_log_hook(
                 sys::DiscordLogLevel_Debug,
                 std::ptr::null_mut(),
-                Some(across_ffi::callbacks::log),
+                Some(callbacks::log),
             ))
         };
     }
 
     pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()
+    }
+
+    pub fn event_receivers(&self) -> event::Receivers {
+        self.receivers.clone()
+    }
+
+    pub fn empty_event_receivers(&self) {
+        self.receivers.empty_channels().unwrap()
     }
 }
 
@@ -67,7 +64,7 @@ impl<'a> Drop for Discord<'a> {
 fn create_params(
     client_id: i64,
     flags: CreateFlags,
-    event_data: *mut c_void
+    event_data: *mut c_void,
 ) -> sys::DiscordCreateParams {
     sys::DiscordCreateParams {
         client_id,
@@ -115,26 +112,26 @@ fn create_params(
 }
 
 const ACTIVITY: sys::IDiscordActivityEvents = sys::IDiscordActivityEvents {
-    on_activity_join: Some(across_ffi::activity::on_activity_join),
-    on_activity_spectate: Some(across_ffi::activity::on_activity_spectate),
-    on_activity_join_request: Some(across_ffi::activity::on_activity_join_request),
-    on_activity_invite: Some(across_ffi::activity::on_activity_invite),
+    on_activity_join: Some(across_ffi::activities::on_activity_join),
+    on_activity_spectate: Some(across_ffi::activities::on_activity_spectate),
+    on_activity_join_request: Some(across_ffi::activities::on_activity_join_request),
+    on_activity_invite: Some(across_ffi::activities::on_activity_invite),
 };
 
 const LOBBY: sys::IDiscordLobbyEvents = sys::IDiscordLobbyEvents {
-    on_lobby_update: Some(across_ffi::lobby::on_lobby_update),
-    on_lobby_delete: Some(across_ffi::lobby::on_lobby_delete),
-    on_member_connect: Some(across_ffi::lobby::on_member_connect),
-    on_member_update: Some(across_ffi::lobby::on_member_update),
-    on_member_disconnect: Some(across_ffi::lobby::on_member_disconnect),
-    on_lobby_message: Some(across_ffi::lobby::on_lobby_message),
-    on_speaking: Some(across_ffi::lobby::on_speaking),
-    on_network_message: Some(across_ffi::lobby::on_network_message),
+    on_lobby_update: Some(across_ffi::lobbies::on_lobby_update),
+    on_lobby_delete: Some(across_ffi::lobbies::on_lobby_delete),
+    on_member_connect: Some(across_ffi::lobbies::on_member_connect),
+    on_member_update: Some(across_ffi::lobbies::on_member_update),
+    on_member_disconnect: Some(across_ffi::lobbies::on_member_disconnect),
+    on_lobby_message: Some(across_ffi::lobbies::on_lobby_message),
+    on_speaking: Some(across_ffi::lobbies::on_speaking),
+    on_network_message: Some(across_ffi::lobbies::on_network_message),
 };
 
 const NETWORK: sys::IDiscordNetworkEvents = sys::IDiscordNetworkEvents {
-    on_message: Some(across_ffi::network::on_message),
-    on_route_update: Some(across_ffi::network::on_route_update),
+    on_message: Some(across_ffi::networking::on_message),
+    on_route_update: Some(across_ffi::networking::on_route_update),
 };
 
 const OVERLAY: sys::IDiscordOverlayEvents = sys::IDiscordOverlayEvents {
@@ -142,8 +139,8 @@ const OVERLAY: sys::IDiscordOverlayEvents = sys::IDiscordOverlayEvents {
 };
 
 const RELATIONSHIP: sys::IDiscordRelationshipEvents = sys::IDiscordRelationshipEvents {
-    on_refresh: Some(across_ffi::relationship::on_refresh),
-    on_relationship_update: Some(across_ffi::relationship::on_relationship_update),
+    on_refresh: Some(across_ffi::relationships::on_refresh),
+    on_relationship_update: Some(across_ffi::relationships::on_relationship_update),
 };
 
 const STORE: sys::IDiscordStoreEvents = sys::IDiscordStoreEvents {
@@ -152,7 +149,7 @@ const STORE: sys::IDiscordStoreEvents = sys::IDiscordStoreEvents {
 };
 
 const USER: sys::IDiscordUserEvents = sys::IDiscordUserEvents {
-    on_current_user_update: Some(across_ffi::user::on_current_user_update),
+    on_current_user_update: Some(across_ffi::users::on_current_user_update),
 };
 
 const VOICE: sys::IDiscordVoiceEvents = sys::IDiscordVoiceEvents {

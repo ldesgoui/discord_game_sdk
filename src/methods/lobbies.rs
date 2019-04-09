@@ -26,7 +26,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().create_lobby(
                 tx.core,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result_from_sys::<F, Lobby>)
+                Some(callbacks::result_from_sys::<F, Lobby>)
             ))
         }
     }
@@ -55,7 +55,7 @@ impl<'a> Discord<'a> {
                 lobby_id,
                 tx.core,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -68,7 +68,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().delete_lobby(
                 lobby_id,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -84,7 +84,7 @@ impl<'a> Discord<'a> {
                 lobby_id,
                 secret.as_ptr() as *mut _,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result_from_sys::<F, Lobby>)
+                Some(callbacks::result_from_sys::<F, Lobby>)
             ))
         }
     }
@@ -102,7 +102,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().connect_lobby_with_activity_secret(
                 activity_secret.as_ptr() as *mut _,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result_from_sys::<F, Lobby>)
+                Some(callbacks::result_from_sys::<F, Lobby>)
             ))
         }
     }
@@ -115,7 +115,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().disconnect_lobby(
                 lobby_id,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -240,7 +240,7 @@ impl<'a> Discord<'a> {
                 user_id,
                 tx.core,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -338,7 +338,7 @@ impl<'a> Discord<'a> {
                 buf.as_ptr() as *mut _,
                 buf.len() as u32,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>),
+                Some(callbacks::result::<F>),
             ))
         }
     }
@@ -369,7 +369,7 @@ impl<'a> Discord<'a> {
     //         ffi!(self.get_lobby_manager().search(
     //             tx.core,
     //             Box::into_raw(Box::new(callback)) as *mut _,
-    //             Some(across_ffi::callbacks::result_from_sys::<F, Lobby>)
+    //             Some(callbacks::result_from_sys::<F, Lobby>)
     //         ))
     //     }
     // }
@@ -386,7 +386,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().connect_voice(
                 lobby_id,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>),
+                Some(callbacks::result::<F>),
             ))
         }
     }
@@ -399,7 +399,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().disconnect_voice(
                 lobby_id,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>),
+                Some(callbacks::result::<F>),
             ))
         }
     }

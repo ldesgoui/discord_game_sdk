@@ -3,14 +3,9 @@ use crate::prelude::*;
 pub struct Discord<'a> {
     pub(crate) core: &'a mut sys::IDiscordCore,
     pub(crate) client_id: i64,
-    pub(crate) activity_channel: shrev::EventChannel<event::Activity>,
-    pub(crate) lobby_channel: shrev::EventChannel<event::Lobby>,
-    pub(crate) network_channel: shrev::EventChannel<event::Network>,
-    pub(crate) overlay_channel: shrev::EventChannel<event::Overlay>,
-    pub(crate) relationship_channel: shrev::EventChannel<event::Relationship>,
-    pub(crate) store_channel: shrev::EventChannel<event::Store>,
-    pub(crate) user_channel: shrev::EventChannel<event::User>,
-    pub(crate) voice_channel: shrev::EventChannel<event::Voice>,
+    #[allow(dead_code)]
+    pub(crate) senders: Box<event::Senders>,
+    pub(crate) receivers: event::Receivers,
 }
 
 impl<'a> std::fmt::Debug for Discord<'a> {

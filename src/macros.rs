@@ -5,6 +5,7 @@ macro_rules! ffi {
             assert!($self.core.$method.is_some());
 
             log::trace!(target: "discord_game_sdk", "calling FFI: {}", stringify!($method));
+
             $self.core.$method.unwrap()($self.core as *mut _, $( $args ),*)
         }
     };
@@ -17,6 +18,7 @@ macro_rules! ffi {
             assert!(manager.$method.is_some());
 
             log::trace!(target: "discord_game_sdk", "calling FFI manager method: {}", stringify!($method));
+
             manager.$method.unwrap()(manager as *mut _, $( $args ),*)
         }
     };

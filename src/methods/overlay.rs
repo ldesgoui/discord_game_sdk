@@ -30,7 +30,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_overlay_manager().set_locked(
                 opened,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -43,7 +43,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_overlay_manager().open_activity_invite(
                 action.to_sys(),
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -58,7 +58,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_overlay_manager().open_guild_invite(
                 code.as_ptr(),
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -70,7 +70,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_overlay_manager().open_voice_settings(
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }

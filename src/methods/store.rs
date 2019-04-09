@@ -9,7 +9,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_store_manager().fetch_skus(
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -96,7 +96,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_store_manager().start_purchase(
                 sku_id,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }

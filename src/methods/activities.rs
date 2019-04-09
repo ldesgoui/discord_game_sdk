@@ -25,7 +25,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_activity_manager().update_activity(
                 &mut activity as *mut _,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         };
     }
@@ -37,7 +37,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_activity_manager().clear_activity(
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         };
     }
@@ -51,7 +51,7 @@ impl<'a> Discord<'a> {
                 user_id,
                 reply.to_sys(),
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         };
     }
@@ -73,7 +73,7 @@ impl<'a> Discord<'a> {
                 action.to_sys(),
                 content.as_ptr(),
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         };
     }
@@ -86,7 +86,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_activity_manager().accept_invite(
                 user_id,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }

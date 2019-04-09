@@ -29,7 +29,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_storage_manager().read_async(
                 filename.as_ptr(),
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::slice::<F>)
+                Some(callbacks::slice::<F>)
             ))
         }
     }
@@ -51,7 +51,7 @@ impl<'a> Discord<'a> {
                 offset,
                 length,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::slice::<F>)
+                Some(callbacks::slice::<F>)
             ))
         }
     }
@@ -81,7 +81,7 @@ impl<'a> Discord<'a> {
                 buffer.as_ptr() as *mut _,
                 buffer.len() as u32,
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }

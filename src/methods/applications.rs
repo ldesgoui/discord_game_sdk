@@ -33,7 +33,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_application_manager().validate_or_exit(
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result::<F>)
+                Some(callbacks::result::<F>)
             ))
         }
     }
@@ -45,7 +45,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_application_manager().get_oauth2_token(
                 Box::into_raw(Box::new(callback)) as *mut _,
-                Some(across_ffi::callbacks::result_from_sys::<F, OAuth2Token>)
+                Some(callbacks::result_from_sys::<F, OAuth2Token>)
             ))
         }
     }
