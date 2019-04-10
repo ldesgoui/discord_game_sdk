@@ -2,7 +2,9 @@ use crate::prelude::*;
 
 /// # Lobbies
 impl<'a> Discord<'a> {
-    // TODO: LobbyTransaction<'a> doesn't seem like it's valid, please verify
+    // TODO FIX MEMORY LEAK
+    // Dropping LobbyTransaction after not using it will cause
+    // the allocated item to be leaked
     pub fn create_lobby_transaction(&mut self) -> Result<LobbyTransaction<'a>> {
         let mut tx: *mut sys::IDiscordLobbyTransaction = std::ptr::null_mut();
 
@@ -18,6 +20,7 @@ impl<'a> Discord<'a> {
         Ok(LobbyTransaction { core })
     }
 
+    // tested
     pub fn create_lobby<F>(&mut self, tx: LobbyTransaction<'a>, callback: F)
     where
         F: FnMut(&mut Discord, Result<Lobby>),
@@ -46,6 +49,7 @@ impl<'a> Discord<'a> {
         Ok(LobbyTransaction { core })
     }
 
+    // tested
     pub fn update_lobby<F>(&mut self, lobby_id: i64, tx: LobbyTransaction<'a>, callback: F)
     where
         F: FnMut(&mut Discord, Result<()>),
@@ -133,6 +137,7 @@ impl<'a> Discord<'a> {
         Ok(Lobby::from_sys(&lobby))
     }
 
+    // tested
     pub fn lobby_activity_secret(&mut self, lobby_id: i64) -> Result<String> {
         let mut secret: sys::DiscordLobbySecret = [0; size_of::<sys::DiscordLobbySecret>()];
 
@@ -146,6 +151,7 @@ impl<'a> Discord<'a> {
         Ok(unsafe { string_from_cstr(&secret as *const _) })
     }
 
+    // tested
     pub fn lobby_metadata(&mut self, lobby_id: i64, key: impl AsRef<str>) -> Result<String> {
         let key = CString::new(key.as_ref()).unwrap();
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
@@ -162,6 +168,7 @@ impl<'a> Discord<'a> {
         Ok(unsafe { string_from_cstr(&value as *const _) })
     }
 
+    // tested
     pub fn all_lobby_metadata(&mut self, lobby_id: i64) -> Result<HashMap<String, String>> {
         let mut count: i32 = 0;
 
@@ -245,6 +252,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    // tested
     pub fn all_lobby_member_ids(&mut self, lobby_id: i64) -> Result<Vec<i64>> {
         let mut count = 0;
 
@@ -343,9 +351,6 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // TODO: blocked because we kinda would like lobby_search to do the aggregation by itself but
-    // it can't as it requires &mut self
-    //
     pub fn lobby_search_query(&mut self) -> Result<SearchQuery<'a>> {
         let mut query: *mut sys::IDiscordLobbySearchQuery = std::ptr::null_mut();
 
@@ -402,6 +407,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    // tested
     pub fn connect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
     where
         F: FnMut(&mut Discord, Result<()>),
