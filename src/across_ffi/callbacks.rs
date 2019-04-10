@@ -9,6 +9,18 @@ where
     boxed.1(unsafe { boxed.0.as_mut() }.unwrap(), res.to_result())
 }
 
+pub(crate) extern "C" fn result_str<F>(ptr: *mut c_void, res: sys::EDiscordResult, cstr: *const i8)
+where
+    F: FnMut(&mut Discord, Result<String>),
+{
+    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
+
+    boxed.1(
+        unsafe { boxed.0.as_mut() }.unwrap(),
+        res.to_result().map(|()| unsafe { string_from_cstr(cstr) }),
+    )
+}
+
 pub(crate) extern "C" fn result_from_sys<F, S>(
     ptr: *mut c_void,
     res: sys::EDiscordResult,

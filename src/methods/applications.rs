@@ -48,4 +48,16 @@ impl<'a> Discord<'a> {
             ))
         }
     }
+
+    pub fn app_ticket<F>(&mut self, callback: F)
+    where
+        F: FnMut(&mut Discord, Result<String>),
+    {
+        unsafe {
+            ffi!(self.get_application_manager().get_ticket(
+                self.wrap_callback(callback),
+                Some(callbacks::result_str::<F>)
+            ))
+        }
+    }
 }
