@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 /// # Users
 impl<'a> Discord<'a> {
+    // tested, returned Err(_) until event::user::CurrentUserUpdate
     pub fn current_user(&mut self) -> Result<User> {
         let mut user = sys::DiscordUser::default();
 
@@ -15,6 +16,7 @@ impl<'a> Discord<'a> {
         Ok(User::from_sys(&user))
     }
 
+    // tested
     pub fn user<F>(&mut self, user_id: i64, callback: F)
     where
         F: FnMut(&mut Discord, Result<User>),
@@ -28,7 +30,8 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn current_user_premium_type(&mut self) -> Result<PremiumKind> {
+    // tested
+    pub fn current_user_premium_kind(&mut self) -> Result<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
         unsafe {

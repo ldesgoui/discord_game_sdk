@@ -20,16 +20,17 @@ impl<'a> Discord<'a> {
 
         let core = unsafe { core_ptr.as_mut() }.unwrap();
 
-        let mut result = Self {
+        let mut instance = Self {
             core,
             client_id,
             senders,
             receivers,
         };
 
-        result.set_log_hook();
+        instance.set_log_hook();
+        instance.kickstart_managers();
 
-        Ok(result)
+        Ok(instance)
     }
 
     fn set_log_hook(&mut self) {
@@ -40,6 +41,19 @@ impl<'a> Discord<'a> {
                 Some(callbacks::log),
             ))
         };
+    }
+
+    fn kickstart_managers(&mut self) {
+        unsafe {
+            ffi!(self.get_activity_manager());
+            ffi!(self.get_lobby_manager());
+            ffi!(self.get_network_manager());
+            ffi!(self.get_overlay_manager());
+            ffi!(self.get_relationship_manager());
+            ffi!(self.get_store_manager());
+            ffi!(self.get_user_manager());
+            // ffi!(self.get_voice_manager());
+        }
     }
 
     pub fn run_callbacks(&mut self) -> Result<()> {
@@ -73,37 +87,37 @@ fn create_params(
         events: std::ptr::null_mut(),
         event_data,
 
-        application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
         application_events: std::ptr::null_mut(),
+        application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
 
-        user_events: &mut USER,
+        user_events: Box::into_raw(Box::new(USER)),
         user_version: sys::DISCORD_USER_MANAGER_VERSION,
 
         image_events: std::ptr::null_mut(),
         image_version: sys::DISCORD_IMAGE_MANAGER_VERSION,
 
-        activity_events: &mut ACTIVITY,
+        activity_events: Box::into_raw(Box::new(ACTIVITY)),
         activity_version: sys::DISCORD_ACTIVITY_MANAGER_VERSION,
 
-        relationship_events: &mut RELATIONSHIP,
+        relationship_events: Box::into_raw(Box::new(RELATIONSHIP)),
         relationship_version: sys::DISCORD_RELATIONSHIP_MANAGER_VERSION,
 
-        lobby_events: &mut LOBBY,
+        lobby_events: Box::into_raw(Box::new(LOBBY)),
         lobby_version: sys::DISCORD_LOBBY_MANAGER_VERSION,
 
-        network_events: &mut NETWORK,
+        network_events: Box::into_raw(Box::new(NETWORK)),
         network_version: sys::DISCORD_NETWORK_MANAGER_VERSION,
 
-        overlay_events: &mut OVERLAY,
+        overlay_events: Box::into_raw(Box::new(OVERLAY)),
         overlay_version: sys::DISCORD_OVERLAY_MANAGER_VERSION,
 
         storage_events: std::ptr::null_mut(),
         storage_version: sys::DISCORD_STORAGE_MANAGER_VERSION,
 
-        store_events: &mut STORE,
+        store_events: Box::into_raw(Box::new(STORE)),
         store_version: sys::DISCORD_STORE_MANAGER_VERSION,
 
-        voice_events: &mut VOICE,
+        voice_events: Box::into_raw(Box::new(VOICE)),
         voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
 
         achievement_events: std::ptr::null_mut(),

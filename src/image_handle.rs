@@ -4,6 +4,7 @@ use crate::prelude::*;
 pub struct ImageHandle {
     pub kind: ImageKind,
     pub id: i64,
+    // MUST BE ONE OF [16, 32, 64, 128, 256]
     pub size: u32,
 }
 

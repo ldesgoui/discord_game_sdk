@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 /// # Relationships
 impl<'a> Discord<'a> {
+    // tested
+    // returns NotFound until event::relationships::Refreshed
     pub fn relationship_with(&mut self, user_id: i64) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
@@ -15,6 +17,8 @@ impl<'a> Discord<'a> {
         Ok(Relationship::from_sys(&relationship))
     }
 
+    // tested
+    // returns vec![] until event::relationships::Refreshed
     pub fn all_relationships<F>(&mut self, filter: F) -> Result<Vec<Relationship>>
     where
         F: FnMut(Relationship) -> bool,

@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 /// # Application
 impl<'a> Discord<'a> {
+    // tested, returns "en-US" and similar
     pub fn current_locale(&mut self) -> String {
         let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
 
@@ -14,6 +15,7 @@ impl<'a> Discord<'a> {
         unsafe { string_from_cstr(&locale as *const _) }
     }
 
+    // tested, returns "master" or whichever `dispatch` branch is in use
     pub fn current_branch(&mut self) -> String {
         let mut branch: sys::DiscordBranch = [0; size_of::<sys::DiscordBranch>()];
 
@@ -26,6 +28,7 @@ impl<'a> Discord<'a> {
         unsafe { string_from_cstr(&branch as *const _) }
     }
 
+    // tested, hasn't failed yet
     pub fn validate_or_exit<F>(&mut self, callback: F)
     where
         F: FnMut(&mut Discord, Result<()>),
@@ -37,6 +40,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    // tested
     pub fn oauth2_token<F>(&mut self, callback: F)
     where
         F: FnMut(&mut Discord, Result<OAuth2Token>),
@@ -49,6 +53,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    // tested
     pub fn app_ticket<F>(&mut self, callback: F)
     where
         F: FnMut(&mut Discord, Result<String>),

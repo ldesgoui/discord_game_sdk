@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 /// # Store
 impl<'a> Discord<'a> {
+    // tested
     pub fn load_skus<F>(&mut self, callback: F)
     where
         F: FnMut(&mut Discord, Result<()>),
@@ -13,7 +14,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn sku<F>(&mut self, id: i64) -> Result<Sku> {
+    pub fn sku(&mut self, id: i64) -> Result<Sku> {
         let mut sku = sys::DiscordSku::default();
 
         unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku as *mut _,)) }.to_result()?;
@@ -21,7 +22,8 @@ impl<'a> Discord<'a> {
         Ok(Sku::from_sys(&sku))
     }
 
-    pub fn all_skus<F>(&mut self) -> Result<Vec<Sku>> {
+    // tested, returned []
+    pub fn all_skus(&mut self) -> Result<Vec<Sku>> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
@@ -39,7 +41,7 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
-    pub fn entitlement<F>(&mut self, id: i64) -> Result<Entitlement> {
+    pub fn entitlement(&mut self, id: i64) -> Result<Entitlement> {
         let mut entitlement = sys::DiscordEntitlement::default();
 
         unsafe {
@@ -52,7 +54,8 @@ impl<'a> Discord<'a> {
         Ok(Entitlement::from_sys(&entitlement))
     }
 
-    pub fn all_entitlements<F>(&mut self) -> Result<Vec<Entitlement>> {
+    // tested, returned []
+    pub fn all_entitlements(&mut self) -> Result<Vec<Entitlement>> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }

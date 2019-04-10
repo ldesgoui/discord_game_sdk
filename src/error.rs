@@ -4,7 +4,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
 pub enum Error {
-    #[error(display = "Discord SDK returned error")]
+    #[error(display = "Discord SDK error: {}", _0)]
     DiscordError(#[error(cause)] DiscordError),
 }
 

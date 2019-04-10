@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 /// # Overlay
 impl<'a> Discord<'a> {
+    // tested in terminal, was returning false
+    // kinda inconclusive
     pub fn overlay_enabled(&mut self) -> bool {
         let mut enabled = false;
 
@@ -14,12 +16,14 @@ impl<'a> Discord<'a> {
         enabled
     }
 
+    // tested in terminal, was returning true until event::overlay::Toggled
+    // kinda inconclusive
     pub fn overlay_opened(&mut self) -> bool {
-        let mut opened = false;
+        let mut locked = false;
 
-        unsafe { ffi!(self.get_overlay_manager().is_locked(&mut opened as *mut _)) }
+        unsafe { ffi!(self.get_overlay_manager().is_locked(&mut locked as *mut _)) }
 
-        opened
+        !locked
     }
 
     pub fn set_overlay_opened<F>(&mut self, opened: bool, callback: F)
@@ -28,7 +32,7 @@ impl<'a> Discord<'a> {
     {
         unsafe {
             ffi!(self.get_overlay_manager().set_locked(
-                opened,
+                !opened,
                 self.wrap_callback(callback),
                 Some(callbacks::result::<F>)
             ))
@@ -48,6 +52,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    // tested
     pub fn open_guild_invite_overlay<F>(&mut self, code: impl AsRef<str>, callback: F)
     where
         F: FnMut(&mut Discord, Result<()>),
@@ -63,6 +68,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    // tested
     pub fn open_voice_settings<F>(&mut self, callback: F)
     where
         F: FnMut(&mut Discord, Result<()>),
