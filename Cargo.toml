@@ -22,7 +22,7 @@ discord_game_sdk_sys = { version = "0.1.0", path = "./sys" }
 discord_game_sdk_mock = { version = "0.1.0", path = "./mock", optional = true }
 
 [dev-dependencies]
-env_logger = { version = "0.6.1" }
+pretty_env_logger = { version = "0.3.0" }
 
 [workspace]
 members = ["sys", "mock"]
