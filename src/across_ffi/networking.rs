@@ -7,6 +7,8 @@ pub(crate) extern "C" fn on_message(
     data: *mut u8,
     len: u32,
 ) {
+    prevent_unwind!();
+
     let buffer = unsafe { std::slice::from_raw_parts(data, len as usize) }.to_vec();
 
     unsafe { (senders as *mut event::Senders).as_ref() }
@@ -21,6 +23,8 @@ pub(crate) extern "C" fn on_message(
 }
 
 pub(crate) extern "C" fn on_route_update(senders: *mut c_void, route: *const i8) {
+    prevent_unwind!();
+
     let route = unsafe { string_from_cstr(route) };
 
     unsafe { (senders as *mut event::Senders).as_ref() }

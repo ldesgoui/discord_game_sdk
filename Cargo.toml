@@ -13,16 +13,24 @@ categories = ["api-bindings", "game-engines"]
 mock = ["discord_game_sdk_sys/mock", "discord_game_sdk_mock"]
 
 [dependencies]
-chrono = { version = "0.4.6", default-features = false }
-crossbeam-channel = { version = "0.3.8", default-features = false }
-derive_more = { version = "0.14.0", default-features = false }
-err-derive = { version = "0.1.5", default-features = false }
-log = { version = "0.4.6", default-features = false }
-discord_game_sdk_sys = { version = "0.1.0", path = "./sys" }
-discord_game_sdk_mock = { version = "0.1.0", path = "./mock", optional = true }
+chrono = "0.4.6"
+crossbeam-channel = "0.3.8"
+derive_more = "0.14.0"
+err-derive = "0.1.5"
+log = "0.4.6"
+scopeguard = "1.0.0"
+
+[dependencies.discord_game_sdk_sys]
+version = "0.1.0"
+path = "./sys"
+
+[dependencies.discord_game_sdk_mock]
+version = "0.1.0"
+path = "./mock"
+optional = true
 
 [dev-dependencies]
-pretty_env_logger = { version = "0.3.0" }
+pretty_env_logger = "0.3.0"
 
 [workspace]
 members = ["sys", "mock"]

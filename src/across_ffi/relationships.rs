@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
 pub(crate) extern "C" fn on_refresh(senders: *mut c_void) {
+    prevent_unwind!();
+
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .relationships_refresh
@@ -12,6 +14,8 @@ pub(crate) extern "C" fn on_relationship_update(
     senders: *mut c_void,
     relationship: *mut sys::DiscordRelationship,
 ) {
+    prevent_unwind!();
+
     let relationship = unsafe { Relationship::from_sys_ptr(relationship) };
 
     unsafe { (senders as *mut event::Senders).as_ref() }

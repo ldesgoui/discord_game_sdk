@@ -4,6 +4,8 @@ pub(crate) extern "C" fn result<F>(ptr: *mut c_void, res: sys::EDiscordResult)
 where
     F: FnMut(&mut Discord, Result<()>),
 {
+    prevent_unwind!();
+
     let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
 
     boxed.1(unsafe { boxed.0.as_mut() }.unwrap(), res.to_result())
@@ -13,6 +15,8 @@ pub(crate) extern "C" fn result_str<F>(ptr: *mut c_void, res: sys::EDiscordResul
 where
     F: FnMut(&mut Discord, Result<String>),
 {
+    prevent_unwind!();
+
     let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
 
     boxed.1(
@@ -29,6 +33,8 @@ pub(crate) extern "C" fn result_from_sys<F, S>(
     F: FnMut(&mut Discord, Result<S>),
     S: FromSys,
 {
+    prevent_unwind!();
+
     let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
 
     boxed.1(
@@ -45,6 +51,8 @@ pub(crate) extern "C" fn result_from_sys_ptr<F, S>(
     F: FnMut(&mut Discord, Result<S>),
     S: FromSys,
 {
+    prevent_unwind!();
+
     let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
 
     boxed.1(
@@ -62,6 +70,8 @@ pub(crate) extern "C" fn slice<F>(
 ) where
     F: FnMut(&mut Discord, Result<&[u8]>) + Sized,
 {
+    prevent_unwind!();
+
     let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
 
     boxed.1(
@@ -78,12 +88,16 @@ pub(crate) extern "C" fn filter_relationship<F>(
 where
     F: FnMut(Relationship) -> bool,
 {
+    prevent_unwind!();
+
     let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
 
     callback(unsafe { Relationship::from_sys_ptr(relationship_ptr) })
 }
 
 pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, message: *const i8) {
+    prevent_unwind!();
+
     if message.is_null() {
         panic!("log_hook was passed a null pointer");
     }

@@ -18,4 +18,9 @@ log = "0.4.6"
 memoffset = "0.3.0"
 pretty_env_logger = "0.3.0"
 scopeguard = "1.0.0"
-discord_game_sdk_sys = { version = "0.1.0", path = "../sys", features = ["mock"] }
+
+[dependencies.discord_game_sdk_sys]
+version = "0.1.0"
+path = "../sys"
+features = ["mock"]
+

@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
 pub(crate) extern "C" fn on_activity_join(senders: *mut c_void, secret: *const i8) {
+    prevent_unwind!();
+
     let secret = unsafe { string_from_cstr(secret) };
 
     unsafe { (senders as *mut event::Senders).as_ref() }
@@ -11,6 +13,8 @@ pub(crate) extern "C" fn on_activity_join(senders: *mut c_void, secret: *const i
 }
 
 pub(crate) extern "C" fn on_activity_spectate(senders: *mut c_void, secret: *const i8) {
+    prevent_unwind!();
+
     let secret = unsafe { string_from_cstr(secret) };
 
     unsafe { (senders as *mut event::Senders).as_ref() }
@@ -24,6 +28,8 @@ pub(crate) extern "C" fn on_activity_join_request(
     senders: *mut c_void,
     user: *mut sys::DiscordUser,
 ) {
+    prevent_unwind!();
+
     let user = unsafe { User::from_sys_ptr(user) };
 
     unsafe { (senders as *mut event::Senders).as_ref() }
@@ -39,6 +45,8 @@ pub(crate) extern "C" fn on_activity_invite(
     user: *mut sys::DiscordUser,
     activity: *mut sys::DiscordActivity,
 ) {
+    prevent_unwind!();
+
     let action = Action::from_sys(&action);
     let user = unsafe { User::from_sys_ptr(user) };
     let activity = unsafe { Activity::from_sys_ptr(activity) };

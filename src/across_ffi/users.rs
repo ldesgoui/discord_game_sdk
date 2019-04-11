@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
 pub(crate) extern "C" fn on_current_user_update(senders: *mut c_void) {
+    prevent_unwind!();
+
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .current_user_update

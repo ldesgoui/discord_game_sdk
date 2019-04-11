@@ -23,3 +23,27 @@ macro_rules! ffi {
         }
     };
 }
+
+macro_rules! prevent_unwind {
+    () => {
+        let hook = std::panic::take_hook();
+
+        std::panic::set_hook(Box::new(|info| {
+            eprintln!();
+            eprintln!("discord_game_sdk:");
+            eprintln!("    The program has encountered a `panic` across FFI bounds,");
+            eprintln!("    unwinding at this point would be undefined behavior,");
+            eprintln!("    we will abort the process instead.");
+            eprintln!("    Here are informations about the panic:");
+            eprintln!();
+            eprintln!("{}", info);
+            eprintln!();
+
+            std::process::abort();
+        }));
+
+        scopeguard::defer_on_success!({
+            std::panic::set_hook(hook);
+        });
+    };
+}

@@ -54,6 +54,7 @@ pub unsafe extern "C" fn DiscordCreate(
 /// Complete
 pub unsafe extern "C" fn destroy(core: *mut sys::IDiscordCore) {
     prevent_unwind!();
+
     let _inst: Box<Instance> = Box::from_raw(Instance::from_core(core));
 }
 

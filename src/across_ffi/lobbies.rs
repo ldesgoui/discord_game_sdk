@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
 pub(crate) extern "C" fn on_lobby_update(senders: *mut c_void, id: i64) {
+    prevent_unwind!();
+
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .lobbies_update
@@ -9,6 +11,8 @@ pub(crate) extern "C" fn on_lobby_update(senders: *mut c_void, id: i64) {
 }
 
 pub(crate) extern "C" fn on_lobby_delete(senders: *mut c_void, id: i64, reason: u32) {
+    prevent_unwind!();
+
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .lobbies_delete
@@ -17,6 +21,8 @@ pub(crate) extern "C" fn on_lobby_delete(senders: *mut c_void, id: i64, reason: 
 }
 
 pub(crate) extern "C" fn on_member_connect(senders: *mut c_void, id: i64, user_id: i64) {
+    prevent_unwind!();
+
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .lobbies_member_connect
@@ -25,6 +31,8 @@ pub(crate) extern "C" fn on_member_connect(senders: *mut c_void, id: i64, user_i
 }
 
 pub(crate) extern "C" fn on_member_update(senders: *mut c_void, id: i64, user_id: i64) {
+    prevent_unwind!();
+
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .lobbies_member_update
@@ -33,6 +41,8 @@ pub(crate) extern "C" fn on_member_update(senders: *mut c_void, id: i64, user_id
 }
 
 pub(crate) extern "C" fn on_member_disconnect(senders: *mut c_void, id: i64, user_id: i64) {
+    prevent_unwind!();
+
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .lobbies_member_disconnect
@@ -47,6 +57,8 @@ pub(crate) extern "C" fn on_lobby_message(
     data: *mut u8,
     len: u32,
 ) {
+    prevent_unwind!();
+
     let buffer = unsafe { std::slice::from_raw_parts(data, len as usize) }.to_vec();
 
     unsafe { (senders as *mut event::Senders).as_ref() }
@@ -61,6 +73,8 @@ pub(crate) extern "C" fn on_lobby_message(
 }
 
 pub(crate) extern "C" fn on_speaking(senders: *mut c_void, id: i64, user_id: i64, speaking: bool) {
+    prevent_unwind!();
+
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .lobbies_speaking
@@ -80,6 +94,8 @@ pub(crate) extern "C" fn on_network_message(
     data: *mut u8,
     len: u32,
 ) {
+    prevent_unwind!();
+
     let buffer = unsafe { std::slice::from_raw_parts(data, len as usize) }.to_vec();
 
     unsafe { (senders as *mut event::Senders).as_ref() }
