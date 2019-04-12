@@ -23,6 +23,7 @@ extern "C" {}
 mod macros;
 
 mod activity;
+mod callbacks;
 mod discord;
 mod entitlement;
 pub mod error;
@@ -43,7 +44,7 @@ mod methods {
     mod activities;
     mod applications;
     mod images;
-    mod lobbies;
+    //mod lobbies;
     mod networking;
     mod overlay;
     mod relationships;
@@ -85,6 +86,7 @@ mod prelude {
     pub(crate) use crate::error::ToResult;
     pub(crate) use crate::{
         across_ffi::{self, callbacks},
+        callbacks::*,
         event,
         utils::*,
         *,

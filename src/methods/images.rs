@@ -1,18 +1,15 @@
 use crate::prelude::*;
 
 /// # Images
-impl<'a> Discord<'a> {
+impl Discord {
     // tested, takes a few seconds, returns the same handle as inputted
     pub fn fetch_image<F>(&mut self, handle: ImageHandle, refresh: bool, callback: F)
     where
-        F: FnMut(&mut Discord, Result<ImageHandle>),
+        F: FnMut(&mut Discord, Result<ImageHandle>) + 'static,
     {
         unsafe {
-            ffi!(self.get_image_manager().fetch(
-                handle.to_sys(),
-                refresh,
-                self.wrap_callback(callback),
-                Some(callbacks::result_from_sys::<F, ImageHandle>),
+            ffi!(self.get_image_manager().fetch(handle.to_sys(), refresh)(
+                ResultFromSysCallback::new(callback)
             ))
         }
     }

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// # Storage
-impl<'a> Discord<'a> {
+impl Discord {
     // tested
     pub fn read_file(&mut self, filename: impl AsRef<str>, buffer: &mut [u8]) -> Result<u32> {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
@@ -23,15 +23,13 @@ impl<'a> Discord<'a> {
     // tested
     pub fn read_file_async<F>(&mut self, filename: impl AsRef<str>, callback: F)
     where
-        F: FnMut(&mut Discord, Result<&[u8]>),
+        F: FnMut(&mut Discord, Result<Vec<u8>>) + 'static,
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
 
         unsafe {
-            ffi!(self.get_storage_manager().read_async(
-                filename.as_ptr(),
-                self.wrap_callback(callback),
-                Some(callbacks::slice::<F>)
+            ffi!(self.get_storage_manager().read_async(filename.as_ptr())(
+                ResultBytesCallback::new(callback)
             ))
         }
     }
@@ -44,7 +42,7 @@ impl<'a> Discord<'a> {
         length: u64,
         callback: F,
     ) where
-        F: FnMut(&mut Discord, Result<&[u8]>),
+        F: FnMut(&mut Discord, Result<Vec<u8>>) + 'static,
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
 
@@ -52,10 +50,8 @@ impl<'a> Discord<'a> {
             ffi!(self.get_storage_manager().read_async_partial(
                 filename.as_ptr(),
                 offset,
-                length,
-                self.wrap_callback(callback),
-                Some(callbacks::slice::<F>)
-            ))
+                length
+            )(ResultBytesCallback::new(callback)))
         }
     }
 
@@ -76,7 +72,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn write_file_async<F>(&mut self, filename: impl AsRef<str>, buffer: &[u8], callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         let filename = std::ffi::CString::new(filename.as_ref()).unwrap();
 
@@ -84,10 +80,8 @@ impl<'a> Discord<'a> {
             ffi!(self.get_storage_manager().write_async(
                 filename.as_ptr(),
                 buffer.as_ptr() as *mut _,
-                buffer.len() as u32,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>)
-            ))
+                buffer.len() as u32
+            )(ResultCallback::new(callback)))
         }
     }
 

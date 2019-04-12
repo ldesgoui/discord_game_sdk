@@ -1,84 +1,70 @@
 use crate::prelude::*;
 
-pub(crate) extern "C" fn result<F>(ptr: *mut c_void, res: sys::EDiscordResult)
-where
-    F: FnMut(&mut Discord, Result<()>),
-{
+pub(crate) extern "C" fn result(ptr: *mut c_void, res: sys::EDiscordResult) {
     prevent_unwind!();
 
-    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
-
-    boxed.1(unsafe { boxed.0.as_mut() }.unwrap(), res.to_result())
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<()>>) }
+        .try_send(res.to_result())
+        .unwrap()
 }
 
-pub(crate) extern "C" fn result_str<F>(ptr: *mut c_void, res: sys::EDiscordResult, cstr: *const i8)
-where
-    F: FnMut(&mut Discord, Result<String>),
-{
-    prevent_unwind!();
-
-    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
-
-    boxed.1(
-        unsafe { boxed.0.as_mut() }.unwrap(),
-        res.to_result().map(|()| unsafe { string_from_cstr(cstr) }),
-    )
-}
-
-pub(crate) extern "C" fn result_from_sys<F, S>(
+pub(crate) extern "C" fn result_string(
     ptr: *mut c_void,
     res: sys::EDiscordResult,
-    source: S::Source,
-) where
-    F: FnMut(&mut Discord, Result<S>),
-    S: FromSys,
-{
+    cstr: *const i8,
+) {
     prevent_unwind!();
 
-    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
-
-    boxed.1(
-        unsafe { boxed.0.as_mut() }.unwrap(),
-        res.to_result().map(|()| S::from_sys(&source)),
-    )
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<String>>) }
+        .try_send(res.to_result().map(|()| unsafe { string_from_cstr(cstr) }))
+        .unwrap()
 }
 
-pub(crate) extern "C" fn result_from_sys_ptr<F, S>(
-    ptr: *mut c_void,
-    res: sys::EDiscordResult,
-    source_ptr: *mut S::Source,
-) where
-    F: FnMut(&mut Discord, Result<S>),
-    S: FromSys,
-{
-    prevent_unwind!();
-
-    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
-
-    boxed.1(
-        unsafe { boxed.0.as_mut() }.unwrap(),
-        res.to_result()
-            .map(|()| unsafe { S::from_sys_ptr(source_ptr) }),
-    )
-}
-
-pub(crate) extern "C" fn slice<F>(
+pub(crate) extern "C" fn result_bytes(
     ptr: *mut c_void,
     res: sys::EDiscordResult,
     buffer_ptr: *mut u8,
     len: u32,
+) {
+    prevent_unwind!();
+
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<Vec<u8>>>) }
+        .try_send(
+            res.to_result()
+                .map(|()| unsafe { std::slice::from_raw_parts(buffer_ptr, len as usize) }.to_vec()),
+        )
+        .unwrap()
+}
+
+pub(crate) extern "C" fn result_from_sys<S>(
+    ptr: *mut c_void,
+    res: sys::EDiscordResult,
+    source: S::Source,
 ) where
-    F: FnMut(&mut Discord, Result<&[u8]>) + Sized,
+    S: FromSys,
 {
     prevent_unwind!();
 
-    let mut boxed: Box<(*mut Discord, F)> = unsafe { Box::from_raw(ptr as *mut _) };
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<S>>) }
+        .try_send(res.to_result().map(|()| S::from_sys(&source)))
+        .unwrap()
+}
 
-    boxed.1(
-        unsafe { boxed.0.as_mut() }.unwrap(),
-        res.to_result()
-            .map(|()| unsafe { std::slice::from_raw_parts(buffer_ptr, len as usize) }),
-    )
+pub(crate) extern "C" fn result_from_sys_ptr<S>(
+    ptr: *mut c_void,
+    res: sys::EDiscordResult,
+    source_ptr: *mut S::Source,
+) where
+    S: FromSys,
+{
+    prevent_unwind!();
+
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<S>>) }
+        .try_send(
+            res.to_result()
+                .map(|()| unsafe { S::from_sys_ptr(source_ptr) }),
+        )
+        .unwrap()
 }
 
 pub(crate) extern "C" fn filter_relationship<F>(
@@ -90,17 +76,13 @@ where
 {
     prevent_unwind!();
 
-    let mut callback: Box<F> = unsafe { Box::from_raw(callback_ptr as *mut F) };
+    let mut callback: &mut F = unsafe { (callback_ptr as *mut F).as_mut() }.unwrap();
 
     callback(unsafe { Relationship::from_sys_ptr(relationship_ptr) })
 }
 
 pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, message: *const i8) {
     prevent_unwind!();
-
-    if message.is_null() {
-        panic!("log_hook was passed a null pointer");
-    }
 
     let level = match level {
         sys::DiscordLogLevel_Error => log::Level::Error,
@@ -114,5 +96,5 @@ pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, messa
         .to_str()
         .unwrap();
 
-    log::log!(target: "discord_game_sdk", level, "[SDK] {}", message);
+    log!(level, "SDK: {}", message);
 }

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// # Users
-impl<'a> Discord<'a> {
+impl Discord {
     // tested, returned Err(_) until event::user::CurrentUserUpdate
     pub fn current_user(&mut self) -> Result<User> {
         let mut user = sys::DiscordUser::default();
@@ -19,13 +19,11 @@ impl<'a> Discord<'a> {
     // tested
     pub fn user<F>(&mut self, user_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<User>),
+        F: FnMut(&mut Discord, Result<User>) + 'static,
     {
         unsafe {
-            ffi!(self.get_user_manager().get_user(
-                user_id,
-                self.wrap_callback(callback),
-                Some(callbacks::result_from_sys_ptr::<F, User>)
+            ffi!(self.get_user_manager().get_user(user_id)(
+                ResultFromSysPtrCallback::new(callback)
             ))
         }
     }

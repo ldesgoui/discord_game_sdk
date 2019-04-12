@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// # Core
-impl<'a> Discord<'a> {
+impl Discord {
     pub fn new(client_id: i64) -> Result<Self> {
         Self::with_create_flags(client_id, CreateFlags::default())
     }
@@ -13,18 +13,16 @@ impl<'a> Discord<'a> {
 
         let mut params = create_params(client_id, flags, senders_ptr as *mut _);
 
-        let mut core_ptr = std::ptr::null_mut();
+        let mut core = std::ptr::null_mut();
 
-        unsafe { sys::DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core_ptr) }
-            .to_result()?;
-
-        let core = unsafe { core_ptr.as_mut() }.unwrap();
+        unsafe { sys::DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core) }.to_result()?;
 
         let mut instance = Self {
             core,
             client_id,
             senders,
             receivers,
+            callbacks: Vec::new(),
         };
 
         instance.set_log_hook();
@@ -36,7 +34,7 @@ impl<'a> Discord<'a> {
     fn set_log_hook(&mut self) {
         unsafe {
             ffi!(self.set_log_hook(
-                sys::DiscordLogLevel_Debug,
+                sys::DiscordLogLevel_Debug + 1,
                 std::ptr::null_mut(),
                 Some(callbacks::log),
             ))
@@ -57,7 +55,19 @@ impl<'a> Discord<'a> {
     }
 
     pub fn run_callbacks(&mut self) -> Result<()> {
-        unsafe { ffi!(self.run_callbacks()) }.to_result()
+        unsafe { ffi!(self.run_callbacks()) }.to_result()?;
+
+        let mut i = 0;
+        while i < self.callbacks.len() {
+            if self.callbacks[i].is_ready() {
+                let mut callback = self.callbacks.remove(i);
+                callback.run(self);
+            } else {
+                i += 1;
+            }
+        }
+
+        Ok(())
     }
 
     pub fn event_receivers(&self) -> event::Receivers {
@@ -65,11 +75,13 @@ impl<'a> Discord<'a> {
     }
 
     pub fn empty_event_receivers(&self) {
+        // Virtually impossible to panic, this would return Err(_) if send failed, the only fail
+        // case would be if the Receivers were dropped, which they cannot be, because we own them
         self.receivers.empty_channels().unwrap()
     }
 }
 
-impl<'a> Drop for Discord<'a> {
+impl Drop for Discord {
     fn drop(&mut self) {
         unsafe { ffi!(self.destroy()) }
     }

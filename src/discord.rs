@@ -1,14 +1,15 @@
 use crate::prelude::*;
 
-pub struct Discord<'a> {
-    pub(crate) core: &'a mut sys::IDiscordCore,
+pub struct Discord {
+    pub(crate) core: *mut sys::IDiscordCore,
     pub(crate) client_id: i64,
     #[allow(dead_code)]
     pub(crate) senders: Box<event::Senders>,
     pub(crate) receivers: event::Receivers,
+    pub(crate) callbacks: Vec<Box<dyn AnyCallback>>,
 }
 
-impl<'a> std::fmt::Debug for Discord<'a> {
+impl std::fmt::Debug for Discord {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("Discord")
             .field("client_id", &self.client_id)
@@ -16,10 +17,9 @@ impl<'a> std::fmt::Debug for Discord<'a> {
     }
 }
 
-impl<'a> Discord<'a> {
-    // yikes
-    pub(crate) fn wrap_callback(&mut self, callback: impl Sized) -> *mut c_void {
-        Box::into_raw(Box::new((self as *mut _, callback))) as *mut _
+impl Discord {
+    pub(crate) fn register_callback(&mut self, callback: impl AnyCallback + 'static) {
+        self.callbacks.push(Box::new(callback))
     }
 }
 

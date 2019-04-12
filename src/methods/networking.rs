@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// # Networking
-impl<'a> Discord<'a> {
+impl Discord {
     pub fn peer_id(&mut self) -> u64 {
         let mut peer_id = 0;
 

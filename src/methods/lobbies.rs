@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// # Lobbies
-impl<'a> Discord<'a> {
+impl Discord {
     // TODO FIX MEMORY LEAK
     // Dropping LobbyTransaction after not using it will cause
     // the allocated item to be leaked

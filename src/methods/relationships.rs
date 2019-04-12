@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// # Relationships
-impl<'a> Discord<'a> {
+impl Discord {
     // tested
     // returns NotFound until event::relationships::Refreshed
     pub fn relationship_with(&mut self, user_id: i64) -> Result<Relationship> {

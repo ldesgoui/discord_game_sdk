@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// # Application
-impl<'a> Discord<'a> {
+impl Discord {
     // tested, returns "en-US" and similar
     pub fn current_locale(&mut self) -> String {
         let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
@@ -31,24 +31,23 @@ impl<'a> Discord<'a> {
     // tested, hasn't failed yet
     pub fn validate_or_exit<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         unsafe {
-            ffi!(self
-                .get_application_manager()
-                .validate_or_exit(self.wrap_callback(callback), Some(callbacks::result::<F>)))
+            ffi!(self.get_application_manager().validate_or_exit()(
+                ResultCallback::new(callback)
+            ))
         }
     }
 
     // tested
     pub fn oauth2_token<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<OAuth2Token>),
+        F: FnMut(&mut Discord, Result<OAuth2Token>) + 'static,
     {
         unsafe {
-            ffi!(self.get_application_manager().get_oauth2_token(
-                self.wrap_callback(callback),
-                Some(callbacks::result_from_sys_ptr::<F, OAuth2Token>)
+            ffi!(self.get_application_manager().get_oauth2_token()(
+                ResultFromSysPtrCallback::new(callback)
             ))
         }
     }
@@ -56,12 +55,11 @@ impl<'a> Discord<'a> {
     // tested
     pub fn app_ticket<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<String>),
+        F: FnMut(&mut Discord, Result<String>) + 'static,
     {
         unsafe {
-            ffi!(self.get_application_manager().get_ticket(
-                self.wrap_callback(callback),
-                Some(callbacks::result_str::<F>)
+            ffi!(self.get_application_manager().get_ticket()(
+                ResultStringCallback::new(callback)
             ))
         }
     }

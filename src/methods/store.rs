@@ -1,16 +1,16 @@
 use crate::prelude::*;
 
 /// # Store
-impl<'a> Discord<'a> {
+impl Discord {
     // tested
     pub fn load_skus<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         unsafe {
-            ffi!(self
-                .get_store_manager()
-                .fetch_skus(self.wrap_callback(callback), Some(callbacks::result::<F>)))
+            ffi!(self.get_store_manager().fetch_skus()(ResultCallback::new(
+                callback
+            )))
         }
     }
 
@@ -92,13 +92,11 @@ impl<'a> Discord<'a> {
 
     pub fn start_purchase<F>(&mut self, sku_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         unsafe {
-            ffi!(self.get_store_manager().start_purchase(
-                sku_id,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>)
+            ffi!(self.get_store_manager().start_purchase(sku_id)(
+                ResultCallback::new(callback)
             ))
         }
     }

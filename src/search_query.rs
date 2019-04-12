@@ -5,48 +5,48 @@ pub struct SearchQuery<'a> {
 }
 
 impl<'a> SearchQuery<'a> {
-    pub fn filter(
-        &mut self,
-        key: impl AsRef<str>,
-        value: impl AsRef<str>,
-        comparison: Comparison,
-        cast: Cast,
-    ) -> Result<()> {
-        let key = CString::new(key.as_ref()).unwrap();
-        let value = CString::new(value.as_ref()).unwrap();
+    //pub fn filter(
+    //    &mut self,
+    //    key: impl AsRef<str>,
+    //    value: impl AsRef<str>,
+    //    comparison: Comparison,
+    //    cast: Cast,
+    //) -> Result<()> {
+    //    let key = CString::new(key.as_ref()).unwrap();
+    //    let value = CString::new(value.as_ref()).unwrap();
 
-        unsafe {
-            ffi!(self.filter(
-                key.as_ptr() as *mut _,
-                comparison.to_sys(),
-                cast.to_sys(),
-                value.as_ptr() as *mut _
-            ))
-        }
-        .to_result()
-    }
+    //    unsafe {
+    //        ffi!(self.filter(
+    //            key.as_ptr() as *mut _,
+    //            comparison.to_sys(),
+    //            cast.to_sys(),
+    //            value.as_ptr() as *mut _
+    //        ))
+    //    }
+    //    .to_result()
+    //}
 
-    pub fn sort(&mut self, key: impl AsRef<str>, value: impl AsRef<str>, cast: Cast) -> Result<()> {
-        let key = CString::new(key.as_ref()).unwrap();
-        let value = CString::new(value.as_ref()).unwrap();
+    //pub fn sort(&mut self, key: impl AsRef<str>, value: impl AsRef<str>, cast: Cast) -> Result<()> {
+    //    let key = CString::new(key.as_ref()).unwrap();
+    //    let value = CString::new(value.as_ref()).unwrap();
 
-        unsafe {
-            ffi!(self.sort(
-                key.as_ptr() as *mut _,
-                cast.to_sys(),
-                value.as_ptr() as *mut _
-            ))
-        }
-        .to_result()
-    }
+    //    unsafe {
+    //        ffi!(self.sort(
+    //            key.as_ptr() as *mut _,
+    //            cast.to_sys(),
+    //            value.as_ptr() as *mut _
+    //        ))
+    //    }
+    //    .to_result()
+    //}
 
-    pub fn limit(&mut self, limit: u32) -> Result<()> {
-        unsafe { ffi!(self.limit(limit)) }.to_result()
-    }
+    //pub fn limit(&mut self, limit: u32) -> Result<()> {
+    //    unsafe { ffi!(self.limit(limit)) }.to_result()
+    //}
 
-    pub fn distance(&mut self, distance: Distance) -> Result<()> {
-        unsafe { ffi!(self.distance(distance.to_sys())) }.to_result()
-    }
+    //pub fn distance(&mut self, distance: Distance) -> Result<()> {
+    //    unsafe { ffi!(self.distance(distance.to_sys())) }.to_result()
+    //}
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

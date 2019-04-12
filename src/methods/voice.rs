@@ -6,7 +6,7 @@ use crate::prelude::*;
 /// Currently, the SDK seems to crash after running the "voice settings updated" event handler
 /// with a panic inside panic. This has beem reported. For the meantime, the following functions
 /// are not usable.
-impl<'a> Discord<'a> {
+impl Discord {
     // TODO: get_input_mode (no idea how im supposed to deal with shortcuts)
     // TODO: set_input_mode
 
