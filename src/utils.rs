@@ -13,3 +13,7 @@ pub(crate) trait FromSys: Sized {
 pub(crate) unsafe fn string_from_cstr(ptr: *const i8) -> String {
     CStr::from_ptr(ptr).to_str().unwrap().to_string()
 }
+
+pub(crate) struct MacroHelper<T> {
+    pub(crate) core: *mut T,
+}

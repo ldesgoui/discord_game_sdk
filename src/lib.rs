@@ -14,6 +14,7 @@
 //! If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
 #![recursion_limit = "128"]
+#![allow(unused_macros, unused_imports)]
 
 #[cfg(feature = "mock")]
 #[link(name = "discord_game_sdk_mock")]
@@ -44,7 +45,7 @@ mod methods {
     mod activities;
     mod applications;
     mod images;
-    //mod lobbies;
+    mod lobbies;
     mod networking;
     mod overlay;
     mod relationships;

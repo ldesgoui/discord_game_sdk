@@ -1,52 +1,79 @@
 use crate::prelude::*;
 
+#[derive(Clone, Debug, Default)]
 pub struct SearchQuery<'a> {
-    pub(crate) core: &'a mut sys::IDiscordLobbySearchQuery,
+    pub(crate) filter: Option<(&'a str, &'a str, Comparison, Cast)>,
+    pub(crate) sort: Option<(&'a str, &'a str, Cast)>,
+    pub(crate) limit: Option<u32>,
+    pub(crate) distance: Option<Distance>,
 }
 
 impl<'a> SearchQuery<'a> {
-    //pub fn filter(
-    //    &mut self,
-    //    key: impl AsRef<str>,
-    //    value: impl AsRef<str>,
-    //    comparison: Comparison,
-    //    cast: Cast,
-    //) -> Result<()> {
-    //    let key = CString::new(key.as_ref()).unwrap();
-    //    let value = CString::new(value.as_ref()).unwrap();
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-    //    unsafe {
-    //        ffi!(self.filter(
-    //            key.as_ptr() as *mut _,
-    //            comparison.to_sys(),
-    //            cast.to_sys(),
-    //            value.as_ptr() as *mut _
-    //        ))
-    //    }
-    //    .to_result()
-    //}
+    pub fn filter(
+        &'a mut self,
+        key: &'a str,
+        value: &'a str,
+        comparison: Comparison,
+        cast: Cast,
+    ) -> &'a mut Self {
+        self.filter = Some((key, value, comparison, cast));
+        self
+    }
 
-    //pub fn sort(&mut self, key: impl AsRef<str>, value: impl AsRef<str>, cast: Cast) -> Result<()> {
-    //    let key = CString::new(key.as_ref()).unwrap();
-    //    let value = CString::new(value.as_ref()).unwrap();
+    pub fn sort(&'a mut self, key: &'a str, value: &'a str, cast: Cast) -> &'a mut Self {
+        self.sort = Some((key, value, cast));
+        self
+    }
 
-    //    unsafe {
-    //        ffi!(self.sort(
-    //            key.as_ptr() as *mut _,
-    //            cast.to_sys(),
-    //            value.as_ptr() as *mut _
-    //        ))
-    //    }
-    //    .to_result()
-    //}
+    pub fn limit(&'a mut self, limit: u32) -> &'a mut Self {
+        self.limit = Some(limit);
+        self
+    }
 
-    //pub fn limit(&mut self, limit: u32) -> Result<()> {
-    //    unsafe { ffi!(self.limit(limit)) }.to_result()
-    //}
+    pub fn distance(&'a mut self, distance: Distance) -> &'a mut Self {
+        self.distance = Some(distance);
+        self
+    }
 
-    //pub fn distance(&mut self, distance: Distance) -> Result<()> {
-    //    unsafe { ffi!(self.distance(distance.to_sys())) }.to_result()
-    //}
+    pub(crate) unsafe fn process(self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
+        let tx = MacroHelper { core: ptr };
+
+        if let Some((key, value, comparison, cast)) = self.filter {
+            let key = CString::new(key).unwrap();
+            let value = CString::new(value).unwrap();
+
+            ffi!(tx.filter(
+                key.as_ptr() as *mut _,
+                comparison.to_sys(),
+                cast.to_sys(),
+                value.as_ptr() as *mut _,
+            ))
+            .to_result()?;
+        }
+
+        if let Some((key, value, cast)) = self.sort {
+            ffi!(tx.sort(
+                key.as_ptr() as *mut _,
+                cast.to_sys(),
+                value.as_ptr() as *mut _,
+            ))
+            .to_result()?;
+        }
+
+        if let Some(limit) = self.limit {
+            ffi!(tx.limit(limit)).to_result()?;
+        }
+
+        if let Some(distance) = self.distance {
+            ffi!(tx.distance(distance.to_sys())).to_result()?;
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

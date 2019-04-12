@@ -2,93 +2,86 @@ use crate::prelude::*;
 
 /// # Lobbies
 impl Discord {
-    // TODO FIX MEMORY LEAK
-    // Dropping LobbyTransaction after not using it will cause
-    // the allocated item to be leaked
-    pub fn create_lobby_transaction(&mut self) -> Result<LobbyTransaction<'a>> {
-        let mut tx: *mut sys::IDiscordLobbyTransaction = std::ptr::null_mut();
+    // tested
+    pub fn create_lobby<F>(&mut self, builder: LobbyTransaction, mut callback: F)
+    where
+        F: FnMut(&mut Discord, Result<Lobby>) + 'static,
+    {
+        let mut ptr = std::ptr::null_mut();
 
-        unsafe {
+        if let Err(e) = unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .get_lobby_create_transaction(&mut tx))
+                .get_lobby_create_transaction(&mut ptr))
+            .to_result()
+        } {
+            callback(self, Err(e));
+            return;
         }
-        .to_result()?;
 
-        let core = unsafe { tx.as_mut() }.unwrap();
+        if let Err(e) = unsafe { builder.process(ptr) } {
+            callback(self, Err(e));
+            return;
+        }
 
-        Ok(LobbyTransaction { core })
-    }
-
-    // tested
-    pub fn create_lobby<F>(&mut self, tx: LobbyTransaction<'a>, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<Lobby>),
-    {
         unsafe {
-            ffi!(self.get_lobby_manager().create_lobby(
-                tx.core,
-                self.wrap_callback(callback),
-                Some(callbacks::result_from_sys_ptr::<F, Lobby>)
+            ffi!(self.get_lobby_manager().create_lobby(ptr)(
+                ResultFromSysPtrCallback::new(callback)
             ))
         }
     }
 
-    pub fn update_lobby_transaction(&mut self, lobby_id: i64) -> Result<LobbyTransaction<'a>> {
-        let mut tx: *mut sys::IDiscordLobbyTransaction = std::ptr::null_mut();
+    // tested
+    pub fn update_lobby<F>(&mut self, lobby_id: i64, builder: LobbyTransaction, mut callback: F)
+    where
+        F: FnMut(&mut Discord, Result<()>) + 'static,
+    {
+        let mut ptr = std::ptr::null_mut();
 
-        unsafe {
+        if let Err(e) = unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .get_lobby_update_transaction(lobby_id, &mut tx))
+                .get_lobby_update_transaction(lobby_id, &mut ptr))
+            .to_result()
+        } {
+            callback(self, Err(e));
+            return;
         }
-        .to_result()?;
 
-        let core = unsafe { tx.as_mut() }.unwrap();
+        if let Err(e) = unsafe { builder.process(ptr) } {
+            callback(self, Err(e));
+            return;
+        }
 
-        Ok(LobbyTransaction { core })
-    }
-
-    // tested
-    pub fn update_lobby<F>(&mut self, lobby_id: i64, tx: LobbyTransaction<'a>, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>),
-    {
         unsafe {
-            ffi!(self.get_lobby_manager().update_lobby(
-                lobby_id,
-                tx.core,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>)
+            ffi!(self.get_lobby_manager().update_lobby(lobby_id, ptr)(
+                ResultCallback::new(callback)
             ))
         }
     }
 
     pub fn delete_lobby<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().delete_lobby(
-                lobby_id,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>)
+            ffi!(self.get_lobby_manager().delete_lobby(lobby_id)(
+                ResultCallback::new(callback)
             ))
         }
     }
 
     pub fn connect_lobby<F>(&mut self, lobby_id: i64, secret: impl AsRef<str>, callback: F)
     where
-        F: FnMut(&mut Discord, Result<Lobby>),
+        F: FnMut(&mut Discord, Result<Lobby>) + 'static,
     {
         let secret = CString::new(secret.as_ref()).unwrap();
 
         unsafe {
-            ffi!(self.get_lobby_manager().connect_lobby(
-                lobby_id,
-                secret.as_ptr() as *mut _,
-                self.wrap_callback(callback),
-                Some(callbacks::result_from_sys_ptr::<F, Lobby>)
+            ffi!(self
+                .get_lobby_manager()
+                .connect_lobby(lobby_id, secret.as_ptr() as *mut _)(
+                ResultFromSysPtrCallback::new(callback)
             ))
         }
     }
@@ -98,28 +91,24 @@ impl Discord {
         activity_secret: impl AsRef<str>,
         callback: F,
     ) where
-        F: FnMut(&mut Discord, Result<Lobby>),
+        F: FnMut(&mut Discord, Result<Lobby>) + 'static,
     {
         let activity_secret = CString::new(activity_secret.as_ref()).unwrap();
 
         unsafe {
             ffi!(self.get_lobby_manager().connect_lobby_with_activity_secret(
-                activity_secret.as_ptr() as *mut _,
-                self.wrap_callback(callback),
-                Some(callbacks::result_from_sys_ptr::<F, Lobby>)
-            ))
+                activity_secret.as_ptr() as *mut _
+            )(ResultFromSysPtrCallback::new(callback)))
         }
     }
 
     pub fn disconnect_lobby<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().disconnect_lobby(
-                lobby_id,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>)
+            ffi!(self.get_lobby_manager().disconnect_lobby(lobby_id)(
+                ResultCallback::new(callback)
             ))
         }
     }
@@ -213,41 +202,37 @@ impl Discord {
         Ok(res)
     }
 
-    pub fn update_member_transaction(
-        &mut self,
-        lobby_id: i64,
-        user_id: i64,
-    ) -> Result<LobbyMemberTransaction<'a>> {
-        let mut tx: *mut sys::IDiscordLobbyMemberTransaction = std::ptr::null_mut();
-
-        unsafe {
-            ffi!(self
-                .get_lobby_manager()
-                .get_member_update_transaction(lobby_id, user_id, &mut tx))
-        }
-        .to_result()?;
-
-        let core = unsafe { tx.as_mut() }.unwrap();
-
-        Ok(LobbyMemberTransaction { core })
-    }
-
     pub fn update_member<F>(
         &mut self,
         lobby_id: i64,
         user_id: i64,
-        tx: LobbyMemberTransaction<'a>,
-        callback: F,
+        builder: LobbyMemberTransaction,
+        mut callback: F,
     ) where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
+        let mut ptr = std::ptr::null_mut();
+
+        if let Err(e) = unsafe {
+            ffi!(self
+                .get_lobby_manager()
+                .get_member_update_transaction(lobby_id, user_id, &mut ptr))
+            .to_result()
+        } {
+            callback(self, Err(e));
+            return;
+        }
+
+        if let Err(e) = unsafe { builder.process(ptr) } {
+            callback(self, Err(e));
+            return;
+        }
+
         unsafe {
-            ffi!(self.get_lobby_manager().update_member(
-                lobby_id,
-                user_id,
-                tx.core,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>)
+            ffi!(self
+                .get_lobby_manager()
+                .update_member(lobby_id, user_id, ptr)(
+                ResultCallback::new(callback)
             ))
         }
     }
@@ -336,7 +321,7 @@ impl Discord {
 
     pub fn send_lobby_message<F>(&mut self, lobby_id: i64, buf: &[u8], callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         assert!(buf.len() <= u32::max_value() as usize);
 
@@ -344,31 +329,32 @@ impl Discord {
             ffi!(self.get_lobby_manager().send_lobby_message(
                 lobby_id,
                 buf.as_ptr() as *mut _,
-                buf.len() as u32,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>),
-            ))
+                buf.len() as u32
+            )(ResultCallback::new(callback)))
         }
     }
 
-    pub fn lobby_search_query(&mut self) -> Result<SearchQuery<'a>> {
-        let mut query: *mut sys::IDiscordLobbySearchQuery = std::ptr::null_mut();
-
-        unsafe { ffi!(self.get_lobby_manager().get_search_query(&mut query)) }.to_result()?;
-
-        let core = unsafe { query.as_mut() }.unwrap();
-
-        Ok(SearchQuery { core })
-    }
-
-    pub fn lobby_search<F>(&mut self, query: SearchQuery<'a>, mut callback: F)
+    pub fn lobby_search<F>(&mut self, builder: SearchQuery, mut callback: F)
     where
-        F: FnMut(&mut Discord, Result<Vec<i64>>),
+        F: FnMut(&mut Discord, Result<Vec<i64>>) + 'static,
     {
-        // yikes
-        self.lobby_search_inner(query, |gsdk, res| {
-            if res.is_err() {
-                return callback(gsdk, res.map(|_| unreachable!()));
+        let mut ptr = std::ptr::null_mut();
+
+        if let Err(e) =
+            unsafe { ffi!(self.get_lobby_manager().get_search_query(&mut ptr)).to_result() }
+        {
+            callback(self, Err(e));
+            return;
+        }
+
+        if let Err(e) = unsafe { builder.process(ptr) } {
+            callback(self, Err(e));
+            return;
+        }
+
+        let inner = move |gsdk: &mut Discord, res: Result<()>| {
+            if let Err(e) = res {
+                return callback(gsdk, Err(e));
             }
 
             let mut count = 0;
@@ -383,53 +369,42 @@ impl Discord {
                     unsafe { ffi!(gsdk.get_lobby_manager().get_lobby_id(index, &mut lobby_id)) }
                         .to_result();
 
-                if res.is_err() {
-                    return callback(gsdk, res.map(|_| unreachable!()));
+                if let Err(e) = res {
+                    return callback(gsdk, Err(e));
                 }
 
                 vec.push(lobby_id);
             }
 
             callback(gsdk, Ok(vec))
-        })
-    }
+        };
 
-    fn lobby_search_inner<F>(&mut self, query: SearchQuery<'a>, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>),
-    {
         unsafe {
-            ffi!(self.get_lobby_manager().search(
-                query.core,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>)
-            ))
+            ffi!(self.get_lobby_manager().search(ptr)(ResultCallback::new(
+                inner
+            )))
         }
     }
 
     // tested
     pub fn connect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().connect_voice(
-                lobby_id,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>),
+            ffi!(self.get_lobby_manager().connect_voice(lobby_id)(
+                ResultCallback::new(callback)
             ))
         }
     }
 
     pub fn disconnect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>),
+        F: FnMut(&mut Discord, Result<()>) + 'static,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().disconnect_voice(
-                lobby_id,
-                self.wrap_callback(callback),
-                Some(callbacks::result::<F>),
+            ffi!(self.get_lobby_manager().disconnect_voice(lobby_id)(
+                ResultCallback::new(callback)
             ))
         }
     }
