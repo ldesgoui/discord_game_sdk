@@ -4,18 +4,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
 pub enum Error {
-    #[error(display = "Discord SDK error: {}", _0)]
-    DiscordError(#[error(cause)] DiscordError),
-}
-
-impl From<DiscordError> for Error {
-    fn from(e: DiscordError) -> Self {
-        Error::DiscordError(e)
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq, err_derive::Error)]
-pub enum DiscordError {
     #[error(display = "service unavailable")]
     ServiceUnavailable,
 
@@ -152,9 +140,9 @@ pub(crate) trait ToResult: Sized {
 
 impl ToResult for sys::EDiscordResult {
     fn to_result(self) -> Result<()> {
-        use DiscordError::*;
+        use Error::*;
 
-        Err(Error::DiscordError(match self {
+        Err(match self {
             sys::DiscordResult_Ok => return Ok(()),
             sys::DiscordResult_ServiceUnavailable => ServiceUnavailable,
             sys::DiscordResult_InvalidVersion => InvalidVersion,
@@ -200,6 +188,6 @@ impl ToResult for sys::EDiscordResult {
             sys::DiscordResult_PurchaseError => PurchaseError,
             sys::DiscordResult_TransactionAborted => TransactionAborted,
             _ => panic!("enum"),
-        }))
+        })
     }
 }
