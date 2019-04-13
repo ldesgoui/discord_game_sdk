@@ -5,7 +5,7 @@ use chrono::{offset::TimeZone, DateTime, Utc};
 pub struct FileStat(pub(crate) sys::DiscordFileStat);
 
 impl FileStat {
-    str_field!(filename, filename);
+    get_str!(filename, filename);
 
     pub fn size(&self) -> u64 {
         self.0.size

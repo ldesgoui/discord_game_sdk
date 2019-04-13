@@ -8,9 +8,9 @@ impl User {
         self.0.id
     }
 
-    str_field!(username, username);
-    str_field!(discriminator, discriminator);
-    str_field!(avatar, avatar);
+    get_str!(username, username);
+    get_str!(discriminator, discriminator);
+    get_str!(avatar, avatar);
 
     pub fn is_bot(&self) -> bool {
         self.0.bot

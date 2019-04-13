@@ -27,7 +27,6 @@ pub(crate) use discord_game_sdk_sys as sys;
 mod action;
 mod activity;
 mod activity_kind;
-mod activity_update;
 mod callbacks;
 mod cast;
 mod comparison;
@@ -109,7 +108,6 @@ pub use self::{
     action::Action,
     activity::Activity,
     activity_kind::ActivityKind,
-    activity_update::ActivityUpdate,
     cast::Cast,
     comparison::Comparison,
     create_flags::CreateFlags,

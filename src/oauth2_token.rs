@@ -8,7 +8,7 @@ use std::mem::transmute;
 pub struct OAuth2Token(pub(crate) sys::DiscordOAuth2Token);
 
 impl OAuth2Token {
-    str_field!(access_token, access_token);
+    get_str!(access_token, access_token);
 
     pub fn scopes<'a>(
         &'a self,

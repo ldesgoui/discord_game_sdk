@@ -16,7 +16,7 @@ impl Lobby {
         self.0.owner_id
     }
 
-    str_field!(secret, secret);
+    get_str!(secret, secret);
 
     pub fn capacity(&self) -> u32 {
         self.0.capacity

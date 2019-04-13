@@ -51,13 +51,25 @@ macro_rules! prevent_unwind {
     };
 }
 
-macro_rules! str_field {
+macro_rules! get_str {
     ($name:ident, $($field:tt)+) => {
         pub fn $name(&self) -> &str {
             std::ffi::CStr::from_bytes_with_nul(unsafe { std::mem::transmute(&(self.0).$($field)+[..]) })
                 .unwrap()
                 .to_str()
                 .unwrap()
+        }
+    }
+}
+
+macro_rules! set_str {
+    ($name:ident, $($field:tt)+) => {
+        pub fn $name<'a>(&'a mut self, value: impl AsRef<std::ffi::CStr>) -> &'a mut Self {
+            let bytes: &[i8] = unsafe { std::mem::transmute(value.as_ref().to_bytes_with_nul()) };
+            let field = &mut (self.0).$($field)+;
+            debug_assert!(bytes.len() <= field.len());
+            field[..bytes.len()].copy_from_slice(bytes);
+            self
         }
     }
 }

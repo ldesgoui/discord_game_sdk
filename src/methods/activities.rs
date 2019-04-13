@@ -1,6 +1,6 @@
 use crate::{
-    callbacks::ResultCallback, sys, to_result::ToResult, Action, ActivityKind, ActivityUpdate,
-    Discord, DiscordResult, RequestReply,
+    callbacks::ResultCallback, sys, to_result::ToResult, Action, Activity, ActivityKind, Discord,
+    DiscordResult, RequestReply,
 };
 use std::ffi::CStr;
 
@@ -15,11 +15,11 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
-    pub fn update_activity<F>(&mut self, activity_update: ActivityUpdate, callback: F)
+    pub fn update_activity<F>(&mut self, activity: &Activity, callback: F)
     where
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
-        let mut activity: sys::DiscordActivity = activity_update.into();
+        let mut activity: sys::DiscordActivity = activity.0;
 
         // Unsure if this is required
         activity.type_ = ActivityKind::Playing.into();

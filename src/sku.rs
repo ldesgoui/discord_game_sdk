@@ -12,11 +12,11 @@ impl Sku {
         self.0.type_.into()
     }
 
-    str_field!(name, name);
+    get_str!(name, name);
 
     pub fn price_amount(&self) -> u32 {
         self.0.price.amount
     }
 
-    str_field!(price_currency, price.currency);
+    get_str!(price_currency, price.currency);
 }
