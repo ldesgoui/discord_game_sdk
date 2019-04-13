@@ -7,16 +7,16 @@ use crate::{
 impl<'a> Discord<'a> {
     // tested, returned Err(_) until event::user::CurrentUserUpdate
     pub fn current_user(&mut self) -> DiscordResult<User> {
-        let mut user = sys::DiscordUser::default();
+        let mut user = User(sys::DiscordUser::default());
 
         unsafe {
             ffi!(self
                 .get_user_manager()
-                .get_current_user(&mut user as *mut _))
+                .get_current_user(&mut user.0 as *mut _))
         }
         .to_result()?;
 
-        Ok(User::from(user))
+        Ok(user)
     }
 
     // tested

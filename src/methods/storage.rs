@@ -115,16 +115,16 @@ impl<'a> Discord<'a> {
 
     // tested
     pub fn file_stat(&mut self, filename: impl AsRef<CStr>) -> DiscordResult<FileStat> {
-        let mut stat = sys::DiscordFileStat::default();
+        let mut stat = FileStat(sys::DiscordFileStat::default());
 
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .stat(filename.as_ref().as_ptr(), &mut stat))
+                .stat(filename.as_ref().as_ptr(), &mut stat.0))
         }
         .to_result()?;
 
-        Ok(FileStat::from(stat))
+        Ok(stat)
     }
 
     // tested
@@ -134,13 +134,17 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_storage_manager().count(&mut count)) }
 
         let mut result = Vec::with_capacity(count as usize);
-        let mut stat = sys::DiscordFileStat::default();
+        let mut stat = FileStat(sys::DiscordFileStat::default());
 
         for index in 0..count {
-            unsafe { ffi!(self.get_storage_manager().stat_at(index as i32, &mut stat)) }
-                .to_result()?;
+            unsafe {
+                ffi!(self
+                    .get_storage_manager()
+                    .stat_at(index as i32, &mut stat.0))
+            }
+            .to_result()?;
 
-            result.push(FileStat::from(stat))
+            result.push(stat)
         }
 
         Ok(result)

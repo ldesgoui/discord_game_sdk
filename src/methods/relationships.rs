@@ -5,16 +5,16 @@ impl<'a> Discord<'a> {
     // tested
     // returns NotFound until event::relationships::Refreshed
     pub fn relationship_with(&mut self, user_id: i64) -> DiscordResult<Relationship> {
-        let mut relationship = sys::DiscordRelationship::default();
+        let mut relationship = Relationship(sys::DiscordRelationship::default());
 
         unsafe {
             ffi!(self
                 .get_relationship_manager()
-                .get(user_id, &mut relationship))
+                .get(user_id, &mut relationship.0))
         }
         .to_result()?;
 
-        Ok(Relationship::from(relationship))
+        Ok(relationship)
     }
 
     // tested
@@ -38,17 +38,17 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_relationship_manager().count(&mut count)) }.to_result()?;
 
         let mut result = Vec::with_capacity(count as usize);
-        let mut relationship = sys::DiscordRelationship::default();
+        let mut relationship = Relationship(sys::DiscordRelationship::default());
 
         for index in 0..count {
             unsafe {
                 ffi!(self
                     .get_relationship_manager()
-                    .get_at(index as u32, &mut relationship))
+                    .get_at(index as u32, &mut relationship.0))
             }
             .to_result()?;
 
-            result.push(Relationship::from(relationship))
+            result.push(relationship)
         }
 
         Ok(result)

@@ -17,11 +17,11 @@ impl<'a> Discord<'a> {
     }
 
     pub fn sku(&mut self, id: i64) -> DiscordResult<Sku> {
-        let mut sku = sys::DiscordSku::default();
+        let mut sku = Sku(sys::DiscordSku::default());
 
-        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku as *mut _,)) }.to_result()?;
+        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku.0 as *mut _,)) }.to_result()?;
 
-        Ok(Sku::from(sku))
+        Ok(sku)
     }
 
     // tested, returned []
@@ -31,29 +31,33 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
 
         let mut result = Vec::with_capacity(count as usize);
-        let mut sku = sys::DiscordSku::default();
+        let mut sku = Sku(sys::DiscordSku::default());
 
         for index in 0..count {
-            unsafe { ffi!(self.get_store_manager().get_sku_at(index as i32, &mut sku)) }
-                .to_result()?;
+            unsafe {
+                ffi!(self
+                    .get_store_manager()
+                    .get_sku_at(index as i32, &mut sku.0))
+            }
+            .to_result()?;
 
-            result.push(Sku::from(sku))
+            result.push(sku)
         }
 
         Ok(result)
     }
 
     pub fn entitlement(&mut self, id: i64) -> DiscordResult<Entitlement> {
-        let mut entitlement = sys::DiscordEntitlement::default();
+        let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
         unsafe {
             ffi!(self
                 .get_store_manager()
-                .get_entitlement(id, &mut entitlement as *mut _,))
+                .get_entitlement(id, &mut entitlement.0 as *mut _,))
         }
         .to_result()?;
 
-        Ok(Entitlement::from(entitlement))
+        Ok(entitlement)
     }
 
     // tested, returned []
@@ -63,17 +67,17 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }
 
         let mut result = Vec::with_capacity(count as usize);
-        let mut entitlement = sys::DiscordEntitlement::default();
+        let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
         for index in 0..count {
             unsafe {
                 ffi!(self
                     .get_store_manager()
-                    .get_entitlement_at(index as i32, &mut entitlement))
+                    .get_entitlement_at(index as i32, &mut entitlement.0))
             }
             .to_result()?;
 
-            result.push(Entitlement::from(entitlement))
+            result.push(entitlement);
         }
 
         Ok(result)
