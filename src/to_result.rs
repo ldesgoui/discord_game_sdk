@@ -1,4 +1,4 @@
-use crate::{sys, DiscordError, DiscordResult};
+use crate::{panic_messages::INVALID_ENUM, sys, DiscordError, DiscordResult};
 
 pub(crate) trait ToResult: Sized {
     fn to_result(self) -> DiscordResult<()>;
@@ -53,7 +53,7 @@ impl ToResult for sys::EDiscordResult {
             sys::DiscordResult_InvalidGiftCode => InvalidGiftCode,
             sys::DiscordResult_PurchaseError => PurchaseError,
             sys::DiscordResult_TransactionAborted => TransactionAborted,
-            _ => panic!("enum"),
+            _ => panic!(INVALID_ENUM),
         })
     }
 }
