@@ -102,34 +102,34 @@ fn create_params(
         application_events: std::ptr::null_mut(),
         application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
 
-        user_events: Box::into_raw(Box::new(USER)),
+        user_events: USER as *const _ as *mut _,
         user_version: sys::DISCORD_USER_MANAGER_VERSION,
 
         image_events: std::ptr::null_mut(),
         image_version: sys::DISCORD_IMAGE_MANAGER_VERSION,
 
-        activity_events: Box::into_raw(Box::new(ACTIVITY)),
+        activity_events: ACTIVITY as *const _ as *mut _,
         activity_version: sys::DISCORD_ACTIVITY_MANAGER_VERSION,
 
-        relationship_events: Box::into_raw(Box::new(RELATIONSHIP)),
+        relationship_events: RELATIONSHIP as *const _ as *mut _,
         relationship_version: sys::DISCORD_RELATIONSHIP_MANAGER_VERSION,
 
-        lobby_events: Box::into_raw(Box::new(LOBBY)),
+        lobby_events: LOBBY as *const _ as *mut _,
         lobby_version: sys::DISCORD_LOBBY_MANAGER_VERSION,
 
-        network_events: Box::into_raw(Box::new(NETWORK)),
+        network_events: NETWORK as *const _ as *mut _,
         network_version: sys::DISCORD_NETWORK_MANAGER_VERSION,
 
-        overlay_events: Box::into_raw(Box::new(OVERLAY)),
+        overlay_events: OVERLAY as *const _ as *mut _,
         overlay_version: sys::DISCORD_OVERLAY_MANAGER_VERSION,
 
         storage_events: std::ptr::null_mut(),
         storage_version: sys::DISCORD_STORAGE_MANAGER_VERSION,
 
-        store_events: Box::into_raw(Box::new(STORE)),
+        store_events: STORE as *const _ as *mut _,
         store_version: sys::DISCORD_STORE_MANAGER_VERSION,
 
-        voice_events: Box::into_raw(Box::new(VOICE)),
+        voice_events: VOICE as *const _ as *mut _,
         voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
 
         achievement_events: std::ptr::null_mut(),
@@ -137,14 +137,14 @@ fn create_params(
     }
 }
 
-const ACTIVITY: sys::IDiscordActivityEvents = sys::IDiscordActivityEvents {
+const ACTIVITY: &'static sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
     on_activity_join: Some(across_ffi::activities::on_activity_join),
     on_activity_spectate: Some(across_ffi::activities::on_activity_spectate),
     on_activity_join_request: Some(across_ffi::activities::on_activity_join_request),
     on_activity_invite: Some(across_ffi::activities::on_activity_invite),
 };
 
-const LOBBY: sys::IDiscordLobbyEvents = sys::IDiscordLobbyEvents {
+const LOBBY: &'static sys::IDiscordLobbyEvents = &sys::IDiscordLobbyEvents {
     on_lobby_update: Some(across_ffi::lobbies::on_lobby_update),
     on_lobby_delete: Some(across_ffi::lobbies::on_lobby_delete),
     on_member_connect: Some(across_ffi::lobbies::on_member_connect),
@@ -155,29 +155,29 @@ const LOBBY: sys::IDiscordLobbyEvents = sys::IDiscordLobbyEvents {
     on_network_message: Some(across_ffi::lobbies::on_network_message),
 };
 
-const NETWORK: sys::IDiscordNetworkEvents = sys::IDiscordNetworkEvents {
+const NETWORK: &'static sys::IDiscordNetworkEvents = &sys::IDiscordNetworkEvents {
     on_message: Some(across_ffi::networking::on_message),
     on_route_update: Some(across_ffi::networking::on_route_update),
 };
 
-const OVERLAY: sys::IDiscordOverlayEvents = sys::IDiscordOverlayEvents {
+const OVERLAY: &'static sys::IDiscordOverlayEvents = &sys::IDiscordOverlayEvents {
     on_toggle: Some(across_ffi::overlay::on_toggle),
 };
 
-const RELATIONSHIP: sys::IDiscordRelationshipEvents = sys::IDiscordRelationshipEvents {
+const RELATIONSHIP: &'static sys::IDiscordRelationshipEvents = &sys::IDiscordRelationshipEvents {
     on_refresh: Some(across_ffi::relationships::on_refresh),
     on_relationship_update: Some(across_ffi::relationships::on_relationship_update),
 };
 
-const STORE: sys::IDiscordStoreEvents = sys::IDiscordStoreEvents {
+const STORE: &'static sys::IDiscordStoreEvents = &sys::IDiscordStoreEvents {
     on_entitlement_create: Some(across_ffi::store::on_entitlement_create),
     on_entitlement_delete: Some(across_ffi::store::on_entitlement_delete),
 };
 
-const USER: sys::IDiscordUserEvents = sys::IDiscordUserEvents {
+const USER: &'static sys::IDiscordUserEvents = &sys::IDiscordUserEvents {
     on_current_user_update: Some(across_ffi::users::on_current_user_update),
 };
 
-const VOICE: sys::IDiscordVoiceEvents = sys::IDiscordVoiceEvents {
+const VOICE: &'static sys::IDiscordVoiceEvents = &sys::IDiscordVoiceEvents {
     on_settings_update: Some(across_ffi::voice::on_settings_update),
 };
