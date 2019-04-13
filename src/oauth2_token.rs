@@ -10,7 +10,9 @@ pub struct OAuth2Token(pub(crate) sys::DiscordOAuth2Token);
 impl OAuth2Token {
     str_field!(access_token, access_token);
 
-    pub fn scopes(&self) -> impl Iterator + DoubleEndedIterator + FusedIterator {
+    pub fn scopes<'a>(
+        &'a self,
+    ) -> impl Iterator<Item = &'a str> + DoubleEndedIterator + FusedIterator + 'a {
         CStr::from_bytes_with_nul(unsafe { transmute(&self.0.scopes[..]) })
             .unwrap()
             .to_str()
