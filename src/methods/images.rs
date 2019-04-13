@@ -32,7 +32,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested, returns linear RGBA V<u8> supposedly
-    pub fn image_data(&mut self, handle: ImageHandle) -> DiscordResult<Image> {
+    pub fn image(&mut self, handle: ImageHandle) -> DiscordResult<Image> {
         let (width, height) = self.image_dimensions(handle)?;
         let mut data: Vec<u8> = vec![0; (4 * width * height) as usize];
 
