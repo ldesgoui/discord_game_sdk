@@ -1,25 +1,4 @@
-use crate::prelude::*;
+use crate::sys;
 
-#[derive(Debug)]
-pub struct OAuth2Token {
-    pub access_token: String,
-    pub scopes: Vec<String>,
-    pub expires: chrono::DateTime<chrono::Utc>,
-}
-
-impl FromSys for OAuth2Token {
-    type Source = sys::DiscordOAuth2Token;
-
-    fn from_sys(source: &Self::Source) -> Self {
-        use chrono::offset::TimeZone;
-
-        Self {
-            access_token: unsafe { string_from_cstr(&source.access_token as *const _) },
-            scopes: unsafe { string_from_cstr(&source.scopes as *const _) }
-                .split(' ')
-                .map(String::from)
-                .collect(),
-            expires: chrono::Utc.timestamp(source.expires, 0),
-        }
-    }
-}
+#[derive(Clone, Copy, Debug, Eq, PartialEq, derive_more::From, derive_more::Into)]
+pub struct OAuth2Token(pub(crate) sys::DiscordOAuth2Token);

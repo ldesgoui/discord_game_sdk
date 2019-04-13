@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::Entitlement;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EntitlementCreate {

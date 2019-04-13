@@ -1,4 +1,5 @@
-use crate::prelude::*;
+use crate::{event, sys};
+use std::ffi::{c_void, CStr};
 
 pub(crate) extern "C" fn on_message(
     senders: *mut c_void,
@@ -25,7 +26,10 @@ pub(crate) extern "C" fn on_message(
 pub(crate) extern "C" fn on_route_update(senders: *mut c_void, route: *const i8) {
     prevent_unwind!();
 
-    let route = unsafe { string_from_cstr(route) };
+    let route = unsafe { CStr::from_ptr(route) }
+        .to_str()
+        .unwrap()
+        .to_string();
 
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()

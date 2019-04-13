@@ -1,7 +1,8 @@
-use crate::prelude::*;
+use crate::{callbacks::ResultCallback, Action, Discord, DiscordResult};
+use std::ffi::CStr;
 
 /// # Overlay
-impl Discord {
+impl<'a> Discord<'a> {
     // tested in terminal, was returning false
     // kinda inconclusive
     pub fn overlay_enabled(&mut self) -> bool {
@@ -28,7 +29,7 @@ impl Discord {
 
     pub fn set_overlay_opened<F>(&mut self, opened: bool, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self.get_overlay_manager().set_locked(!opened)(
@@ -39,26 +40,26 @@ impl Discord {
 
     pub fn open_invite_overlay<F>(&mut self, action: Action, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
-                .open_activity_invite(action.to_sys())(
+                .open_activity_invite(action.into())(
                 ResultCallback::new(callback)
             ))
         }
     }
 
     // tested
-    pub fn open_guild_invite_overlay<F>(&mut self, code: impl AsRef<str>, callback: F)
+    pub fn open_guild_invite_overlay<F>(&mut self, code: impl AsRef<CStr>, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
-        let code = std::ffi::CString::new(code.as_ref()).unwrap();
-
         unsafe {
-            ffi!(self.get_overlay_manager().open_guild_invite(code.as_ptr())(
+            ffi!(self
+                .get_overlay_manager()
+                .open_guild_invite(code.as_ref().as_ptr())(
                 ResultCallback::new(callback)
             ))
         }
@@ -67,7 +68,7 @@ impl Discord {
     // tested
     pub fn open_voice_settings<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self.get_overlay_manager().open_voice_settings()(

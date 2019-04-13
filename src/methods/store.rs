@@ -1,11 +1,13 @@
-use crate::prelude::*;
+use crate::{
+    callbacks::ResultCallback, sys, to_result::ToResult, Discord, DiscordResult, Entitlement, Sku,
+};
 
 /// # Store
-impl Discord {
+impl<'a> Discord<'a> {
     // tested
     pub fn load_skus<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self.get_store_manager().fetch_skus()(ResultCallback::new(
@@ -14,16 +16,16 @@ impl Discord {
         }
     }
 
-    pub fn sku(&mut self, id: i64) -> Result<Sku> {
+    pub fn sku(&mut self, id: i64) -> DiscordResult<Sku> {
         let mut sku = sys::DiscordSku::default();
 
         unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku as *mut _,)) }.to_result()?;
 
-        Ok(Sku::from_sys(&sku))
+        Ok(Sku::from(sku))
     }
 
     // tested, returned []
-    pub fn all_skus(&mut self) -> Result<Vec<Sku>> {
+    pub fn all_skus(&mut self) -> DiscordResult<Vec<Sku>> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
@@ -35,13 +37,13 @@ impl Discord {
             unsafe { ffi!(self.get_store_manager().get_sku_at(index as i32, &mut sku)) }
                 .to_result()?;
 
-            result.push(Sku::from_sys(&sku))
+            result.push(Sku::from(sku))
         }
 
         Ok(result)
     }
 
-    pub fn entitlement(&mut self, id: i64) -> Result<Entitlement> {
+    pub fn entitlement(&mut self, id: i64) -> DiscordResult<Entitlement> {
         let mut entitlement = sys::DiscordEntitlement::default();
 
         unsafe {
@@ -51,11 +53,11 @@ impl Discord {
         }
         .to_result()?;
 
-        Ok(Entitlement::from_sys(&entitlement))
+        Ok(Entitlement::from(entitlement))
     }
 
     // tested, returned []
-    pub fn all_entitlements(&mut self) -> Result<Vec<Entitlement>> {
+    pub fn all_entitlements(&mut self) -> DiscordResult<Vec<Entitlement>> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }
@@ -71,13 +73,13 @@ impl Discord {
             }
             .to_result()?;
 
-            result.push(Entitlement::from_sys(&entitlement))
+            result.push(Entitlement::from(entitlement))
         }
 
         Ok(result)
     }
 
-    pub fn has_entitlement(&mut self, sku_id: i64) -> Result<bool> {
+    pub fn has_entitlement(&mut self, sku_id: i64) -> DiscordResult<bool> {
         let mut has_entitlement = false;
 
         unsafe {
@@ -92,7 +94,7 @@ impl Discord {
 
     pub fn start_purchase<F>(&mut self, sku_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self.get_store_manager().start_purchase(sku_id)(

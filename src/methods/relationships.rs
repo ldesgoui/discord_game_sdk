@@ -1,10 +1,10 @@
-use crate::prelude::*;
+use crate::{across_ffi, sys, to_result::ToResult, Discord, DiscordResult, Relationship};
 
 /// # Relationships
-impl Discord {
+impl<'a> Discord<'a> {
     // tested
     // returns NotFound until event::relationships::Refreshed
-    pub fn relationship_with(&mut self, user_id: i64) -> Result<Relationship> {
+    pub fn relationship_with(&mut self, user_id: i64) -> DiscordResult<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
         unsafe {
@@ -14,19 +14,22 @@ impl Discord {
         }
         .to_result()?;
 
-        Ok(Relationship::from_sys(&relationship))
+        Ok(Relationship::from(relationship))
     }
 
     // tested
     // returns vec![] until event::relationships::Refreshed
-    pub fn all_relationships<F>(&mut self, filter: F) -> Result<Vec<Relationship>>
+    pub fn all_relationships<F>(&mut self, filter: F) -> DiscordResult<Vec<Relationship>>
     where
         F: FnMut(Relationship) -> bool,
     {
+        let filter_ptr = Box::into_raw(Box::new(filter));
+        let _filter = unsafe { Box::from_raw(filter_ptr) };
+
         unsafe {
             ffi!(self.get_relationship_manager().filter(
-                Box::into_raw(Box::new(filter)) as *mut _,
-                Some(callbacks::filter_relationship::<F>)
+                filter_ptr as *mut _,
+                Some(across_ffi::callbacks::filter_relationship::<F>)
             ))
         }
 
@@ -45,7 +48,7 @@ impl Discord {
             }
             .to_result()?;
 
-            result.push(Relationship::from_sys(&relationship))
+            result.push(Relationship::from(relationship))
         }
 
         Ok(result)

@@ -1,4 +1,5 @@
-use crate::prelude::*;
+use crate::event;
+use std::ffi::c_void;
 
 pub(crate) extern "C" fn on_toggle(senders: *mut c_void, locked: bool) {
     prevent_unwind!();

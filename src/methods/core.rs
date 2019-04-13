@@ -1,12 +1,13 @@
-use crate::prelude::*;
+use crate::{across_ffi, event, sys, to_result::ToResult, CreateFlags, Discord, DiscordResult};
+use std::ffi::c_void;
 
 /// # Core
-impl Discord {
-    pub fn new(client_id: i64) -> Result<Self> {
+impl<'a> Discord<'a> {
+    pub fn new(client_id: i64) -> DiscordResult<Self> {
         Self::with_create_flags(client_id, CreateFlags::default())
     }
 
-    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
+    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> DiscordResult<Self> {
         let (senders, receivers) = event::create_channels();
         let senders_ptr = Box::into_raw(Box::new(senders));
         let senders = unsafe { Box::from_raw(senders_ptr) };
@@ -36,7 +37,7 @@ impl Discord {
             ffi!(self.set_log_hook(
                 sys::DiscordLogLevel_Debug + 1,
                 std::ptr::null_mut(),
-                Some(callbacks::log),
+                Some(across_ffi::callbacks::log),
             ))
         };
     }
@@ -54,7 +55,7 @@ impl Discord {
         }
     }
 
-    pub fn run_callbacks(&mut self) -> Result<()> {
+    pub fn run_callbacks(&mut self) -> DiscordResult<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()?;
 
         let mut i = 0;
@@ -81,7 +82,7 @@ impl Discord {
     }
 }
 
-impl Drop for Discord {
+impl<'a> Drop for Discord<'a> {
     fn drop(&mut self) {
         unsafe { ffi!(self.destroy()) }
     }
@@ -92,9 +93,11 @@ fn create_params(
     flags: CreateFlags,
     event_data: *mut c_void,
 ) -> sys::DiscordCreateParams {
+    let flags: sys::EDiscordCreateFlags = flags.into();
+
     sys::DiscordCreateParams {
         client_id,
-        flags: flags.to_sys() as u64,
+        flags: flags as u64,
 
         events: std::ptr::null_mut(),
         event_data,

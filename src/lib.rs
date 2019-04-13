@@ -14,7 +14,6 @@
 //! If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
 #![recursion_limit = "128"]
-#![allow(unused_macros, unused_imports)]
 
 #[cfg(feature = "mock")]
 #[link(name = "discord_game_sdk_mock")]
@@ -23,21 +22,30 @@ extern "C" {}
 #[macro_use]
 mod macros;
 
+pub(crate) use discord_game_sdk_sys as sys;
+
 mod activity;
+mod activity_update;
 mod callbacks;
 mod discord;
 mod entitlement;
-pub mod error;
+mod enums;
+mod error;
 mod file_stat;
+mod image;
 mod image_handle;
 mod lobby;
+mod lobby_member_transaction;
 mod lobby_transaction;
+pub(crate) mod macro_helper;
+pub(crate) mod metadata_update;
 mod oauth2_token;
+mod presence;
 mod relationship;
 mod search_query;
 mod sku;
+mod to_result;
 mod user;
-mod utils;
 
 mod methods {
     mod core;
@@ -70,7 +78,7 @@ pub mod event {
     pub(crate) use self::channels::*;
 }
 
-mod across_ffi {
+pub(crate) mod across_ffi {
     pub(crate) mod activities;
     pub(crate) mod callbacks;
     pub(crate) mod lobbies;
@@ -82,37 +90,23 @@ mod across_ffi {
     pub(crate) mod voice;
 }
 
-mod prelude {
-    #[allow(unused_imports)]
-    pub(crate) use crate::error::ToResult;
-    pub(crate) use crate::{
-        across_ffi::{self, callbacks},
-        callbacks::*,
-        event,
-        utils::*,
-        *,
-    };
-    pub(crate) use crossbeam_channel::{Receiver, Sender};
-    pub(crate) use discord_game_sdk_sys as sys;
-    pub(crate) use std::{
-        collections::HashMap,
-        ffi::{c_void, CStr, CString},
-        mem::size_of,
-    };
-}
-
-pub use crate::{
-    activity::*,
-    discord::*,
-    entitlement::*,
-    error::{Error, Result},
-    file_stat::*,
-    image_handle::*,
-    lobby::*,
-    lobby_transaction::*,
-    oauth2_token::*,
-    relationship::*,
-    search_query::*,
-    sku::*,
-    user::*,
+pub use self::{
+    activity::Activity,
+    activity_update::ActivityUpdate,
+    discord::Discord,
+    entitlement::Entitlement,
+    enums::*,
+    error::{DiscordError, DiscordResult},
+    file_stat::FileStat,
+    image::Image,
+    image_handle::ImageHandle,
+    lobby::Lobby,
+    lobby_member_transaction::LobbyMemberTransaction,
+    lobby_transaction::LobbyTransaction,
+    oauth2_token::OAuth2Token,
+    presence::Presence,
+    relationship::Relationship,
+    search_query::SearchQuery,
+    sku::Sku,
+    user::User,
 };

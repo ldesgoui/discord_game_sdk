@@ -1,4 +1,5 @@
-use crate::prelude::*;
+use crate::event;
+use std::ffi::c_void;
 
 pub(crate) extern "C" fn on_settings_update(senders: *mut c_void) {
     prevent_unwind!();

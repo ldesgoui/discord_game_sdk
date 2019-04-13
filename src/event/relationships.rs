@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::Relationship;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Refresh;

@@ -1,4 +1,5 @@
-use crate::prelude::*;
+use crate::event;
+use std::ffi::c_void;
 
 pub(crate) extern "C" fn on_lobby_update(senders: *mut c_void, id: i64) {
     prevent_unwind!();

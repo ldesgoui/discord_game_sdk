@@ -1,9 +1,12 @@
-use crate::prelude::*;
+use crate::{
+    callbacks::ResultFromPtrCallback, sys, to_result::ToResult, Discord, DiscordResult,
+    PremiumKind, User,
+};
 
 /// # Users
-impl Discord {
+impl<'a> Discord<'a> {
     // tested, returned Err(_) until event::user::CurrentUserUpdate
-    pub fn current_user(&mut self) -> Result<User> {
+    pub fn current_user(&mut self) -> DiscordResult<User> {
         let mut user = sys::DiscordUser::default();
 
         unsafe {
@@ -13,23 +16,23 @@ impl Discord {
         }
         .to_result()?;
 
-        Ok(User::from_sys(&user))
+        Ok(User::from(user))
     }
 
     // tested
     pub fn user<F>(&mut self, user_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<User>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<User>) + 'a,
     {
         unsafe {
             ffi!(self.get_user_manager().get_user(user_id)(
-                ResultFromSysPtrCallback::new(callback)
+                ResultFromPtrCallback::new(callback)
             ))
         }
     }
 
     // tested
-    pub fn current_user_premium_kind(&mut self) -> Result<PremiumKind> {
+    pub fn current_user_premium_kind(&mut self) -> DiscordResult<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
         unsafe {
@@ -39,6 +42,6 @@ impl Discord {
         }
         .to_result()?;
 
-        Ok(PremiumKind::from_sys(&premium_type))
+        Ok(PremiumKind::from(premium_type))
     }
 }

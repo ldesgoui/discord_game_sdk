@@ -1,15 +1,15 @@
-use crate::prelude::*;
+use crate::{callbacks::AnyCallback, event, sys};
 
-pub struct Discord {
+pub struct Discord<'a> {
     pub(crate) core: *mut sys::IDiscordCore,
     pub(crate) client_id: i64,
     #[allow(dead_code)]
     pub(crate) senders: Box<event::Senders>,
     pub(crate) receivers: event::Receivers,
-    pub(crate) callbacks: Vec<Box<dyn AnyCallback>>,
+    pub(crate) callbacks: Vec<Box<dyn AnyCallback + 'a>>,
 }
 
-impl std::fmt::Debug for Discord {
+impl<'a> std::fmt::Debug for Discord<'a> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("Discord")
             .field("client_id", &self.client_id)
@@ -17,31 +17,8 @@ impl std::fmt::Debug for Discord {
     }
 }
 
-impl Discord {
-    pub(crate) fn register_callback(&mut self, callback: impl AnyCallback + 'static) {
+impl<'a> Discord<'a> {
+    pub(crate) fn register_callback(&mut self, callback: impl AnyCallback + 'a) {
         self.callbacks.push(Box::new(callback))
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum CreateFlags {
-    /// Requires Discord to be running to play the game
-    Default,
-    /// Does not require Discord to be running, use this on other platforms
-    NoRequireDiscord,
-}
-
-impl Default for CreateFlags {
-    fn default() -> Self {
-        CreateFlags::Default
-    }
-}
-
-impl CreateFlags {
-    pub(crate) fn to_sys(self) -> sys::EDiscordCreateFlags {
-        match self {
-            CreateFlags::Default => sys::DiscordCreateFlags_Default,
-            CreateFlags::NoRequireDiscord => sys::DiscordCreateFlags_NoRequireDiscord,
-        }
     }
 }

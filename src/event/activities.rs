@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{Action, Activity, User};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Join {

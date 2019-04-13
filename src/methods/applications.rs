@@ -1,7 +1,12 @@
-use crate::prelude::*;
+use crate::{
+    callbacks::{ResultCallback, ResultFromPtrCallback, ResultStringCallback},
+    sys, Discord, DiscordResult, OAuth2Token,
+};
+use std::ffi::CStr;
+use std::mem::{size_of, transmute};
 
 /// # Application
-impl Discord {
+impl<'a> Discord<'a> {
     // tested, returns "en-US" and similar
     pub fn current_locale(&mut self) -> String {
         let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
@@ -12,7 +17,11 @@ impl Discord {
                 .get_current_locale(&mut locale as *mut _))
         }
 
-        unsafe { string_from_cstr(&locale as *const _) }
+        CStr::from_bytes_with_nul(unsafe { transmute(&locale[..]) })
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string()
     }
 
     // tested, returns "master" or whichever `dispatch` branch is in use
@@ -25,13 +34,17 @@ impl Discord {
                 .get_current_branch(&mut branch as *mut _))
         }
 
-        unsafe { string_from_cstr(&branch as *const _) }
+        CStr::from_bytes_with_nul(unsafe { transmute(&branch[..]) })
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string()
     }
 
     // tested, hasn't failed yet
     pub fn validate_or_exit<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'static,
     {
         unsafe {
             ffi!(self.get_application_manager().validate_or_exit()(
@@ -43,11 +56,11 @@ impl Discord {
     // tested
     pub fn oauth2_token<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<OAuth2Token>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<OAuth2Token>) + 'static,
     {
         unsafe {
             ffi!(self.get_application_manager().get_oauth2_token()(
-                ResultFromSysPtrCallback::new(callback)
+                ResultFromPtrCallback::new(callback)
             ))
         }
     }
@@ -55,7 +68,7 @@ impl Discord {
     // tested
     pub fn app_ticket<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<String>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<String>) + 'static,
     {
         unsafe {
             ffi!(self.get_application_manager().get_ticket()(

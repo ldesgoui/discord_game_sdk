@@ -1,9 +1,11 @@
-use crate::prelude::*;
+use crate::{sys, to_result::ToResult, DiscordResult, Relationship};
+use crossbeam_channel::Sender;
+use std::ffi::{c_void, CStr};
 
 pub(crate) extern "C" fn result(ptr: *mut c_void, res: sys::EDiscordResult) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<()>>) }
+    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<()>>) }
         .try_send(res.to_result())
         .unwrap()
 }
@@ -15,8 +17,13 @@ pub(crate) extern "C" fn result_string(
 ) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<String>>) }
-        .try_send(res.to_result().map(|()| unsafe { string_from_cstr(cstr) }))
+    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<String>>) }
+        .try_send(res.to_result().map(|()| {
+            unsafe { CStr::from_ptr(cstr) }
+                .to_str()
+                .unwrap()
+                .to_string()
+        }))
         .unwrap()
 }
 
@@ -28,7 +35,7 @@ pub(crate) extern "C" fn result_bytes(
 ) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<Vec<u8>>>) }
+    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<Vec<u8>>>) }
         .try_send(
             res.to_result()
                 .map(|()| unsafe { std::slice::from_raw_parts(buffer_ptr, len as usize) }.to_vec()),
@@ -36,34 +43,28 @@ pub(crate) extern "C" fn result_bytes(
         .unwrap()
 }
 
-pub(crate) extern "C" fn result_from_sys<S>(
-    ptr: *mut c_void,
-    res: sys::EDiscordResult,
-    source: S::Source,
-) where
-    S: FromSys,
+pub(crate) extern "C" fn result_from<S, E>(ptr: *mut c_void, res: sys::EDiscordResult, source: S)
+where
+    S: Into<E>,
 {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<S>>) }
-        .try_send(res.to_result().map(|()| S::from_sys(&source)))
+    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<E>>) }
+        .try_send(res.to_result().map(|()| source.into()))
         .unwrap()
 }
 
-pub(crate) extern "C" fn result_from_sys_ptr<S>(
+pub(crate) extern "C" fn result_from_ptr<S, E>(
     ptr: *mut c_void,
     res: sys::EDiscordResult,
-    source_ptr: *mut S::Source,
+    source_ptr: *mut S,
 ) where
-    S: FromSys,
+    S: Into<E> + Copy,
 {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<S>>) }
-        .try_send(
-            res.to_result()
-                .map(|()| unsafe { S::from_sys_ptr(source_ptr) }),
-        )
+    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<E>>) }
+        .try_send(res.to_result().map(|()| unsafe { *source_ptr }.into()))
         .unwrap()
 }
 
@@ -76,9 +77,9 @@ where
 {
     prevent_unwind!();
 
-    let mut callback: &mut F = unsafe { (callback_ptr as *mut F).as_mut() }.unwrap();
+    let callback: &mut F = unsafe { (callback_ptr as *mut F).as_mut() }.unwrap();
 
-    callback(unsafe { Relationship::from_sys_ptr(relationship_ptr) })
+    callback(unsafe { *relationship_ptr }.into())
 }
 
 pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, message: *const i8) {
@@ -96,5 +97,5 @@ pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, messa
         .to_str()
         .unwrap();
 
-    log!(level, "SDK: {}", message);
+    log::log!(level, "SDK: {}", message);
 }

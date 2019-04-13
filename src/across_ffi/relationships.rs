@@ -1,4 +1,5 @@
-use crate::prelude::*;
+use crate::{event, sys};
+use std::ffi::c_void;
 
 pub(crate) extern "C" fn on_refresh(senders: *mut c_void) {
     prevent_unwind!();
@@ -16,11 +17,11 @@ pub(crate) extern "C" fn on_relationship_update(
 ) {
     prevent_unwind!();
 
-    let relationship = unsafe { Relationship::from_sys_ptr(relationship) };
-
     unsafe { (senders as *mut event::Senders).as_ref() }
         .unwrap()
         .relationships_update
-        .try_send(event::relationships::Update { relationship })
+        .try_send(event::relationships::Update {
+            relationship: unsafe { *relationship }.into(),
+        })
         .unwrap()
 }

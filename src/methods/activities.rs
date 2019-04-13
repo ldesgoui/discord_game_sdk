@@ -1,25 +1,29 @@
-use crate::prelude::*;
+use crate::{
+    callbacks::ResultCallback, sys, to_result::ToResult, Action, ActivityKind, ActivityUpdate,
+    Discord, DiscordResult, RequestReply,
+};
+use std::ffi::CStr;
 
 /// # Activities
-impl Discord {
-    pub fn register_launch_command(&mut self, command: impl AsRef<str>) -> Result<()> {
-        let cstring = std::ffi::CString::new(command.as_ref()).unwrap();
-
+impl<'a> Discord<'a> {
+    pub fn register_launch_command(&mut self, command: impl AsRef<CStr>) -> DiscordResult<()> {
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .register_command(cstring.as_ptr()))
+                .register_command(command.as_ref().as_ptr()))
         }
         .to_result()
     }
 
-    /// # Rate limit
-    /// 5 updates per 20 seconds
-    pub fn update_activity<F>(&mut self, activity_change: &ActivityChange, callback: F)
+    pub fn update_activity<F>(&mut self, activity_update: ActivityUpdate, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
-        let mut activity = activity_change.to_sys();
+        let mut activity: sys::DiscordActivity = activity_update.into();
+
+        // Unsure if this is required
+        activity.type_ = ActivityKind::Playing.into();
+        activity.application_id = self.client_id;
 
         unsafe {
             ffi!(self
@@ -32,7 +36,7 @@ impl Discord {
 
     pub fn clear_activity<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self.get_activity_manager().clear_activity()(
@@ -43,12 +47,12 @@ impl Discord {
 
     pub fn send_request_reply<F>(&mut self, user_id: i64, reply: RequestReply, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .send_request_reply(user_id, reply.to_sys())(
+                .send_request_reply(user_id, reply.into())(
                 ResultCallback::new(callback)
             ))
         };
@@ -58,25 +62,23 @@ impl Discord {
         &mut self,
         user_id: i64,
         action: Action,
-        content: impl AsRef<str>,
+        content: impl AsRef<CStr>,
         callback: F,
     ) where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
-        let content = std::ffi::CString::new(content.as_ref()).unwrap();
-
         unsafe {
             ffi!(self.get_activity_manager().send_invite(
                 user_id,
-                action.to_sys(),
-                content.as_ptr()
+                action.into(),
+                content.as_ref().as_ptr()
             )(ResultCallback::new(callback)))
         };
     }
 
     pub fn accept_invite<F>(&mut self, user_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, Result<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self.get_activity_manager().accept_invite(user_id)(

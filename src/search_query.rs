@@ -1,4 +1,7 @@
-use crate::prelude::*;
+use crate::{
+    macro_helper::MacroHelper, sys, to_result::ToResult, Cast, Comparison, DiscordResult, Distance,
+};
+use std::ffi::CString;
 
 #[derive(Clone, Debug, Default)]
 pub struct SearchQuery<'a> {
@@ -39,7 +42,10 @@ impl<'a> SearchQuery<'a> {
         self
     }
 
-    pub(crate) unsafe fn process(self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
+    pub(crate) unsafe fn process(
+        self,
+        ptr: *mut sys::IDiscordLobbySearchQuery,
+    ) -> DiscordResult<()> {
         let tx = MacroHelper { core: ptr };
 
         if let Some((key, value, comparison, cast)) = self.filter {
@@ -48,8 +54,8 @@ impl<'a> SearchQuery<'a> {
 
             ffi!(tx.filter(
                 key.as_ptr() as *mut _,
-                comparison.to_sys(),
-                cast.to_sys(),
+                comparison.into(),
+                cast.into(),
                 value.as_ptr() as *mut _,
             ))
             .to_result()?;
@@ -58,7 +64,7 @@ impl<'a> SearchQuery<'a> {
         if let Some((key, value, cast)) = self.sort {
             ffi!(tx.sort(
                 key.as_ptr() as *mut _,
-                cast.to_sys(),
+                cast.into(),
                 value.as_ptr() as *mut _,
             ))
             .to_result()?;
@@ -69,66 +75,9 @@ impl<'a> SearchQuery<'a> {
         }
 
         if let Some(distance) = self.distance {
-            ffi!(tx.distance(distance.to_sys())).to_result()?;
+            ffi!(tx.distance(distance.into())).to_result()?;
         }
 
         Ok(())
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Cast {
-    Number,
-    String,
-}
-
-impl Cast {
-    fn to_sys(self) -> sys::EDiscordLobbySearchCast {
-        match self {
-            Cast::String => sys::DiscordLobbySearchCast_String,
-            Cast::Number => sys::DiscordLobbySearchCast_Number,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Comparison {
-    Equal,
-    GreaterThan,
-    GreaterThanOrEqual,
-    LessThan,
-    LessThanOrEqual,
-    NotEqual,
-}
-
-impl Comparison {
-    fn to_sys(self) -> sys::EDiscordLobbySearchComparison {
-        match self {
-            Comparison::Equal => sys::DiscordLobbySearchComparison_Equal,
-            Comparison::GreaterThan => sys::DiscordLobbySearchComparison_GreaterThan,
-            Comparison::GreaterThanOrEqual => sys::DiscordLobbySearchComparison_GreaterThanOrEqual,
-            Comparison::LessThan => sys::DiscordLobbySearchComparison_LessThan,
-            Comparison::LessThanOrEqual => sys::DiscordLobbySearchComparison_LessThanOrEqual,
-            Comparison::NotEqual => sys::DiscordLobbySearchComparison_NotEqual,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Distance {
-    Default,
-    Extended,
-    Global,
-    Local,
-}
-
-impl Distance {
-    fn to_sys(self) -> sys::EDiscordLobbySearchDistance {
-        match self {
-            Distance::Default => sys::DiscordLobbySearchDistance_Default,
-            Distance::Extended => sys::DiscordLobbySearchDistance_Extended,
-            Distance::Global => sys::DiscordLobbySearchDistance_Global,
-            Distance::Local => sys::DiscordLobbySearchDistance_Local,
-        }
     }
 }
