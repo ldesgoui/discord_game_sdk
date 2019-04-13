@@ -60,6 +60,7 @@ mod sku_kind;
 mod status;
 mod to_result;
 mod user;
+mod user_flags;
 
 mod methods {
     mod core;
@@ -136,4 +137,5 @@ pub use self::{
     sku_kind::SkuKind,
     status::Status,
     user::User,
+    user_flags::UserFlags,
 };

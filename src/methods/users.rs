@@ -1,6 +1,6 @@
 use crate::{
     callbacks::ResultFromPtrCallback, sys, to_result::ToResult, Discord, DiscordResult,
-    PremiumKind, User,
+    PremiumKind, User, UserFlags,
 };
 
 /// # Users
@@ -43,5 +43,30 @@ impl<'a> Discord<'a> {
         .to_result()?;
 
         Ok(PremiumKind::from(premium_type))
+    }
+
+    pub fn current_user_flags(&mut self) -> DiscordResult<UserFlags> {
+        let mut flags = UserFlags::empty();
+
+        for flag in &[
+            UserFlags::PARTNER,
+            UserFlags::HYPE_SQUAD_EVENTS,
+            UserFlags::HYPE_SQUAD_HOUSE_1,
+            UserFlags::HYPE_SQUAD_HOUSE_2,
+            UserFlags::HYPE_SQUAD_HOUSE_3,
+        ] {
+            let mut contains = false;
+
+            unsafe {
+                ffi!(self
+                    .get_user_manager()
+                    .current_user_has_flag(flag.bits(), &mut contains as *mut _))
+            }
+            .to_result()?;
+
+            flags.set(*flag, contains);
+        }
+
+        Ok(flags)
     }
 }
