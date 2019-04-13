@@ -50,3 +50,14 @@ macro_rules! prevent_unwind {
         });
     };
 }
+
+macro_rules! str_field {
+    ($name:ident, $($field:tt)+) => {
+        pub fn $name(&self) -> &str {
+            std::ffi::CStr::from_bytes_with_nul(unsafe { std::mem::transmute(&(self.0).$($field)+[..]) })
+                .unwrap()
+                .to_str()
+                .unwrap()
+        }
+    }
+}

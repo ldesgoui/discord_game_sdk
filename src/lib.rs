@@ -24,26 +24,40 @@ mod macros;
 
 pub(crate) use discord_game_sdk_sys as sys;
 
+mod action;
 mod activity;
+mod activity_kind;
 mod activity_update;
 mod callbacks;
+mod cast;
+mod comparison;
+mod create_flags;
 mod discord;
+mod distance;
 mod entitlement;
-mod enums;
+mod entitlement_kind;
 mod error;
 mod file_stat;
 mod image;
 mod image_handle;
+mod image_kind;
 mod lobby;
+mod lobby_kind;
 mod lobby_member_transaction;
 mod lobby_transaction;
 pub(crate) mod macro_helper;
 pub(crate) mod metadata_update;
 mod oauth2_token;
+pub(crate) mod panic_messages;
+mod premium_kind;
 mod presence;
 mod relationship;
+mod relationship_kind;
+mod request_reply;
 mod search_query;
 mod sku;
+mod sku_kind;
+mod status;
 mod to_result;
 mod user;
 
@@ -91,22 +105,35 @@ pub(crate) mod across_ffi {
 }
 
 pub use self::{
+    action::Action,
     activity::Activity,
+    activity_kind::ActivityKind,
     activity_update::ActivityUpdate,
+    cast::Cast,
+    comparison::Comparison,
+    create_flags::CreateFlags,
     discord::Discord,
+    distance::Distance,
     entitlement::Entitlement,
-    enums::*,
+    entitlement_kind::EntitlementKind,
     error::{DiscordError, DiscordResult},
     file_stat::FileStat,
     image::Image,
     image_handle::ImageHandle,
+    image_kind::ImageKind,
     lobby::Lobby,
+    lobby_kind::LobbyKind,
     lobby_member_transaction::LobbyMemberTransaction,
     lobby_transaction::LobbyTransaction,
     oauth2_token::OAuth2Token,
+    premium_kind::PremiumKind,
     presence::Presence,
     relationship::Relationship,
+    relationship_kind::RelationshipKind,
+    request_reply::RequestReply,
     search_query::SearchQuery,
     sku::Sku,
+    sku_kind::SkuKind,
+    status::Status,
     user::User,
 };
