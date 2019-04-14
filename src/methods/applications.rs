@@ -44,7 +44,7 @@ impl<'a> Discord<'a> {
     // tested, hasn't failed yet
     pub fn validate_or_exit<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
             ffi!(self.get_application_manager().validate_or_exit()(
@@ -56,7 +56,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn oauth2_token<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<OAuth2Token>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<OAuth2Token>) + 'a,
     {
         unsafe {
             ffi!(self.get_application_manager().get_oauth2_token()(
@@ -68,7 +68,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn app_ticket<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<String>) + 'static,
+        F: FnMut(&mut Discord, DiscordResult<String>) + 'a,
     {
         unsafe {
             ffi!(self.get_application_manager().get_ticket()(
