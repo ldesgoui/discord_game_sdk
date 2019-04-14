@@ -2,11 +2,11 @@ use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback},
     sys,
     to_result::ToResult,
-    Discord, DiscordResult, Lobby, LobbyMemberTransaction, LobbyTransaction, SearchQuery,
+    utils, Discord, DiscordResult, Lobby, LobbyMemberTransaction, LobbyTransaction, SearchQuery,
 };
 use std::collections::HashMap;
 use std::ffi::CStr;
-use std::mem::{size_of, transmute};
+use std::mem::size_of;
 
 /// # Lobbies
 impl<'a> Discord<'a> {
@@ -23,13 +23,11 @@ impl<'a> Discord<'a> {
                 .get_lobby_create_transaction(&mut ptr))
             .to_result()
         } {
-            callback(self, Err(e));
-            return;
+            return callback(self, Err(e));
         }
 
         if let Err(e) = unsafe { builder.process(ptr) } {
-            callback(self, Err(e));
-            return;
+            return callback(self, Err(e));
         }
 
         unsafe {
@@ -52,13 +50,11 @@ impl<'a> Discord<'a> {
                 .get_lobby_update_transaction(lobby_id, &mut ptr))
             .to_result()
         } {
-            callback(self, Err(e));
-            return;
+            return callback(self, Err(e));
         }
 
         if let Err(e) = unsafe { builder.process(ptr) } {
-            callback(self, Err(e));
-            return;
+            return callback(self, Err(e));
         }
 
         unsafe {
@@ -141,11 +137,13 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(CStr::from_bytes_with_nul(unsafe { transmute(&secret[..]) })
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string())
+        Ok(
+            CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&secret[..]))
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string(),
+        )
     }
 
     // tested
@@ -165,7 +163,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(CStr::from_bytes_with_nul(unsafe { transmute(&value[..]) })
+        Ok(CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&value[..]))
             .unwrap()
             .to_str()
             .unwrap()
@@ -207,12 +205,12 @@ impl<'a> Discord<'a> {
             .to_result()?;
 
             let _ = res.insert(
-                CStr::from_bytes_with_nul(unsafe { transmute(&key[..]) })
+                CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&key[..]))
                     .unwrap()
                     .to_str()
                     .unwrap()
                     .to_string(),
-                CStr::from_bytes_with_nul(unsafe { transmute(&value[..]) })
+                CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&value[..]))
                     .unwrap()
                     .to_str()
                     .unwrap()
@@ -240,13 +238,11 @@ impl<'a> Discord<'a> {
                 .get_member_update_transaction(lobby_id, user_id, &mut ptr))
             .to_result()
         } {
-            callback(self, Err(e));
-            return;
+            return callback(self, Err(e));
         }
 
         if let Err(e) = unsafe { builder.process(ptr) } {
-            callback(self, Err(e));
-            return;
+            return callback(self, Err(e));
         }
 
         unsafe {
@@ -330,12 +326,12 @@ impl<'a> Discord<'a> {
             .to_result()?;
 
             let _ = res.insert(
-                CStr::from_bytes_with_nul(unsafe { transmute(&key[..]) })
+                CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&key[..]))
                     .unwrap()
                     .to_str()
                     .unwrap()
                     .to_string(),
-                CStr::from_bytes_with_nul(unsafe { transmute(&value[..]) })
+                CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&value[..]))
                     .unwrap()
                     .to_str()
                     .unwrap()
@@ -370,13 +366,11 @@ impl<'a> Discord<'a> {
         if let Err(e) =
             unsafe { ffi!(self.get_lobby_manager().get_search_query(&mut ptr)).to_result() }
         {
-            callback(self, Err(e));
-            return;
+            return callback(self, Err(e));
         }
 
         if let Err(e) = unsafe { builder.process(ptr) } {
-            callback(self, Err(e));
-            return;
+            return callback(self, Err(e));
         }
 
         let inner = move |gsdk: &mut Discord, res: DiscordResult<()>| {

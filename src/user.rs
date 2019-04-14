@@ -1,6 +1,6 @@
 use crate::{sys, ImageHandle};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct User(pub(crate) sys::DiscordUser);
 
 impl User {
@@ -22,7 +22,19 @@ impl User {
         ImageHandle(sys::DiscordImageHandle {
             type_: sys::DiscordImageType_User,
             id: self.0.id,
-            size: size,
+            size,
         })
+    }
+}
+
+impl std::fmt::Debug for User {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("User")
+            .field("id", &self.id())
+            .field("username", &self.username())
+            .field("discriminator", &self.discriminator())
+            .field("avatar", &self.avatar())
+            .field("is_bot", &self.is_bot())
+            .finish()
     }
 }

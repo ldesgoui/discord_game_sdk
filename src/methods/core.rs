@@ -140,14 +140,14 @@ fn create_params(
     }
 }
 
-const ACTIVITY: &'static sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
+const ACTIVITY: &sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
     on_activity_join: Some(across_ffi::activities::on_activity_join),
     on_activity_spectate: Some(across_ffi::activities::on_activity_spectate),
     on_activity_join_request: Some(across_ffi::activities::on_activity_join_request),
     on_activity_invite: Some(across_ffi::activities::on_activity_invite),
 };
 
-const LOBBY: &'static sys::IDiscordLobbyEvents = &sys::IDiscordLobbyEvents {
+const LOBBY: &sys::IDiscordLobbyEvents = &sys::IDiscordLobbyEvents {
     on_lobby_update: Some(across_ffi::lobbies::on_lobby_update),
     on_lobby_delete: Some(across_ffi::lobbies::on_lobby_delete),
     on_member_connect: Some(across_ffi::lobbies::on_member_connect),
@@ -158,29 +158,29 @@ const LOBBY: &'static sys::IDiscordLobbyEvents = &sys::IDiscordLobbyEvents {
     on_network_message: Some(across_ffi::lobbies::on_network_message),
 };
 
-const NETWORK: &'static sys::IDiscordNetworkEvents = &sys::IDiscordNetworkEvents {
+const NETWORK: &sys::IDiscordNetworkEvents = &sys::IDiscordNetworkEvents {
     on_message: Some(across_ffi::networking::on_message),
     on_route_update: Some(across_ffi::networking::on_route_update),
 };
 
-const OVERLAY: &'static sys::IDiscordOverlayEvents = &sys::IDiscordOverlayEvents {
+const OVERLAY: &sys::IDiscordOverlayEvents = &sys::IDiscordOverlayEvents {
     on_toggle: Some(across_ffi::overlay::on_toggle),
 };
 
-const RELATIONSHIP: &'static sys::IDiscordRelationshipEvents = &sys::IDiscordRelationshipEvents {
+const RELATIONSHIP: &sys::IDiscordRelationshipEvents = &sys::IDiscordRelationshipEvents {
     on_refresh: Some(across_ffi::relationships::on_refresh),
     on_relationship_update: Some(across_ffi::relationships::on_relationship_update),
 };
 
-const STORE: &'static sys::IDiscordStoreEvents = &sys::IDiscordStoreEvents {
+const STORE: &sys::IDiscordStoreEvents = &sys::IDiscordStoreEvents {
     on_entitlement_create: Some(across_ffi::store::on_entitlement_create),
     on_entitlement_delete: Some(across_ffi::store::on_entitlement_delete),
 };
 
-const USER: &'static sys::IDiscordUserEvents = &sys::IDiscordUserEvents {
+const USER: &sys::IDiscordUserEvents = &sys::IDiscordUserEvents {
     on_current_user_update: Some(across_ffi::users::on_current_user_update),
 };
 
-const VOICE: &'static sys::IDiscordVoiceEvents = &sys::IDiscordVoiceEvents {
+const VOICE: &sys::IDiscordVoiceEvents = &sys::IDiscordVoiceEvents {
     on_settings_update: Some(across_ffi::voice::on_settings_update),
 };

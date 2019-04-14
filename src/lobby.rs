@@ -1,6 +1,6 @@
 use crate::{sys, LobbyKind};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct Lobby(pub(crate) sys::DiscordLobby);
 
 impl Lobby {
@@ -24,5 +24,18 @@ impl Lobby {
 
     pub fn locked(&self) -> bool {
         self.0.locked
+    }
+}
+
+impl std::fmt::Debug for Lobby {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Lobby")
+            .field("id", &self.id())
+            .field("kind", &self.kind())
+            .field("owner_id", &self.owner_id())
+            .field("secret", &self.secret())
+            .field("capacity", &self.capacity())
+            .field("locked", &self.locked())
+            .finish()
     }
 }

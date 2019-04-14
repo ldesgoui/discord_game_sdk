@@ -54,7 +54,11 @@ macro_rules! prevent_unwind {
 macro_rules! get_str {
     ($name:ident, $($field:tt)+) => {
         pub fn $name(&self) -> &str {
-            std::ffi::CStr::from_bytes_with_nul(unsafe { std::mem::transmute(&(self.0).$($field)+[..]) })
+            use crate::utils::slice_i8_to_u8;
+
+            let field = &(self.0).$($field)+;
+
+            std::ffi::CStr::from_bytes_with_nul(slice_i8_to_u8(field))
                 .unwrap()
                 .to_str()
                 .unwrap()
@@ -64,11 +68,16 @@ macro_rules! get_str {
 
 macro_rules! set_str {
     ($name:ident, $($field:tt)+) => {
-        pub fn $name<'a>(&'a mut self, value: impl AsRef<std::ffi::CStr>) -> &'a mut Self {
-            let bytes: &[i8] = unsafe { std::mem::transmute(value.as_ref().to_bytes_with_nul()) };
+        pub fn $name(&'_ mut self, value: impl AsRef<std::ffi::CStr>) -> &'_ mut Self {
+            use crate::utils::slice_u8_to_i8;
+
+            let bytes: &[i8] = slice_u8_to_i8(value.as_ref().to_bytes_with_nul());
             let field = &mut (self.0).$($field)+;
+
             debug_assert!(bytes.len() <= field.len());
+
             field[..bytes.len()].copy_from_slice(bytes);
+
             self
         }
     }

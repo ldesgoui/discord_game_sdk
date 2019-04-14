@@ -9,16 +9,17 @@ pub struct Discord<'a> {
     pub(crate) callbacks: Vec<Box<dyn AnyCallback + 'a>>,
 }
 
-impl<'a> std::fmt::Debug for Discord<'a> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Discord")
-            .field("client_id", &self.client_id)
-            .finish()
-    }
-}
-
 impl<'a> Discord<'a> {
     pub(crate) fn register_callback(&mut self, callback: impl AnyCallback + 'a) {
         self.callbacks.push(Box::new(callback))
+    }
+}
+
+impl<'a> std::fmt::Debug for Discord<'a> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Discord")
+            .field("ffi_ptr", &self.core)
+            .field("client_id", &self.client_id)
+            .finish()
     }
 }

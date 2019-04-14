@@ -60,6 +60,7 @@ mod status;
 mod to_result;
 mod user;
 mod user_flags;
+pub(crate) mod utils;
 
 mod methods {
     mod core;

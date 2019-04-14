@@ -31,7 +31,7 @@ impl<'a> Discord<'a> {
                 .update_activity(&mut activity as *mut _)(
                 ResultCallback::new(callback)
             ))
-        };
+        }
     }
 
     pub fn clear_activity<F>(&mut self, callback: F)
@@ -42,7 +42,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_activity_manager().clear_activity()(
                 ResultCallback::new(callback)
             ))
-        };
+        }
     }
 
     pub fn send_request_reply<F>(&mut self, user_id: i64, reply: RequestReply, callback: F)
@@ -55,7 +55,7 @@ impl<'a> Discord<'a> {
                 .send_request_reply(user_id, reply.into())(
                 ResultCallback::new(callback)
             ))
-        };
+        }
     }
 
     pub fn send_invite<F>(
@@ -73,7 +73,7 @@ impl<'a> Discord<'a> {
                 action.into(),
                 content.as_ref().as_ptr()
             )(ResultCallback::new(callback)))
-        };
+        }
     }
 
     pub fn accept_invite<F>(&mut self, user_id: i64, callback: F)

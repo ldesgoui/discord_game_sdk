@@ -1,7 +1,7 @@
 use crate::{sys, ActivityKind};
 use chrono::{offset::TimeZone, DateTime, Utc};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct Activity(pub(crate) sys::DiscordActivity);
 
 impl Activity {
@@ -59,12 +59,12 @@ impl Activity {
     set_str!(with_state, state);
     set_str!(with_details, details);
 
-    pub fn with_start_time<'a>(&'a mut self, value: DateTime<Utc>) -> &'a mut Self {
+    pub fn with_start_time(&'_ mut self, value: DateTime<Utc>) -> &'_ mut Self {
         self.0.timestamps.start = value.timestamp();
         self
     }
 
-    pub fn with_end_time<'a>(&'a mut self, value: DateTime<Utc>) -> &'a mut Self {
+    pub fn with_end_time(&'_ mut self, value: DateTime<Utc>) -> &'_ mut Self {
         self.0.timestamps.end = value.timestamp();
         self
     }
@@ -76,17 +76,17 @@ impl Activity {
 
     set_str!(with_party_id, party.id);
 
-    pub fn with_party_amount<'a>(&'a mut self, value: i32) -> &'a mut Self {
+    pub fn with_party_amount(&'_ mut self, value: i32) -> &'_ mut Self {
         self.0.party.size.current_size = value;
         self
     }
 
-    pub fn with_party_capacity<'a>(&'a mut self, value: i32) -> &'a mut Self {
+    pub fn with_party_capacity(&'_ mut self, value: i32) -> &'_ mut Self {
         self.0.party.size.max_size = value;
         self
     }
 
-    pub fn with_instance<'a>(&'a mut self, value: bool) -> &'a mut Self {
+    pub fn with_instance(&'_ mut self, value: bool) -> &'_ mut Self {
         self.0.instance = value;
         self
     }
@@ -94,4 +94,29 @@ impl Activity {
     set_str!(with_match_secret, secrets.match_);
     set_str!(with_join_secret, secrets.join);
     set_str!(with_spectate_secret, secrets.spectate);
+}
+
+impl std::fmt::Debug for Activity {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Activity")
+            .field("kind", &self.kind())
+            .field("application_id", &self.application_id())
+            .field("name", &self.name())
+            .field("state", &self.state())
+            .field("details", &self.details())
+            .field("start_time", &self.start_time())
+            .field("end_time", &self.end_time())
+            .field("large_image_key", &self.large_image_key())
+            .field("large_image_tooltip", &self.large_image_tooltip())
+            .field("small_image_key", &self.small_image_key())
+            .field("small_image_tooltip", &self.small_image_tooltip())
+            .field("party_id", &self.party_id())
+            .field("party_amount", &self.party_amount())
+            .field("party_capacity", &self.party_capacity())
+            .field("instance", &self.instance())
+            .field("match_secret", &self.match_secret())
+            .field("join_secret", &self.join_secret())
+            .field("spectate_secret", &self.spectate_secret())
+            .finish()
+    }
 }

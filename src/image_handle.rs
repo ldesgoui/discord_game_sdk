@@ -1,6 +1,6 @@
 use crate::{sys, ImageKind};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct ImageHandle(pub(crate) sys::DiscordImageHandle);
 
 impl ImageHandle {
@@ -24,5 +24,15 @@ impl ImageHandle {
             id: user_id,
             size,
         })
+    }
+}
+
+impl std::fmt::Debug for ImageHandle {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("ImageHandle")
+            .field("kind", &self.kind())
+            .field("id", &self.id())
+            .field("size", &self.size())
+            .finish()
     }
 }

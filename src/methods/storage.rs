@@ -2,10 +2,10 @@ use crate::{
     callbacks::{ResultBytesCallback, ResultCallback},
     sys,
     to_result::ToResult,
-    Discord, DiscordResult, FileStat,
+    utils, Discord, DiscordResult, FileStat,
 };
 use std::ffi::CStr;
-use std::mem::{size_of, transmute};
+use std::mem::size_of;
 
 /// # Storage
 impl<'a> Discord<'a> {
@@ -156,7 +156,7 @@ impl<'a> Discord<'a> {
 
         unsafe { ffi!(self.get_storage_manager().get_path(&mut path)) }.to_result()?;
 
-        Ok(CStr::from_bytes_with_nul(unsafe { transmute(&path[..]) })
+        Ok(CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&path[..]))
             .unwrap()
             .to_str()
             .unwrap()

@@ -18,7 +18,7 @@ impl Image {
         self.height
     }
 
-    pub fn data<'a>(&'a self) -> &'a [u8] {
+    pub fn data(&'_ self) -> &'_ [u8] {
         &self.data[..]
     }
 }

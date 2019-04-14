@@ -1,6 +1,6 @@
 use crate::{sys, SkuKind};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct Sku(pub(crate) sys::DiscordSku);
 
 impl Sku {
@@ -19,4 +19,16 @@ impl Sku {
     }
 
     get_str!(price_currency, price.currency);
+}
+
+impl std::fmt::Debug for Sku {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("Sku")
+            .field("id", &self.id())
+            .field("kind", &self.kind())
+            .field("name", &self.name())
+            .field("price_amount", &self.price_amount())
+            .field("price_currency", &self.price_currency())
+            .finish()
+    }
 }
