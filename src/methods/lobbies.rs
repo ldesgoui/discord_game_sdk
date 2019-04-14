@@ -2,7 +2,8 @@ use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback},
     sys,
     to_result::ToResult,
-    utils, Discord, DiscordResult, Lobby, LobbyMemberTransaction, LobbyTransaction, SearchQuery,
+    utils::{CStrExt, slice_i8_to_u8}
+        , Discord, DiscordResult, Lobby, LobbyMemberTransaction, LobbyTransaction, SearchQuery,
 };
 use std::collections::HashMap;
 use std::ffi::CStr;
@@ -138,7 +139,7 @@ impl<'a> Discord<'a> {
         .to_result()?;
 
         Ok(
-            CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&secret[..]))
+            CStr::from_bytes(slice_i8_to_u8(&secret[..]))
                 .unwrap()
                 .to_str()
                 .unwrap()
@@ -163,7 +164,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&value[..]))
+        Ok(CStr::from_bytes(slice_i8_to_u8(&value[..]))
             .unwrap()
             .to_str()
             .unwrap()
@@ -205,12 +206,12 @@ impl<'a> Discord<'a> {
             .to_result()?;
 
             let _ = res.insert(
-                CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&key[..]))
+                CStr::from_bytes(slice_i8_to_u8(&key[..]))
                     .unwrap()
                     .to_str()
                     .unwrap()
                     .to_string(),
-                CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&value[..]))
+                CStr::from_bytes(slice_i8_to_u8(&value[..]))
                     .unwrap()
                     .to_str()
                     .unwrap()
@@ -326,12 +327,12 @@ impl<'a> Discord<'a> {
             .to_result()?;
 
             let _ = res.insert(
-                CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&key[..]))
+                CStr::from_bytes(slice_i8_to_u8(&key[..]))
                     .unwrap()
                     .to_str()
                     .unwrap()
                     .to_string(),
-                CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&value[..]))
+                CStr::from_bytes(slice_i8_to_u8(&value[..]))
                     .unwrap()
                     .to_str()
                     .unwrap()

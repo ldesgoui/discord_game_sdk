@@ -1,6 +1,6 @@
 use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback, ResultStringCallback},
-    sys, utils, Discord, DiscordResult, OAuth2Token,
+    sys, utils::{CStrExt, slice_i8_to_u8}, Discord, DiscordResult, OAuth2Token,
 };
 use std::ffi::CStr;
 use std::mem::size_of;
@@ -17,7 +17,7 @@ impl<'a> Discord<'a> {
                 .get_current_locale(&mut locale as *mut _))
         }
 
-        CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&locale[..]))
+        CStr::from_bytes(slice_i8_to_u8(&locale[..]))
             .unwrap()
             .to_str()
             .unwrap()
@@ -34,7 +34,7 @@ impl<'a> Discord<'a> {
                 .get_current_branch(&mut branch as *mut _))
         }
 
-        CStr::from_bytes_with_nul(utils::slice_i8_to_u8(&branch[..]))
+        CStr::from_bytes(slice_i8_to_u8(&branch[..]))
             .unwrap()
             .to_str()
             .unwrap()

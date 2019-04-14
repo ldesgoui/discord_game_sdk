@@ -54,11 +54,11 @@ macro_rules! prevent_unwind {
 macro_rules! get_str {
     ($name:ident, $($field:tt)+) => {
         pub fn $name(&self) -> &str {
-            use crate::utils::slice_i8_to_u8;
+            use crate::utils::{CStrExt, slice_i8_to_u8};
 
             let field = &(self.0).$($field)+;
 
-            std::ffi::CStr::from_bytes_with_nul(slice_i8_to_u8(field))
+            std::ffi::CStr::from_bytes(slice_i8_to_u8(field))
                 .unwrap()
                 .to_str()
                 .unwrap()
