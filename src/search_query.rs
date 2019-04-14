@@ -19,8 +19,8 @@ impl<'a> SearchQuery<'a> {
     pub fn filter(
         &'a mut self,
         key: &'a CStr,
-        value: &'a CStr,
         comparison: Comparison,
+        value: &'a CStr,
         cast: Cast,
     ) -> &'a mut Self {
         self.filter = Some((key, value, comparison, cast));
