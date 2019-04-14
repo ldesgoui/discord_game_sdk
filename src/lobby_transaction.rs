@@ -1,8 +1,6 @@
-use crate::{
-    macro_helper::MacroHelper, metadata_update::MetadataUpdate, sys, to_result::ToResult,
-    DiscordResult, LobbyKind,
-};
-use std::ffi::CString;
+use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, DiscordResult, LobbyKind};
+use std::collections::HashMap;
+use std::ffi::CStr;
 
 #[derive(Clone, Debug, Default)]
 pub struct LobbyTransaction<'a> {
@@ -10,7 +8,7 @@ pub struct LobbyTransaction<'a> {
     pub(crate) owner: Option<i64>,
     pub(crate) capacity: Option<u32>,
     pub(crate) locked: Option<bool>,
-    pub(crate) metadata: Vec<MetadataUpdate<'a>>,
+    pub(crate) metadata: HashMap<&'a CStr, Option<&'a CStr>>,
 }
 
 impl<'a> LobbyTransaction<'a> {
@@ -33,13 +31,13 @@ impl<'a> LobbyTransaction<'a> {
         self
     }
 
-    pub fn add_metadata(&'a mut self, key: &'a str, value: &'a str) -> &'a mut Self {
-        self.metadata.push(MetadataUpdate::Add(key, value));
+    pub fn add_metadata(&'a mut self, key: &'a CStr, value: &'a CStr) -> &'a mut Self {
+        let _ = self.metadata.insert(key, Some(value));
         self
     }
 
-    pub fn delete_metadata<S>(&'a mut self, key: &'a str) -> &'a mut Self {
-        self.metadata.push(MetadataUpdate::Delete(key));
+    pub fn delete_metadata<S>(&'a mut self, key: &'a CStr) -> &'a mut Self {
+        let _ = self.metadata.insert(key, None);
         self
     }
 
@@ -70,16 +68,13 @@ impl<'a> LobbyTransaction<'a> {
             ffi!(tx.set_locked(locked)).to_result()?;
         }
 
-        for meta in self.metadata {
-            match meta {
-                MetadataUpdate::Add(key, value) => {
-                    let key = CString::new(key).unwrap();
-                    let value = CString::new(value).unwrap();
+        for (key, value) in self.metadata {
+            match value {
+                Some(value) => {
                     ffi!(tx.set_metadata(key.as_ptr() as *mut _, value.as_ptr() as *mut _))
                         .to_result()?;
                 }
-                MetadataUpdate::Delete(key) => {
-                    let key = CString::new(key).unwrap();
+                None => {
                     ffi!(tx.delete_metadata(key.as_ptr() as *mut _)).to_result()?;
                 }
             }

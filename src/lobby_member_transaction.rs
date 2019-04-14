@@ -1,12 +1,10 @@
-use crate::{
-    macro_helper::MacroHelper, metadata_update::MetadataUpdate, sys, to_result::ToResult,
-    DiscordResult,
-};
-use std::ffi::CString;
+use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, DiscordResult};
+use std::collections::HashMap;
+use std::ffi::CStr;
 
 #[derive(Clone, Debug, Default)]
 pub struct LobbyMemberTransaction<'a> {
-    pub(crate) metadata: Vec<MetadataUpdate<'a>>,
+    pub(crate) metadata: HashMap<&'a CStr, Option<&'a CStr>>,
 }
 
 impl<'a> LobbyMemberTransaction<'a> {
@@ -14,13 +12,13 @@ impl<'a> LobbyMemberTransaction<'a> {
         Self::default()
     }
 
-    pub fn add_metadata(&'a mut self, key: &'a str, value: &'a str) -> &'a mut Self {
-        self.metadata.push(MetadataUpdate::Add(key, value));
+    pub fn add_metadata(&'a mut self, key: &'a CStr, value: &'a CStr) -> &'a mut Self {
+        let _ = self.metadata.insert(key, Some(value));
         self
     }
 
-    pub fn delete_metadata<S>(&'a mut self, key: &'a str) -> &'a mut Self {
-        self.metadata.push(MetadataUpdate::Delete(key));
+    pub fn delete_metadata<S>(&'a mut self, key: &'a CStr) -> &'a mut Self {
+        let _ = self.metadata.insert(key, None);
         self
     }
 
@@ -30,16 +28,13 @@ impl<'a> LobbyMemberTransaction<'a> {
     ) -> DiscordResult<()> {
         let tx = MacroHelper { core: ptr };
 
-        for meta in self.metadata {
-            match meta {
-                MetadataUpdate::Add(key, value) => {
-                    let key = CString::new(key).unwrap();
-                    let value = CString::new(value).unwrap();
+        for (key, value) in self.metadata {
+            match value {
+                Some(value) => {
                     ffi!(tx.set_metadata(key.as_ptr() as *mut _, value.as_ptr() as *mut _))
                         .to_result()?;
                 }
-                MetadataUpdate::Delete(key) => {
-                    let key = CString::new(key).unwrap();
+                None => {
                     ffi!(tx.delete_metadata(key.as_ptr() as *mut _)).to_result()?;
                 }
             }

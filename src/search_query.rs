@@ -1,12 +1,12 @@
 use crate::{
     macro_helper::MacroHelper, sys, to_result::ToResult, Cast, Comparison, DiscordResult, Distance,
 };
-use std::ffi::CString;
+use std::ffi::CStr;
 
 #[derive(Clone, Debug, Default)]
 pub struct SearchQuery<'a> {
-    pub(crate) filter: Option<(&'a str, &'a str, Comparison, Cast)>,
-    pub(crate) sort: Option<(&'a str, &'a str, Cast)>,
+    pub(crate) filter: Option<(&'a CStr, &'a CStr, Comparison, Cast)>,
+    pub(crate) sort: Option<(&'a CStr, &'a CStr, Cast)>,
     pub(crate) limit: Option<u32>,
     pub(crate) distance: Option<Distance>,
 }
@@ -18,8 +18,8 @@ impl<'a> SearchQuery<'a> {
 
     pub fn filter(
         &'a mut self,
-        key: &'a str,
-        value: &'a str,
+        key: &'a CStr,
+        value: &'a CStr,
         comparison: Comparison,
         cast: Cast,
     ) -> &'a mut Self {
@@ -27,7 +27,7 @@ impl<'a> SearchQuery<'a> {
         self
     }
 
-    pub fn sort(&'a mut self, key: &'a str, value: &'a str, cast: Cast) -> &'a mut Self {
+    pub fn sort(&'a mut self, key: &'a CStr, value: &'a CStr, cast: Cast) -> &'a mut Self {
         self.sort = Some((key, value, cast));
         self
     }
@@ -49,9 +49,6 @@ impl<'a> SearchQuery<'a> {
         let tx = MacroHelper { core: ptr };
 
         if let Some((key, value, comparison, cast)) = self.filter {
-            let key = CString::new(key).unwrap();
-            let value = CString::new(value).unwrap();
-
             ffi!(tx.filter(
                 key.as_ptr() as *mut _,
                 comparison.into(),

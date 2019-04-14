@@ -45,7 +45,6 @@ mod lobby_kind;
 mod lobby_member_transaction;
 mod lobby_transaction;
 pub(crate) mod macro_helper;
-pub(crate) mod metadata_update;
 mod oauth2_token;
 pub(crate) mod panic_messages;
 mod premium_kind;
