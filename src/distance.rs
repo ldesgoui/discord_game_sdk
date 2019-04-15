@@ -1,6 +1,6 @@
 use crate::sys;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Distance {
     Default,
     Extended,

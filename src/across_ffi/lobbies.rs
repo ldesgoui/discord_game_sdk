@@ -1,6 +1,6 @@
 use crate::{
     event,
-    panic_messages::{NOT_UTF8, NULL_PTR, SEND_FAIL},
+    panic_messages::{NULL_PTR, SEND_FAIL},
 };
 use std::ffi::c_void;
 
