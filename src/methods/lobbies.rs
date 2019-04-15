@@ -320,10 +320,11 @@ impl<'a> Discord<'a> {
         Ok(res)
     }
 
-    pub fn send_lobby_message<F>(&mut self, lobby_id: i64, buf: &[u8], callback: F)
+    pub fn send_lobby_message<F>(&mut self, lobby_id: i64, buf: impl AsRef<[u8]>, callback: F)
     where
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
+        let buf = buf.as_ref();
         assert!(buf.len() <= u32::max_value() as usize);
 
         unsafe {

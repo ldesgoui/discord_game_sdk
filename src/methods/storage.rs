@@ -14,9 +14,11 @@ impl<'a> Discord<'a> {
     pub fn read_file(
         &mut self,
         filename: impl AsRef<CStr>,
-        buffer: &mut [u8],
+        mut buffer: impl AsMut<[u8]>,
     ) -> DiscordResult<u32> {
         let mut read = 0;
+
+        let buffer = buffer.as_mut();
 
         unsafe {
             ffi!(self.get_storage_manager().read(
@@ -63,7 +65,12 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn write_file(&mut self, filename: impl AsRef<CStr>, buffer: &[u8]) -> DiscordResult<()> {
+    pub fn write_file(
+        &mut self,
+        filename: impl AsRef<CStr>,
+        buffer: impl AsRef<[u8]>,
+    ) -> DiscordResult<()> {
+        let buffer = buffer.as_ref();
         unsafe {
             ffi!(self.get_storage_manager().write(
                 filename.as_ref().as_ptr(),
@@ -75,10 +82,15 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn write_file_async<F>(&mut self, filename: impl AsRef<CStr>, buffer: &[u8], callback: F)
-    where
+    pub fn write_file_async<F>(
+        &mut self,
+        filename: impl AsRef<CStr>,
+        buffer: impl AsRef<[u8]>,
+        callback: F,
+    ) where
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
+        let buffer = buffer.as_ref();
         unsafe {
             ffi!(self
                 .get_storage_manager()

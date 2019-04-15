@@ -10,6 +10,7 @@ keywords = ["discord", "sdk", "gamedev"]
 categories = ["api-bindings", "game-engines"]
 
 [features]
+serde1 = ["serde"]
 mock = ["discord_game_sdk_sys/mock", "discord_game_sdk_mock"]
 
 [dependencies]
@@ -24,13 +25,18 @@ memchr = "2.2.0"
 scopeguard = "1.0.0"
 
 [dependencies.discord_game_sdk_sys]
-version = "0.1.0"
 path = "./sys"
+version = "0.1.0"
 
 [dependencies.discord_game_sdk_mock]
-version = "0.1.0"
-path = "./mock"
 optional = true
+path = "./mock"
+version = "0.1.0"
+
+[dependencies.serde]
+features = ["derive"]
+optional = true
+version = "1"
 
 [dev-dependencies]
 pretty_env_logger = "0.3.0"

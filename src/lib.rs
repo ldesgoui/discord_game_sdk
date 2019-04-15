@@ -36,6 +36,7 @@ mod distance;
 mod entitlement;
 mod entitlement_kind;
 mod error;
+mod fetch_kind;
 mod file_stat;
 mod image;
 mod image_handle;
@@ -51,6 +52,7 @@ mod premium_kind;
 mod presence;
 mod relationship;
 mod relationship_kind;
+mod reliability;
 mod request_reply;
 mod search_query;
 mod sku;
@@ -116,6 +118,7 @@ pub use self::{
     entitlement::Entitlement,
     entitlement_kind::EntitlementKind,
     error::{DiscordError, DiscordResult},
+    fetch_kind::FetchKind,
     file_stat::FileStat,
     image::Image,
     image_handle::ImageHandle,
@@ -129,6 +132,7 @@ pub use self::{
     presence::Presence,
     relationship::Relationship,
     relationship_kind::RelationshipKind,
+    reliability::Reliability,
     request_reply::RequestReply,
     search_query::SearchQuery,
     sku::Sku,

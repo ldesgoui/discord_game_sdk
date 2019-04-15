@@ -1,19 +1,19 @@
 use crate::{
-    callbacks::ResultFromCallback, sys, to_result::ToResult, Discord, DiscordResult, Image,
-    ImageHandle,
+    callbacks::ResultFromCallback, sys, to_result::ToResult, Discord, DiscordResult, FetchKind,
+    Image, ImageHandle,
 };
 
 /// # Images
 impl<'a> Discord<'a> {
     // tested, takes a few seconds, returns the same handle as inputted
-    pub fn fetch_image<F>(&mut self, handle: ImageHandle, refresh: bool, callback: F)
+    pub fn fetch_image<F>(&mut self, handle: ImageHandle, refresh: FetchKind, callback: F)
     where
         F: FnMut(&mut Discord, DiscordResult<ImageHandle>) + 'a,
     {
         unsafe {
             ffi!(self
                 .get_image_manager()
-                .fetch(handle.into(), refresh)
+                .fetch(handle.into(), refresh.into())
                 .and_then(ResultFromCallback::new(callback)))
         }
     }

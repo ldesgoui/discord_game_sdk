@@ -1,4 +1,4 @@
-use crate::{to_result::ToResult, Discord, DiscordResult};
+use crate::{to_result::ToResult, Discord, DiscordResult, Reliability};
 use std::ffi::CStr;
 
 /// # Networking
@@ -37,11 +37,16 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_network_manager().close_peer(peer_id)) }.to_result()
     }
 
-    pub fn open_channel(&mut self, peer_id: u64, chan_id: u8, reliable: bool) -> DiscordResult<()> {
+    pub fn open_channel(
+        &mut self,
+        peer_id: u64,
+        chan_id: u8,
+        reliable: Reliability,
+    ) -> DiscordResult<()> {
         unsafe {
             ffi!(self
                 .get_network_manager()
-                .open_channel(peer_id, chan_id, reliable))
+                .open_channel(peer_id, chan_id, reliable.into()))
         }
         .to_result()
     }
@@ -50,7 +55,14 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_network_manager().close_channel(peer_id, chan_id)) }.to_result()
     }
 
-    pub fn send_message(&mut self, peer_id: u64, chan_id: u8, buf: &[u8]) -> DiscordResult<()> {
+    pub fn send_message(
+        &mut self,
+        peer_id: u64,
+        chan_id: u8,
+        buf: impl AsRef<[u8]>,
+    ) -> DiscordResult<()> {
+        let buf = buf.as_ref();
+
         assert!(buf.len() <= u32::max_value() as usize);
 
         unsafe {
