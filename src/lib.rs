@@ -15,14 +15,8 @@
 
 #![recursion_limit = "128"]
 
-#[cfg(feature = "mock")]
-#[link(name = "discord_game_sdk_mock")]
-extern "C" {}
-
 #[macro_use]
 mod macros;
-
-pub(crate) use discord_game_sdk_sys as sys;
 
 mod action;
 mod activity;
@@ -106,6 +100,8 @@ pub(crate) mod across_ffi {
     pub(crate) mod voice;
 }
 
+pub(crate) use discord_game_sdk_sys as sys;
+
 pub use self::{
     action::Action,
     activity::Activity,
@@ -141,3 +137,7 @@ pub use self::{
     user::User,
     user_flags::UserFlags,
 };
+
+#[cfg(feature = "mock")]
+#[link(name = "discord_game_sdk_mock")]
+extern "C" {}
