@@ -2,6 +2,7 @@ use crate::{panic_messages::INVALID_ENUM, sys};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ImageKind {
+    /// User Avatar
     User,
 }
 

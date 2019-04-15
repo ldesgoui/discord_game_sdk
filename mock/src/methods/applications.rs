@@ -7,7 +7,7 @@ pub unsafe extern "C" fn validate_or_exit(
     callback: Option<unsafe extern "C" fn(callback_data: *mut c_void, result: sys::EDiscordResult)>,
 ) {
     prevent_unwind!();
-    let mut inst = Instance::from_application(core);
+    let inst = Instance::from_application(core);
 
     inst.state.queue(1, move |i| {
         callback.unwrap()(callback_data, sys::DiscordResult_Ok);

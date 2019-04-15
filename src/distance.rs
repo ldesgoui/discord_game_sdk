@@ -1,11 +1,16 @@
 use crate::sys;
 
+/// Maximum distance during a Lobby Search
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Distance {
-    Default,
-    Extended,
-    Global,
+    /// Within the same region
     Local,
+    /// Within the same and adjacent regions
+    Default,
+    /// Far distances, like US to EU
+    Extended,
+    /// All regions
+    Global,
 }
 
 #[doc(hidden)]

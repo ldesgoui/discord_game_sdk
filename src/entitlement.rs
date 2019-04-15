@@ -1,5 +1,10 @@
 use crate::{sys, EntitlementKind};
 
+/// Proof that user has made a purchase
+///
+/// This must then be consumed by your game's backend
+///
+/// [Official Documentation](https://discordapp.com/developers/docs/game-sdk/store)
 #[derive(Clone, Copy, Eq, Hash, PartialEq, derive_more::From, derive_more::Into)]
 pub struct Entitlement(pub(crate) sys::DiscordEntitlement);
 

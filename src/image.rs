@@ -18,6 +18,11 @@ impl Image {
         self.height
     }
 
+    /// Flat slice of uncompressed SRGBA image data
+    ///
+    /// Length is `width * height * 4`
+    ///
+    /// Pattern is: `RGBARGBARGBA...`
     pub fn data(&'_ self) -> &'_ [u8] {
         &self.data[..]
     }

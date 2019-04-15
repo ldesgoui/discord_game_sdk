@@ -1,14 +1,19 @@
 use crate::{sys, ActivityKind};
 use chrono::{offset::TimeZone, DateTime, Utc};
 
+/// Activity (also known as Rich Presence)
+///
+/// [Official documentation](https://discordapp.com/developers/docs/game-sdk/activities)
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct Activity(pub(crate) sys::DiscordActivity);
 
 impl Activity {
+    /// Create a new Activity with empty fields
     pub fn empty() -> Self {
         Self(sys::DiscordActivity::default())
     }
 
+    /// Check if an Activity is completely blank and should be ignored
     pub fn is_empty(&self) -> bool {
         self == &Self::empty()
     }

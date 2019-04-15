@@ -4,13 +4,15 @@ version = "0.1.0"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Safe wrapper for the Discord Game SDK"
-license = "MIT OR Apache-2.0"
+license = "Apache-2.0 OR MIT"
 repository = "https://github.com/ldesgoui/discord_game_sdk"
 keywords = ["discord", "sdk", "gamedev"]
 categories = ["api-bindings", "game-engines"]
 
+[package.metadata.docs.rs]
+features = ["discord_game_sdk_sys/doc"]
+
 [features]
-serde1 = ["serde"]
 mock = ["discord_game_sdk_sys/mock", "discord_game_sdk_mock"]
 
 [dependencies]
@@ -26,17 +28,12 @@ scopeguard = "1.0.0"
 
 [dependencies.discord_game_sdk_sys]
 path = "./sys"
-version = "0.1.0"
+version = "0.2.0"
 
 [dependencies.discord_game_sdk_mock]
 optional = true
 path = "./mock"
 version = "0.1.0"
-
-[dependencies.serde]
-features = ["derive"]
-optional = true
-version = "1"
 
 [dev-dependencies]
 pretty_env_logger = "0.3.0"

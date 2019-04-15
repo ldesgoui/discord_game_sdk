@@ -51,7 +51,7 @@ fn main() {
 
     // DO NOT RELY ON THIS
     if cfg!(feature = "doc") {
-        std::fs::copy("src/.generated.rs", out_path.join("bindings.rs"));
+        std::fs::copy("src/.generated.rs", out_path.join("bindings.rs")).unwrap();
         return;
     }
 

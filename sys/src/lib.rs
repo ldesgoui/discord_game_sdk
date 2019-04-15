@@ -1,9 +1,11 @@
-//! Rust low-level bindings for the [Discord Game SDK](https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide).
+//! Rust low-level bindings for the [Discord Game SDK]
+//!
 //! Following the `-sys` package conventions, this crate does not define higher-level abstractions.
+//!
+//! [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
 
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
+#![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys/0.2.0")]
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 

@@ -4,6 +4,7 @@ use crate::{panic_messages::INVALID_ENUM, sys};
 pub enum RelationshipKind {
     Blocked,
     Friend,
+    /// Not a friend but interacts with current user often (frequency + recency)
     Implicit,
     None,
     PendingIncoming,

@@ -1,6 +1,8 @@
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Reliability {
+    /// All data will be received
     Reliable,
+    /// Some data will be lost
     Unreliable,
 }
 

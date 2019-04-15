@@ -1,5 +1,6 @@
 use crate::{callbacks::AnyCallback, event, sys};
 
+/// Main interface with SDK
 pub struct Discord<'a> {
     pub(crate) core: *mut sys::IDiscordCore,
     pub(crate) client_id: i64,

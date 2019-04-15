@@ -1,19 +1,54 @@
-//! Safe wrapper for the [Discord Game SDK](https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide).
+//! Safe wrapper for the [Discord Game SDK]
+//!
+//! This crate provides Rust support to the the following Discord features:
+//!
+//! - Activities (Rich Presence)
+//! - Users, Avatars and Relationships
+//! - Lobbies, Matchmaking and Voice communication
+//! - Faux-P2P Networking
+//! - Cloud Synchronized (or not) Storage
+//! - Store transactions
+//!
 //!
 //! # Status
 //!
-//! This library is currently in very early stages, most of the API is missing.
+//! This library is currently in very early stages, most of the API is implemented but unstable.
+//! There are currently no tests (This will change once [`discord_game_sdk_mock`] is further
+//! developed).
+//!
+//!
+//! # API stability
+//!
+//! API stability is completely uncertain until Discord provides details on their update process
+//! and how breaking changes will be introduced. The SDK documentations clearly mention that the
+//! API is not currently stabilized.
+//!
+//!
+//! # Safety
+//!
+//! This crate relies on the SDK to provide correct data and behavior:
+//! - Non-null pointers to valid memory
+//! - UTF-8, NUL-terminated strings
+//! - Valid enum values
+//! - No mutation of memory it should have no ownership of
+//! - No use of pointers after `destroy` is called
+//!
 //!
 //! # "Legal" note
 //!
 //! This wrapper was informally allowed for publication and distribution by Discord Staff.
-//! I cannot redistribute the SDK files until it is made open-source or is licensed for redistribution. You will have to follow some instructions when first setting up your project.
-//! This also means that docs.rs will not be able to build the documentation.
+//! I cannot redistribute the SDK files until it is made open-source or is licensed for
+//! redistribution. You will have to follow some instructions when first setting up your project.
 //! Apologies for the inconvenience.
 //!
-//! If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
+//! If you're a part of Discord and wish to discuss this, please
+//! email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
+//!
+//!
+//! [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
+//! [`discord_game_sdk_mock`]: https://github.com/ldesgoui/discord_game_sdk/tree/master/mock
 
-// #![deny(missing_docs)]
+#![doc(html_root_url = "https://docs.rs/discord_game_sdk/0.2.0")]
 #![recursion_limit = "128"]
 
 #[macro_use]
@@ -75,6 +110,72 @@ mod methods {
 }
 
 pub mod event {
+    //! # Event Types
+    //!
+    //! This crate makes use of [`crossbeam_channel`] to pass events.
+    //!
+    //! All event and callback handlers do a minimal amount of work possible across FFI; they send
+    //! copied or cloned data. Here is why:
+    //! - Panics in FFI must be intercepted and unwinding must be disabled
+    //! - Passing a mutable reference to [`Discord`] would result in either mutable aliasing or
+    //!   deadlocks (if using Arc<Mutex<_>>)
+    //!
+    //! If an event or callback handler runs into a panic across FFI, the panic will be
+    //! intercepted and the process will be aborted.
+    //!
+    //!
+    //! ### IMPORTANT NOTE:
+    //! If you do not make use of all receivers, you must call [`Discord::empty_event_receivers`]
+    //! or [`event::Receivers::empty_channels`] to prevent the event buffers from growing
+    //! too big. A safe place to do that would be just before [`Discord::run_callbacks`].
+    //!
+    //!
+    //! ### IMPORTANT NOTE:
+    //! Unless you plan to run [`Discord::run_callbacks`] in another thread, waiting for events
+    //! will never stop. This means that [`crossbeam_channel::Receiver::try_recv`] should be used
+    //! instead of [`crossbeam_channel::Receiver::recv`], and [`crossbeam_channel::select!`] must
+    //! contain a `default` clause.
+    //!
+    //!
+    //! ### IMPORTANT NOTE:
+    //! [`crossbeam_channel::Receiver`]s (and [`event::Receivers`]) may be cloned but the events
+    //! won't be duplicated. An event may only be received once across the whole application.
+    //! Dispatching events to multiple different places is on you.
+    //!
+    //!
+    //! ## Examples
+    //!
+    //! ```no_run
+    //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    //! use crossbeam_channel::select;
+    //!
+    //! let mut discord = discord_game_sdk::Discord::new(999999999999999999)?;
+    //! let recvs = discord.event_receivers();
+    //!
+    //! loop {
+    //!     discord.empty_event_receivers();
+    //!     discord.run_callbacks();
+    //!
+    //!     select! {
+    //!         recv(recvs.current_user_update) -> _ => println!("User updated!"),
+    //!         default => continue,
+    //!     }
+    //! }
+    //! # Ok(()) }
+    //! ```
+    //!
+    //! [`Discord::empty_event_receivers`]: ../struct.Discord.html#method.empty_event_receivers
+    //! [`Discord::run_callbacks`]: ../struct.Discord.html#method.run_callbacks
+    //! [`Discord`]: ../struct.Discord.html
+    //! [`crossbeam_channel::Receiver::recv`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Receiver.html#method.recv
+    //! [`crossbeam_channel::Receiver::try_recv`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Receiver.html#method.try_recv
+    //! [`crossbeam_channel::Receiver`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Receiver.html
+    //! [`crossbeam_channel::Sender`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Sender.html
+    //! [`crossbeam_channel::select!`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/macro.select.html
+    //! [`crossbeam_channel`]: https://docs.rs/crossbeam-channel
+    //! [`event::Receivers::empty_channel`]: struct.Receivers.html#method.empty_channels
+    //! [`event::Receivers`]: struct.Receivers.html
+
     pub mod activities;
     mod channels;
     pub mod lobbies;

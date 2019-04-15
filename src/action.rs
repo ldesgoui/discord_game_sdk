@@ -1,5 +1,8 @@
 use crate::{panic_messages::INVALID_ENUM, sys};
 
+/// Action to take when invited or inviting to an [`Activity`]
+///
+/// [`Activity`]: struct.Activity.html
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Action {
     Join,
