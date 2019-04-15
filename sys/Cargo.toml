@@ -9,8 +9,12 @@ repository = "https://github.com/ldesgoui/discord_game_sdk"
 keywords = ["discord", "sdk", "gamedev"]
 categories = ["external-ffi-bindings", "game-engines"]
 
+[package.metadata.docs.rs]
+features = ["doc"]
+
 [features]
 mock = []
+doc = [] # DO NOT RELY ON THIS
 
 [build-dependencies]
 bindgen = "0.48.1"

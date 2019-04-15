@@ -48,6 +48,13 @@ fn main() {
 
     let target = std::env::var("TARGET").unwrap();
     let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
+
+    // DO NOT RELY ON THIS
+    if cfg!(feature = "doc") {
+        std::fs::copy("src/.generated.rs", out_path.join("bindings.rs"));
+        return;
+    }
+
     let sdk_path =
         std::path::PathBuf::from(std::env::var("DISCORD_GAME_SDK_PATH").expect(MISSING_SDK_PATH));
 
