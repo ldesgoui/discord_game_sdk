@@ -1,4 +1,9 @@
-use crate::{sys, to_result::ToResult, DiscordResult, Relationship};
+use crate::{
+    panic_messages::{INVALID_ENUM, NOT_UTF8, SEND_FAIL},
+    sys,
+    to_result::ToResult,
+    DiscordResult, Relationship,
+};
 use crossbeam_channel::Sender;
 use std::ffi::{c_void, CStr};
 
@@ -7,7 +12,7 @@ pub(crate) extern "C" fn result(ptr: *mut c_void, res: sys::EDiscordResult) {
 
     unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<()>>) }
         .try_send(res.to_result())
-        .unwrap()
+        .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn result_string(
@@ -21,10 +26,10 @@ pub(crate) extern "C" fn result_string(
         .try_send(res.to_result().map(|()| {
             unsafe { CStr::from_ptr(cstr) }
                 .to_str()
-                .unwrap()
+                .expect(NOT_UTF8)
                 .to_string()
         }))
-        .unwrap()
+        .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn result_bytes(
@@ -40,7 +45,7 @@ pub(crate) extern "C" fn result_bytes(
             res.to_result()
                 .map(|()| unsafe { std::slice::from_raw_parts(buffer_ptr, len as usize) }.to_vec()),
         )
-        .unwrap()
+        .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn result_from<S, E>(ptr: *mut c_void, res: sys::EDiscordResult, source: S)
@@ -51,7 +56,7 @@ where
 
     unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<E>>) }
         .try_send(res.to_result().map(|()| source.into()))
-        .unwrap()
+        .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn result_from_ptr<S, E>(
@@ -65,7 +70,7 @@ pub(crate) extern "C" fn result_from_ptr<S, E>(
 
     unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<E>>) }
         .try_send(res.to_result().map(|()| unsafe { *source_ptr }.into()))
-        .unwrap()
+        .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn filter_relationship<F>(
@@ -77,25 +82,24 @@ where
 {
     prevent_unwind!();
 
-    let callback: &mut F = unsafe { (callback_ptr as *mut F).as_mut() }.unwrap();
+    let callback: *mut F = callback_ptr as *mut F;
 
-    callback(unsafe { *relationship_ptr }.into())
+    unsafe { (*callback)((*relationship_ptr).into()) }
 }
 
 pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, message: *const i8) {
     prevent_unwind!();
 
+    use log::Level::*;
     let level = match level {
-        sys::DiscordLogLevel_Error => log::Level::Error,
-        sys::DiscordLogLevel_Warn => log::Level::Warn,
-        sys::DiscordLogLevel_Info => log::Level::Info,
-        sys::DiscordLogLevel_Debug => log::Level::Debug,
-        _ => panic!("enum"),
+        sys::DiscordLogLevel_Error => Error,
+        sys::DiscordLogLevel_Warn => Warn,
+        sys::DiscordLogLevel_Info => Info,
+        sys::DiscordLogLevel_Debug => Debug,
+        _ => panic!(INVALID_ENUM),
     };
 
-    let message = unsafe { std::ffi::CStr::from_ptr(message) }
-        .to_str()
-        .unwrap();
+    let message = unsafe { CStr::from_ptr(message) }.to_str().expect(NOT_UTF8);
 
     log::log!(level, "SDK: {}", message);
 }
