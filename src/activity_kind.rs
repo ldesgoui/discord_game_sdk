@@ -8,6 +8,7 @@ pub enum ActivityKind {
     Watching,
 }
 
+#[doc(hidden)]
 impl From<sys::EDiscordActivityType> for ActivityKind {
     fn from(source: sys::EDiscordActivityType) -> Self {
         match source {
@@ -20,6 +21,7 @@ impl From<sys::EDiscordActivityType> for ActivityKind {
     }
 }
 
+#[doc(hidden)]
 impl Into<sys::EDiscordActivityType> for ActivityKind {
     fn into(self) -> sys::EDiscordActivityType {
         match self {

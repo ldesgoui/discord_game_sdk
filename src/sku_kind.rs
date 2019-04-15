@@ -8,6 +8,7 @@ pub enum SkuKind {
     DLC,
 }
 
+#[doc(hidden)]
 impl From<sys::EDiscordSkuType> for SkuKind {
     fn from(source: sys::EDiscordSkuType) -> Self {
         match source {

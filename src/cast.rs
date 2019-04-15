@@ -6,6 +6,7 @@ pub enum Cast {
     String,
 }
 
+#[doc(hidden)]
 impl Into<sys::EDiscordLobbySearchCast> for Cast {
     fn into(self) -> sys::EDiscordLobbySearchCast {
         match self {

@@ -8,6 +8,7 @@ pub enum Status {
     Online,
 }
 
+#[doc(hidden)]
 impl From<sys::EDiscordStatus> for Status {
     fn from(source: sys::EDiscordStatus) -> Self {
         match source {

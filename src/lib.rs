@@ -13,6 +13,7 @@
 //!
 //! If you're a part of Discord and wish to discuss this, please email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
+// #![deny(missing_docs)]
 #![recursion_limit = "128"]
 
 #[macro_use]

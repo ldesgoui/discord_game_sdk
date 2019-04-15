@@ -6,6 +6,7 @@ pub enum Action {
     Spectate,
 }
 
+#[doc(hidden)]
 impl From<sys::EDiscordActivityActionType> for Action {
     fn from(source: sys::EDiscordActivityActionType) -> Self {
         match source {
@@ -16,6 +17,7 @@ impl From<sys::EDiscordActivityActionType> for Action {
     }
 }
 
+#[doc(hidden)]
 impl Into<sys::EDiscordActivityActionType> for Action {
     fn into(self) -> sys::EDiscordActivityActionType {
         match self {

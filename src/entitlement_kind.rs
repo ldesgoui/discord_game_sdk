@@ -11,6 +11,7 @@ pub enum EntitlementKind {
     UserGift,
 }
 
+#[doc(hidden)]
 impl From<sys::EDiscordEntitlementType> for EntitlementKind {
     fn from(source: sys::EDiscordEntitlementType) -> Self {
         match source {

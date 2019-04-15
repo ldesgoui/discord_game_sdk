@@ -10,6 +10,7 @@ pub enum RelationshipKind {
     PendingOutgoing,
 }
 
+#[doc(hidden)]
 impl From<sys::EDiscordRelationshipType> for RelationshipKind {
     fn from(source: sys::EDiscordRelationshipType) -> Self {
         match source {

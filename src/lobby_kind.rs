@@ -6,6 +6,7 @@ pub enum LobbyKind {
     Private,
 }
 
+#[doc(hidden)]
 impl From<sys::EDiscordLobbyType> for LobbyKind {
     fn from(source: sys::EDiscordLobbyType) -> Self {
         match source {
@@ -16,6 +17,7 @@ impl From<sys::EDiscordLobbyType> for LobbyKind {
     }
 }
 
+#[doc(hidden)]
 impl Into<sys::EDiscordLobbyType> for LobbyKind {
     fn into(self) -> sys::EDiscordLobbyType {
         match self {

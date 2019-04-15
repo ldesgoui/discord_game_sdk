@@ -4,6 +4,7 @@ pub enum Reliability {
     Unreliable,
 }
 
+#[doc(hidden)]
 impl Into<bool> for Reliability {
     fn into(self) -> bool {
         match self {

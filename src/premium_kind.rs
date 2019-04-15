@@ -10,6 +10,7 @@ pub enum PremiumKind {
     Tier2,
 }
 
+#[doc(hidden)]
 impl From<sys::EDiscordPremiumType> for PremiumKind {
     fn from(source: sys::EDiscordPremiumType) -> Self {
         match source {

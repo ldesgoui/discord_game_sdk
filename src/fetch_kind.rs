@@ -4,6 +4,7 @@ pub enum FetchKind {
     UseCached,
 }
 
+#[doc(hidden)]
 impl Into<bool> for FetchKind {
     fn into(self) -> bool {
         match self {

@@ -14,6 +14,7 @@ impl Default for CreateFlags {
     }
 }
 
+#[doc(hidden)]
 impl Into<sys::EDiscordCreateFlags> for CreateFlags {
     fn into(self) -> sys::EDiscordCreateFlags {
         match self {
