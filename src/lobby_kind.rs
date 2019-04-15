@@ -1,6 +1,6 @@
 use crate::{panic_messages::INVALID_ENUM, sys};
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum LobbyKind {
     Public,
     Private,

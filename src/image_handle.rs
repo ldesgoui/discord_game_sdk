@@ -1,6 +1,6 @@
 use crate::{sys, ImageKind};
 
-#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq, derive_more::From, derive_more::Into)]
 pub struct ImageHandle(pub(crate) sys::DiscordImageHandle);
 
 impl ImageHandle {

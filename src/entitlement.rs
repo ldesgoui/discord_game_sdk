@@ -1,6 +1,6 @@
 use crate::{sys, EntitlementKind};
 
-#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq, derive_more::From, derive_more::Into)]
 pub struct Entitlement(pub(crate) sys::DiscordEntitlement);
 
 impl Entitlement {

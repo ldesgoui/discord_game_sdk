@@ -1,6 +1,6 @@
 use crate::sys;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum RequestReply {
     Yes,
     No,
