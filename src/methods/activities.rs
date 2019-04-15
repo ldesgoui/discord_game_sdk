@@ -28,9 +28,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .update_activity(&mut activity as *mut _)(
-                ResultCallback::new(callback)
-            ))
+                .update_activity(&mut activity as *mut _)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -39,9 +38,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_activity_manager().clear_activity()(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_activity_manager()
+                .clear_activity()
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -52,9 +52,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .send_request_reply(user_id, reply.into())(
-                ResultCallback::new(callback)
-            ))
+                .send_request_reply(user_id, reply.into())
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -68,11 +67,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_activity_manager().send_invite(
-                user_id,
-                action.into(),
-                content.as_ref().as_ptr()
-            )(ResultCallback::new(callback)))
+            ffi!(self
+                .get_activity_manager()
+                .send_invite(user_id, action.into(), content.as_ref().as_ptr())
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -81,9 +79,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_activity_manager().accept_invite(user_id)(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_activity_manager()
+                .accept_invite(user_id)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 }

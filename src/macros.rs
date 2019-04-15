@@ -14,8 +14,13 @@ macro_rules! ffi {
         function(manager, $( $args ),*)
     }};
 
-    // ffi!(self.get_activity_manager().accept_invite(user_id)(callback))
-    ($self:ident .  $get_manager:ident () .  $method:ident ($($args:expr),* $(,)?) ($callback:expr $(,)?)) => {{
+    // ffi!(self.get_activity_manager().accept_invite(user_id).and_then(callback))
+    (
+        $self:ident
+        .  $get_manager:ident ()
+        .  $method:ident ($($args:expr),* $(,)?)
+        . and_then ($callback:expr $(,)?)
+     ) => {{
         let manager = ffi!($self.$get_manager());
         log::trace!("FFI:     {}", stringify!($method));
         let function = (*manager).$method.unwrap();
@@ -54,14 +59,11 @@ macro_rules! prevent_unwind {
 macro_rules! get_str {
     ($name:ident, $($field:tt)+) => {
         pub fn $name(&self) -> &str {
-            use crate::utils::{CStrExt, slice_i8_to_u8};
+            use crate::utils::cstr_to_str;
 
             let field = &(self.0).$($field)+;
 
-            std::ffi::CStr::from_bytes(slice_i8_to_u8(field))
-                .unwrap()
-                .to_str()
-                .unwrap()
+            cstr_to_str(field)
         }
     }
 }

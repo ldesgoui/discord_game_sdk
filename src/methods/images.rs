@@ -11,9 +11,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<ImageHandle>) + 'a,
     {
         unsafe {
-            ffi!(self.get_image_manager().fetch(handle.into(), refresh)(
-                ResultFromCallback::new(callback)
-            ))
+            ffi!(self
+                .get_image_manager()
+                .fetch(handle.into(), refresh)
+                .and_then(ResultFromCallback::new(callback)))
         }
     }
 

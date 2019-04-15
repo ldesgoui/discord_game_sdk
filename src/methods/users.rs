@@ -25,9 +25,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<User>) + 'a,
     {
         unsafe {
-            ffi!(self.get_user_manager().get_user(user_id)(
-                ResultFromPtrCallback::new(callback)
-            ))
+            ffi!(self
+                .get_user_manager()
+                .get_user(user_id)
+                .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
 

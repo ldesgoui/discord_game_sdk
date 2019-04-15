@@ -2,7 +2,8 @@ use crate::{
     callbacks::{ResultBytesCallback, ResultCallback},
     sys,
     to_result::ToResult,
-    utils::{CStrExt, slice_i8_to_u8}, Discord, DiscordResult, FileStat,
+    utils::cstr_to_str,
+    Discord, DiscordResult, FileStat,
 };
 use std::ffi::CStr;
 use std::mem::size_of;
@@ -38,9 +39,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .read_async(filename.as_ref().as_ptr())(
-                ResultBytesCallback::new(callback)
-            ))
+                .read_async(filename.as_ref().as_ptr())
+                .and_then(ResultBytesCallback::new(callback)))
         }
     }
 
@@ -55,11 +55,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<Vec<u8>>) + 'a,
     {
         unsafe {
-            ffi!(self.get_storage_manager().read_async_partial(
-                filename.as_ref().as_ptr(),
-                offset,
-                length
-            )(ResultBytesCallback::new(callback)))
+            ffi!(self
+                .get_storage_manager()
+                .read_async_partial(filename.as_ref().as_ptr(), offset, length)
+                .and_then(ResultBytesCallback::new(callback)))
         }
     }
 
@@ -81,11 +80,14 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_storage_manager().write_async(
-                filename.as_ref().as_ptr(),
-                buffer.as_ptr() as *mut _,
-                buffer.len() as u32
-            )(ResultCallback::new(callback)))
+            ffi!(self
+                .get_storage_manager()
+                .write_async(
+                    filename.as_ref().as_ptr(),
+                    buffer.as_ptr() as *mut _,
+                    buffer.len() as u32
+                )
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -156,10 +158,6 @@ impl<'a> Discord<'a> {
 
         unsafe { ffi!(self.get_storage_manager().get_path(&mut path)) }.to_result()?;
 
-        Ok(CStr::from_bytes(slice_i8_to_u8(&path[..]))
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string())
+        Ok(cstr_to_str(&path[..]).to_string())
     }
 }

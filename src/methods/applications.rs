@@ -1,8 +1,9 @@
 use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback, ResultStringCallback},
-    sys, utils::{CStrExt, slice_i8_to_u8}, Discord, DiscordResult, OAuth2Token,
+    sys,
+    utils::cstr_to_str,
+    Discord, DiscordResult, OAuth2Token,
 };
-use std::ffi::CStr;
 use std::mem::size_of;
 
 /// # Application
@@ -17,11 +18,7 @@ impl<'a> Discord<'a> {
                 .get_current_locale(&mut locale as *mut _))
         }
 
-        CStr::from_bytes(slice_i8_to_u8(&locale[..]))
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string()
+        cstr_to_str(&locale[..]).to_string()
     }
 
     // tested, returns "master" or whichever `dispatch` branch is in use
@@ -34,11 +31,7 @@ impl<'a> Discord<'a> {
                 .get_current_branch(&mut branch as *mut _))
         }
 
-        CStr::from_bytes(slice_i8_to_u8(&branch[..]))
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string()
+        cstr_to_str(&branch[..]).to_string()
     }
 
     // tested, hasn't failed yet
@@ -47,9 +40,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_application_manager().validate_or_exit()(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_application_manager()
+                .validate_or_exit()
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -59,9 +53,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<OAuth2Token>) + 'a,
     {
         unsafe {
-            ffi!(self.get_application_manager().get_oauth2_token()(
-                ResultFromPtrCallback::new(callback)
-            ))
+            ffi!(self
+                .get_application_manager()
+                .get_oauth2_token()
+                .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
 
@@ -71,9 +66,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<String>) + 'a,
     {
         unsafe {
-            ffi!(self.get_application_manager().get_ticket()(
-                ResultStringCallback::new(callback)
-            ))
+            ffi!(self
+                .get_application_manager()
+                .get_ticket()
+                .and_then(ResultStringCallback::new(callback)))
         }
     }
 }

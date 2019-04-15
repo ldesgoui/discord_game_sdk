@@ -10,9 +10,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_store_manager().fetch_skus()(ResultCallback::new(
-                callback
-            )))
+            ffi!(self
+                .get_store_manager()
+                .fetch_skus()
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -101,9 +102,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_store_manager().start_purchase(sku_id)(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_store_manager()
+                .start_purchase(sku_id)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 }

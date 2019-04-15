@@ -32,9 +32,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_overlay_manager().set_locked(!opened)(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_overlay_manager()
+                .set_locked(!opened)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -45,9 +46,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
-                .open_activity_invite(action.into())(
-                ResultCallback::new(callback)
-            ))
+                .open_activity_invite(action.into())
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -59,9 +59,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
-                .open_guild_invite(code.as_ref().as_ptr())(
-                ResultCallback::new(callback)
-            ))
+                .open_guild_invite(code.as_ref().as_ptr())
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -71,9 +70,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_overlay_manager().open_voice_settings()(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_overlay_manager()
+                .open_voice_settings()
+                .and_then(ResultCallback::new(callback)))
         }
     }
 }

@@ -2,8 +2,8 @@ use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback},
     sys,
     to_result::ToResult,
-    utils::{CStrExt, slice_i8_to_u8}
-        , Discord, DiscordResult, Lobby, LobbyMemberTransaction, LobbyTransaction, SearchQuery,
+    utils::cstr_to_str,
+    Discord, DiscordResult, Lobby, LobbyMemberTransaction, LobbyTransaction, SearchQuery,
 };
 use std::collections::HashMap;
 use std::ffi::CStr;
@@ -32,9 +32,10 @@ impl<'a> Discord<'a> {
         }
 
         unsafe {
-            ffi!(self.get_lobby_manager().create_lobby(ptr)(
-                ResultFromPtrCallback::new(callback)
-            ))
+            ffi!(self
+                .get_lobby_manager()
+                .create_lobby(ptr)
+                .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
 
@@ -59,9 +60,10 @@ impl<'a> Discord<'a> {
         }
 
         unsafe {
-            ffi!(self.get_lobby_manager().update_lobby(lobby_id, ptr)(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_lobby_manager()
+                .update_lobby(lobby_id, ptr)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -70,9 +72,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().delete_lobby(lobby_id)(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_lobby_manager()
+                .delete_lobby(lobby_id)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -83,9 +86,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .connect_lobby(lobby_id, secret.as_ref().as_ptr() as *mut _)(
-                ResultFromPtrCallback::new(callback)
-            ))
+                .connect_lobby(lobby_id, secret.as_ref().as_ptr() as *mut _)
+                .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
 
@@ -97,9 +99,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<Lobby>) + 'a,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().connect_lobby_with_activity_secret(
-                activity_secret.as_ref().as_ptr() as *mut _
-            )(ResultFromPtrCallback::new(callback)))
+            ffi!(self
+                .get_lobby_manager()
+                .connect_lobby_with_activity_secret(activity_secret.as_ref().as_ptr() as *mut _)
+                .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
 
@@ -108,9 +111,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().disconnect_lobby(lobby_id)(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_lobby_manager()
+                .disconnect_lobby(lobby_id)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -138,13 +142,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(
-            CStr::from_bytes(slice_i8_to_u8(&secret[..]))
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .to_string(),
-        )
+        Ok(cstr_to_str(&secret[..]).to_string())
     }
 
     // tested
@@ -164,11 +162,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(CStr::from_bytes(slice_i8_to_u8(&value[..]))
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string())
+        Ok(cstr_to_str(&value[..]).to_string())
     }
 
     // tested
@@ -206,16 +200,8 @@ impl<'a> Discord<'a> {
             .to_result()?;
 
             let _ = res.insert(
-                CStr::from_bytes(slice_i8_to_u8(&key[..]))
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string(),
-                CStr::from_bytes(slice_i8_to_u8(&value[..]))
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string(),
+                cstr_to_str(&key[..]).to_string(),
+                cstr_to_str(&value[..]).to_string(),
             );
         }
 
@@ -249,9 +235,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .update_member(lobby_id, user_id, ptr)(
-                ResultCallback::new(callback)
-            ))
+                .update_member(lobby_id, user_id, ptr)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -327,16 +312,8 @@ impl<'a> Discord<'a> {
             .to_result()?;
 
             let _ = res.insert(
-                CStr::from_bytes(slice_i8_to_u8(&key[..]))
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string(),
-                CStr::from_bytes(slice_i8_to_u8(&value[..]))
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string(),
+                cstr_to_str(&key[..]).to_string(),
+                cstr_to_str(&value[..]).to_string(),
             );
         }
 
@@ -350,11 +327,10 @@ impl<'a> Discord<'a> {
         assert!(buf.len() <= u32::max_value() as usize);
 
         unsafe {
-            ffi!(self.get_lobby_manager().send_lobby_message(
-                lobby_id,
-                buf.as_ptr() as *mut _,
-                buf.len() as u32
-            )(ResultCallback::new(callback)))
+            ffi!(self
+                .get_lobby_manager()
+                .send_lobby_message(lobby_id, buf.as_ptr() as *mut _, buf.len() as u32)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -402,9 +378,10 @@ impl<'a> Discord<'a> {
         };
 
         unsafe {
-            ffi!(self.get_lobby_manager().search(ptr)(ResultCallback::new(
-                inner
-            )))
+            ffi!(self
+                .get_lobby_manager()
+                .search(ptr)
+                .and_then(ResultCallback::new(inner)))
         }
     }
 
@@ -414,9 +391,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().connect_voice(lobby_id)(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_lobby_manager()
+                .connect_voice(lobby_id)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 
@@ -425,9 +403,10 @@ impl<'a> Discord<'a> {
         F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
     {
         unsafe {
-            ffi!(self.get_lobby_manager().disconnect_voice(lobby_id)(
-                ResultCallback::new(callback)
-            ))
+            ffi!(self
+                .get_lobby_manager()
+                .disconnect_voice(lobby_id)
+                .and_then(ResultCallback::new(callback)))
         }
     }
 

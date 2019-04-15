@@ -1,6 +1,5 @@
-use crate::{sys, utils::{CStrExt,slice_i8_to_u8}};
+use crate::{sys, utils::cstr_to_str};
 use chrono::{offset::TimeZone, DateTime, Utc};
-use std::ffi::CStr;
 use std::iter::FusedIterator;
 
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
@@ -12,11 +11,7 @@ impl OAuth2Token {
     pub fn scopes<'a>(
         &'a self,
     ) -> impl Iterator<Item = &'a str> + DoubleEndedIterator + FusedIterator + 'a {
-        CStr::from_bytes(slice_i8_to_u8(&self.0.scopes[..]))
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .split(' ')
+        cstr_to_str(&self.0.scopes[..]).split(' ')
     }
 
     pub fn expires(&self) -> DateTime<Utc> {
