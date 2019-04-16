@@ -17,4 +17,4 @@ doc = [] # DO NOT RELY ON THIS
 mock = []
 
 [build-dependencies]
-bindgen = "0.48.1"
+bindgen = "0.49.0"
