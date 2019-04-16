@@ -44,13 +44,17 @@ impl<'a> Discord<'a> {
 
     fn kickstart_managers(&mut self) {
         unsafe {
-            ffi!(self.get_activity_manager());
-            ffi!(self.get_lobby_manager());
+            // In this order to prioritize managers that instantly generate events
             ffi!(self.get_network_manager());
             ffi!(self.get_overlay_manager());
             ffi!(self.get_relationship_manager());
-            ffi!(self.get_store_manager());
             ffi!(self.get_user_manager());
+
+            ffi!(self.get_activity_manager());
+            ffi!(self.get_lobby_manager());
+            ffi!(self.get_store_manager());
+
+            // Disabled due to crash in SDK
             // ffi!(self.get_voice_manager());
         }
     }
