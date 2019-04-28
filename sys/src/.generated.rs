@@ -1526,7 +1526,7 @@ impl ::std::cmp::PartialEq for DiscordUserAchievement {
     }
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordLobbyTransaction {
     pub set_type: ::std::option::Option<
         unsafe extern "C" fn(
@@ -1652,13 +1652,8 @@ fn bindgen_test_layout_IDiscordLobbyTransaction() {
         )
     );
 }
-impl Default for IDiscordLobbyTransaction {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordLobbyMemberTransaction {
     pub set_metadata: ::std::option::Option<
         unsafe extern "C" fn(
@@ -1713,13 +1708,8 @@ fn bindgen_test_layout_IDiscordLobbyMemberTransaction() {
         )
     );
 }
-impl Default for IDiscordLobbyMemberTransaction {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordLobbySearchQuery {
     pub filter: ::std::option::Option<
         unsafe extern "C" fn(
@@ -1806,14 +1796,9 @@ fn bindgen_test_layout_IDiscordLobbySearchQuery() {
         )
     );
 }
-impl Default for IDiscordLobbySearchQuery {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 pub type IDiscordApplicationEvents = *mut ::std::os::raw::c_void;
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordApplicationManager {
     pub validate_or_exit: ::std::option::Option<
         unsafe extern "C" fn(
@@ -1937,13 +1922,8 @@ fn bindgen_test_layout_IDiscordApplicationManager() {
         )
     );
 }
-impl Default for IDiscordApplicationManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordUserEvents {
     pub on_current_user_update:
         ::std::option::Option<unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void)>,
@@ -1974,13 +1954,8 @@ fn bindgen_test_layout_IDiscordUserEvents() {
         )
     );
 }
-impl Default for IDiscordUserEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordUserManager {
     pub get_current_user: ::std::option::Option<
         unsafe extern "C" fn(
@@ -2077,14 +2052,9 @@ fn bindgen_test_layout_IDiscordUserManager() {
         )
     );
 }
-impl Default for IDiscordUserManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 pub type IDiscordImageEvents = *mut ::std::os::raw::c_void;
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordImageManager {
     pub fetch: ::std::option::Option<
         unsafe extern "C" fn(
@@ -2162,13 +2132,8 @@ fn bindgen_test_layout_IDiscordImageManager() {
         )
     );
 }
-impl Default for IDiscordImageManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordActivityEvents {
     pub on_activity_join: ::std::option::Option<
         unsafe extern "C" fn(
@@ -2258,13 +2223,8 @@ fn bindgen_test_layout_IDiscordActivityEvents() {
         )
     );
 }
-impl Default for IDiscordActivityEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordActivityManager {
     pub register_command: ::std::option::Option<
         unsafe extern "C" fn(
@@ -2445,13 +2405,8 @@ fn bindgen_test_layout_IDiscordActivityManager() {
         )
     );
 }
-impl Default for IDiscordActivityManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordRelationshipEvents {
     pub on_refresh:
         ::std::option::Option<unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void)>,
@@ -2500,13 +2455,8 @@ fn bindgen_test_layout_IDiscordRelationshipEvents() {
         )
     );
 }
-impl Default for IDiscordRelationshipEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordRelationshipManager {
     pub filter: ::std::option::Option<
         unsafe extern "C" fn(
@@ -2600,13 +2550,8 @@ fn bindgen_test_layout_IDiscordRelationshipManager() {
         )
     );
 }
-impl Default for IDiscordRelationshipManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordLobbyEvents {
     pub on_lobby_update: ::std::option::Option<
         unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, lobby_id: i64),
@@ -2759,13 +2704,8 @@ fn bindgen_test_layout_IDiscordLobbyEvents() {
         )
     );
 }
-impl Default for IDiscordLobbyEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordLobbyManager {
     pub get_lobby_create_transaction: ::std::option::Option<
         unsafe extern "C" fn(
@@ -3494,13 +3434,8 @@ fn bindgen_test_layout_IDiscordLobbyManager() {
         )
     );
 }
-impl Default for IDiscordLobbyManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordNetworkEvents {
     pub on_message: ::std::option::Option<
         unsafe extern "C" fn(
@@ -3555,13 +3490,8 @@ fn bindgen_test_layout_IDiscordNetworkEvents() {
         )
     );
 }
-impl Default for IDiscordNetworkEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordNetworkManager {
     pub get_peer_id: ::std::option::Option<
         unsafe extern "C" fn(
@@ -3724,13 +3654,8 @@ fn bindgen_test_layout_IDiscordNetworkManager() {
         )
     );
 }
-impl Default for IDiscordNetworkManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordOverlayEvents {
     pub on_toggle: ::std::option::Option<
         unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, locked: bool),
@@ -3759,13 +3684,8 @@ fn bindgen_test_layout_IDiscordOverlayEvents() {
         )
     );
 }
-impl Default for IDiscordOverlayEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordOverlayManager {
     pub is_enabled: ::std::option::Option<
         unsafe extern "C" fn(manager: *mut IDiscordOverlayManager, enabled: *mut bool),
@@ -3913,14 +3833,9 @@ fn bindgen_test_layout_IDiscordOverlayManager() {
         )
     );
 }
-impl Default for IDiscordOverlayManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 pub type IDiscordStorageEvents = *mut ::std::os::raw::c_void;
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordStorageManager {
     pub read: ::std::option::Option<
         unsafe extern "C" fn(
@@ -4153,13 +4068,8 @@ fn bindgen_test_layout_IDiscordStorageManager() {
         )
     );
 }
-impl Default for IDiscordStorageManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordStoreEvents {
     pub on_entitlement_create: ::std::option::Option<
         unsafe extern "C" fn(
@@ -4213,13 +4123,8 @@ fn bindgen_test_layout_IDiscordStoreEvents() {
         )
     );
 }
-impl Default for IDiscordStoreEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordStoreManager {
     pub fetch_skus: ::std::option::Option<
         unsafe extern "C" fn(
@@ -4426,13 +4331,8 @@ fn bindgen_test_layout_IDiscordStoreManager() {
         )
     );
 }
-impl Default for IDiscordStoreManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordVoiceEvents {
     pub on_settings_update:
         ::std::option::Option<unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void)>,
@@ -4462,13 +4362,8 @@ fn bindgen_test_layout_IDiscordVoiceEvents() {
         )
     );
 }
-impl Default for IDiscordVoiceEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordVoiceManager {
     pub get_input_mode: ::std::option::Option<
         unsafe extern "C" fn(
@@ -4663,13 +4558,8 @@ fn bindgen_test_layout_IDiscordVoiceManager() {
         )
     );
 }
-impl Default for IDiscordVoiceManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordAchievementEvents {
     pub on_user_achievement_update: ::std::option::Option<
         unsafe extern "C" fn(
@@ -4704,13 +4594,8 @@ fn bindgen_test_layout_IDiscordAchievementEvents() {
         )
     );
 }
-impl Default for IDiscordAchievementEvents {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordAchievementManager {
     pub set_user_achievement: ::std::option::Option<
         unsafe extern "C" fn(
@@ -4834,14 +4719,9 @@ fn bindgen_test_layout_IDiscordAchievementManager() {
         )
     );
 }
-impl Default for IDiscordAchievementManager {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
-}
 pub type IDiscordCoreEvents = *mut ::std::os::raw::c_void;
 #[repr(C)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordCore {
     pub destroy: ::std::option::Option<unsafe extern "C" fn(core: *mut IDiscordCore)>,
     pub run_callbacks:
@@ -5073,11 +4953,6 @@ fn bindgen_test_layout_IDiscordCore() {
             stringify!(get_achievement_manager)
         )
     );
-}
-impl Default for IDiscordCore {
-    fn default() -> Self {
-        unsafe { ::std::mem::zeroed() }
-    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
