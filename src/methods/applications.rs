@@ -2,11 +2,12 @@ use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback, ResultStringCallback},
     sys,
     utils::cstr_to_str,
-    Discord, DiscordResult, OAuth2Token,
+    Discord, OAuth2Token, Result,
 };
 use std::mem::size_of;
 
 /// # Application
+/// https://discordapp.com/developers/docs/game-sdk/applications
 impl<'a> Discord<'a> {
     // tested, returns "en-US" and similar
     pub fn current_locale(&mut self) -> String {
@@ -37,7 +38,7 @@ impl<'a> Discord<'a> {
     // tested, hasn't failed yet
     pub fn validate_or_exit<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -50,7 +51,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn oauth2_token<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<OAuth2Token>) + 'a,
+        F: FnMut(&mut Discord, Result<OAuth2Token>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -63,7 +64,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn app_ticket<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<String>) + 'a,
+        F: FnMut(&mut Discord, Result<String>) + 'a,
     {
         unsafe {
             ffi!(self

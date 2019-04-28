@@ -1,4 +1,4 @@
-use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, DiscordResult};
+use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, Result};
 use std::collections::HashMap;
 use std::ffi::CStr;
 
@@ -25,7 +25,7 @@ impl<'a> LobbyMemberTransaction<'a> {
     pub(crate) unsafe fn process(
         self,
         ptr: *mut sys::IDiscordLobbyMemberTransaction,
-    ) -> DiscordResult<()> {
+    ) -> Result<()> {
         let tx = MacroHelper { core: ptr };
 
         for (key, value) in self.metadata {

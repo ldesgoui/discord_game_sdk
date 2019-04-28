@@ -1,10 +1,11 @@
-use crate::{across_ffi, sys, to_result::ToResult, Discord, DiscordResult, Relationship};
+use crate::{across_ffi, sys, to_result::ToResult, Discord, Relationship, Result};
 
 /// # Relationships
+/// https://discordapp.com/developers/docs/game-sdk/relationships
 impl<'a> Discord<'a> {
     // tested
     // returns NotFound until event::relationships::Refreshed
-    pub fn relationship_with(&mut self, user_id: i64) -> DiscordResult<Relationship> {
+    pub fn relationship_with(&mut self, user_id: i64) -> Result<Relationship> {
         let mut relationship = Relationship(sys::DiscordRelationship::default());
 
         unsafe {
@@ -19,7 +20,7 @@ impl<'a> Discord<'a> {
 
     // tested
     // returns vec![] until event::relationships::Refreshed
-    pub fn all_relationships<F>(&mut self, filter: F) -> DiscordResult<Vec<Relationship>>
+    pub fn all_relationships<F>(&mut self, filter: F) -> Result<Vec<Relationship>>
     where
         F: FnMut(Relationship) -> bool,
     {

@@ -3,18 +3,19 @@ use crate::{
     sys,
     to_result::ToResult,
     utils::cstr_to_str,
-    Discord, DiscordResult, Lobby, LobbyMemberTransaction, LobbyTransaction, SearchQuery,
+    Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Result, SearchQuery,
 };
 use std::collections::HashMap;
 use std::ffi::CStr;
 use std::mem::size_of;
 
 /// # Lobbies
+/// https://discordapp.com/developers/docs/game-sdk/lobbies
 impl<'a> Discord<'a> {
     // tested
     pub fn create_lobby<F>(&mut self, builder: LobbyTransaction, mut callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<Lobby>) + 'a,
+        F: FnMut(&mut Discord, Result<Lobby>) + 'a,
     {
         let mut ptr = std::ptr::null_mut();
 
@@ -42,7 +43,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn update_lobby<F>(&mut self, lobby_id: i64, builder: LobbyTransaction, mut callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         let mut ptr = std::ptr::null_mut();
 
@@ -69,7 +70,7 @@ impl<'a> Discord<'a> {
 
     pub fn delete_lobby<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -81,7 +82,7 @@ impl<'a> Discord<'a> {
 
     pub fn connect_lobby<F>(&mut self, lobby_id: i64, secret: impl AsRef<CStr>, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<Lobby>) + 'a,
+        F: FnMut(&mut Discord, Result<Lobby>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -96,7 +97,7 @@ impl<'a> Discord<'a> {
         activity_secret: impl AsRef<CStr>,
         callback: F,
     ) where
-        F: FnMut(&mut Discord, DiscordResult<Lobby>) + 'a,
+        F: FnMut(&mut Discord, Result<Lobby>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -108,7 +109,7 @@ impl<'a> Discord<'a> {
 
     pub fn disconnect_lobby<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -118,7 +119,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn lobby(&mut self, lobby_id: i64) -> DiscordResult<Lobby> {
+    pub fn lobby(&mut self, lobby_id: i64) -> Result<Lobby> {
         let mut lobby = sys::DiscordLobby::default();
 
         unsafe {
@@ -132,7 +133,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn lobby_activity_secret(&mut self, lobby_id: i64) -> DiscordResult<String> {
+    pub fn lobby_activity_secret(&mut self, lobby_id: i64) -> Result<String> {
         let mut secret: sys::DiscordLobbySecret = [0; size_of::<sys::DiscordLobbySecret>()];
 
         unsafe {
@@ -146,11 +147,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn lobby_metadata(
-        &mut self,
-        lobby_id: i64,
-        key: impl AsRef<CStr>,
-    ) -> DiscordResult<String> {
+    pub fn lobby_metadata(&mut self, lobby_id: i64, key: impl AsRef<CStr>) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
         unsafe {
@@ -166,7 +163,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn all_lobby_metadata(&mut self, lobby_id: i64) -> DiscordResult<HashMap<String, String>> {
+    pub fn all_lobby_metadata(&mut self, lobby_id: i64) -> Result<HashMap<String, String>> {
         let mut count: i32 = 0;
 
         unsafe {
@@ -215,7 +212,7 @@ impl<'a> Discord<'a> {
         builder: LobbyMemberTransaction,
         mut callback: F,
     ) where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         let mut ptr = std::ptr::null_mut();
 
@@ -241,7 +238,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn all_lobby_member_ids(&mut self, lobby_id: i64) -> DiscordResult<Vec<i64>> {
+    pub fn all_lobby_member_ids(&mut self, lobby_id: i64) -> Result<Vec<i64>> {
         let mut count = 0;
 
         unsafe {
@@ -274,7 +271,7 @@ impl<'a> Discord<'a> {
         &mut self,
         lobby_id: i64,
         user_id: i64,
-    ) -> DiscordResult<HashMap<String, String>> {
+    ) -> Result<HashMap<String, String>> {
         let mut count: i32 = 0;
 
         unsafe {
@@ -322,7 +319,7 @@ impl<'a> Discord<'a> {
 
     pub fn send_lobby_message<F>(&mut self, lobby_id: i64, buf: impl AsRef<[u8]>, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         let buf = buf.as_ref();
         assert!(buf.len() <= u32::max_value() as usize);
@@ -337,7 +334,7 @@ impl<'a> Discord<'a> {
 
     pub fn lobby_search<F>(&mut self, builder: SearchQuery, mut callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<Vec<i64>>) + 'a,
+        F: FnMut(&mut Discord, Result<Vec<i64>>) + 'a,
     {
         let mut ptr = std::ptr::null_mut();
 
@@ -351,7 +348,7 @@ impl<'a> Discord<'a> {
             return callback(self, Err(e));
         }
 
-        let inner = move |gsdk: &mut Discord, res: DiscordResult<()>| {
+        let inner = move |gsdk: &mut Discord, res: Result<()>| {
             if let Err(e) = res {
                 return callback(gsdk, Err(e));
             }
@@ -389,7 +386,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn connect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -401,7 +398,7 @@ impl<'a> Discord<'a> {
 
     pub fn disconnect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -411,15 +408,15 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn connect_lobby_network(&mut self, lobby_id: i64) -> DiscordResult<()> {
+    pub fn connect_lobby_network(&mut self, lobby_id: i64) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().connect_network(lobby_id,)) }.to_result()
     }
 
-    pub fn disconnect_lobby_network(&mut self, lobby_id: i64) -> DiscordResult<()> {
+    pub fn disconnect_lobby_network(&mut self, lobby_id: i64) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().disconnect_network(lobby_id,)) }.to_result()
     }
 
-    pub fn flush_lobby_network(&mut self) -> DiscordResult<()> {
+    pub fn flush_lobby_network(&mut self) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().flush_network()) }.to_result()
     }
 
@@ -428,7 +425,7 @@ impl<'a> Discord<'a> {
         lobby_id: i64,
         channel_id: u8,
         reliable: bool,
-    ) -> DiscordResult<()> {
+    ) -> Result<()> {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -443,7 +440,7 @@ impl<'a> Discord<'a> {
         user_id: i64,
         channel_id: u8,
         buf: &[u8],
-    ) -> DiscordResult<()> {
+    ) -> Result<()> {
         assert!(buf.len() <= u32::max_value() as usize);
 
         unsafe {

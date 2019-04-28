@@ -1,4 +1,4 @@
-use crate::{across_ffi::callbacks, sys, Discord, DiscordResult};
+use crate::{across_ffi::callbacks, sys, Discord, Result};
 use crossbeam_channel::{Receiver, Sender};
 use std::ffi::c_void;
 use std::marker::PhantomData;
@@ -10,17 +10,17 @@ pub(crate) trait AnyCallback {
 
 pub(crate) struct ResultCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<()>),
+    F: FnMut(&mut Discord, Result<()>),
 {
     pub(crate) callback: F,
-    pub(crate) receiver: Receiver<DiscordResult<()>>,
+    pub(crate) receiver: Receiver<Result<()>>,
 }
 
 impl<F> ResultCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<()>),
+    F: FnMut(&mut Discord, Result<()>),
 {
-    pub(crate) fn new(callback: F) -> (Self, Sender<DiscordResult<()>>) {
+    pub(crate) fn new(callback: F) -> (Self, Sender<Result<()>>) {
         let (sender, receiver) = crossbeam_channel::bounded(1);
         (Self { callback, receiver }, sender)
     }
@@ -32,7 +32,7 @@ where
 
 impl<F> AnyCallback for ResultCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<()>),
+    F: FnMut(&mut Discord, Result<()>),
 {
     fn is_ready(&self) -> bool {
         !self.receiver.is_empty()
@@ -45,17 +45,17 @@ where
 
 pub(crate) struct ResultStringCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<String>),
+    F: FnMut(&mut Discord, Result<String>),
 {
     pub(crate) callback: F,
-    pub(crate) receiver: Receiver<DiscordResult<String>>,
+    pub(crate) receiver: Receiver<Result<String>>,
 }
 
 impl<F> ResultStringCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<String>),
+    F: FnMut(&mut Discord, Result<String>),
 {
-    pub(crate) fn new(callback: F) -> (Self, Sender<DiscordResult<String>>) {
+    pub(crate) fn new(callback: F) -> (Self, Sender<Result<String>>) {
         let (sender, receiver) = crossbeam_channel::bounded(1);
         (Self { callback, receiver }, sender)
     }
@@ -69,7 +69,7 @@ where
 
 impl<F> AnyCallback for ResultStringCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<String>),
+    F: FnMut(&mut Discord, Result<String>),
 {
     fn is_ready(&self) -> bool {
         !self.receiver.is_empty()
@@ -82,17 +82,17 @@ where
 
 pub(crate) struct ResultBytesCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<Vec<u8>>),
+    F: FnMut(&mut Discord, Result<Vec<u8>>),
 {
     pub(crate) callback: F,
-    pub(crate) receiver: Receiver<DiscordResult<Vec<u8>>>,
+    pub(crate) receiver: Receiver<Result<Vec<u8>>>,
 }
 
 impl<F> ResultBytesCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<Vec<u8>>),
+    F: FnMut(&mut Discord, Result<Vec<u8>>),
 {
-    pub(crate) fn new(callback: F) -> (Self, Sender<DiscordResult<Vec<u8>>>) {
+    pub(crate) fn new(callback: F) -> (Self, Sender<Result<Vec<u8>>>) {
         let (sender, receiver) = crossbeam_channel::bounded(1);
         (Self { callback, receiver }, sender)
     }
@@ -106,7 +106,7 @@ where
 
 impl<F> AnyCallback for ResultBytesCallback<F>
 where
-    F: FnMut(&mut Discord, DiscordResult<Vec<u8>>),
+    F: FnMut(&mut Discord, Result<Vec<u8>>),
 {
     fn is_ready(&self) -> bool {
         !self.receiver.is_empty()
@@ -119,20 +119,20 @@ where
 
 pub(crate) struct ResultFromCallback<F, S, E>
 where
-    F: FnMut(&mut Discord, DiscordResult<E>),
+    F: FnMut(&mut Discord, Result<E>),
     S: Into<E>,
 {
     pub(crate) callback: F,
-    pub(crate) receiver: Receiver<DiscordResult<E>>,
+    pub(crate) receiver: Receiver<Result<E>>,
     _marker: PhantomData<S>,
 }
 
 impl<F, S, E> ResultFromCallback<F, S, E>
 where
-    F: FnMut(&mut Discord, DiscordResult<E>),
+    F: FnMut(&mut Discord, Result<E>),
     S: Into<E>,
 {
-    pub(crate) fn new(callback: F) -> (Self, Sender<DiscordResult<E>>) {
+    pub(crate) fn new(callback: F) -> (Self, Sender<Result<E>>) {
         let (sender, receiver) = crossbeam_channel::bounded(1);
         (
             Self {
@@ -151,7 +151,7 @@ where
 
 impl<F, S, E> AnyCallback for ResultFromCallback<F, S, E>
 where
-    F: FnMut(&mut Discord, DiscordResult<E>),
+    F: FnMut(&mut Discord, Result<E>),
     S: Into<E>,
 {
     fn is_ready(&self) -> bool {
@@ -165,20 +165,20 @@ where
 
 pub(crate) struct ResultFromPtrCallback<F, S, E>
 where
-    F: FnMut(&mut Discord, DiscordResult<E>),
+    F: FnMut(&mut Discord, Result<E>),
     S: Into<E> + Sized,
 {
     pub(crate) callback: F,
-    pub(crate) receiver: Receiver<DiscordResult<E>>,
+    pub(crate) receiver: Receiver<Result<E>>,
     _marker: PhantomData<S>,
 }
 
 impl<F, S, E> ResultFromPtrCallback<F, S, E>
 where
-    F: FnMut(&mut Discord, DiscordResult<E>),
+    F: FnMut(&mut Discord, Result<E>),
     S: Into<E> + Copy,
 {
-    pub(crate) fn new(callback: F) -> (Self, Sender<DiscordResult<E>>) {
+    pub(crate) fn new(callback: F) -> (Self, Sender<Result<E>>) {
         let (sender, receiver) = crossbeam_channel::bounded(1);
         (
             Self {
@@ -199,7 +199,7 @@ where
 
 impl<F, S, E> AnyCallback for ResultFromPtrCallback<F, S, E>
 where
-    F: FnMut(&mut Discord, DiscordResult<E>),
+    F: FnMut(&mut Discord, Result<E>),
     S: Into<E> + Sized,
 {
     fn is_ready(&self) -> bool {

@@ -1,5 +1,5 @@
 use crate::{
-    macro_helper::MacroHelper, sys, to_result::ToResult, Cast, Comparison, DiscordResult, Distance,
+    macro_helper::MacroHelper, sys, to_result::ToResult, Cast, Comparison, Distance, Result,
 };
 use std::ffi::CStr;
 
@@ -42,10 +42,7 @@ impl<'a> SearchQuery<'a> {
         self
     }
 
-    pub(crate) unsafe fn process(
-        self,
-        ptr: *mut sys::IDiscordLobbySearchQuery,
-    ) -> DiscordResult<()> {
+    pub(crate) unsafe fn process(self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
         let tx = MacroHelper { core: ptr };
 
         if let Some((key, value, comparison, cast)) = self.filter {

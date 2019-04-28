@@ -1,7 +1,8 @@
-use crate::{callbacks::ResultCallback, Action, Discord, DiscordResult};
+use crate::{callbacks::ResultCallback, Action, Discord, Result};
 use std::ffi::CStr;
 
 /// # Overlay
+/// https://discordapp.com/developers/docs/game-sdk/overlay
 impl<'a> Discord<'a> {
     // tested in terminal, was returning false
     // kinda inconclusive
@@ -29,7 +30,7 @@ impl<'a> Discord<'a> {
 
     pub fn set_overlay_opened<F>(&mut self, opened: bool, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -41,7 +42,7 @@ impl<'a> Discord<'a> {
 
     pub fn open_invite_overlay<F>(&mut self, action: Action, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -54,7 +55,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn open_guild_invite_overlay<F>(&mut self, code: impl AsRef<CStr>, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -67,7 +68,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn open_voice_settings<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self

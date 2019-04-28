@@ -1,13 +1,14 @@
 use crate::{
-    callbacks::ResultCallback, sys, to_result::ToResult, Discord, DiscordResult, Entitlement, Sku,
+    callbacks::ResultCallback, sys, to_result::ToResult, Discord, Entitlement, Result, Sku,
 };
 
 /// # Store
+/// https://discordapp.com/developers/docs/game-sdk/store
 impl<'a> Discord<'a> {
     // tested
     pub fn load_skus<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -17,7 +18,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn sku(&mut self, id: i64) -> DiscordResult<Sku> {
+    pub fn sku(&mut self, id: i64) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
         unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku.0 as *mut _,)) }.to_result()?;
@@ -26,7 +27,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested, returned []
-    pub fn all_skus(&mut self) -> DiscordResult<Vec<Sku>> {
+    pub fn all_skus(&mut self) -> Result<Vec<Sku>> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
@@ -48,7 +49,7 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
-    pub fn entitlement(&mut self, id: i64) -> DiscordResult<Entitlement> {
+    pub fn entitlement(&mut self, id: i64) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
         unsafe {
@@ -62,7 +63,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested, returned []
-    pub fn all_entitlements(&mut self) -> DiscordResult<Vec<Entitlement>> {
+    pub fn all_entitlements(&mut self) -> Result<Vec<Entitlement>> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }
@@ -84,7 +85,7 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
-    pub fn has_entitlement(&mut self, sku_id: i64) -> DiscordResult<bool> {
+    pub fn has_entitlement(&mut self, sku_id: i64) -> Result<bool> {
         let mut has_entitlement = false;
 
         unsafe {
@@ -99,7 +100,7 @@ impl<'a> Discord<'a> {
 
     pub fn start_purchase<F>(&mut self, sku_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self

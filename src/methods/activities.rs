@@ -1,12 +1,13 @@
 use crate::{
     callbacks::ResultCallback, sys, to_result::ToResult, Action, Activity, ActivityKind, Discord,
-    DiscordResult, RequestReply,
+    RequestReply, Result,
 };
 use std::ffi::CStr;
 
 /// # Activities
+/// https://discordapp.com/developers/docs/game-sdk/activities
 impl<'a> Discord<'a> {
-    pub fn register_launch_command(&mut self, command: impl AsRef<CStr>) -> DiscordResult<()> {
+    pub fn register_launch_command(&mut self, command: impl AsRef<CStr>) -> Result<()> {
         unsafe {
             ffi!(self
                 .get_activity_manager()
@@ -17,7 +18,7 @@ impl<'a> Discord<'a> {
 
     pub fn update_activity<F>(&mut self, activity: &Activity, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         let mut activity: sys::DiscordActivity = activity.0;
 
@@ -35,7 +36,7 @@ impl<'a> Discord<'a> {
 
     pub fn clear_activity<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -47,7 +48,7 @@ impl<'a> Discord<'a> {
 
     pub fn send_request_reply<F>(&mut self, user_id: i64, reply: RequestReply, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -64,7 +65,7 @@ impl<'a> Discord<'a> {
         content: impl AsRef<CStr>,
         callback: F,
     ) where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -76,7 +77,7 @@ impl<'a> Discord<'a> {
 
     pub fn accept_invite<F>(&mut self, user_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         unsafe {
             ffi!(self

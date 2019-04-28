@@ -1,12 +1,13 @@
 use crate::{
-    callbacks::ResultFromPtrCallback, sys, to_result::ToResult, Discord, DiscordResult,
-    PremiumKind, User, UserFlags,
+    callbacks::ResultFromPtrCallback, sys, to_result::ToResult, Discord, PremiumKind, Result, User,
+    UserFlags,
 };
 
 /// # Users
+/// https://discordapp.com/developers/docs/game-sdk/users
 impl<'a> Discord<'a> {
     // tested, returned Err(_) until event::user::CurrentUserUpdate
-    pub fn current_user(&mut self) -> DiscordResult<User> {
+    pub fn current_user(&mut self) -> Result<User> {
         let mut user = User(sys::DiscordUser::default());
 
         unsafe {
@@ -22,7 +23,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn user<F>(&mut self, user_id: i64, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<User>) + 'a,
+        F: FnMut(&mut Discord, Result<User>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -33,7 +34,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn current_user_premium_kind(&mut self) -> DiscordResult<PremiumKind> {
+    pub fn current_user_premium_kind(&mut self) -> Result<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
         unsafe {
@@ -46,7 +47,7 @@ impl<'a> Discord<'a> {
         Ok(PremiumKind::from(premium_type))
     }
 
-    pub fn current_user_flags(&mut self) -> DiscordResult<UserFlags> {
+    pub fn current_user_flags(&mut self) -> Result<UserFlags> {
         let mut flags = UserFlags::empty();
 
         for flag in &[

@@ -215,7 +215,7 @@ pub use self::{
     distance::Distance,
     entitlement::Entitlement,
     entitlement_kind::EntitlementKind,
-    error::{DiscordError, DiscordResult},
+    error::{Error, Result},
     fetch_kind::FetchKind,
     file_stat::FileStat,
     image::Image,

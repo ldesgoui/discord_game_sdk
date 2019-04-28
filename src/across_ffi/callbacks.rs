@@ -2,7 +2,7 @@ use crate::{
     panic_messages::{INVALID_ENUM, NOT_UTF8, SEND_FAIL},
     sys,
     to_result::ToResult,
-    DiscordResult, Relationship,
+    Relationship, Result,
 };
 use crossbeam_channel::Sender;
 use std::ffi::{c_void, CStr};
@@ -10,7 +10,7 @@ use std::ffi::{c_void, CStr};
 pub(crate) extern "C" fn result(ptr: *mut c_void, res: sys::EDiscordResult) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<()>>) }
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<()>>) }
         .try_send(res.to_result())
         .expect(SEND_FAIL)
 }
@@ -22,7 +22,7 @@ pub(crate) extern "C" fn result_string(
 ) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<String>>) }
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<String>>) }
         .try_send(res.to_result().map(|()| {
             unsafe { CStr::from_ptr(cstr) }
                 .to_str()
@@ -40,7 +40,7 @@ pub(crate) extern "C" fn result_bytes(
 ) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<Vec<u8>>>) }
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<Vec<u8>>>) }
         .try_send(
             res.to_result()
                 .map(|()| unsafe { std::slice::from_raw_parts(buffer_ptr, len as usize) }.to_vec()),
@@ -54,7 +54,7 @@ where
 {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<E>>) }
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<E>>) }
         .try_send(res.to_result().map(|()| source.into()))
         .expect(SEND_FAIL)
 }
@@ -68,7 +68,7 @@ pub(crate) extern "C" fn result_from_ptr<S, E>(
 {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<DiscordResult<E>>) }
+    unsafe { Box::from_raw(ptr as *mut Sender<Result<E>>) }
         .try_send(res.to_result().map(|()| unsafe { *source_ptr }.into()))
         .expect(SEND_FAIL)
 }

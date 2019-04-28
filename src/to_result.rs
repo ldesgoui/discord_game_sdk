@@ -1,12 +1,12 @@
-use crate::{panic_messages::INVALID_ENUM, sys, DiscordError, DiscordResult};
+use crate::{panic_messages::INVALID_ENUM, sys, Error, Result};
 
 pub(crate) trait ToResult: Sized {
-    fn to_result(self) -> DiscordResult<()>;
+    fn to_result(self) -> Result<()>;
 }
 
 impl ToResult for sys::EDiscordResult {
-    fn to_result(self) -> DiscordResult<()> {
-        use DiscordError::*;
+    fn to_result(self) -> Result<()> {
+        use Error::*;
 
         Err(match self {
             sys::DiscordResult_Ok => return Ok(()),

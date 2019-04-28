@@ -1,4 +1,4 @@
-use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, DiscordResult, LobbyKind};
+use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, LobbyKind, Result};
 use std::collections::HashMap;
 use std::ffi::CStr;
 
@@ -46,10 +46,7 @@ impl<'a> LobbyTransaction<'a> {
         self
     }
 
-    pub(crate) unsafe fn process(
-        self,
-        ptr: *mut sys::IDiscordLobbyTransaction,
-    ) -> DiscordResult<()> {
+    pub(crate) unsafe fn process(self, ptr: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
         let tx = MacroHelper { core: ptr };
 
         if let Some(kind) = self.kind {

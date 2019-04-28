@@ -1,7 +1,7 @@
-pub type DiscordResult<T> = std::result::Result<T, DiscordError>;
+pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, err_derive::Error)]
-pub enum DiscordError {
+pub enum Error {
     #[error(display = "service unavailable")]
     ServiceUnavailable,
 

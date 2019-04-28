@@ -3,19 +3,20 @@ use crate::{
     sys,
     to_result::ToResult,
     utils::cstr_to_str,
-    Discord, DiscordResult, FileStat,
+    Discord, FileStat, Result,
 };
 use std::ffi::CStr;
 use std::mem::size_of;
 
 /// # Storage
+/// https://discordapp.com/developers/docs/game-sdk/storage
 impl<'a> Discord<'a> {
     // tested
     pub fn read_file(
         &mut self,
         filename: impl AsRef<CStr>,
         mut buffer: impl AsMut<[u8]>,
-    ) -> DiscordResult<u32> {
+    ) -> Result<u32> {
         let mut read = 0;
 
         let buffer = buffer.as_mut();
@@ -36,7 +37,7 @@ impl<'a> Discord<'a> {
     // tested
     pub fn read_file_async<F>(&mut self, filename: impl AsRef<CStr>, callback: F)
     where
-        F: FnMut(&mut Discord, DiscordResult<Vec<u8>>) + 'a,
+        F: FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -54,7 +55,7 @@ impl<'a> Discord<'a> {
         length: u64,
         callback: F,
     ) where
-        F: FnMut(&mut Discord, DiscordResult<Vec<u8>>) + 'a,
+        F: FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
     {
         unsafe {
             ffi!(self
@@ -69,7 +70,7 @@ impl<'a> Discord<'a> {
         &mut self,
         filename: impl AsRef<CStr>,
         buffer: impl AsRef<[u8]>,
-    ) -> DiscordResult<()> {
+    ) -> Result<()> {
         let buffer = buffer.as_ref();
         unsafe {
             ffi!(self.get_storage_manager().write(
@@ -88,7 +89,7 @@ impl<'a> Discord<'a> {
         buffer: impl AsRef<[u8]>,
         callback: F,
     ) where
-        F: FnMut(&mut Discord, DiscordResult<()>) + 'a,
+        F: FnMut(&mut Discord, Result<()>) + 'a,
     {
         let buffer = buffer.as_ref();
         unsafe {
@@ -104,7 +105,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn delete_file(&mut self, filename: impl AsRef<CStr>) -> DiscordResult<()> {
+    pub fn delete_file(&mut self, filename: impl AsRef<CStr>) -> Result<()> {
         unsafe {
             ffi!(self
                 .get_storage_manager()
@@ -114,7 +115,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn file_exists(&mut self, filename: impl AsRef<CStr>) -> DiscordResult<bool> {
+    pub fn file_exists(&mut self, filename: impl AsRef<CStr>) -> Result<bool> {
         let mut exists = false;
 
         unsafe {
@@ -128,7 +129,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn file_stat(&mut self, filename: impl AsRef<CStr>) -> DiscordResult<FileStat> {
+    pub fn file_stat(&mut self, filename: impl AsRef<CStr>) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
         unsafe {
@@ -142,7 +143,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn all_file_stats(&mut self) -> DiscordResult<Vec<FileStat>> {
+    pub fn all_file_stats(&mut self) -> Result<Vec<FileStat>> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_storage_manager().count(&mut count)) }
@@ -165,7 +166,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn folder_path(&mut self) -> DiscordResult<String> {
+    pub fn folder_path(&mut self) -> Result<String> {
         let mut path: sys::DiscordPath = [0; size_of::<sys::DiscordPath>()];
 
         unsafe { ffi!(self.get_storage_manager().get_path(&mut path)) }.to_result()?;

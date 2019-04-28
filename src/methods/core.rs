@@ -1,13 +1,14 @@
-use crate::{across_ffi, event, sys, to_result::ToResult, CreateFlags, Discord, DiscordResult};
+use crate::{across_ffi, event, sys, to_result::ToResult, CreateFlags, Discord, Result};
 use std::ffi::c_void;
 
 /// # Core
+/// https://discordapp.com/developers/docs/game-sdk/discord
 impl<'a> Discord<'a> {
-    pub fn new(client_id: i64) -> DiscordResult<Self> {
+    pub fn new(client_id: i64) -> Result<Self> {
         Self::with_create_flags(client_id, CreateFlags::default())
     }
 
-    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> DiscordResult<Self> {
+    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
         let (senders, receivers) = event::create_channels();
         let senders_ptr = Box::into_raw(Box::new(senders));
         let senders = unsafe { Box::from_raw(senders_ptr) };
@@ -59,9 +60,10 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn run_callbacks(&mut self) -> DiscordResult<()> {
+    pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()?;
 
+        // TODO: this could be turned into a crossbeam_channel::Select
         let mut i = 0;
         while i < self.callbacks.len() {
             if self.callbacks[i].is_ready() {
