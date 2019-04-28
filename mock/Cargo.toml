@@ -1,6 +1,6 @@
 [package]
 name = "discord_game_sdk_mock"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Mock library of the Discord Game SDK"
