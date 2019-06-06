@@ -1,23 +1,6 @@
-/target
 **/*.rs.bk
-
-#Added by cargo
-#
-#already existing elements are commented out
-
-#/target
-#**/*.rs.bk
+/target
 Cargo.lock
-
-#Added by cargo
-#
-#already existing elements are commented out
-
-#/target
-#**/*.rs.bk
-#Cargo.lock
-
-shell.nix
 discord_game_sdk.dll
 sdk/
-build.rs
+shell.nix
