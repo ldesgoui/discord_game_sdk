@@ -239,7 +239,3 @@ pub use self::{
     user::User,
     user_flags::UserFlags,
 };
-
-#[cfg(feature = "mock")]
-#[link(name = "discord_game_sdk_mock")]
-extern "C" {}

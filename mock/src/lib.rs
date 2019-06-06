@@ -40,3 +40,5 @@ pub(crate) mod prelude {
     pub(crate) use discord_game_sdk_sys as sys;
     pub(crate) use std::ffi::*;
 }
+
+pub use crate::methods::core::DiscordCreate;

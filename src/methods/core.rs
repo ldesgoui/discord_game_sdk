@@ -1,6 +1,12 @@
 use crate::{across_ffi, event, sys, to_result::ToResult, CreateFlags, Discord, Result};
 use std::ffi::c_void;
 
+#[cfg(feature = "mock")]
+use sys::DiscordCreate;
+
+#[cfg(not(feature = "mock"))]
+use discord_game_sdk_mock::DiscordCreate;
+
 /// # Core
 /// https://discordapp.com/developers/docs/game-sdk/discord
 impl<'a> Discord<'a> {
@@ -17,7 +23,7 @@ impl<'a> Discord<'a> {
 
         let mut core = std::ptr::null_mut();
 
-        unsafe { sys::DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core) }.to_result()?;
+        unsafe { DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core) }.to_result()?;
 
         let mut instance = Self {
             core,
