@@ -1,6 +1,6 @@
 [package]
 name = "discord_game_sdk_mock"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Mock library of the Discord Game SDK"
@@ -11,9 +11,6 @@ categories = ["development-tools::testing", "development-tools::ffi"]
 
 [package.metadata.docs.rs]
 features = ["discord_game_sdk_sys/doc"]
-
-[lib]
-crate-type = ["cdylib"]
 
 [dependencies]
 log = "0.4.6"
