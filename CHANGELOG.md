@@ -2,6 +2,10 @@
 
 This document contains information about the releases of this crate.
 
+## [0.2.5]
+
+- fix SIGILL in `discord_game_sdk_mock`
+
 ## [0.2.4]
 
 - `discord_game_sdk_mock` does not use its own logger anymore
