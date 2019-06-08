@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[repr(C, packed)]
 pub struct State {
     pub version: sys::DiscordVersion,
     pub params: sys::DiscordCreateParams,

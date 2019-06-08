@@ -43,16 +43,6 @@ pub unsafe extern "C" fn DiscordCreate(
 
     let mut inst = Instance::new(version, params);
 
-    inst.state.queue(1, |inst| {
-        inst.state
-            .params
-            .overlay_events
-            .as_ref()
-            .unwrap()
-            .on_toggle
-            .unwrap()(inst.state.params.event_data, true);
-    });
-
     *result = Box::into_raw(Box::new(inst)) as *mut _;
 
     log::trace!("returning pointer to {:p}", *result);

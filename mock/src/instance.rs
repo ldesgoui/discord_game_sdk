@@ -1,6 +1,7 @@
 use crate::interfaces;
 use crate::prelude::*;
 
+#[repr(C, packed)]
 pub struct Instance {
     pub interfaces: Interfaces,
     pub state: State,
@@ -42,17 +43,17 @@ impl Instance {
 #[allow(dead_code)]
 #[rustfmt::skip]
 impl Instance {
-    from_ptr!(from_core, sys::IDiscordCore, interfaces.core);
-    from_ptr!(from_application, sys::IDiscordApplicationManager, interfaces.applications);
-    from_ptr!(from_user, sys::IDiscordUserManager, interfaces.users);
-    from_ptr!(from_image, sys::IDiscordImageManager, interfaces.images);
-    from_ptr!(from_activity, sys::IDiscordActivityManager, interfaces.activities);
-    from_ptr!(from_relationship, sys::IDiscordRelationshipManager, interfaces.relationships);
-    from_ptr!(from_lobby, sys::IDiscordLobbyManager, interfaces.lobbies);
-    from_ptr!(from_network, sys::IDiscordNetworkManager, interfaces.networking);
-    from_ptr!(from_overlay, sys::IDiscordOverlayManager, interfaces.overlay);
-    from_ptr!(from_storage, sys::IDiscordStorageManager, interfaces.storage);
-    from_ptr!(from_store, sys::IDiscordStoreManager, interfaces.store);
-    from_ptr!(from_voice, sys::IDiscordVoiceManager, interfaces.voice);
-    from_ptr!(from_achievement, sys::IDiscordAchievementManager, interfaces.achievements);
+    from_ptr!(Instance, from_core, sys::IDiscordCore, interfaces.core);
+    from_ptr!(Instance, from_application, sys::IDiscordApplicationManager, interfaces.applications);
+    from_ptr!(Instance, from_user, sys::IDiscordUserManager, interfaces.users);
+    from_ptr!(Instance, from_image, sys::IDiscordImageManager, interfaces.images);
+    from_ptr!(Instance, from_activity, sys::IDiscordActivityManager, interfaces.activities);
+    from_ptr!(Instance, from_relationship, sys::IDiscordRelationshipManager, interfaces.relationships);
+    from_ptr!(Instance, from_lobby, sys::IDiscordLobbyManager, interfaces.lobbies);
+    from_ptr!(Instance, from_network, sys::IDiscordNetworkManager, interfaces.networking);
+    from_ptr!(Instance, from_overlay, sys::IDiscordOverlayManager, interfaces.overlay);
+    from_ptr!(Instance, from_storage, sys::IDiscordStorageManager, interfaces.storage);
+    from_ptr!(Instance, from_store, sys::IDiscordStoreManager, interfaces.store);
+    from_ptr!(Instance, from_voice, sys::IDiscordVoiceManager, interfaces.voice);
+    from_ptr!(Instance, from_achievement, sys::IDiscordAchievementManager, interfaces.achievements);
 }

@@ -25,6 +25,8 @@ impl<'a> Discord<'a> {
 
         unsafe { DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core) }.to_result()?;
 
+        log::trace!("received pointer to {:p}", core);
+
         let mut instance = Self {
             core,
             client_id,
@@ -42,7 +44,7 @@ impl<'a> Discord<'a> {
     fn set_log_hook(&mut self) {
         unsafe {
             ffi!(self.set_log_hook(
-                sys::DiscordLogLevel_Debug + 1,
+                sys::DiscordLogLevel_Debug,
                 std::ptr::null_mut(),
                 Some(across_ffi::callbacks::log),
             ))

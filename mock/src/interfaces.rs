@@ -1,6 +1,7 @@
 use crate::methods::*;
 use crate::prelude::*;
 
+#[repr(C, packed)]
 pub struct Interfaces {
     pub core: sys::IDiscordCore,
     pub applications: sys::IDiscordApplicationManager,
