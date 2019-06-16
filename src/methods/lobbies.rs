@@ -13,10 +13,11 @@ use std::mem::size_of;
 /// https://discordapp.com/developers/docs/game-sdk/lobbies
 impl<'a> Discord<'a> {
     // tested
-    pub fn create_lobby<F>(&mut self, builder: LobbyTransaction, mut callback: F)
-    where
-        F: FnMut(&mut Discord, Result<Lobby>) + 'a,
-    {
+    pub fn create_lobby(
+        &mut self,
+        builder: LobbyTransaction,
+        mut callback: impl FnMut(&mut Discord, Result<Lobby>) + 'a,
+    ) {
         let mut ptr = std::ptr::null_mut();
 
         if let Err(e) = unsafe {
@@ -41,10 +42,12 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn update_lobby<F>(&mut self, lobby_id: i64, builder: LobbyTransaction, mut callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn update_lobby(
+        &mut self,
+        lobby_id: i64,
+        builder: LobbyTransaction,
+        mut callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         let mut ptr = std::ptr::null_mut();
 
         if let Err(e) = unsafe {
@@ -68,10 +71,11 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn delete_lobby<F>(&mut self, lobby_id: i64, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn delete_lobby(
+        &mut self,
+        lobby_id: i64,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -80,10 +84,12 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn connect_lobby<F>(&mut self, lobby_id: i64, secret: impl AsRef<CStr>, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<Lobby>) + 'a,
-    {
+    pub fn connect_lobby(
+        &mut self,
+        lobby_id: i64,
+        secret: impl AsRef<CStr>,
+        callback: impl FnMut(&mut Discord, Result<Lobby>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -92,13 +98,11 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn connect_lobby_with_activity_secret<F>(
+    pub fn connect_lobby_with_activity_secret(
         &mut self,
         activity_secret: impl AsRef<CStr>,
-        callback: F,
-    ) where
-        F: FnMut(&mut Discord, Result<Lobby>) + 'a,
-    {
+        callback: impl FnMut(&mut Discord, Result<Lobby>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -107,10 +111,11 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn disconnect_lobby<F>(&mut self, lobby_id: i64, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn disconnect_lobby(
+        &mut self,
+        lobby_id: i64,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -205,15 +210,13 @@ impl<'a> Discord<'a> {
         Ok(res)
     }
 
-    pub fn update_member<F>(
+    pub fn update_member(
         &mut self,
         lobby_id: i64,
         user_id: i64,
         builder: LobbyMemberTransaction,
-        mut callback: F,
-    ) where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+        mut callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         let mut ptr = std::ptr::null_mut();
 
         if let Err(e) = unsafe {
@@ -317,10 +320,12 @@ impl<'a> Discord<'a> {
         Ok(res)
     }
 
-    pub fn send_lobby_message<F>(&mut self, lobby_id: i64, buf: impl AsRef<[u8]>, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn send_lobby_message(
+        &mut self,
+        lobby_id: i64,
+        buf: impl AsRef<[u8]>,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         let buf = buf.as_ref();
         assert!(buf.len() <= u32::max_value() as usize);
 
@@ -332,10 +337,11 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn lobby_search<F>(&mut self, builder: SearchQuery, mut callback: F)
-    where
-        F: FnMut(&mut Discord, Result<Vec<i64>>) + 'a,
-    {
+    pub fn lobby_search(
+        &mut self,
+        builder: SearchQuery,
+        mut callback: impl FnMut(&mut Discord, Result<Vec<i64>>) + 'a,
+    ) {
         let mut ptr = std::ptr::null_mut();
 
         if let Err(e) =
@@ -384,10 +390,11 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn connect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn connect_lobby_voice(
+        &mut self,
+        lobby_id: i64,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -396,10 +403,11 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn disconnect_lobby_voice<F>(&mut self, lobby_id: i64, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn disconnect_lobby_voice(
+        &mut self,
+        lobby_id: i64,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()

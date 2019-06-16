@@ -35,10 +35,11 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn read_file_async<F>(&mut self, filename: impl AsRef<CStr>, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
-    {
+    pub fn read_file_async(
+        &mut self,
+        filename: impl AsRef<CStr>,
+        callback: impl FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_storage_manager()
@@ -48,15 +49,13 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn read_file_async_partial<F>(
+    pub fn read_file_async_partial(
         &mut self,
         filename: impl AsRef<CStr>,
         offset: u64,
         length: u64,
-        callback: F,
-    ) where
-        F: FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
-    {
+        callback: impl FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_storage_manager()
@@ -83,14 +82,12 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn write_file_async<F>(
+    pub fn write_file_async(
         &mut self,
         filename: impl AsRef<CStr>,
         buffer: impl AsRef<[u8]>,
-        callback: F,
-    ) where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         let buffer = buffer.as_ref();
         unsafe {
             ffi!(self

@@ -20,10 +20,10 @@ impl<'a> Discord<'a> {
 
     // tested
     // returns vec![] until event::relationships::Refreshed
-    pub fn all_relationships<F>(&mut self, filter: F) -> Result<Vec<Relationship>>
-    where
-        F: FnMut(Relationship) -> bool,
-    {
+    pub fn all_relationships<F: FnMut(Relationship) -> bool>(
+        &mut self,
+        filter: F,
+    ) -> Result<Vec<Relationship>> {
         let filter_ptr = Box::into_raw(Box::new(filter));
         let _filter = unsafe { Box::from_raw(filter_ptr) };
 

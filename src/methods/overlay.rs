@@ -28,10 +28,11 @@ impl<'a> Discord<'a> {
         !locked
     }
 
-    pub fn set_overlay_opened<F>(&mut self, opened: bool, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn set_overlay_opened(
+        &mut self,
+        opened: bool,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
@@ -40,10 +41,11 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn open_invite_overlay<F>(&mut self, action: Action, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn open_invite_overlay(
+        &mut self,
+        action: Action,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
@@ -53,10 +55,11 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn open_guild_invite_overlay<F>(&mut self, code: impl AsRef<CStr>, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn open_guild_invite_overlay(
+        &mut self,
+        code: impl AsRef<CStr>,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
@@ -66,10 +69,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn open_voice_settings<F>(&mut self, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn open_voice_settings(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()

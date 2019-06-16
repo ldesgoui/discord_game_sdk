@@ -16,10 +16,11 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
-    pub fn update_activity<F>(&mut self, activity: &Activity, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn update_activity(
+        &mut self,
+        activity: &Activity,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         let mut activity: sys::DiscordActivity = activity.0;
 
         // Unsure if this is required
@@ -34,10 +35,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn clear_activity<F>(&mut self, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn clear_activity(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
@@ -46,10 +44,12 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn send_request_reply<F>(&mut self, user_id: i64, reply: RequestReply, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn send_request_reply(
+        &mut self,
+        user_id: i64,
+        reply: RequestReply,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
@@ -58,15 +58,13 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn send_invite<F>(
+    pub fn send_invite(
         &mut self,
         user_id: i64,
         action: Action,
         content: impl AsRef<CStr>,
-        callback: F,
-    ) where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
@@ -75,10 +73,11 @@ impl<'a> Discord<'a> {
         }
     }
 
-    pub fn accept_invite<F>(&mut self, user_id: i64, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn accept_invite(
+        &mut self,
+        user_id: i64,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_activity_manager()

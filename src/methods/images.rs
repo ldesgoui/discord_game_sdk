@@ -7,10 +7,12 @@ use crate::{
 /// https://discordapp.com/developers/docs/game-sdk/images
 impl<'a> Discord<'a> {
     // tested, takes a few seconds, returns the same handle as inputted
-    pub fn fetch_image<F>(&mut self, handle: ImageHandle, refresh: FetchKind, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<ImageHandle>) + 'a,
-    {
+    pub fn fetch_image(
+        &mut self,
+        handle: ImageHandle,
+        refresh: FetchKind,
+        callback: impl FnMut(&mut Discord, Result<ImageHandle>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_image_manager()

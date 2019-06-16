@@ -21,10 +21,7 @@ impl<'a> Discord<'a> {
     }
 
     // tested
-    pub fn user<F>(&mut self, user_id: i64, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<User>) + 'a,
-    {
+    pub fn user(&mut self, user_id: i64, callback: impl FnMut(&mut Discord, Result<User>) + 'a) {
         unsafe {
             ffi!(self
                 .get_user_manager()

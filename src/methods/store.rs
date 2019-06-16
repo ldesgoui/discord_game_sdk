@@ -6,10 +6,7 @@ use crate::{
 /// https://discordapp.com/developers/docs/game-sdk/store
 impl<'a> Discord<'a> {
     // tested
-    pub fn load_skus<F>(&mut self, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn load_skus(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
                 .get_store_manager()
@@ -98,10 +95,11 @@ impl<'a> Discord<'a> {
         Ok(has_entitlement)
     }
 
-    pub fn start_purchase<F>(&mut self, sku_id: i64, callback: F)
-    where
-        F: FnMut(&mut Discord, Result<()>) + 'a,
-    {
+    pub fn start_purchase(
+        &mut self,
+        sku_id: i64,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
         unsafe {
             ffi!(self
                 .get_store_manager()
