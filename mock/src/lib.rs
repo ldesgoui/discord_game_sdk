@@ -11,6 +11,7 @@
 //! [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
 
 #![allow(unused_variables)]
+#![doc(html_root_url = "https://docs.rs/discord_game_sdk_mock")]
 
 #[macro_use]
 mod macros;

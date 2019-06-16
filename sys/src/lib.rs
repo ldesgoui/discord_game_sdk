@@ -5,7 +5,7 @@
 //! [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
 
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
-#![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys")]
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 

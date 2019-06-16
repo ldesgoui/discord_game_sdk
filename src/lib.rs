@@ -48,7 +48,7 @@
 //! [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
 //! [`discord_game_sdk_mock`]: https://github.com/ldesgoui/discord_game_sdk/tree/master/mock
 
-#![doc(html_root_url = "https://docs.rs/discord_game_sdk/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/discord_game_sdk")]
 #![recursion_limit = "128"]
 
 #[macro_use]
