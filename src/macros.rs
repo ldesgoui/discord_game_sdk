@@ -54,7 +54,7 @@ discord_game_sdk:
     The program has encountered a `panic` across FFI bounds, unwinding at this
     point would be undefined behavior, we will abort the process instead.
     Please report this issue to https://github.com/ldesgoui/discord_game_sdk
-    Here are informations about the panic:
+    Here is the panic message:
 
 {}
             ",
