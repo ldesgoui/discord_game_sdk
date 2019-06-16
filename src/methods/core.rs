@@ -85,8 +85,8 @@ impl<'a> Discord<'a> {
         Ok(())
     }
 
-    pub fn event_receivers(&self) -> event::Receivers {
-        self.receivers.clone()
+    pub fn event_receivers(&self) -> &event::Receivers {
+        &self.receivers
     }
 
     pub fn empty_event_receivers(&self) {
