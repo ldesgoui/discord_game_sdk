@@ -1,15 +1,33 @@
-use crate::{to_result::ToResult, Discord, Result};
+use crate::{callbacks::ResultCallback, sys, to_result::ToResult, Discord, InputMode, Result};
 
 /// # Voice
-/// https://discordapp.com/developers/docs/game-sdk/voice
-///
-/// ## SDK issues
-/// Currently, the SDK seems to crash after running the "voice settings updated" event handler
-/// with a panic inside panic. This has beem reported. For the meantime, the following functions
-/// are not usable.
+/// <https://discordapp.com/developers/docs/game-sdk/voice>
 impl<'a> Discord<'a> {
-    // TODO: get_input_mode (no idea how im supposed to deal with shortcuts)
-    // TODO: set_input_mode
+    pub fn input_mode(&mut self) -> Result<InputMode> {
+        let mut input_mode = InputMode(sys::DiscordInputMode::default());
+
+        unsafe {
+            ffi!(self
+                .get_voice_manager()
+                .get_input_mode(&mut input_mode.0 as *mut _))
+        }
+        .to_result()?;
+
+        Ok(input_mode)
+    }
+
+    pub fn set_input_mode(
+        &mut self,
+        input_mode: InputMode,
+        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+    ) {
+        unsafe {
+            ffi!(self
+                .get_voice_manager()
+                .set_input_mode(input_mode.0)
+                .and_then(ResultCallback::new(callback)))
+        }
+    }
 
     pub fn self_muted(&mut self) -> Result<bool> {
         let mut muted = false;

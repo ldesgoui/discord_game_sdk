@@ -71,6 +71,8 @@ mod file_stat;
 mod image;
 mod image_handle;
 mod image_kind;
+mod input_mode;
+mod input_mode_kind;
 mod lobby;
 mod lobby_kind;
 mod lobby_member_transaction;
@@ -221,6 +223,8 @@ pub use self::{
     image::Image,
     image_handle::ImageHandle,
     image_kind::ImageKind,
+    input_mode::InputMode,
+    input_mode_kind::InputModeKind,
     lobby::Lobby,
     lobby_kind::LobbyKind,
     lobby_member_transaction::LobbyMemberTransaction,
