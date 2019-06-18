@@ -9,6 +9,17 @@ impl InputMode {
     }
 
     get_str!(shortcut, shortcut);
+
+    pub fn empty() -> Self {
+        Self(Default::default())
+    }
+
+    pub fn with_kind(&'_ mut self, kind: InputModeKind) -> &'_ mut Self {
+        self.0.type_ = kind.into();
+        self
+    }
+
+    set_str!(with_shortcut, shortcut);
 }
 
 impl std::fmt::Debug for InputMode {
