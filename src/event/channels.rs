@@ -52,33 +52,28 @@ pub struct Receivers {
 }
 
 impl Receivers {
-    pub fn empty_channels(&self) -> std::result::Result<(), crossbeam_channel::RecvError> {
-        loop {
-            crossbeam_channel::select! {
-                recv(self.activities_join) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.activities_spectate) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.activities_request) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.activities_invite) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.lobbies_update) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.lobbies_delete) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.lobbies_member_connect) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.lobbies_member_update) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.lobbies_member_disconnect) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.lobbies_message) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.lobbies_speaking) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.lobbies_network_message) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.networking_message) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.networking_route_update) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.overlay_toggle) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.relationships_refresh) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.relationships_update) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.store_entitlement_create) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.store_entitlement_delete) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.current_user_update) -> e => log::trace!("dropping event: {:?}", e?),
-                recv(self.voice_settings_update) -> e => log::trace!("dropping event: {:?}", e?),
-                default => return Ok(())
-            }
-        }
+    pub fn empty_channels(&self) {
+        self.activities_join.try_iter().for_each(|_| ());
+        self.activities_spectate.try_iter().for_each(|_| ());
+        self.activities_request.try_iter().for_each(|_| ());
+        self.activities_invite.try_iter().for_each(|_| ());
+        self.lobbies_update.try_iter().for_each(|_| ());
+        self.lobbies_delete.try_iter().for_each(|_| ());
+        self.lobbies_member_connect.try_iter().for_each(|_| ());
+        self.lobbies_member_update.try_iter().for_each(|_| ());
+        self.lobbies_member_disconnect.try_iter().for_each(|_| ());
+        self.lobbies_message.try_iter().for_each(|_| ());
+        self.lobbies_speaking.try_iter().for_each(|_| ());
+        self.lobbies_network_message.try_iter().for_each(|_| ());
+        self.networking_message.try_iter().for_each(|_| ());
+        self.networking_route_update.try_iter().for_each(|_| ());
+        self.overlay_toggle.try_iter().for_each(|_| ());
+        self.relationships_refresh.try_iter().for_each(|_| ());
+        self.relationships_update.try_iter().for_each(|_| ());
+        self.store_entitlement_create.try_iter().for_each(|_| ());
+        self.store_entitlement_delete.try_iter().for_each(|_| ());
+        self.current_user_update.try_iter().for_each(|_| ());
+        self.voice_settings_update.try_iter().for_each(|_| ());
     }
 }
 

@@ -90,9 +90,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn empty_event_receivers(&self) {
-        // Virtually impossible to panic, this would return Err(_) if send failed, the only fail
-        // case would be if the Receivers were dropped, which they cannot be, because we own them
-        self.receivers.empty_channels().unwrap()
+        self.receivers.empty_channels()
     }
 }
 

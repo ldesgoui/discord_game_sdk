@@ -49,7 +49,6 @@
 //! [`discord_game_sdk_mock`]: https://github.com/ldesgoui/discord_game_sdk/tree/master/mock
 
 #![doc(html_root_url = "https://docs.rs/discord_game_sdk")]
-#![recursion_limit = "128"]
 
 #[macro_use]
 mod macros;
@@ -134,8 +133,7 @@ pub mod event {
     //!
     //! ### IMPORTANT NOTE:
     //! Unless you plan to run [`Discord::run_callbacks`] in another thread, waiting for events
-    //! will never stop. This means that [`crossbeam_channel::Receiver::try_recv`] should be used
-    //! instead of [`crossbeam_channel::Receiver::recv`], and [`crossbeam_channel::select!`] must
+    //! will block forever. This means that `try_` methods should be used and `select!` must
     //! contain a `default` clause.
     //!
     //!
@@ -149,7 +147,6 @@ pub mod event {
     //!
     //! ```no_run
     //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    //! use crossbeam_channel::select;
     //!
     //! let mut discord = discord_game_sdk::Discord::new(999999999999999999)?;
     //! let recvs = discord.event_receivers();
@@ -158,9 +155,8 @@ pub mod event {
     //!     discord.empty_event_receivers();
     //!     discord.run_callbacks();
     //!
-    //!     select! {
-    //!         recv(recvs.current_user_update) -> _ => println!("User updated!"),
-    //!         default => continue,
+    //!     for _ in recvs.current_user_update.try_iter() {
+    //!         println!("User updated!"),
     //!     }
     //! }
     //! # Ok(()) }
@@ -169,11 +165,8 @@ pub mod event {
     //! [`Discord::empty_event_receivers`]: ../struct.Discord.html#method.empty_event_receivers
     //! [`Discord::run_callbacks`]: ../struct.Discord.html#method.run_callbacks
     //! [`Discord`]: ../struct.Discord.html
-    //! [`crossbeam_channel::Receiver::recv`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Receiver.html#method.recv
-    //! [`crossbeam_channel::Receiver::try_recv`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Receiver.html#method.try_recv
     //! [`crossbeam_channel::Receiver`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Receiver.html
     //! [`crossbeam_channel::Sender`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Sender.html
-    //! [`crossbeam_channel::select!`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/macro.select.html
     //! [`crossbeam_channel`]: https://docs.rs/crossbeam-channel
     //! [`event::Receivers::empty_channel`]: struct.Receivers.html#method.empty_channels
     //! [`event::Receivers`]: struct.Receivers.html
