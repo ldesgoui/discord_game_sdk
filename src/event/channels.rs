@@ -3,6 +3,7 @@ use crossbeam_channel::{Receiver, Sender};
 
 #[derive(Clone, Debug)]
 pub(crate) struct Senders {
+    pub(crate) achievements_update: Sender<event::achievements::Update>,
     pub(crate) activities_join: Sender<event::activities::Join>,
     pub(crate) activities_spectate: Sender<event::activities::Spectate>,
     pub(crate) activities_request: Sender<event::activities::Request>,
@@ -28,6 +29,7 @@ pub(crate) struct Senders {
 
 #[derive(Clone, Debug)]
 pub struct Receivers {
+    pub achievements_update: Receiver<event::achievements::Update>,
     pub activities_join: Receiver<event::activities::Join>,
     pub activities_spectate: Receiver<event::activities::Spectate>,
     pub activities_request: Receiver<event::activities::Request>,
@@ -53,33 +55,35 @@ pub struct Receivers {
 
 impl Receivers {
     pub fn empty_channels(&self) {
-        self.activities_join.try_iter().for_each(|_| ());
-        self.activities_spectate.try_iter().for_each(|_| ());
-        self.activities_request.try_iter().for_each(|_| ());
-        self.activities_invite.try_iter().for_each(|_| ());
-        self.lobbies_update.try_iter().for_each(|_| ());
-        self.lobbies_delete.try_iter().for_each(|_| ());
-        self.lobbies_member_connect.try_iter().for_each(|_| ());
-        self.lobbies_member_update.try_iter().for_each(|_| ());
-        self.lobbies_member_disconnect.try_iter().for_each(|_| ());
-        self.lobbies_message.try_iter().for_each(|_| ());
-        self.lobbies_speaking.try_iter().for_each(|_| ());
-        self.lobbies_network_message.try_iter().for_each(|_| ());
-        self.networking_message.try_iter().for_each(|_| ());
-        self.networking_route_update.try_iter().for_each(|_| ());
-        self.overlay_toggle.try_iter().for_each(|_| ());
-        self.relationships_refresh.try_iter().for_each(|_| ());
-        self.relationships_update.try_iter().for_each(|_| ());
-        self.store_entitlement_create.try_iter().for_each(|_| ());
-        self.store_entitlement_delete.try_iter().for_each(|_| ());
-        self.current_user_update.try_iter().for_each(|_| ());
-        self.voice_settings_update.try_iter().for_each(|_| ());
+        self.achievements_update.try_iter().for_each(drop);
+        self.activities_join.try_iter().for_each(drop);
+        self.activities_spectate.try_iter().for_each(drop);
+        self.activities_request.try_iter().for_each(drop);
+        self.activities_invite.try_iter().for_each(drop);
+        self.lobbies_update.try_iter().for_each(drop);
+        self.lobbies_delete.try_iter().for_each(drop);
+        self.lobbies_member_connect.try_iter().for_each(drop);
+        self.lobbies_member_update.try_iter().for_each(drop);
+        self.lobbies_member_disconnect.try_iter().for_each(drop);
+        self.lobbies_message.try_iter().for_each(drop);
+        self.lobbies_speaking.try_iter().for_each(drop);
+        self.lobbies_network_message.try_iter().for_each(drop);
+        self.networking_message.try_iter().for_each(drop);
+        self.networking_route_update.try_iter().for_each(drop);
+        self.overlay_toggle.try_iter().for_each(drop);
+        self.relationships_refresh.try_iter().for_each(drop);
+        self.relationships_update.try_iter().for_each(drop);
+        self.store_entitlement_create.try_iter().for_each(drop);
+        self.store_entitlement_delete.try_iter().for_each(drop);
+        self.current_user_update.try_iter().for_each(drop);
+        self.voice_settings_update.try_iter().for_each(drop);
     }
 }
 
 pub(crate) fn create_channels() -> (Senders, Receivers) {
     use crossbeam_channel::unbounded;
 
+    let achievements_update = unbounded();
     let activities_join = unbounded();
     let activities_spectate = unbounded();
     let activities_request = unbounded();
@@ -104,6 +108,7 @@ pub(crate) fn create_channels() -> (Senders, Receivers) {
 
     (
         Senders {
+            achievements_update: achievements_update.0,
             activities_join: activities_join.0,
             activities_spectate: activities_spectate.0,
             activities_request: activities_request.0,
@@ -127,6 +132,7 @@ pub(crate) fn create_channels() -> (Senders, Receivers) {
             voice_settings_update: voice_settings_update.0,
         },
         Receivers {
+            achievements_update: achievements_update.1,
             activities_join: activities_join.1,
             activities_spectate: activities_spectate.1,
             activities_request: activities_request.1,

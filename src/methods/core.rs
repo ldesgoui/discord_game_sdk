@@ -108,7 +108,7 @@ fn create_params(
         events: std::ptr::null_mut(),
         event_data,
 
-        application_events: std::ptr::null_mut(),
+        application_events: ACHIEVEMENT as *const _ as *mut _,
         application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
 
         user_events: USER as *const _ as *mut _,
@@ -145,6 +145,10 @@ fn create_params(
         achievement_version: sys::DISCORD_ACHIEVEMENT_MANAGER_VERSION,
     }
 }
+
+const ACHIEVEMENT: &sys::IDiscordAchievementEvents = &sys::IDiscordAchievementEvents {
+    on_user_achievement_update: Some(across_ffi::achievements::on_user_achievement_update),
+};
 
 const ACTIVITY: &sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
     on_activity_join: Some(across_ffi::activities::on_activity_join),

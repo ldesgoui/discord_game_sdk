@@ -51,6 +51,7 @@
 #[macro_use]
 mod macros;
 
+mod achievement;
 mod action;
 mod activity;
 mod activity_kind;
@@ -95,6 +96,7 @@ pub(crate) mod utils;
 mod methods {
     mod core;
 
+    mod achievements;
     mod activities;
     mod applications;
     mod images;
@@ -168,6 +170,7 @@ mod methods {
 /// [`event::Receivers::empty_channel`]: struct.Receivers.html#method.empty_channels
 /// [`event::Receivers`]: struct.Receivers.html
 pub mod event {
+    pub mod achievements;
     pub mod activities;
     mod channels;
     pub mod lobbies;
@@ -183,6 +186,7 @@ pub mod event {
 }
 
 pub(crate) mod across_ffi {
+    pub(crate) mod achievements;
     pub(crate) mod activities;
     pub(crate) mod callbacks;
     pub(crate) mod lobbies;
@@ -197,6 +201,7 @@ pub(crate) mod across_ffi {
 pub(crate) use discord_game_sdk_sys as sys;
 
 pub use self::{
+    achievement::Achievement,
     action::Action,
     activity::Activity,
     activity_kind::ActivityKind,
