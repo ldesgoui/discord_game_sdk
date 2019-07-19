@@ -19,29 +19,8 @@ pub unsafe extern "C" fn DiscordCreate(
         params.flags == sys::DiscordCreateFlags_Default as u64
     );
     log::trace!("  - SDK Version: {}", version);
-    log::trace!(
-        "  - Application Manager Version: {}",
-        params.application_version
-    );
-    log::trace!("  - User Manager Version: {}", params.user_version);
-    log::trace!("  - Image Manager Version: {}", params.image_version);
-    log::trace!("  - Activity Manager Version: {}", params.activity_version);
-    log::trace!(
-        "  - Relationship Manager Version: {}",
-        params.relationship_version
-    );
-    log::trace!("  - Lobby Manager Version: {}", params.lobby_version);
-    log::trace!("  - Network Manager Version: {}", params.network_version);
-    log::trace!("  - Overlay Manager Version: {}", params.overlay_version);
-    log::trace!("  - Storage Manager Version: {}", params.storage_version);
-    log::trace!("  - Store Manager Version: {}", params.store_version);
-    log::trace!("  - Voice Manager Version: {}", params.voice_version);
-    log::trace!(
-        "  - Achievement Manager Version: {}",
-        params.achievement_version
-    );
 
-    let mut inst = Instance::new(version, params);
+    let inst = Instance::new(version, params);
 
     *result = Box::into_raw(Box::new(inst)) as *mut _;
 

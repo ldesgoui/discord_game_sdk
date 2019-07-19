@@ -4,18 +4,18 @@ use crate::prelude::*;
 #[repr(C, packed)]
 pub struct Interfaces {
     pub core: sys::IDiscordCore,
-    pub applications: sys::IDiscordApplicationManager,
-    pub users: sys::IDiscordUserManager,
-    pub images: sys::IDiscordImageManager,
+    pub achievements: sys::IDiscordAchievementManager,
     pub activities: sys::IDiscordActivityManager,
-    pub relationships: sys::IDiscordRelationshipManager,
+    pub applications: sys::IDiscordApplicationManager,
+    pub images: sys::IDiscordImageManager,
     pub lobbies: sys::IDiscordLobbyManager,
     pub networking: sys::IDiscordNetworkManager,
     pub overlay: sys::IDiscordOverlayManager,
+    pub relationships: sys::IDiscordRelationshipManager,
     pub storage: sys::IDiscordStorageManager,
     pub store: sys::IDiscordStoreManager,
+    pub users: sys::IDiscordUserManager,
     pub voice: sys::IDiscordVoiceManager,
-    pub achievements: sys::IDiscordAchievementManager,
 }
 
 pub const INTERFACES: Interfaces = Interfaces {
