@@ -5,8 +5,7 @@ use std::ffi::CStr;
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/overlay>
 impl<'a> Discord<'a> {
-    // tested in terminal, was returning false
-    // kinda inconclusive
+    /// <https://discordapp.com/developers/docs/game-sdk/overlay#isenabled>
     pub fn overlay_enabled(&mut self) -> bool {
         let mut enabled = false;
 
@@ -19,8 +18,7 @@ impl<'a> Discord<'a> {
         enabled
     }
 
-    // tested in terminal, was returning true until event::overlay::Toggled
-    // kinda inconclusive
+    /// <https://discordapp.com/developers/docs/game-sdk/overlay#islocked>
     pub fn overlay_opened(&mut self) -> bool {
         let mut locked = false;
 
@@ -29,6 +27,7 @@ impl<'a> Discord<'a> {
         !locked
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/overlay#setlocked>
     pub fn set_overlay_opened(
         &mut self,
         opened: bool,
@@ -42,6 +41,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/overlay#openactivityinvite>
     pub fn open_invite_overlay(
         &mut self,
         action: Action,
@@ -56,6 +56,8 @@ impl<'a> Discord<'a> {
     }
 
     /// `code` must be valid UTF-8
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/overlay#openguildinvite>
     pub fn open_guild_invite_overlay(
         &mut self,
         code: impl AsRef<CStr>,
@@ -69,7 +71,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/overlay#openvoicesettings>
     pub fn open_voice_settings(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self

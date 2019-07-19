@@ -10,9 +10,10 @@ use std::ffi::CStr;
 use std::mem::size_of;
 
 /// # Lobbies
-/// https://discordapp.com/developers/docs/game-sdk/lobbies
+///
+/// <https://discordapp.com/developers/docs/game-sdk/lobbies>
 impl<'a> Discord<'a> {
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#createlobby>
     pub fn create_lobby(
         &mut self,
         builder: LobbyTransaction,
@@ -41,7 +42,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#updatelobby>
     pub fn update_lobby(
         &mut self,
         lobby_id: i64,
@@ -71,6 +72,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#deletelobby>
     pub fn delete_lobby(
         &mut self,
         lobby_id: i64,
@@ -84,6 +86,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby>
     pub fn connect_lobby(
         &mut self,
         lobby_id: i64,
@@ -98,6 +101,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret>
     pub fn connect_lobby_with_activity_secret(
         &mut self,
         activity_secret: impl AsRef<CStr>,
@@ -111,6 +115,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectlobby>
     pub fn disconnect_lobby(
         &mut self,
         lobby_id: i64,
@@ -124,9 +129,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobby>
     pub fn lobby(&mut self, lobby_id: i64) -> Result<Lobby> {
         let mut lobby = sys::DiscordLobby::default();
-
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -137,7 +142,7 @@ impl<'a> Discord<'a> {
         Ok(Lobby::from(lobby))
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyactivitysecret>
     pub fn lobby_activity_secret(&mut self, lobby_id: i64) -> Result<String> {
         let mut secret: sys::DiscordLobbySecret = [0; size_of::<sys::DiscordLobbySecret>()];
 
@@ -151,7 +156,7 @@ impl<'a> Discord<'a> {
         Ok(cstr_to_str(&secret[..]).to_string())
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
     pub fn lobby_metadata(&mut self, lobby_id: i64, key: impl AsRef<CStr>) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
@@ -167,7 +172,9 @@ impl<'a> Discord<'a> {
         Ok(cstr_to_str(&value[..]).to_string())
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
     pub fn all_lobby_metadata(&mut self, lobby_id: i64) -> Result<HashMap<String, String>> {
         let mut count: i32 = 0;
 
@@ -210,6 +217,7 @@ impl<'a> Discord<'a> {
         Ok(res)
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#updatemember>
     pub fn update_member(
         &mut self,
         lobby_id: i64,
@@ -240,7 +248,8 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membercount>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid>
     pub fn all_lobby_member_ids(&mut self, lobby_id: i64) -> Result<Vec<i64>> {
         let mut count = 0;
 
@@ -270,6 +279,9 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
     pub fn all_lobby_member_metadata(
         &mut self,
         lobby_id: i64,
@@ -320,6 +332,7 @@ impl<'a> Discord<'a> {
         Ok(res)
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#sendlobbymessage>
     pub fn send_lobby_message(
         &mut self,
         lobby_id: i64,
@@ -337,6 +350,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#search>
     pub fn lobby_search(
         &mut self,
         builder: SearchQuery,
@@ -389,7 +403,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectvoice>
     pub fn connect_lobby_voice(
         &mut self,
         lobby_id: i64,
@@ -403,6 +417,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectvoice>
     pub fn disconnect_lobby_voice(
         &mut self,
         lobby_id: i64,
@@ -416,10 +431,12 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectnetwork>
     pub fn connect_lobby_network(&mut self, lobby_id: i64) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().connect_network(lobby_id,)) }.to_result()
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectnetwork>
     pub fn disconnect_lobby_network(&mut self, lobby_id: i64) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().disconnect_network(lobby_id,)) }.to_result()
     }
@@ -428,6 +445,7 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_lobby_manager().flush_network()) }.to_result()
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#opennetworkchannel>
     pub fn open_lobby_network_channel(
         &mut self,
         lobby_id: i64,
@@ -442,6 +460,7 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#sendnetworkmessage>
     pub fn send_lobby_network_message(
         &mut self,
         lobby_id: i64,

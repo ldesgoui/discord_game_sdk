@@ -1,8 +1,12 @@
 use crate::{callbacks::ResultCallback, sys, to_result::ToResult, Achievement, Discord, Result};
 
 /// # Achievements
-/// https://discordapp.com/developers/docs/game-sdk/achievements
+///
+/// <https://discordapp.com/developers/docs/game-sdk/achievements>
 impl<'a> Discord<'a> {
+    /// `percent_complete` must be [0..=100]
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/achievements#setuserachievement>
     pub fn set_achievement(
         &'a mut self,
         achievement_id: i64,
@@ -17,6 +21,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/achievements#fetchuserachievements>
     pub fn fetch_achievements(&'a mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
@@ -26,6 +31,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievement>
     pub fn achievement(&'a mut self, achievement_id: i64) -> Result<Achievement> {
         let mut achievement = Achievement(sys::DiscordUserAchievement::default());
 
@@ -39,6 +45,8 @@ impl<'a> Discord<'a> {
         Ok(achievement)
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
+    /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
     pub fn all_achievements(&'a mut self) -> Result<Vec<Achievement>> {
         let mut count: i32 = 0;
 

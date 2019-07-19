@@ -3,10 +3,11 @@ use crate::{
 };
 
 /// # Store
-/// https://discordapp.com/developers/docs/game-sdk/store
+///
+/// <https://discordapp.com/developers/docs/game-sdk/store>
 impl<'a> Discord<'a> {
-    // tested
-    pub fn load_skus(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
+    /// <https://discordapp.com/developers/docs/game-sdk/store#fetchskus>
+    pub fn fetch_skus(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
                 .get_store_manager()
@@ -15,6 +16,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/store#getsku>
     pub fn sku(&mut self, id: i64) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
@@ -23,7 +25,8 @@ impl<'a> Discord<'a> {
         Ok(sku)
     }
 
-    // tested, returned []
+    /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
+    /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
     pub fn all_skus(&mut self) -> Result<Vec<Sku>> {
         let mut count = 0;
 
@@ -46,6 +49,7 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlement>
     pub fn entitlement(&mut self, id: i64) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
@@ -59,7 +63,8 @@ impl<'a> Discord<'a> {
         Ok(entitlement)
     }
 
-    // tested, returned []
+    /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
+    /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
     pub fn all_entitlements(&mut self) -> Result<Vec<Entitlement>> {
         let mut count = 0;
 
@@ -82,6 +87,7 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/store#hasskuentitlement>
     pub fn has_entitlement(&mut self, sku_id: i64) -> Result<bool> {
         let mut has_entitlement = false;
 
@@ -95,6 +101,7 @@ impl<'a> Discord<'a> {
         Ok(has_entitlement)
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/store#startpurchase>
     pub fn start_purchase(
         &mut self,
         sku_id: i64,

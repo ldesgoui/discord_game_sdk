@@ -9,9 +9,10 @@ use std::ffi::CStr;
 use std::mem::size_of;
 
 /// # Storage
-/// https://discordapp.com/developers/docs/game-sdk/storage
+///
+/// <https://discordapp.com/developers/docs/game-sdk/storage>
 impl<'a> Discord<'a> {
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#read>
     pub fn read_file(
         &mut self,
         filename: impl AsRef<CStr>,
@@ -34,7 +35,7 @@ impl<'a> Discord<'a> {
         Ok(read)
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#readasync>
     pub fn read_file_async(
         &mut self,
         filename: impl AsRef<CStr>,
@@ -48,7 +49,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#readasyncpartial>
     pub fn read_file_async_partial(
         &mut self,
         filename: impl AsRef<CStr>,
@@ -64,7 +65,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#write>
     pub fn write_file(
         &mut self,
         filename: impl AsRef<CStr>,
@@ -81,7 +82,7 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#writeasync>
     pub fn write_file_async(
         &mut self,
         filename: impl AsRef<CStr>,
@@ -101,7 +102,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#delete>
     pub fn delete_file(&mut self, filename: impl AsRef<CStr>) -> Result<()> {
         unsafe {
             ffi!(self
@@ -111,7 +112,7 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#exists>
     pub fn file_exists(&mut self, filename: impl AsRef<CStr>) -> Result<bool> {
         let mut exists = false;
 
@@ -125,7 +126,7 @@ impl<'a> Discord<'a> {
         Ok(exists)
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#stat>
     pub fn file_stat(&mut self, filename: impl AsRef<CStr>) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
@@ -139,7 +140,8 @@ impl<'a> Discord<'a> {
         Ok(stat)
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
     pub fn all_file_stats(&mut self) -> Result<Vec<FileStat>> {
         let mut count = 0;
 
@@ -162,7 +164,7 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#getpath>
     pub fn folder_path(&mut self) -> Result<String> {
         let mut path: sys::DiscordPath = [0; size_of::<sys::DiscordPath>()];
 

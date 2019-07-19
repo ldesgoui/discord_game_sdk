@@ -4,9 +4,10 @@ use crate::{
 };
 
 /// # Images
-/// https://discordapp.com/developers/docs/game-sdk/images
+///
+/// <https://discordapp.com/developers/docs/game-sdk/images>
 impl<'a> Discord<'a> {
-    // tested, takes a few seconds, returns the same handle as inputted
+    /// <https://discordapp.com/developers/docs/game-sdk/images#fetch>
     pub fn fetch_image(
         &mut self,
         handle: ImageHandle,
@@ -21,7 +22,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested, works fine, doubt it has much use
+    /// <https://discordapp.com/developers/docs/game-sdk/images#getdimensions>
     pub fn image_dimensions(&mut self, handle: ImageHandle) -> Result<(u32, u32)> {
         let mut dimensions = sys::DiscordImageDimensions::default();
 
@@ -35,7 +36,7 @@ impl<'a> Discord<'a> {
         Ok((dimensions.width, dimensions.height))
     }
 
-    // tested, returns linear RGBA V<u8> supposedly
+    /// <https://discordapp.com/developers/docs/game-sdk/images#getdata>
     pub fn image(&mut self, handle: ImageHandle) -> Result<Image> {
         let (width, height) = self.image_dimensions(handle)?;
         let mut data: Vec<u8> = vec![0; (4 * width * height) as usize];

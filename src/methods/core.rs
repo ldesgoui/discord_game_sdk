@@ -2,7 +2,8 @@ use crate::{across_ffi, event, sys, to_result::ToResult, CreateFlags, Discord, R
 use std::ffi::c_void;
 
 /// # Core
-/// https://discordapp.com/developers/docs/game-sdk/discord
+///
+/// <https://discordapp.com/developers/docs/game-sdk/discord>
 impl<'a> Discord<'a> {
     pub fn new(client_id: i64) -> Result<Self> {
         Self::with_create_flags(client_id, CreateFlags::default())
