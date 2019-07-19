@@ -33,7 +33,7 @@ impl Image {
         debug_assert!(x < self.width);
         debug_assert!(y < self.height);
 
-        let idx = x + y * width;
+        let idx = (x + y * self.width) as usize;
 
         (
             self.data[idx + 0],
