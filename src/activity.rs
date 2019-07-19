@@ -3,7 +3,7 @@ use chrono::{offset::TimeZone, DateTime, Utc};
 
 /// Activity (also known as Rich Presence)
 ///
-/// [Official documentation](https://discordapp.com/developers/docs/game-sdk/activities)
+/// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activity-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct Activity(pub(crate) sys::DiscordActivity);
 

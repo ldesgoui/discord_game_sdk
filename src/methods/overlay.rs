@@ -2,7 +2,8 @@ use crate::{callbacks::ResultCallback, Action, Discord, Result};
 use std::ffi::CStr;
 
 /// # Overlay
-/// https://discordapp.com/developers/docs/game-sdk/overlay
+///
+/// <https://discordapp.com/developers/docs/game-sdk/overlay>
 impl<'a> Discord<'a> {
     // tested in terminal, was returning false
     // kinda inconclusive
@@ -54,7 +55,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// `code` must be valid UTF-8
     pub fn open_guild_invite_overlay(
         &mut self,
         code: impl AsRef<CStr>,

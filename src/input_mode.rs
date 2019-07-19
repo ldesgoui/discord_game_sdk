@@ -1,5 +1,8 @@
 use crate::{sys, InputModeKind};
 
+/// Input Mode
+///
+/// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmode-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct InputMode(pub(crate) sys::DiscordInputMode);
 
@@ -8,8 +11,13 @@ impl InputMode {
         self.0.type_.into()
     }
 
-    get_str!(shortcut, shortcut);
+    get_str!(
+        "<https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>",
+        shortcut,
+        shortcut
+    );
 
+    /// Create a new, empty Input Mode
     pub fn empty() -> Self {
         Self(Default::default())
     }
@@ -19,7 +27,11 @@ impl InputMode {
         self
     }
 
-    set_str!(with_shortcut, shortcut);
+    set_str!(
+        "<https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>",
+        with_shortcut,
+        shortcut
+    );
 }
 
 impl std::fmt::Debug for InputMode {

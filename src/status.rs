@@ -1,5 +1,8 @@
 use crate::{panic_messages::INVALID_ENUM, sys};
 
+/// User Status
+///
+/// <https://discordapp.com/developers/docs/game-sdk/relationships#data-models-status-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Status {
     DoNotDisturb,

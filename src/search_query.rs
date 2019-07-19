@@ -3,6 +3,9 @@ use crate::{
 };
 use std::ffi::CStr;
 
+/// Lobby Search
+///
+/// <https://discordapp.com/developers/docs/game-sdk/lobbies#search>
 #[derive(Clone, Debug, Default)]
 pub struct SearchQuery<'a> {
     pub(crate) filter: Option<(&'a CStr, &'a CStr, Comparison, Cast)>,
@@ -16,6 +19,11 @@ impl<'a> SearchQuery<'a> {
         Self::default()
     }
 
+    /// Filters lobbies based on metadata comparison
+    ///
+    /// `key` and `value` must also be valid UTF-8
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchfilter>
     pub fn filter(
         &'a mut self,
         key: &'a CStr,
@@ -27,16 +35,27 @@ impl<'a> SearchQuery<'a> {
         self
     }
 
+    /// Sorts the filtered lobbies based on "near-ness" to a given value
+    ///
+    /// `key` and `value` must also be valid UTF-8
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchsort>
     pub fn sort(&'a mut self, key: &'a CStr, value: &'a CStr, cast: Cast) -> &'a mut Self {
         self.sort = Some((key, value, cast));
         self
     }
 
+    /// Limits the number of lobbies returned in a search
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchlimit>
     pub fn limit(&'a mut self, limit: u32) -> &'a mut Self {
         self.limit = Some(limit);
         self
     }
 
+    /// Filters lobby results to within certain regions relative to the user's location
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchdistance>
     pub fn distance(&'a mut self, distance: Distance) -> &'a mut Self {
         self.distance = Some(distance);
         self

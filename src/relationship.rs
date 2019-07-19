@@ -1,5 +1,8 @@
 use crate::{sys, Presence, RelationshipKind, User};
 
+/// Relationship
+///
+/// <https://discordapp.com/developers/docs/game-sdk/relationships#data-models-relationship-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct Relationship(pub(crate) sys::DiscordRelationship);
 

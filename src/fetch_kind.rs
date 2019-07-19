@@ -1,3 +1,4 @@
+/// Image Fetch Option
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum FetchKind {
     ForceRefresh,

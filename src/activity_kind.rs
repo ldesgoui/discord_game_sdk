@@ -1,5 +1,8 @@
 use crate::{panic_messages::INVALID_ENUM, sys};
 
+/// Activity Type
+///
+/// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activitytype-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ActivityKind {
     Listening,

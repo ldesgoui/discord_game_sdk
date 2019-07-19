@@ -1,5 +1,8 @@
 use crate::{panic_messages::INVALID_ENUM, sys};
 
+/// Lobby Type
+///
+/// <https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbytype-enum>
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum LobbyKind {
     Public,

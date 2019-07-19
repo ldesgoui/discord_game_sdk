@@ -1,3 +1,4 @@
+/// Image with pixel data
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Image {
     pub(crate) width: u32,
@@ -25,5 +26,20 @@ impl Image {
     /// Pattern is: `RGBARGBARGBA...`
     pub fn data(&'_ self) -> &'_ [u8] {
         &self.data[..]
+    }
+
+    /// Get R, G, B, A channels of pixel at (x, y)
+    pub fn pixel(&self, x: u32, y: u32) -> (u8, u8, u8, u8) {
+        debug_assert!(x < self.width);
+        debug_assert!(y < self.height);
+
+        let idx = x + y * width;
+
+        (
+            self.data[idx + 0],
+            self.data[idx + 1],
+            self.data[idx + 2],
+            self.data[idx + 3],
+        )
     }
 }

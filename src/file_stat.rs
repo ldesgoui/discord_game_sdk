@@ -1,6 +1,9 @@
 use crate::sys;
 use chrono::{offset::TimeZone, DateTime, Utc};
 
+/// File Metadata
+///
+/// <https://discordapp.com/developers/docs/game-sdk/storage#data-models-filestat-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 pub struct FileStat(pub(crate) sys::DiscordFileStat);
 

@@ -29,7 +29,7 @@ macro_rules! ffi {
         . $get_manager:ident ()
         . $method:ident ($($args:expr),* $(,)?)
         . and_then ($callback:expr $(,)?)
-     ) => {{
+    ) => {{
         use crate::panic_messages::NULL_PTR;
         let manager = ffi!($self.$get_manager());
         log::trace!("FFI: .{}", stringify!($method));
@@ -71,7 +71,9 @@ discord_game_sdk:
 }
 
 macro_rules! get_str {
-    ($name:ident, $($field:tt)+) => {
+    ($doc:expr, $name:ident, $($field:tt)+) => {
+        #[doc = $doc]
+        #[doc = "\n## Cost\n\nString length is calculated every call"]
         pub fn $name(&self) -> &str {
             use crate::utils::cstr_to_str;
 
@@ -79,11 +81,24 @@ macro_rules! get_str {
 
             cstr_to_str(field)
         }
-    }
+    };
+
+    ($name:ident, $($field:tt)+) => {
+        #[doc = "## Cost\n\nString length is calculated every call"]
+        pub fn $name(&self) -> &str {
+            use crate::utils::cstr_to_str;
+
+            let field = &(self.0).$($field)+;
+
+            cstr_to_str(field)
+        }
+    };
 }
 
 macro_rules! set_str {
-    ($name:ident, $($field:tt)+) => {
+    ($doc:expr, $name:ident, $($field:tt)+) => {
+        #[doc = $doc]
+        #[doc = "## Panics\n\n`value` must be smaller than the container it is being written to"]
         pub fn $name(&'_ mut self, value: impl AsRef<std::ffi::CStr>) -> &'_ mut Self {
             use crate::utils::slice_u8_to_i8;
 
@@ -96,5 +111,21 @@ macro_rules! set_str {
 
             self
         }
-    }
+    };
+
+    ($name:ident, $($field:tt)+) => {
+        #[doc = "## Panics\n\n`value` must be smaller than the container it is being written to"]
+        pub fn $name(&'_ mut self, value: impl AsRef<std::ffi::CStr>) -> &'_ mut Self {
+            use crate::utils::slice_u8_to_i8;
+
+            let bytes: &[i8] = slice_u8_to_i8(value.as_ref().to_bytes_with_nul());
+            let field = &mut (self.0).$($field)+;
+
+            debug_assert!(bytes.len() <= field.len());
+
+            field[..bytes.len()].copy_from_slice(bytes);
+
+            self
+        }
+    };
 }

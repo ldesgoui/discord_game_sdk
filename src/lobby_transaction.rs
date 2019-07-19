@@ -2,6 +2,9 @@ use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, LobbyKind, Resu
 use std::collections::HashMap;
 use std::ffi::CStr;
 
+/// Lobby Transaction
+///
+/// <https://discordapp.com/developers/docs/game-sdk/lobbies>
 #[derive(Clone, Debug, Default)]
 pub struct LobbyTransaction<'a> {
     pub(crate) kind: Option<LobbyKind>,
@@ -16,31 +19,41 @@ impl<'a> LobbyTransaction<'a> {
         Self::default()
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsettype>
     pub fn kind(&'a mut self, kind: LobbyKind) -> &'a mut Self {
         self.kind = Some(kind);
         self
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetowner>
     pub fn owner(&'a mut self, user_id: i64) -> &'a mut Self {
         self.owner = Some(user_id);
         self
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetcapacity>
     pub fn capacity(&'a mut self, capacity: u32) -> &'a mut Self {
         self.capacity = Some(capacity);
         self
     }
 
+    /// `key` and `value` must also be valid UTF-8
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetmetadata>
     pub fn add_metadata(&'a mut self, key: &'a CStr, value: &'a CStr) -> &'a mut Self {
         let _ = self.metadata.insert(key, Some(value));
         self
     }
 
+    /// `key` must also be valid UTF-8
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactiondeletemetadata>
     pub fn delete_metadata<S>(&'a mut self, key: &'a CStr) -> &'a mut Self {
         let _ = self.metadata.insert(key, None);
         self
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetlocked>
     pub fn locked(&'a mut self, locked: bool) -> &'a mut Self {
         self.locked = Some(locked);
         self

@@ -1,5 +1,8 @@
 use crate::sys;
 
+/// Lobby Search Cast
+///
+/// <https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbysearchcast-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Cast {
     Number,

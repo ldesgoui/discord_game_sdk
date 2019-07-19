@@ -1,5 +1,8 @@
 use crate::{panic_messages::INVALID_ENUM, sys};
 
+/// Premium Type
+///
+/// <https://discordapp.com/developers/docs/game-sdk/users#data-models-premiumtype-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum PremiumKind {
     /// Not a Nitro subscriber

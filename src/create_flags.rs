@@ -1,5 +1,8 @@
 use crate::sys;
 
+/// Discord Creation Flags
+///
+/// <https://discordapp.com/developers/docs/game-sdk/discord#data-models-createflags-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum CreateFlags {
     /// Requires Discord to be running to play the game
