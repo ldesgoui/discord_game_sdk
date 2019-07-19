@@ -1,6 +1,6 @@
 //! Safe wrapper for the [Discord Game SDK]
 //!
-//! This crate provides Rust support to the the following Discord features:
+//! This crate provides Rust support to the following Discord features:
 //!
 //! - Activities (Rich Presence)
 //! - Users, Avatars and Relationships
@@ -8,19 +8,14 @@
 //! - Faux-P2P Networking
 //! - Cloud Synchronized (or not) Storage
 //! - Store transactions
+//! - Achievements
+//! - ...
 //!
 //!
 //! # Status
 //!
-//! This library is currently in very early stages, most of the API is implemented but unstable.
-//! I'm not aware of any good ways to test this crate.
-//!
-//!
-//! # API stability
-//!
-//! API stability is completely uncertain until Discord provides details on their update process
-//! and how breaking changes will be introduced. The SDK documentations clearly mention that the
-//! API is not currently stabilized.
+//! This library is currently in early stages but is stabilizing.
+//! I'm not aware of any good ways to test this crate, there are currently no tests.
 //!
 //!
 //! # Safety
