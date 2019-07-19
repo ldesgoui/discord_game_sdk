@@ -58,8 +58,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager());
             ffi!(self.get_store_manager());
 
-            // Disabled due to crash in SDK
-            // ffi!(self.get_voice_manager());
+            ffi!(self.get_voice_manager());
         }
     }
 
