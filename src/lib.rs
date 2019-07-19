@@ -13,8 +13,7 @@
 //! # Status
 //!
 //! This library is currently in very early stages, most of the API is implemented but unstable.
-//! There are currently no tests (This will change once [`discord_game_sdk_mock`] is further
-//! developed).
+//! I'm not aware of any good ways to test this crate.
 //!
 //!
 //! # API stability
@@ -46,7 +45,6 @@
 //!
 //!
 //! [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
-//! [`discord_game_sdk_mock`]: https://github.com/ldesgoui/discord_game_sdk/tree/master/mock
 
 #![doc(html_root_url = "https://docs.rs/discord_game_sdk")]
 
@@ -110,67 +108,66 @@ mod methods {
     mod voice;
 }
 
+/// # Event Types
+///
+/// This crate makes use of [`crossbeam_channel`] to pass events.
+///
+/// All event and callback handlers do a minimal amount of work possible across FFI; they send
+/// copied or cloned data. Here is why:
+/// - Panics in FFI must be intercepted and unwinding must be disabled
+/// - Passing a mutable reference to [`Discord`] would result in either mutable aliasing or
+///   deadlocks (if using Arc<Mutex<_>>)
+///
+/// If an event or callback handler runs into a panic across FFI, the panic will be
+/// intercepted and the process will be aborted.
+///
+///
+/// ### IMPORTANT NOTE:
+/// If you do not make use of all receivers, you must call [`Discord::empty_event_receivers`]
+/// or [`event::Receivers::empty_channels`] to prevent the event buffers from growing
+/// too big. A safe place to do that would be just before [`Discord::run_callbacks`].
+///
+///
+/// ### IMPORTANT NOTE:
+/// Unless you plan to run [`Discord::run_callbacks`] in another thread, waiting for events
+/// will block forever. This means that `try_` methods should be used and `select!` must
+/// contain a `default` clause.
+///
+///
+/// ### IMPORTANT NOTE:
+/// [`crossbeam_channel::Receiver`]s (and [`event::Receivers`]) may be cloned but the events
+/// won't be duplicated. An event may only be received once across the whole application.
+/// Dispatching events to multiple different places is on you.
+///
+///
+/// ## Examples
+///
+/// ```no_run
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+///
+/// let mut discord = discord_game_sdk::Discord::new(999999999999999999)?;
+/// let recvs = discord.event_receivers();
+///
+/// loop {
+///     discord.empty_event_receivers();
+///     discord.run_callbacks();
+///
+///     for _ in recvs.current_user_update.try_iter() {
+///         println!("User updated!"),
+///     }
+/// }
+/// # Ok(()) }
+/// ```
+///
+/// [`Discord::empty_event_receivers`]: ../struct.Discord.html#method.empty_event_receivers
+/// [`Discord::run_callbacks`]: ../struct.Discord.html#method.run_callbacks
+/// [`Discord`]: ../struct.Discord.html
+/// [`crossbeam_channel::Receiver`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Receiver.html
+/// [`crossbeam_channel::Sender`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Sender.html
+/// [`crossbeam_channel`]: https://docs.rs/crossbeam-channel
+/// [`event::Receivers::empty_channel`]: struct.Receivers.html#method.empty_channels
+/// [`event::Receivers`]: struct.Receivers.html
 pub mod event {
-    //! # Event Types
-    //!
-    //! This crate makes use of [`crossbeam_channel`] to pass events.
-    //!
-    //! All event and callback handlers do a minimal amount of work possible across FFI; they send
-    //! copied or cloned data. Here is why:
-    //! - Panics in FFI must be intercepted and unwinding must be disabled
-    //! - Passing a mutable reference to [`Discord`] would result in either mutable aliasing or
-    //!   deadlocks (if using Arc<Mutex<_>>)
-    //!
-    //! If an event or callback handler runs into a panic across FFI, the panic will be
-    //! intercepted and the process will be aborted.
-    //!
-    //!
-    //! ### IMPORTANT NOTE:
-    //! If you do not make use of all receivers, you must call [`Discord::empty_event_receivers`]
-    //! or [`event::Receivers::empty_channels`] to prevent the event buffers from growing
-    //! too big. A safe place to do that would be just before [`Discord::run_callbacks`].
-    //!
-    //!
-    //! ### IMPORTANT NOTE:
-    //! Unless you plan to run [`Discord::run_callbacks`] in another thread, waiting for events
-    //! will block forever. This means that `try_` methods should be used and `select!` must
-    //! contain a `default` clause.
-    //!
-    //!
-    //! ### IMPORTANT NOTE:
-    //! [`crossbeam_channel::Receiver`]s (and [`event::Receivers`]) may be cloned but the events
-    //! won't be duplicated. An event may only be received once across the whole application.
-    //! Dispatching events to multiple different places is on you.
-    //!
-    //!
-    //! ## Examples
-    //!
-    //! ```no_run
-    //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-    //!
-    //! let mut discord = discord_game_sdk::Discord::new(999999999999999999)?;
-    //! let recvs = discord.event_receivers();
-    //!
-    //! loop {
-    //!     discord.empty_event_receivers();
-    //!     discord.run_callbacks();
-    //!
-    //!     for _ in recvs.current_user_update.try_iter() {
-    //!         println!("User updated!"),
-    //!     }
-    //! }
-    //! # Ok(()) }
-    //! ```
-    //!
-    //! [`Discord::empty_event_receivers`]: ../struct.Discord.html#method.empty_event_receivers
-    //! [`Discord::run_callbacks`]: ../struct.Discord.html#method.run_callbacks
-    //! [`Discord`]: ../struct.Discord.html
-    //! [`crossbeam_channel::Receiver`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Receiver.html
-    //! [`crossbeam_channel::Sender`]: https://docs.rs/crossbeam-channel/latest/crossbeam_channel/struct.Sender.html
-    //! [`crossbeam_channel`]: https://docs.rs/crossbeam-channel
-    //! [`event::Receivers::empty_channel`]: struct.Receivers.html#method.empty_channels
-    //! [`event::Receivers`]: struct.Receivers.html
-
     pub mod activities;
     mod channels;
     pub mod lobbies;

@@ -17,7 +17,7 @@ Example:
 # export DISCORD_GAME_SDK_PATH=$HOME/Downloads/discord_game_sdk/
 
 From there, everything should compile when you run `cargo build` again.
-If not, please report any issues you have to
+If not, please report any issues you have at:
 
 https://github.com/ldesgoui/discord_game_sdk
 
@@ -33,8 +33,6 @@ You are trying to compile the bindings for the Discord Game SDK.
 Unfortunately, the platform you are trying to target is not
 supported by the Discord Game SDK.
 
-A drop-in replacement mock library was built to test this crate,
-you may also use it for your projects.
 You can find more information at:
 
 https://github.com/ldesgoui/discord_game_sdk
@@ -79,7 +77,7 @@ fn main() {
         .write_to_file(out_path.join("bindings.rs"))
         .expect("discord_game_sdk_sys: could not write bindings to file");
 
-    if cfg!(feature = "mock") {
+    if !cfg!(feature = "link") {
         return;
     }
 

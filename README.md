@@ -15,8 +15,7 @@ This crate provides Rust support to the the following Discord features:
 ## Status
 
 This library is currently in very early stages, most of the API is implemented but unstable.
-There are currently no tests (This will change once [`discord_game_sdk_mock`] is further
-developed).
+I'm not aware of any good ways to test this crate.
 
 
 ## API stability
@@ -48,6 +47,5 @@ email `ldesgoui@gmail.com` or contact `twiikuu#0047`. I mean no harm.
 
 
 [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
-[`discord_game_sdk_mock`]: https://github.com/ldesgoui/discord_game_sdk/tree/master/mock
 
 License: Apache-2.0 OR MIT

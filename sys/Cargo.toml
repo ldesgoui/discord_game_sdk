@@ -1,6 +1,6 @@
 [package]
 name = "discord_game_sdk_sys"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Low-level bindings for the Discord Game SDK"
@@ -11,10 +11,11 @@ categories = ["external-ffi-bindings", "game-engines"]
 
 [package.metadata.docs.rs]
 features = ["doc"]
+no-default-features = true
 
 [features]
 doc = [] # DO NOT RELY ON THIS
-mock = []
+link = []
 
 [build-dependencies]
-bindgen = "0.49.0"
+bindgen = "0.50.0"
