@@ -54,10 +54,10 @@ impl<'a> Discord<'a> {
             ffi!(self.get_relationship_manager());
             ffi!(self.get_user_manager());
 
+            ffi!(self.get_achievement_manager());
             ffi!(self.get_activity_manager());
             ffi!(self.get_lobby_manager());
             ffi!(self.get_store_manager());
-
             ffi!(self.get_voice_manager());
         }
     }
