@@ -12,6 +12,8 @@ use std::mem::size_of;
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/storage>
 impl<'a> Discord<'a> {
+    /// `filename` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#read>
     pub fn read_file(
         &mut self,
@@ -35,6 +37,8 @@ impl<'a> Discord<'a> {
         Ok(read)
     }
 
+    /// `filename` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasync>
     pub fn read_file_async(
         &mut self,
@@ -49,6 +53,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// `filename` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasyncpartial>
     pub fn read_file_async_partial(
         &mut self,
@@ -65,6 +71,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// `filename` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#write>
     pub fn write_file(
         &mut self,
@@ -82,6 +90,8 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// `filename` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#writeasync>
     pub fn write_file_async(
         &mut self,
@@ -102,6 +112,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// `filename` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#delete>
     pub fn delete_file(&mut self, filename: impl AsRef<CStr>) -> Result<()> {
         unsafe {
@@ -112,6 +124,8 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// `filename` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#exists>
     pub fn file_exists(&mut self, filename: impl AsRef<CStr>) -> Result<bool> {
         let mut exists = false;
@@ -126,6 +140,8 @@ impl<'a> Discord<'a> {
         Ok(exists)
     }
 
+    /// `filename` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#stat>
     pub fn file_stat(&mut self, filename: impl AsRef<CStr>) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());

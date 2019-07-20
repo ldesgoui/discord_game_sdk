@@ -73,7 +73,7 @@ discord_game_sdk:
 macro_rules! get_str {
     ($doc:expr, $name:ident, $($field:tt)+) => {
         #[doc = $doc]
-        #[doc = "\n## Cost\n\nString length is calculated every call"]
+        #[doc = "\n\n## Cost\n\nString length is calculated every call"]
         pub fn $name(&self) -> &str {
             use crate::utils::cstr_to_str;
 
@@ -98,7 +98,9 @@ macro_rules! get_str {
 macro_rules! set_str {
     ($doc:expr, $name:ident, $($field:tt)+) => {
         #[doc = $doc]
-        #[doc = "## Panics\n\n`value` must be smaller than the container it is being written to"]
+        #[doc = "`value` must be valid UTF-8\n\n"]
+        #[doc = "## Panics\n\n"]
+        #[doc = "`value` must be smaller than the container it is being written to"]
         pub fn $name(&'_ mut self, value: impl AsRef<std::ffi::CStr>) -> &'_ mut Self {
             use crate::utils::slice_u8_to_i8;
 
@@ -114,7 +116,9 @@ macro_rules! set_str {
     };
 
     ($name:ident, $($field:tt)+) => {
-        #[doc = "## Panics\n\n`value` must be smaller than the container it is being written to"]
+        #[doc = "`value` must be valid UTF-8\n\n"]
+        #[doc = "## Panics\n\n"]
+        #[doc = "`value` must be smaller than the container it is being written to"]
         pub fn $name(&'_ mut self, value: impl AsRef<std::ffi::CStr>) -> &'_ mut Self {
             use crate::utils::slice_u8_to_i8;
 

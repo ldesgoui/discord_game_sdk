@@ -86,6 +86,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// `secret` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby>
     pub fn connect_lobby(
         &mut self,
@@ -101,6 +103,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// `activity_secret` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret>
     pub fn connect_lobby_with_activity_secret(
         &mut self,
@@ -156,6 +160,8 @@ impl<'a> Discord<'a> {
         Ok(cstr_to_str(&secret[..]).to_string())
     }
 
+    /// `key` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
     pub fn lobby_metadata(&mut self, lobby_id: i64, key: impl AsRef<CStr>) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];

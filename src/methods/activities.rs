@@ -7,6 +7,9 @@ use std::ffi::CStr;
 /// # Activities
 /// https://discordapp.com/developers/docs/game-sdk/activities
 impl<'a> Discord<'a> {
+    /// `command` must also be valid UTF-8
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#registercommand>
     pub fn register_launch_command(&mut self, command: impl AsRef<CStr>) -> Result<()> {
         unsafe {
             ffi!(self
@@ -16,6 +19,7 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#updateactivity>
     pub fn update_activity(
         &mut self,
         activity: &Activity,
@@ -35,6 +39,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#clearactivity>
     pub fn clear_activity(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
@@ -44,6 +49,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#sendrequestreply>
     pub fn send_request_reply(
         &mut self,
         user_id: i64,
@@ -58,6 +64,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// `content` must also be valid UTF-8
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#sendinvite>
     pub fn send_invite(
         &mut self,
         user_id: i64,
@@ -73,6 +82,7 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#acceptinvite>
     pub fn accept_invite(
         &mut self,
         user_id: i64,

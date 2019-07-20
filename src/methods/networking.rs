@@ -19,6 +19,8 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_network_manager().flush()) }.to_result()
     }
 
+    /// `route` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#openpeer>
     pub fn open_peer(&mut self, peer_id: u64, route: impl AsRef<CStr>) -> Result<()> {
         unsafe {
@@ -29,6 +31,8 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// `route` must also be valid UTF-8
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#updatepeer>
     pub fn update_peer(&mut self, peer_id: u64, route: impl AsRef<CStr>) -> Result<()> {
         unsafe {
