@@ -4,10 +4,9 @@ This document contains information about the releases of this crate.
 
 ## [0.3.0]
 
-- drop `discord_game_sdk_mock`
-- rework features so that they are additive
+- dropped `discord_game_sdk_mock`
+- reworked features so that they are additive
 - added achievement support
-
 
 ## [0.2.5]
 
