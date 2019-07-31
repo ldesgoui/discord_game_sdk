@@ -25,12 +25,12 @@ impl<'a> SearchQuery<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchfilter>
     pub fn filter(
-        &'a mut self,
+        &mut self,
         key: &'a CStr,
         comparison: Comparison,
         value: &'a CStr,
         cast: Cast,
-    ) -> &'a mut Self {
+    ) -> &mut Self {
         self.filter = Some((key, value, comparison, cast));
         self
     }
@@ -40,7 +40,7 @@ impl<'a> SearchQuery<'a> {
     /// `key` and `value` must also be valid UTF-8
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchsort>
-    pub fn sort(&'a mut self, key: &'a CStr, value: &'a CStr, cast: Cast) -> &'a mut Self {
+    pub fn sort(&mut self, key: &'a CStr, value: &'a CStr, cast: Cast) -> &mut Self {
         self.sort = Some((key, value, cast));
         self
     }
@@ -48,7 +48,7 @@ impl<'a> SearchQuery<'a> {
     /// Limits the number of lobbies returned in a search
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchlimit>
-    pub fn limit(&'a mut self, limit: u32) -> &'a mut Self {
+    pub fn limit(&mut self, limit: u32) -> &mut Self {
         self.limit = Some(limit);
         self
     }
@@ -56,12 +56,12 @@ impl<'a> SearchQuery<'a> {
     /// Filters lobby results to within certain regions relative to the user's location
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchdistance>
-    pub fn distance(&'a mut self, distance: Distance) -> &'a mut Self {
+    pub fn distance(&mut self, distance: Distance) -> &mut Self {
         self.distance = Some(distance);
         self
     }
 
-    pub(crate) unsafe fn process(self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
+    pub(crate) unsafe fn process(&self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
         let tx = MacroHelper { core: ptr };
 
         if let Some((key, value, comparison, cast)) = self.filter {

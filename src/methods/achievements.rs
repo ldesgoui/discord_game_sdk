@@ -8,7 +8,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#setuserachievement>
     pub fn set_achievement(
-        &'a mut self,
+        &mut self,
         achievement_id: i64,
         percent_complete: i64,
         callback: impl FnMut(&mut Discord, Result<()>) + 'a,
@@ -22,7 +22,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#fetchuserachievements>
-    pub fn fetch_achievements(&'a mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
+    pub fn fetch_achievements(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
                 .get_achievement_manager()
@@ -32,7 +32,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievement>
-    pub fn achievement(&'a mut self, achievement_id: i64) -> Result<Achievement> {
+    pub fn achievement(&mut self, achievement_id: i64) -> Result<Achievement> {
         let mut achievement = Achievement(sys::DiscordUserAchievement::default());
 
         unsafe {
@@ -47,7 +47,7 @@ impl<'a> Discord<'a> {
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
-    pub fn all_achievements(&'a mut self) -> Result<Vec<Achievement>> {
+    pub fn all_achievements(&mut self) -> Result<Vec<Achievement>> {
         let mut count: i32 = 0;
 
         unsafe {

@@ -18,7 +18,7 @@ impl<'a> LobbyMemberTransaction<'a> {
     /// `key` and `value` must also be valid UTF-8
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactionsetmetadata>
-    pub fn add_metadata(&'a mut self, key: &'a CStr, value: &'a CStr) -> &'a mut Self {
+    pub fn add_metadata(&mut self, key: &'a CStr, value: &'a CStr) -> &mut Self {
         let _ = self.metadata.insert(key, Some(value));
         self
     }
@@ -26,18 +26,18 @@ impl<'a> LobbyMemberTransaction<'a> {
     /// `key` must also be valid UTF-8
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactiondeletemetadata>
-    pub fn delete_metadata<S>(&'a mut self, key: &'a CStr) -> &'a mut Self {
+    pub fn delete_metadata<S>(&mut self, key: &'a CStr) -> &mut Self {
         let _ = self.metadata.insert(key, None);
         self
     }
 
     pub(crate) unsafe fn process(
-        self,
+        &self,
         ptr: *mut sys::IDiscordLobbyMemberTransaction,
     ) -> Result<()> {
         let tx = MacroHelper { core: ptr };
 
-        for (key, value) in self.metadata {
+        for (key, value) in &self.metadata {
             match value {
                 Some(value) => {
                     ffi!(tx.set_metadata(key.as_ptr() as *mut _, value.as_ptr() as *mut _))

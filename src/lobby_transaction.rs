@@ -20,19 +20,19 @@ impl<'a> LobbyTransaction<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsettype>
-    pub fn kind(&'a mut self, kind: LobbyKind) -> &'a mut Self {
+    pub fn kind(&mut self, kind: LobbyKind) -> &mut Self {
         self.kind = Some(kind);
         self
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetowner>
-    pub fn owner(&'a mut self, user_id: i64) -> &'a mut Self {
+    pub fn owner(&mut self, user_id: i64) -> &mut Self {
         self.owner = Some(user_id);
         self
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetcapacity>
-    pub fn capacity(&'a mut self, capacity: u32) -> &'a mut Self {
+    pub fn capacity(&mut self, capacity: u32) -> &mut Self {
         self.capacity = Some(capacity);
         self
     }
@@ -40,7 +40,7 @@ impl<'a> LobbyTransaction<'a> {
     /// `key` and `value` must also be valid UTF-8
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetmetadata>
-    pub fn add_metadata(&'a mut self, key: &'a CStr, value: &'a CStr) -> &'a mut Self {
+    pub fn add_metadata(&mut self, key: &'a CStr, value: &'a CStr) -> &mut Self {
         let _ = self.metadata.insert(key, Some(value));
         self
     }
@@ -48,18 +48,18 @@ impl<'a> LobbyTransaction<'a> {
     /// `key` must also be valid UTF-8
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactiondeletemetadata>
-    pub fn delete_metadata<S>(&'a mut self, key: &'a CStr) -> &'a mut Self {
+    pub fn delete_metadata<S>(&mut self, key: &'a CStr) -> &mut Self {
         let _ = self.metadata.insert(key, None);
         self
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetlocked>
-    pub fn locked(&'a mut self, locked: bool) -> &'a mut Self {
+    pub fn locked(&mut self, locked: bool) -> &mut Self {
         self.locked = Some(locked);
         self
     }
 
-    pub(crate) unsafe fn process(self, ptr: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
+    pub(crate) unsafe fn process(&self, ptr: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
         let tx = MacroHelper { core: ptr };
 
         if let Some(kind) = self.kind {
@@ -78,7 +78,7 @@ impl<'a> LobbyTransaction<'a> {
             ffi!(tx.set_locked(locked)).to_result()?;
         }
 
-        for (key, value) in self.metadata {
+        for (key, value) in &self.metadata {
             match value {
                 Some(value) => {
                     ffi!(tx.set_metadata(key.as_ptr() as *mut _, value.as_ptr() as *mut _))
