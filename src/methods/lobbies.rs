@@ -16,7 +16,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#createlobby>
     pub fn create_lobby(
         &mut self,
-        builder: LobbyTransaction,
+        transaction: &LobbyTransaction,
         mut callback: impl FnMut(&mut Discord, Result<Lobby>) + 'a,
     ) {
         let mut ptr = std::ptr::null_mut();
@@ -30,7 +30,7 @@ impl<'a> Discord<'a> {
             return callback(self, Err(e));
         }
 
-        if let Err(e) = unsafe { builder.process(ptr) } {
+        if let Err(e) = unsafe { transaction.process(ptr) } {
             return callback(self, Err(e));
         }
 
@@ -46,7 +46,7 @@ impl<'a> Discord<'a> {
     pub fn update_lobby(
         &mut self,
         lobby_id: i64,
-        builder: LobbyTransaction,
+        transaction: &LobbyTransaction,
         mut callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
         let mut ptr = std::ptr::null_mut();
@@ -60,7 +60,7 @@ impl<'a> Discord<'a> {
             return callback(self, Err(e));
         }
 
-        if let Err(e) = unsafe { builder.process(ptr) } {
+        if let Err(e) = unsafe { transaction.process(ptr) } {
             return callback(self, Err(e));
         }
 
@@ -228,7 +228,7 @@ impl<'a> Discord<'a> {
         &mut self,
         lobby_id: i64,
         user_id: i64,
-        builder: LobbyMemberTransaction,
+        transaction: &LobbyMemberTransaction,
         mut callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
         let mut ptr = std::ptr::null_mut();
@@ -242,7 +242,7 @@ impl<'a> Discord<'a> {
             return callback(self, Err(e));
         }
 
-        if let Err(e) = unsafe { builder.process(ptr) } {
+        if let Err(e) = unsafe { transaction.process(ptr) } {
             return callback(self, Err(e));
         }
 
@@ -359,7 +359,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#search>
     pub fn lobby_search(
         &mut self,
-        builder: SearchQuery,
+        search: &SearchQuery,
         mut callback: impl FnMut(&mut Discord, Result<Vec<i64>>) + 'a,
     ) {
         let mut ptr = std::ptr::null_mut();
@@ -370,7 +370,7 @@ impl<'a> Discord<'a> {
             return callback(self, Err(e));
         }
 
-        if let Err(e) = unsafe { builder.process(ptr) } {
+        if let Err(e) = unsafe { search.process(ptr) } {
             return callback(self, Err(e));
         }
 
