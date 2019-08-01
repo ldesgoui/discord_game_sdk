@@ -2,6 +2,11 @@
 
 This document contains information about the releases of this crate.
 
+## [0.3.1]
+
+- removed incorrect lifetime annotations
+- methods who used to take a LobbySearch, LobbyTransaction and LobbyMemberTransaction by value now take it by reference
+
 ## [0.3.0]
 
 - dropped `discord_game_sdk_mock`
