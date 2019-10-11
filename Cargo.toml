@@ -21,7 +21,7 @@ crossbeam-channel = "0.3.8"
 derive_more = "0.15.0"
 discord_game_sdk_sys = { path = "./sys", version = "0.3.0" }
 easy-ext = "0.1.4"
-err-derive = "0.1.5"
+err-derive = "0.2.0"
 log = "0.4.6"
 memchr = "2.2.0"
 scopeguard = "1.0.0"
