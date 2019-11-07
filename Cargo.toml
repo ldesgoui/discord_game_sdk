@@ -17,7 +17,7 @@ no-default-features = true
 [dependencies]
 bitflags = "1.0.4"
 chrono = "0.4.6"
-crossbeam-channel = "0.3.8"
+crossbeam-channel = "0.4.0"
 derive_more = "0.15.0"
 discord_game_sdk_sys = { path = "./sys", version = "0.3.0" }
 easy-ext = "0.1.4"
