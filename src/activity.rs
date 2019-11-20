@@ -1,5 +1,4 @@
 use crate::{sys, ActivityKind};
-use chrono::{offset::TimeZone, DateTime, Utc};
 
 /// Activity (also known as Rich Presence)
 ///
@@ -30,12 +29,14 @@ impl Activity {
     get_str!(state, state);
     get_str!(details, details);
 
-    pub fn start_time(&self) -> DateTime<Utc> {
-        Utc.timestamp(self.0.timestamps.start, 0)
+    /// UTC Timestamp
+    pub fn start_time(&self) -> i64 {
+        self.0.timestamps.start
     }
 
-    pub fn end_time(&self) -> DateTime<Utc> {
-        Utc.timestamp(self.0.timestamps.end, 0)
+    /// UTC Timestamp
+    pub fn end_time(&self) -> i64 {
+        self.0.timestamps.end
     }
 
     get_str!(large_image_key, assets.large_image);
@@ -64,13 +65,13 @@ impl Activity {
     set_str!(with_state, state);
     set_str!(with_details, details);
 
-    pub fn with_start_time(&'_ mut self, value: DateTime<Utc>) -> &'_ mut Self {
-        self.0.timestamps.start = value.timestamp();
+    pub fn with_start_time(&'_ mut self, value: i64) -> &'_ mut Self {
+        self.0.timestamps.start = value;
         self
     }
 
-    pub fn with_end_time(&'_ mut self, value: DateTime<Utc>) -> &'_ mut Self {
-        self.0.timestamps.end = value.timestamp();
+    pub fn with_end_time(&'_ mut self, value: i64) -> &'_ mut Self {
+        self.0.timestamps.end = value;
         self
     }
 

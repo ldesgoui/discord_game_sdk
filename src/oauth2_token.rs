@@ -1,5 +1,4 @@
 use crate::{sys, utils::cstr_to_str};
-use chrono::{offset::TimeZone, DateTime, Utc};
 use std::iter::FusedIterator;
 
 /// OAuth2 Token
@@ -15,16 +14,16 @@ impl OAuth2Token {
         access_token
     );
 
-    /// The list of oauth2 scopes
+    /// The list of OAuth2 scopes
     pub fn scopes<'a>(
         &'a self,
     ) -> impl Iterator<Item = &'a str> + DoubleEndedIterator + FusedIterator + 'a {
         cstr_to_str(&self.0.scopes[..]).split(' ')
     }
 
-    /// The timestamp at which the token expires
-    pub fn expires(&self) -> DateTime<Utc> {
-        Utc.timestamp(self.0.expires, 0)
+    /// The UTC Timestamp at which the token expires
+    pub fn expires(&self) -> i64 {
+        self.0.expires
     }
 }
 

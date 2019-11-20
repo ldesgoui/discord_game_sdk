@@ -2,7 +2,7 @@ use crate::{panic_messages::INVALID_ENUM, sys};
 
 /// Input Mode Type
 ///
-/// https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmodetype-enum
+/// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmodetype-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum InputModeKind {
     PushToTalk,

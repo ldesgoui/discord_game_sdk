@@ -5,7 +5,7 @@ use crate::{
 use std::ffi::CStr;
 
 /// # Activities
-/// https://discordapp.com/developers/docs/game-sdk/activities
+/// <https://discordapp.com/developers/docs/game-sdk/activities>
 impl<'a> Discord<'a> {
     /// `command` must also be valid UTF-8
     ///

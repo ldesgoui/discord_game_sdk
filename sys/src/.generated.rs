@@ -4601,7 +4601,7 @@ pub struct IDiscordAchievementManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordAchievementManager,
             achievement_id: DiscordSnowflake,
-            percent_complete: i64,
+            percent_complete: u8,
             callback_data: *mut ::std::os::raw::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(

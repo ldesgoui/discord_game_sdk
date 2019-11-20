@@ -1,5 +1,4 @@
 use crate::sys;
-use chrono::{offset::TimeZone, DateTime, Utc};
 
 /// File Metadata
 ///
@@ -14,8 +13,9 @@ impl FileStat {
         self.0.size
     }
 
-    pub fn last_modified(&self) -> DateTime<Utc> {
-        Utc.timestamp(self.0.last_modified as i64, 0)
+    /// UTC Timestamp
+    pub fn last_modified(&self) -> i64 {
+        self.0.last_modified as i64
     }
 }
 

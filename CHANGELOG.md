@@ -2,6 +2,13 @@
 
 This document contains information about the releases of this crate.
 
+## [0.4.0]
+
+- `i686-unknown-linux-gnu` and `x86_64-unknown-linux-gnu` are now supported
+- `link` feature acts differently, it copies libraries to $OUT_PATH
+- ABI broke for Achievements (`percent_complete` is now `u8`, was `i64`)
+- dropped dependency to `chrono`, timestamps are now `i64`
+
 ## [0.3.1]
 
 - removed incorrect lifetime annotations

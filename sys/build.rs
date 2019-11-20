@@ -82,29 +82,50 @@ fn main() {
     }
 
     match target.as_ref() {
-        "i686-pc-windows-gnu" | "i686-pc-windows-msvc" => {
-            println!(
-                "cargo:rustc-link-search={}",
-                sdk_path.join("lib/x86").to_str().unwrap()
-            );
-            println!("cargo:rustc-link-lib=discord_game_sdk.dll");
+        "x86_64-unknown-linux-gnu" => {
+            std::fs::copy(
+                sdk_path.join("lib/x86_64/discord_game_sdk.so"),
+                out_path.join("libdiscord_game_sdk.so"),
+            )
+            .unwrap();
         }
-        "x86_64-pc-windows-gnu" | "x86_64-pc-windows-msvc" => {
-            println!(
-                "cargo:rustc-link-search={}",
-                sdk_path.join("lib/x86_64").to_str().unwrap()
-            );
-            println!("cargo:rustc-link-lib=discord_game_sdk.dll");
-        }
+
         "x86_64-apple-darwin" => {
-            println!(
-                "cargo:rustc-link-search={}",
-                sdk_path.join("lib/x86_64").to_str().unwrap()
-            );
-            println!("cargo:rustc-link-lib=discord_game_sdk");
+            std::fs::copy(
+                sdk_path.join("lib/x86_64/discord_game_sdk.dylib"),
+                out_path.join("libdiscord_game_sdk.dylib"),
+            )
+            .unwrap();
         }
+
+        "i686-pc-windows-gnu"
+        | "i686-pc-windows-msvc"
+        | "x86_64-pc-windows-gnu"
+        | "x86_64-pc-windows-msvc" => {
+            let path = sdk_path.join(if target.starts_with("x86_64") {
+                "lib/x86_64"
+            } else {
+                "lib/x86"
+            });
+
+            std::fs::copy(
+                path.join("discord_game_sdk.dll.lib"),
+                out_path.join("discord_game_sdk.lib"),
+            )
+            .unwrap();
+
+            std::fs::copy(
+                path.join("discord_game_sdk.dll"),
+                out_path.join("discord_game_sdk.dll"),
+            )
+            .unwrap();
+        }
+
         _ => panic!(INCOMPATIBLE_PLATFORM),
     }
+
+    println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
+    println!("cargo:rustc-link-lib=dylib=discord_game_sdk");
 }
 
 #[derive(Debug)]

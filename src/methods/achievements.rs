@@ -10,7 +10,7 @@ impl<'a> Discord<'a> {
     pub fn set_achievement(
         &mut self,
         achievement_id: i64,
-        percent_complete: i64,
+        percent_complete: u8,
         callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
         unsafe {
