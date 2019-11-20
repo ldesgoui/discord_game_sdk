@@ -1,4 +1,5 @@
 **/*.rs.bk
+.envrc
 /target
 Cargo.lock
 discord_game_sdk.dll
