@@ -15,17 +15,17 @@ features = ["discord_game_sdk_sys/doc"]
 no-default-features = true
 
 [dependencies]
-bitflags = "1.0.4"
-crossbeam-channel = "0.4"
-derive_more = "0.99.1"
-discord_game_sdk_sys = { path = "./sys", version = "0.3.0" }
-err-derive = "0.2.0"
-log = "0.4.6"
-memchr = "2.2.0"
+bitflags = "1.2.1"
+crossbeam-channel = "0.4.0"
+derive_more = "0.99.2"
+discord_game_sdk_sys = { path = "./sys", version = "0.4.0" }
+err-derive = "0.2.1"
+log = "0.4.8"
+memchr = "2.2.1"
 scopeguard = "1.0.0"
 
 [dev-dependencies]
-pretty_env_logger = "0.3.0"
+pretty_env_logger = "0.3.1"
 
 [features]
 default = ["discord_game_sdk_sys/link"]
