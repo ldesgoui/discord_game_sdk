@@ -1,6 +1,8 @@
 //! Rust low-level bindings for the [Discord Game SDK]
 //!
 //! Following the `-sys` package conventions, this crate does not define higher-level abstractions.
+//! The `link` feature (enabled by default) will copy the necessary library files from the
+//! SDK folders to $OUT_DIR.
 //!
 //! [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
 
