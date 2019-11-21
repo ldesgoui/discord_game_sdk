@@ -19,6 +19,9 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// You may find that your status is not updated while trying this feature, make sure that you
+    /// have not disabled it in your Discord client settings (User Settings -> Game Activity).
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#updateactivity>
     pub fn update_activity(
         &mut self,
