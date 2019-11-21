@@ -5,6 +5,7 @@ This document contains information about the releases of this crate.
 ## [0.4.1]
 
 - fix `sys/build.rs` for Apple OS X
+- fix ActivityKind to support Custom statuses
 
 ## [0.4.0]
 
