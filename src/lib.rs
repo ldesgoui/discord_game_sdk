@@ -141,16 +141,15 @@ mod methods {
 ///
 /// ```no_run
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-///
-/// let mut discord = discord_game_sdk::Discord::new(999999999999999999)?;
-/// let recvs = discord.event_receivers();
+/// let mut discord = Discord::new(999999999999999999)?;
 ///
 /// loop {
 ///     discord.empty_event_receivers();
-///     discord.run_callbacks();
+///     discord.run_callbacks()?;
 ///
+///     let recvs = discord.event_receivers();
 ///     for _ in recvs.current_user_update.try_iter() {
-///         println!("User updated!"),
+///         println!("User updated!");
 ///     }
 /// }
 /// # Ok(()) }
