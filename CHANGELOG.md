@@ -2,6 +2,10 @@
 
 This document contains information about the releases of this crate.
 
+## [0.4.1]
+
+- fix `sys/build.rs` for Apple OS X
+
 ## [0.4.0]
 
 - `i686-unknown-linux-gnu` and `x86_64-unknown-linux-gnu` are now supported
