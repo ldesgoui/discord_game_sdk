@@ -14,6 +14,11 @@ This crate provides Rust support to the following Discord features:
 - ...
 
 
+## Requirements
+
+- https://rust-lang.github.io/rust-bindgen/requirements.html
+- https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide (Instructions are provided during `cargo build`)
+
 ## Status
 
 This library is currently in early stages but is stabilizing.
