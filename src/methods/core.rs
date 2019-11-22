@@ -62,10 +62,12 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// ## Attention
+    /// Event buffers will grow large if `run_callbacks` is not ran often
     pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()?;
 
-        // TODO: this could be turned into a crossbeam_channel::Select
+        // https://github.com/rust-lang/rust/issues/43244
         let mut i = 0;
         while i < self.callbacks.len() {
             if self.callbacks[i].is_ready() {
@@ -79,11 +81,10 @@ impl<'a> Discord<'a> {
         Ok(())
     }
 
-    pub fn event_receivers(&self) -> &event::Receivers {
-        &self.receivers
-    }
-
-    pub fn empty_event_receivers(&self) {
+    /// ## Attention
+    /// Event buffers will grow large if not all used or emptied
+    /// As a rule of thumb, call `empty_event_buffers` before every `run_callbacks`
+    pub fn empty_event_buffers(&self) {
         self.receivers.empty_channels()
     }
 }

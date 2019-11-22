@@ -1,4 +1,4 @@
-use crate::{callbacks::ResultCallback, Action, Discord, Result};
+use crate::{callbacks::ResultCallback, event, Action, Discord, Result};
 
 /// # Overlay
 ///
@@ -80,5 +80,10 @@ impl<'a> Discord<'a> {
                 .open_voice_settings()
                 .and_then(ResultCallback::new(callback)))
         }
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/overlay#ontoggle>
+    pub fn recv_overlay_toggle(&'_ self) -> impl '_ + Iterator<Item = event::overlay::Toggle> {
+        self.receivers.overlay_toggle.try_iter()
     }
 }

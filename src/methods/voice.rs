@@ -1,4 +1,6 @@
-use crate::{callbacks::ResultCallback, sys, to_result::ToResult, Discord, InputMode, Result};
+use crate::{
+    callbacks::ResultCallback, event, sys, to_result::ToResult, Discord, InputMode, Result,
+};
 
 /// # Voice
 ///
@@ -101,5 +103,11 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#setlocalvolume>
     pub fn set_local_volume(&mut self, user_id: i64, volume: u8) -> Result<()> {
         unsafe { ffi!(self.get_voice_manager().set_local_volume(user_id, volume)) }.to_result()
+    }
+
+    pub fn recv_voice_settings_update(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::voice::SettingsUpdate> {
+        self.receivers.voice_settings_update.try_iter()
     }
 }

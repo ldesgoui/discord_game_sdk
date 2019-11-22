@@ -1,6 +1,6 @@
 use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback},
-    sys,
+    event, sys,
     to_result::ToResult,
     utils::{charbuf_len, charbuf_to_str},
     Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Result, SearchQuery,
@@ -492,5 +492,53 @@ impl<'a> Discord<'a> {
             ))
         }
         .to_result()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbyupdate>
+    pub fn recv_lobbies_update(&'_ self) -> impl '_ + Iterator<Item = event::lobbies::Update> {
+        self.receivers.lobbies_update.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbydelete>
+    pub fn recv_lobbies_delete(&'_ self) -> impl '_ + Iterator<Item = event::lobbies::Delete> {
+        self.receivers.lobbies_delete.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberconnect>
+    pub fn recv_lobbies_member_connect(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::lobbies::MemberConnect> {
+        self.receivers.lobbies_member_connect.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberupdate>
+    pub fn recv_lobbies_member_update(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::lobbies::MemberUpdate> {
+        self.receivers.lobbies_member_update.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberdisconnect>
+    pub fn recv_lobbies_member_disconnect(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::lobbies::MemberDisconnect> {
+        self.receivers.lobbies_member_disconnect.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbymessage>
+    pub fn recv_lobbies_message(&'_ self) -> impl '_ + Iterator<Item = event::lobbies::Message> {
+        self.receivers.lobbies_message.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onspeaking>
+    pub fn recv_lobbies_speaking(&'_ self) -> impl '_ + Iterator<Item = event::lobbies::Speaking> {
+        self.receivers.lobbies_speaking.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onnetworkmessage>
+    pub fn recv_lobbies_network_message(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::lobbies::NetworkMessage> {
+        self.receivers.lobbies_network_message.try_iter()
     }
 }

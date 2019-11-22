@@ -1,6 +1,6 @@
 use crate::{
-    callbacks::ResultCallback, sys, to_result::ToResult, Action, Activity, Discord, RequestReply,
-    Result,
+    callbacks::ResultCallback, event, sys, to_result::ToResult, Action, Activity, Discord,
+    RequestReply, Result,
 };
 
 /// # Activities
@@ -96,5 +96,31 @@ impl<'a> Discord<'a> {
                 .accept_invite(user_id)
                 .and_then(ResultCallback::new(callback)))
         }
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoin>
+    pub fn recv_activities_join(&'_ self) -> impl '_ + Iterator<Item = event::activities::Join> {
+        self.receivers.activities_join.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate>
+    pub fn recv_activities_spectate(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::activities::Spectate> {
+        self.receivers.activities_spectate.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoinrequest>
+    pub fn recv_activities_request(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::activities::Request> {
+        self.receivers.activities_request.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityinvite>
+    pub fn recv_activities_invite(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::activities::Invite> {
+        self.receivers.activities_invite.try_iter()
     }
 }

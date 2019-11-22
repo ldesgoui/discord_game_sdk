@@ -1,4 +1,4 @@
-use crate::{across_ffi, sys, to_result::ToResult, Discord, Relationship, Result};
+use crate::{across_ffi, event, sys, to_result::ToResult, Discord, Relationship, Result};
 
 /// # Relationships
 ///
@@ -56,5 +56,19 @@ impl<'a> Discord<'a> {
         }
 
         Ok(result)
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh>
+    pub fn recv_relationships_refresh(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::relationships::Refresh> {
+        self.receivers.relationships_refresh.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate>
+    pub fn recv_relationships_update(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::relationships::Update> {
+        self.receivers.relationships_update.try_iter()
     }
 }

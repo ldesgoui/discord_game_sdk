@@ -1,5 +1,5 @@
 use crate::{
-    callbacks::ResultCallback, sys, to_result::ToResult, Discord, Entitlement, Result, Sku,
+    callbacks::ResultCallback, event, sys, to_result::ToResult, Discord, Entitlement, Result, Sku,
 };
 
 /// # Store
@@ -109,5 +109,19 @@ impl<'a> Discord<'a> {
                 .start_purchase(sku_id)
                 .and_then(ResultCallback::new(callback)))
         }
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate>
+    pub fn recv_store_entitlement_create(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::store::EntitlementCreate> {
+        self.receivers.store_entitlement_create.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete>
+    pub fn recv_store_entitlement_delete(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::store::EntitlementDelete> {
+        self.receivers.store_entitlement_delete.try_iter()
     }
 }

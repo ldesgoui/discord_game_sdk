@@ -1,4 +1,4 @@
-use crate::{to_result::ToResult, Discord, Reliability, Result};
+use crate::{event, to_result::ToResult, Discord, Reliability, Result};
 
 /// # Networking
 ///
@@ -81,5 +81,19 @@ impl<'a> Discord<'a> {
             ))
         }
         .to_result()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/networking#onmessage>
+    pub fn recv_networking_message(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::networking::Message> {
+        self.receivers.networking_message.try_iter()
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/networking#onrouteupdate>
+    pub fn recv_networking_route_update(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::networking::RouteUpdate> {
+        self.receivers.networking_route_update.try_iter()
     }
 }

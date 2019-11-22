@@ -1,4 +1,6 @@
-use crate::{callbacks::ResultCallback, sys, to_result::ToResult, Achievement, Discord, Result};
+use crate::{
+    callbacks::ResultCallback, event, sys, to_result::ToResult, Achievement, Discord, Result,
+};
 
 /// # Achievements
 ///
@@ -71,5 +73,12 @@ impl<'a> Discord<'a> {
         }
 
         Ok(result)
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/achievements#onuserachievementupdate>
+    pub fn recv_achievement_update(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::achievements::Update> {
+        self.receivers.achievements_update.try_iter()
     }
 }

@@ -8,7 +8,7 @@ fn main() {
 
     // Game loop
     loop {
-        gsdk.empty_event_receivers();
+        gsdk.empty_event_buffers();
         if let Err(e) = gsdk.run_callbacks() {
             log::info!("run_callbacks error: {}", e);
             return;

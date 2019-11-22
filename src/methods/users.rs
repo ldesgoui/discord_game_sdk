@@ -1,6 +1,6 @@
 use crate::{
-    callbacks::ResultFromPtrCallback, sys, to_result::ToResult, Discord, PremiumKind, Result, User,
-    UserFlags,
+    callbacks::ResultFromPtrCallback, event, sys, to_result::ToResult, Discord, PremiumKind,
+    Result, User, UserFlags,
 };
 
 /// # Users
@@ -73,5 +73,12 @@ impl<'a> Discord<'a> {
         }
 
         Ok(flags)
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate>
+    pub fn recv_current_user_updaaet(
+        &'_ self,
+    ) -> impl '_ + Iterator<Item = event::users::CurrentUserUpdate> {
+        self.receivers.current_user_update.try_iter()
     }
 }
