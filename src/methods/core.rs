@@ -83,6 +83,7 @@ impl<'a> Discord<'a> {
 
     /// ## Attention
     /// Event buffers will grow large if not all used or emptied
+    ///
     /// As a rule of thumb, call `empty_event_buffers` before every `run_callbacks`
     pub fn empty_event_buffers(&self) {
         self.receivers.empty_channels()

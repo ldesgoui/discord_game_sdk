@@ -6,7 +6,7 @@ use crate::{
 };
 use std::mem::size_of;
 
-/// # Application
+/// # Applications
 /// <https://discordapp.com/developers/docs/game-sdk/applications>
 impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/applications#getcurrentlocale>
