@@ -56,7 +56,7 @@ I'm not aware of any good ways to test this crate, there are currently no tests.
 
 # Features:
 
-- `link`: (delegates to `discord_game_sdk_sys/link`)
+- `link`: (enabled by default, delegates to `discord_game_sdk_sys/link`)
     Provides the linker with an appropriately named dynamic library.
     This allows for `cargo run` to run flawlessly on Linux.
 

@@ -41,7 +41,7 @@
 //!
 //! # Features:
 //!
-//! - `link`:
+//! - `link`: (enabled by default)
 //!     Provides the linker with an appropriately named dynamic library.
 //!     This allows for `cargo run` to run flawlessly on Linux.
 //!
