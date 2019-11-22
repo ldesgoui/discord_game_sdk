@@ -93,7 +93,7 @@ fn main() {
         "x86_64-apple-darwin" => {
             std::fs::copy(
                 sdk_path.join("lib/x86_64/discord_game_sdk.dylib"),
-                out_path.join("discord_game_sdk.dylib"),
+                out_path.join("libdiscord_game_sdk.dylib"),
             )
             .unwrap();
         }

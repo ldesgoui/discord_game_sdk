@@ -2,6 +2,10 @@
 
 This document contains information about the releases of this crate.
 
+## [0.4.2]
+
+- fix Apple OS X regression
+
 ## [0.4.1]
 
 - fix `sys/build.rs` for Apple OS X
