@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// Action to take when invited or inviting to an [`Activity`]
 ///
@@ -7,15 +7,16 @@ use crate::{panic_messages::INVALID_ENUM, sys};
 pub enum Action {
     Join,
     Spectate,
+    Undefined(sys::EDiscordActivityActionType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordActivityActionType> for Action {
     fn from(source: sys::EDiscordActivityActionType) -> Self {
         match source {
-            sys::DiscordActivityActionType_Join => Action::Join,
-            sys::DiscordActivityActionType_Spectate => Action::Spectate,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordActivityActionType_Join => Self::Join,
+            sys::DiscordActivityActionType_Spectate => Self::Spectate,
+            _ => Self::Undefined(source),
         }
     }
 }
@@ -24,8 +25,9 @@ impl From<sys::EDiscordActivityActionType> for Action {
 impl Into<sys::EDiscordActivityActionType> for Action {
     fn into(self) -> sys::EDiscordActivityActionType {
         match self {
-            Action::Join => sys::DiscordActivityActionType_Join,
-            Action::Spectate => sys::DiscordActivityActionType_Spectate,
+            Self::Join => sys::DiscordActivityActionType_Join,
+            Self::Spectate => sys::DiscordActivityActionType_Spectate,
+            Self::Undefined(n) => n,
         }
     }
 }

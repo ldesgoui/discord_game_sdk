@@ -17,12 +17,12 @@ pub enum Comparison {
 impl Into<sys::EDiscordLobbySearchComparison> for Comparison {
     fn into(self) -> sys::EDiscordLobbySearchComparison {
         match self {
-            Comparison::Equal => sys::DiscordLobbySearchComparison_Equal,
-            Comparison::GreaterThan => sys::DiscordLobbySearchComparison_GreaterThan,
-            Comparison::GreaterThanOrEqual => sys::DiscordLobbySearchComparison_GreaterThanOrEqual,
-            Comparison::LessThan => sys::DiscordLobbySearchComparison_LessThan,
-            Comparison::LessThanOrEqual => sys::DiscordLobbySearchComparison_LessThanOrEqual,
-            Comparison::NotEqual => sys::DiscordLobbySearchComparison_NotEqual,
+            Self::Equal => sys::DiscordLobbySearchComparison_Equal,
+            Self::GreaterThan => sys::DiscordLobbySearchComparison_GreaterThan,
+            Self::GreaterThanOrEqual => sys::DiscordLobbySearchComparison_GreaterThanOrEqual,
+            Self::LessThan => sys::DiscordLobbySearchComparison_LessThan,
+            Self::LessThanOrEqual => sys::DiscordLobbySearchComparison_LessThanOrEqual,
+            Self::NotEqual => sys::DiscordLobbySearchComparison_NotEqual,
         }
     }
 }

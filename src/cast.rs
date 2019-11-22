@@ -13,8 +13,8 @@ pub enum Cast {
 impl Into<sys::EDiscordLobbySearchCast> for Cast {
     fn into(self) -> sys::EDiscordLobbySearchCast {
         match self {
-            Cast::String => sys::DiscordLobbySearchCast_String,
-            Cast::Number => sys::DiscordLobbySearchCast_Number,
+            Self::String => sys::DiscordLobbySearchCast_String,
+            Self::Number => sys::DiscordLobbySearchCast_Number,
         }
     }
 }

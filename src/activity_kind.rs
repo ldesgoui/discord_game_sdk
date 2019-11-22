@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// Activity Type
 ///
@@ -9,19 +9,18 @@ pub enum ActivityKind {
     Playing,
     Streaming,
     Watching,
-    Custom,
+    Undefined(sys::EDiscordActivityType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordActivityType> for ActivityKind {
     fn from(source: sys::EDiscordActivityType) -> Self {
         match source {
-            sys::DiscordActivityType_Listening => ActivityKind::Listening,
-            sys::DiscordActivityType_Playing => ActivityKind::Playing,
-            sys::DiscordActivityType_Streaming => ActivityKind::Streaming,
-            sys::DiscordActivityType_Watching => ActivityKind::Watching,
-            4 => ActivityKind::Custom,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordActivityType_Listening => Self::Listening,
+            sys::DiscordActivityType_Playing => Self::Playing,
+            sys::DiscordActivityType_Streaming => Self::Streaming,
+            sys::DiscordActivityType_Watching => Self::Watching,
+            _ => Self::Undefined(source),
         }
     }
 }
@@ -30,11 +29,11 @@ impl From<sys::EDiscordActivityType> for ActivityKind {
 impl Into<sys::EDiscordActivityType> for ActivityKind {
     fn into(self) -> sys::EDiscordActivityType {
         match self {
-            ActivityKind::Listening => sys::DiscordActivityType_Listening,
-            ActivityKind::Playing => sys::DiscordActivityType_Playing,
-            ActivityKind::Streaming => sys::DiscordActivityType_Streaming,
-            ActivityKind::Watching => sys::DiscordActivityType_Watching,
-            ActivityKind::Custom => 4,
+            Self::Listening => sys::DiscordActivityType_Listening,
+            Self::Playing => sys::DiscordActivityType_Playing,
+            Self::Streaming => sys::DiscordActivityType_Streaming,
+            Self::Watching => sys::DiscordActivityType_Watching,
+            Self::Undefined(n) => n,
         }
     }
 }

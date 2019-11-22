@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// User Status
 ///
@@ -9,6 +9,7 @@ pub enum Status {
     Idle,
     Offline,
     Online,
+    Undefined(sys::EDiscordStatus),
 }
 
 #[doc(hidden)]
@@ -19,7 +20,7 @@ impl From<sys::EDiscordStatus> for Status {
             sys::DiscordStatus_Idle => Status::Idle,
             sys::DiscordStatus_Offline => Status::Offline,
             sys::DiscordStatus_Online => Status::Online,
-            _ => panic!(INVALID_ENUM),
+            _ => Self::Undefined(source),
         }
     }
 }

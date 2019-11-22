@@ -9,8 +9,8 @@ pub enum FetchKind {
 impl Into<bool> for FetchKind {
     fn into(self) -> bool {
         match self {
-            FetchKind::ForceRefresh => true,
-            FetchKind::UseCached => false,
+            Self::ForceRefresh => true,
+            Self::UseCached => false,
         }
     }
 }

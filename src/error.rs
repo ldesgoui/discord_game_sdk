@@ -1,3 +1,5 @@
+use crate::sys;
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Discord Error
@@ -133,4 +135,7 @@ pub enum Error {
 
     #[error(display = "transaction aborted")]
     TransactionAborted,
+
+    #[error(display = "undefined error {}", _0)]
+    Undefined(sys::EDiscordResult),
 }

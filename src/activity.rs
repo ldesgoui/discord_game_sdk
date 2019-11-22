@@ -249,6 +249,3 @@ impl std::fmt::Debug for Activity {
             .finish()
     }
 }
-
-#[cfg(tests)]
-mod tests {}

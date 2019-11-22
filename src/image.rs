@@ -25,7 +25,7 @@ impl Image {
     ///
     /// Pattern is: `RGBARGBARGBA...`
     pub fn data(&'_ self) -> &'_ [u8] {
-        &self.data[..]
+        &self.data
     }
 
     /// Get R, G, B, A channels of pixel at (x, y)
@@ -33,10 +33,10 @@ impl Image {
         debug_assert!(x < self.width);
         debug_assert!(y < self.height);
 
-        let idx = (x + y * self.width) as usize;
+        let idx = x as usize + y as usize * self.width as usize;
 
         (
-            self.data[idx + 0],
+            self.data[idx],
             self.data[idx + 1],
             self.data[idx + 2],
             self.data[idx + 3],

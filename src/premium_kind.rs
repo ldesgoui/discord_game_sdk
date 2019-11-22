@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// Premium Type
 ///
@@ -11,16 +11,17 @@ pub enum PremiumKind {
     Tier1,
     /// Nitro subscriber
     Tier2,
+    Undefined(sys::EDiscordPremiumType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordPremiumType> for PremiumKind {
     fn from(source: sys::EDiscordPremiumType) -> Self {
         match source {
-            sys::DiscordPremiumType_None => PremiumKind::None,
-            sys::DiscordPremiumType_Tier1 => PremiumKind::Tier1,
-            sys::DiscordPremiumType_Tier2 => PremiumKind::Tier2,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordPremiumType_None => Self::None,
+            sys::DiscordPremiumType_Tier1 => Self::Tier1,
+            sys::DiscordPremiumType_Tier2 => Self::Tier2,
+            _ => Self::Undefined(source),
         }
     }
 }

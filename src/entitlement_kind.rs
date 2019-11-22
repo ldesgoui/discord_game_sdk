@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// Entitlement Type
 ///
@@ -19,20 +19,21 @@ pub enum EntitlementKind {
     TestModePurchase,
     /// Entitlement was gifted by another user
     UserGift,
+    Undefined(sys::EDiscordEntitlementType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordEntitlementType> for EntitlementKind {
     fn from(source: sys::EDiscordEntitlementType) -> Self {
         match source {
-            sys::DiscordEntitlementType_DeveloperGift => EntitlementKind::DeveloperGift,
-            sys::DiscordEntitlementType_FreePurchase => EntitlementKind::FreePurchase,
-            sys::DiscordEntitlementType_PremiumPurchase => EntitlementKind::PremiumPurchase,
-            sys::DiscordEntitlementType_PremiumSubscription => EntitlementKind::PremiumSubscription,
-            sys::DiscordEntitlementType_Purchase => EntitlementKind::Purchase,
-            sys::DiscordEntitlementType_TestModePurchase => EntitlementKind::TestModePurchase,
-            sys::DiscordEntitlementType_UserGift => EntitlementKind::UserGift,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordEntitlementType_DeveloperGift => Self::DeveloperGift,
+            sys::DiscordEntitlementType_FreePurchase => Self::FreePurchase,
+            sys::DiscordEntitlementType_PremiumPurchase => Self::PremiumPurchase,
+            sys::DiscordEntitlementType_PremiumSubscription => Self::PremiumSubscription,
+            sys::DiscordEntitlementType_Purchase => Self::Purchase,
+            sys::DiscordEntitlementType_TestModePurchase => Self::TestModePurchase,
+            sys::DiscordEntitlementType_UserGift => Self::UserGift,
+            _ => Self::Undefined(source),
         }
     }
 }

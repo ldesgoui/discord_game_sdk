@@ -19,10 +19,10 @@ pub enum Distance {
 impl Into<sys::EDiscordLobbySearchDistance> for Distance {
     fn into(self) -> sys::EDiscordLobbySearchDistance {
         match self {
-            Distance::Default => sys::DiscordLobbySearchDistance_Default,
-            Distance::Extended => sys::DiscordLobbySearchDistance_Extended,
-            Distance::Global => sys::DiscordLobbySearchDistance_Global,
-            Distance::Local => sys::DiscordLobbySearchDistance_Local,
+            Self::Default => sys::DiscordLobbySearchDistance_Default,
+            Self::Extended => sys::DiscordLobbySearchDistance_Extended,
+            Self::Global => sys::DiscordLobbySearchDistance_Global,
+            Self::Local => sys::DiscordLobbySearchDistance_Local,
         }
     }
 }

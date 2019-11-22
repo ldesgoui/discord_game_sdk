@@ -1,5 +1,5 @@
 use crate::{
-    panic_messages::{INVALID_ENUM, NOT_UTF8, SEND_FAIL},
+    panic_messages::{NOT_UTF8, SEND_FAIL},
     sys,
     to_result::ToResult,
     Relationship, Result,
@@ -88,15 +88,16 @@ where
 }
 
 pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, message: *const i8) {
+    use log::Level::*;
+
     prevent_unwind!();
 
-    use log::Level::*;
     let level = match level {
         sys::DiscordLogLevel_Error => Error,
         sys::DiscordLogLevel_Warn => Warn,
         sys::DiscordLogLevel_Info => Info,
         sys::DiscordLogLevel_Debug => Debug,
-        _ => panic!(INVALID_ENUM),
+        _ => Debug,
     };
 
     let message = unsafe { CStr::from_ptr(message) }.to_str().expect(NOT_UTF8);

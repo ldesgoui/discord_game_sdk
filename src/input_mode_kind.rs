@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// Input Mode Type
 ///
@@ -7,15 +7,16 @@ use crate::{panic_messages::INVALID_ENUM, sys};
 pub enum InputModeKind {
     PushToTalk,
     VoiceActivity,
+    Undefined(sys::EDiscordInputModeType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordInputModeType> for InputModeKind {
     fn from(source: sys::EDiscordInputModeType) -> Self {
         match source {
-            sys::DiscordInputModeType_PushToTalk => InputModeKind::PushToTalk,
-            sys::DiscordInputModeType_VoiceActivity => InputModeKind::VoiceActivity,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordInputModeType_PushToTalk => Self::PushToTalk,
+            sys::DiscordInputModeType_VoiceActivity => Self::VoiceActivity,
+            _ => Self::Undefined(source),
         }
     }
 }
@@ -24,8 +25,9 @@ impl From<sys::EDiscordInputModeType> for InputModeKind {
 impl Into<sys::EDiscordInputModeType> for InputModeKind {
     fn into(self) -> sys::EDiscordInputModeType {
         match self {
-            InputModeKind::PushToTalk => sys::DiscordInputModeType_PushToTalk,
-            InputModeKind::VoiceActivity => sys::DiscordInputModeType_VoiceActivity,
+            Self::PushToTalk => sys::DiscordInputModeType_PushToTalk,
+            Self::VoiceActivity => sys::DiscordInputModeType_VoiceActivity,
+            Self::Undefined(n) => n,
         }
     }
 }

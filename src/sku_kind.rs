@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// SKU Type
 ///
@@ -13,17 +13,18 @@ pub enum SkuKind {
     Consumable,
     /// Bundle is a DLC
     DLC,
+    Undefined(sys::EDiscordSkuType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordSkuType> for SkuKind {
     fn from(source: sys::EDiscordSkuType) -> Self {
         match source {
-            sys::DiscordSkuType_Application => SkuKind::Application,
-            sys::DiscordSkuType_Bundle => SkuKind::Bundle,
-            sys::DiscordSkuType_Consumable => SkuKind::Consumable,
-            sys::DiscordSkuType_DLC => SkuKind::DLC,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordSkuType_Application => Self::Application,
+            sys::DiscordSkuType_Bundle => Self::Bundle,
+            sys::DiscordSkuType_Consumable => Self::Consumable,
+            sys::DiscordSkuType_DLC => Self::DLC,
+            _ => Self::Undefined(source),
         }
     }
 }

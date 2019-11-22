@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// Lobby Type
 ///
@@ -7,15 +7,16 @@ use crate::{panic_messages::INVALID_ENUM, sys};
 pub enum LobbyKind {
     Public,
     Private,
+    Undefined(sys::EDiscordLobbyType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordLobbyType> for LobbyKind {
     fn from(source: sys::EDiscordLobbyType) -> Self {
         match source {
-            sys::DiscordLobbyType_Public => LobbyKind::Public,
-            sys::DiscordLobbyType_Private => LobbyKind::Private,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordLobbyType_Public => Self::Public,
+            sys::DiscordLobbyType_Private => Self::Private,
+            _ => Self::Undefined(source),
         }
     }
 }
@@ -24,8 +25,9 @@ impl From<sys::EDiscordLobbyType> for LobbyKind {
 impl Into<sys::EDiscordLobbyType> for LobbyKind {
     fn into(self) -> sys::EDiscordLobbyType {
         match self {
-            LobbyKind::Public => sys::DiscordLobbyType_Public,
-            LobbyKind::Private => sys::DiscordLobbyType_Private,
+            Self::Public => sys::DiscordLobbyType_Public,
+            Self::Private => sys::DiscordLobbyType_Private,
+            Self::Undefined(n) => n,
         }
     }
 }

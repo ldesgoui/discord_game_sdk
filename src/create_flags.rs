@@ -13,7 +13,7 @@ pub enum CreateFlags {
 
 impl Default for CreateFlags {
     fn default() -> Self {
-        CreateFlags::Default
+        Self::Default
     }
 }
 
@@ -21,8 +21,8 @@ impl Default for CreateFlags {
 impl Into<sys::EDiscordCreateFlags> for CreateFlags {
     fn into(self) -> sys::EDiscordCreateFlags {
         match self {
-            CreateFlags::Default => sys::DiscordCreateFlags_Default,
-            CreateFlags::NoRequireDiscord => sys::DiscordCreateFlags_NoRequireDiscord,
+            Self::Default => sys::DiscordCreateFlags_Default,
+            Self::NoRequireDiscord => sys::DiscordCreateFlags_NoRequireDiscord,
         }
     }
 }

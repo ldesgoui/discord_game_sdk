@@ -4,7 +4,7 @@ use crate::{
 };
 use std::iter::FusedIterator;
 
-/// OAuth2 Token
+/// OAuth 2.0 Token
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/applications#data-models-oauth2token-struct>
 #[derive(Clone, Copy, Eq, PartialEq)]

@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// Relationship Type
 ///
@@ -17,19 +17,20 @@ pub enum RelationshipKind {
     PendingIncoming,
     /// Current user has a pending outgoing friend request to user
     PendingOutgoing,
+    Undefined(sys::EDiscordRelationshipType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordRelationshipType> for RelationshipKind {
     fn from(source: sys::EDiscordRelationshipType) -> Self {
         match source {
-            sys::DiscordRelationshipType_Blocked => RelationshipKind::Blocked,
-            sys::DiscordRelationshipType_Friend => RelationshipKind::Friend,
-            sys::DiscordRelationshipType_Implicit => RelationshipKind::Implicit,
-            sys::DiscordRelationshipType_None => RelationshipKind::None,
-            sys::DiscordRelationshipType_PendingIncoming => RelationshipKind::PendingIncoming,
-            sys::DiscordRelationshipType_PendingOutgoing => RelationshipKind::PendingOutgoing,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordRelationshipType_Blocked => Self::Blocked,
+            sys::DiscordRelationshipType_Friend => Self::Friend,
+            sys::DiscordRelationshipType_Implicit => Self::Implicit,
+            sys::DiscordRelationshipType_None => Self::None,
+            sys::DiscordRelationshipType_PendingIncoming => Self::PendingIncoming,
+            sys::DiscordRelationshipType_PendingOutgoing => Self::PendingOutgoing,
+            _ => Self::Undefined(source),
         }
     }
 }

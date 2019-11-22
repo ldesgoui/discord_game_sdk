@@ -1,4 +1,4 @@
-use crate::{panic_messages::INVALID_ENUM, sys};
+use crate::sys;
 
 /// Image Type
 ///
@@ -7,14 +7,15 @@ use crate::{panic_messages::INVALID_ENUM, sys};
 pub enum ImageKind {
     /// User Avatar
     User,
+    Undefined(sys::EDiscordImageType),
 }
 
 #[doc(hidden)]
 impl From<sys::EDiscordImageType> for ImageKind {
     fn from(source: sys::EDiscordImageType) -> Self {
         match source {
-            sys::DiscordImageType_User => ImageKind::User,
-            _ => panic!(INVALID_ENUM),
+            sys::DiscordImageType_User => Self::User,
+            _ => Self::Undefined(source),
         }
     }
 }
@@ -23,7 +24,8 @@ impl From<sys::EDiscordImageType> for ImageKind {
 impl Into<sys::EDiscordImageType> for ImageKind {
     fn into(self) -> sys::EDiscordImageType {
         match self {
-            ImageKind::User => sys::DiscordImageType_User,
+            Self::User => sys::DiscordImageType_User,
+            Self::Undefined(n) => n,
         }
     }
 }
