@@ -31,7 +31,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! discord_game_sdk = "0.4.1"
+//! discord_game_sdk = "0.5.0-alpha.1"
 //! ```
 //!
 //! Set the following environment variable:
