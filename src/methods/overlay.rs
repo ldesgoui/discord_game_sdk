@@ -1,5 +1,4 @@
 use crate::{callbacks::ResultCallback, Action, Discord, Result};
-use std::ffi::CStr;
 
 /// # Overlay
 ///
@@ -55,18 +54,20 @@ impl<'a> Discord<'a> {
         }
     }
 
-    /// `code` must be valid UTF-8
+    /// `code` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#openguildinvite>
     pub fn open_guild_invite_overlay(
         &mut self,
-        code: impl AsRef<CStr>,
+        mut code: String,
         callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
+        code.push('\0');
+
         unsafe {
             ffi!(self
                 .get_overlay_manager()
-                .open_guild_invite(code.as_ref().as_ptr())
+                .open_guild_invite(code.as_ptr() as *const _)
                 .and_then(ResultCallback::new(callback)))
         }
     }

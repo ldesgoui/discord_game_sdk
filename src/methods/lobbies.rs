@@ -6,7 +6,6 @@ use crate::{
     Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Result, SearchQuery,
 };
 use std::collections::HashMap;
-use std::ffi::CStr;
 use std::mem::size_of;
 
 /// # Lobbies
@@ -86,35 +85,39 @@ impl<'a> Discord<'a> {
         }
     }
 
-    /// `secret` must also be valid UTF-8
+    /// `secret` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby>
     pub fn connect_lobby(
         &mut self,
         lobby_id: i64,
-        secret: impl AsRef<CStr>,
+        mut secret: String,
         callback: impl FnMut(&mut Discord, Result<Lobby>) + 'a,
     ) {
+        secret.push('\0');
+
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .connect_lobby(lobby_id, secret.as_ref().as_ptr() as *mut _)
+                .connect_lobby(lobby_id, secret.as_ptr() as *mut _)
                 .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
 
-    /// `activity_secret` must also be valid UTF-8
+    /// `activity_secret` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret>
     pub fn connect_lobby_with_activity_secret(
         &mut self,
-        activity_secret: impl AsRef<CStr>,
+        mut activity_secret: String,
         callback: impl FnMut(&mut Discord, Result<Lobby>) + 'a,
     ) {
+        activity_secret.push('\0');
+
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .connect_lobby_with_activity_secret(activity_secret.as_ref().as_ptr() as *mut _)
+                .connect_lobby_with_activity_secret(activity_secret.as_ptr() as *mut _)
                 .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
@@ -160,16 +163,19 @@ impl<'a> Discord<'a> {
         Ok(charbuf_to_str(&secret[..charbuf_len(&secret)]).to_string())
     }
 
-    /// `key` must also be valid UTF-8
+    /// `key` must not contain any nul bytes, it will grow by one byte.
+    ///
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
-    pub fn lobby_metadata(&mut self, lobby_id: i64, key: impl AsRef<CStr>) -> Result<String> {
+    pub fn lobby_metadata(&mut self, lobby_id: i64, mut key: String) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
+
+        key.push('\0');
 
         unsafe {
             ffi!(self.get_lobby_manager().get_lobby_metadata_value(
                 lobby_id,
-                key.as_ref().as_ptr() as *mut _,
+                key.as_ptr() as *mut _,
                 &mut value as *mut _
             ))
         }

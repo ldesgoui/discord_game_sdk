@@ -1,20 +1,19 @@
 use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, LobbyKind, Result};
 use std::collections::HashMap;
-use std::ffi::CStr;
 
 /// Lobby Transaction
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/lobbies>
 #[derive(Clone, Debug, Default)]
-pub struct LobbyTransaction<'a> {
+pub struct LobbyTransaction {
     pub(crate) kind: Option<LobbyKind>,
     pub(crate) owner: Option<i64>,
     pub(crate) capacity: Option<u32>,
     pub(crate) locked: Option<bool>,
-    pub(crate) metadata: HashMap<&'a CStr, Option<&'a CStr>>,
+    pub(crate) metadata: HashMap<String, Option<String>>,
 }
 
-impl<'a> LobbyTransaction<'a> {
+impl LobbyTransaction {
     pub fn new() -> Self {
         Self::default()
     }
@@ -37,18 +36,21 @@ impl<'a> LobbyTransaction<'a> {
         self
     }
 
-    /// `key` and `value` must also be valid UTF-8
+    /// `key` and `value` must not contain any nul bytes, both will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetmetadata>
-    pub fn add_metadata(&mut self, key: &'a CStr, value: &'a CStr) -> &mut Self {
+    pub fn add_metadata(&mut self, mut key: String, mut value: String) -> &mut Self {
+        key.push('\0');
+        value.push('\0');
         let _ = self.metadata.insert(key, Some(value));
         self
     }
 
-    /// `key` must also be valid UTF-8
+    /// `key` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactiondeletemetadata>
-    pub fn delete_metadata<S>(&mut self, key: &'a CStr) -> &mut Self {
+    pub fn delete_metadata<S>(&mut self, mut key: String) -> &mut Self {
+        key.push('\0');
         let _ = self.metadata.insert(key, None);
         self
     }
@@ -84,6 +86,7 @@ impl<'a> LobbyTransaction<'a> {
                     ffi!(tx.set_metadata(key.as_ptr() as *mut _, value.as_ptr() as *mut _))
                         .to_result()?;
                 }
+
                 None => {
                     ffi!(tx.delete_metadata(key.as_ptr() as *mut _)).to_result()?;
                 }

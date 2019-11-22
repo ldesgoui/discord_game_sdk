@@ -1,20 +1,21 @@
 use crate::{
-    callbacks::ResultCallback, sys, to_result::ToResult, Action, Activity, Discord,
-    RequestReply, Result,
+    callbacks::ResultCallback, sys, to_result::ToResult, Action, Activity, Discord, RequestReply,
+    Result,
 };
-use std::ffi::CStr;
 
 /// # Activities
 /// <https://discordapp.com/developers/docs/game-sdk/activities>
 impl<'a> Discord<'a> {
-    /// `command` must also be valid UTF-8
+    /// `command` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#registercommand>
-    pub fn register_launch_command(&mut self, command: impl AsRef<CStr>) -> Result<()> {
+    pub fn register_launch_command(&mut self, mut command: String) -> Result<()> {
+        command.push('\0');
+
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .register_command(command.as_ref().as_ptr()))
+                .register_command(command.as_ptr() as *const _))
         }
         .to_result()
     }
@@ -63,20 +64,22 @@ impl<'a> Discord<'a> {
         }
     }
 
-    /// `content` must also be valid UTF-8
+    /// `content` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#sendinvite>
     pub fn send_invite(
         &mut self,
         user_id: i64,
         action: Action,
-        content: impl AsRef<CStr>,
+        mut content: String,
         callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
+        content.push('\0');
+
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .send_invite(user_id, action.into(), content.as_ref().as_ptr())
+                .send_invite(user_id, action.into(), content.as_ptr() as *const _)
                 .and_then(ResultCallback::new(callback)))
         }
     }

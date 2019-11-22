@@ -1,32 +1,36 @@
 use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, Result};
 use std::collections::HashMap;
-use std::ffi::CStr;
 
 /// Lobby Member Transaction
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/lobbies>
 #[derive(Clone, Debug, Default)]
-pub struct LobbyMemberTransaction<'a> {
-    pub(crate) metadata: HashMap<&'a CStr, Option<&'a CStr>>,
+pub struct LobbyMemberTransaction {
+    pub(crate) metadata: HashMap<String, Option<String>>,
 }
 
-impl<'a> LobbyMemberTransaction<'a> {
+impl LobbyMemberTransaction {
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// `key` and `value` must also be valid UTF-8
+    /// `key` and `value` must not contain any nul bytes, both will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactionsetmetadata>
-    pub fn add_metadata(&mut self, key: &'a CStr, value: &'a CStr) -> &mut Self {
+    pub fn add_metadata(&mut self, mut key: String, mut value: String) -> &mut Self {
+        key.push('\0');
+        value.push('\0');
+
         let _ = self.metadata.insert(key, Some(value));
+
         self
     }
 
-    /// `key` must also be valid UTF-8
+    /// `key` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactiondeletemetadata>
-    pub fn delete_metadata<S>(&mut self, key: &'a CStr) -> &mut Self {
+    pub fn delete_metadata<S>(&mut self, mut key: String) -> &mut Self {
+        key.push('\0');
         let _ = self.metadata.insert(key, None);
         self
     }

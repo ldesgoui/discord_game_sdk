@@ -5,28 +5,25 @@ use crate::{
     utils::{charbuf_len, charbuf_to_str},
     Discord, FileStat, Result,
 };
-use std::ffi::CStr;
 use std::mem::size_of;
 
 /// # Storage
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/storage>
 impl<'a> Discord<'a> {
-    /// `filename` must also be valid UTF-8
+    /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#read>
-    pub fn read_file(
-        &mut self,
-        filename: impl AsRef<CStr>,
-        mut buffer: impl AsMut<[u8]>,
-    ) -> Result<u32> {
+    pub fn read_file(&mut self, mut filename: String, mut buffer: impl AsMut<[u8]>) -> Result<u32> {
+        filename.push('\0');
+
         let mut read = 0;
 
         let buffer = buffer.as_mut();
 
         unsafe {
             ffi!(self.get_storage_manager().read(
-                filename.as_ref().as_ptr(),
+                filename.as_ptr() as *const _,
                 buffer.as_mut_ptr(),
                 std::cmp::min(buffer.len(), u32::max_value() as usize) as u32,
                 &mut read as *mut _
@@ -37,52 +34,55 @@ impl<'a> Discord<'a> {
         Ok(read)
     }
 
-    /// `filename` must also be valid UTF-8
+    /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasync>
     pub fn read_file_async(
         &mut self,
-        filename: impl AsRef<CStr>,
+        mut filename: String,
         callback: impl FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
     ) {
+        filename.push('\0');
+
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .read_async(filename.as_ref().as_ptr())
+                .read_async(filename.as_ptr() as *const _)
                 .and_then(ResultBytesCallback::new(callback)))
         }
     }
 
-    /// `filename` must also be valid UTF-8
+    /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasyncpartial>
     pub fn read_file_async_partial(
         &mut self,
-        filename: impl AsRef<CStr>,
+        mut filename: String,
         offset: u64,
         length: u64,
         callback: impl FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
     ) {
+        filename.push('\0');
+
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .read_async_partial(filename.as_ref().as_ptr(), offset, length)
+                .read_async_partial(filename.as_ptr() as *const _, offset, length)
                 .and_then(ResultBytesCallback::new(callback)))
         }
     }
 
-    /// `filename` must also be valid UTF-8
+    /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#write>
-    pub fn write_file(
-        &mut self,
-        filename: impl AsRef<CStr>,
-        buffer: impl AsRef<[u8]>,
-    ) -> Result<()> {
+    pub fn write_file(&mut self, mut filename: String, buffer: impl AsRef<[u8]>) -> Result<()> {
+        filename.push('\0');
+
         let buffer = buffer.as_ref();
+
         unsafe {
             ffi!(self.get_storage_manager().write(
-                filename.as_ref().as_ptr(),
+                filename.as_ptr() as *const _,
                 buffer.as_ptr() as *mut _,
                 buffer.len() as u32,
             ))
@@ -90,21 +90,24 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
-    /// `filename` must also be valid UTF-8
+    /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#writeasync>
     pub fn write_file_async(
         &mut self,
-        filename: impl AsRef<CStr>,
+        mut filename: String,
         buffer: impl AsRef<[u8]>,
         callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
+        filename.push('\0');
+
         let buffer = buffer.as_ref();
+
         unsafe {
             ffi!(self
                 .get_storage_manager()
                 .write_async(
-                    filename.as_ref().as_ptr(),
+                    filename.as_ptr() as *const _,
                     buffer.as_ptr() as *mut _,
                     buffer.len() as u32
                 )
@@ -112,44 +115,50 @@ impl<'a> Discord<'a> {
         }
     }
 
-    /// `filename` must also be valid UTF-8
+    /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#delete>
-    pub fn delete_file(&mut self, filename: impl AsRef<CStr>) -> Result<()> {
+    pub fn delete_file(&mut self, mut filename: String) -> Result<()> {
+        filename.push('\0');
+
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .delete_(filename.as_ref().as_ptr()))
+                .delete_(filename.as_ptr() as *const _))
         }
         .to_result()
     }
 
-    /// `filename` must also be valid UTF-8
+    /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#exists>
-    pub fn file_exists(&mut self, filename: impl AsRef<CStr>) -> Result<bool> {
+    pub fn file_exists(&mut self, mut filename: String) -> Result<bool> {
+        filename.push('\0');
+
         let mut exists = false;
 
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .exists(filename.as_ref().as_ptr(), &mut exists))
+                .exists(filename.as_ptr() as *const _, &mut exists))
         }
         .to_result()?;
 
         Ok(exists)
     }
 
-    /// `filename` must also be valid UTF-8
+    /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#stat>
-    pub fn file_stat(&mut self, filename: impl AsRef<CStr>) -> Result<FileStat> {
+    pub fn file_stat(&mut self, mut filename: String) -> Result<FileStat> {
+        filename.push('\0');
+
         let mut stat = sys::DiscordFileStat::default();
 
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .stat(filename.as_ref().as_ptr(), &mut stat))
+                .stat(filename.as_ptr() as *const _, &mut stat))
         }
         .to_result()?;
 

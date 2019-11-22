@@ -1,20 +1,19 @@
 use crate::{
     macro_helper::MacroHelper, sys, to_result::ToResult, Cast, Comparison, Distance, Result,
 };
-use std::ffi::CStr;
 
 /// Lobby Search
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/lobbies#search>
 #[derive(Clone, Debug, Default)]
-pub struct SearchQuery<'a> {
-    pub(crate) filter: Option<(&'a CStr, &'a CStr, Comparison, Cast)>,
-    pub(crate) sort: Option<(&'a CStr, &'a CStr, Cast)>,
+pub struct SearchQuery {
+    pub(crate) filter: Option<(String, String, Comparison, Cast)>,
+    pub(crate) sort: Option<(String, String, Cast)>,
     pub(crate) limit: Option<u32>,
     pub(crate) distance: Option<Distance>,
 }
 
-impl<'a> SearchQuery<'a> {
+impl SearchQuery {
     pub fn new() -> Self {
         Self::default()
     }
@@ -26,11 +25,13 @@ impl<'a> SearchQuery<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchfilter>
     pub fn filter(
         &mut self,
-        key: &'a CStr,
+        mut key: String,
         comparison: Comparison,
-        value: &'a CStr,
+        mut value: String,
         cast: Cast,
     ) -> &mut Self {
+        key.push('\0');
+        value.push('\0');
         self.filter = Some((key, value, comparison, cast));
         self
     }
@@ -40,7 +41,9 @@ impl<'a> SearchQuery<'a> {
     /// `key` and `value` must also be valid UTF-8
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchsort>
-    pub fn sort(&mut self, key: &'a CStr, value: &'a CStr, cast: Cast) -> &mut Self {
+    pub fn sort(&mut self, mut key: String, mut value: String, cast: Cast) -> &mut Self {
+        key.push('\0');
+        value.push('\0');
         self.sort = Some((key, value, cast));
         self
     }
@@ -64,20 +67,20 @@ impl<'a> SearchQuery<'a> {
     pub(crate) unsafe fn process(&self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
         let tx = MacroHelper { core: ptr };
 
-        if let Some((key, value, comparison, cast)) = self.filter {
+        if let Some((key, value, comparison, cast)) = self.filter.as_ref() {
             ffi!(tx.filter(
                 key.as_ptr() as *mut _,
-                comparison.into(),
-                cast.into(),
+                (*comparison).into(),
+                (*cast).into(),
                 value.as_ptr() as *mut _,
             ))
             .to_result()?;
         }
 
-        if let Some((key, value, cast)) = self.sort {
+        if let Some((key, value, cast)) = self.sort.as_ref() {
             ffi!(tx.sort(
                 key.as_ptr() as *mut _,
-                cast.into(),
+                (*cast).into(),
                 value.as_ptr() as *mut _,
             ))
             .to_result()?;

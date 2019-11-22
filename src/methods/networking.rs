@@ -1,5 +1,4 @@
 use crate::{to_result::ToResult, Discord, Reliability, Result};
-use std::ffi::CStr;
 
 /// # Networking
 ///
@@ -19,26 +18,30 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_network_manager().flush()) }.to_result()
     }
 
-    /// `route` must also be valid UTF-8
+    /// `route` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#openpeer>
-    pub fn open_peer(&mut self, peer_id: u64, route: impl AsRef<CStr>) -> Result<()> {
+    pub fn open_peer(&mut self, peer_id: u64, mut route: String) -> Result<()> {
+        route.push('\0');
+
         unsafe {
             ffi!(self
                 .get_network_manager()
-                .open_peer(peer_id, route.as_ref().as_ptr()))
+                .open_peer(peer_id, route.as_ptr() as *const _))
         }
         .to_result()
     }
 
-    /// `route` must also be valid UTF-8
+    /// `route` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#updatepeer>
-    pub fn update_peer(&mut self, peer_id: u64, route: impl AsRef<CStr>) -> Result<()> {
+    pub fn update_peer(&mut self, peer_id: u64, mut route: String) -> Result<()> {
+        route.push('\0');
+
         unsafe {
             ffi!(self
                 .get_network_manager()
-                .update_peer(peer_id, route.as_ref().as_ptr()))
+                .update_peer(peer_id, route.as_ptr() as *const _))
         }
         .to_result()
     }
