@@ -21,8 +21,8 @@
 //!
 //! # Requirements
 //!
-//! - https://rust-lang.github.io/rust-bindgen/requirements.html
-//! - https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
+//! - <https://rust-lang.github.io/rust-bindgen/requirements.html>
+//! - <https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide>
 //!
 //!
 //! # Usage
@@ -197,7 +197,7 @@ mod methods {
 ///
 /// ```no_run
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// let mut discord = Discord::new(999999999999999999)?;
+/// let mut discord = discord_game_sdk::Discord::new(999999999999999999)?;
 ///
 /// loop {
 ///     discord.empty_event_receivers();
