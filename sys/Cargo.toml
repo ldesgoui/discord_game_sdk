@@ -18,4 +18,4 @@ doc = [] # DO NOT RELY ON THIS
 link = []
 
 [build-dependencies]
-bindgen = "0.52.0"
+bindgen = { version = "0.52.0", default-features = false }
