@@ -18,11 +18,11 @@ impl<'a> Discord<'a> {
 
     /// <https://discordapp.com/developers/docs/game-sdk/store#getsku>
     pub fn sku(&mut self, id: i64) -> Result<Sku> {
-        let mut sku = Sku(sys::DiscordSku::default());
+        let mut sku = sys::DiscordSku::default();
 
-        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku.0 as *mut _,)) }.to_result()?;
+        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku as *mut _,)) }.to_result()?;
 
-        Ok(sku)
+        Ok(sku.into())
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
@@ -33,17 +33,13 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
 
         let mut result = Vec::with_capacity(count as usize);
-        let mut sku = Sku(sys::DiscordSku::default());
+        let mut sku = sys::DiscordSku::default();
 
         for index in 0..count {
-            unsafe {
-                ffi!(self
-                    .get_store_manager()
-                    .get_sku_at(index as i32, &mut sku.0))
-            }
-            .to_result()?;
+            unsafe { ffi!(self.get_store_manager().get_sku_at(index as i32, &mut sku)) }
+                .to_result()?;
 
-            result.push(sku)
+            result.push(sku.into())
         }
 
         Ok(result)

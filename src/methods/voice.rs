@@ -6,16 +6,16 @@ use crate::{callbacks::ResultCallback, sys, to_result::ToResult, Discord, InputM
 impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#getinputmode>
     pub fn input_mode(&mut self) -> Result<InputMode> {
-        let mut input_mode = InputMode(sys::DiscordInputMode::default());
+        let mut input_mode = sys::DiscordInputMode::default();
 
         unsafe {
             ffi!(self
                 .get_voice_manager()
-                .get_input_mode(&mut input_mode.0 as *mut _))
+                .get_input_mode(&mut input_mode as *mut _))
         }
         .to_result()?;
 
-        Ok(input_mode)
+        Ok(input_mode.into())
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#setinputmode>
@@ -27,7 +27,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_voice_manager()
-                .set_input_mode(input_mode.0)
+                .set_input_mode(input_mode.sys)
                 .and_then(ResultCallback::new(callback)))
         }
     }

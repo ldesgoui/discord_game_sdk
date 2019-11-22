@@ -13,16 +13,16 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#getcurrentuser>
     pub fn current_user(&mut self) -> Result<User> {
-        let mut user = User(sys::DiscordUser::default());
+        let mut user = sys::DiscordUser::default();
 
         unsafe {
             ffi!(self
                 .get_user_manager()
-                .get_current_user(&mut user.0 as *mut _))
+                .get_current_user(&mut user as *mut _))
         }
         .to_result()?;
 
-        Ok(user)
+        Ok(user.into())
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/users#getuser>

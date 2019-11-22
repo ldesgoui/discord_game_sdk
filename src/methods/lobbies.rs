@@ -2,7 +2,7 @@ use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback},
     sys,
     to_result::ToResult,
-    utils::cstr_to_str,
+    utils::{charbuf_len, charbuf_to_str},
     Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Result, SearchQuery,
 };
 use std::collections::HashMap;
@@ -157,7 +157,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(cstr_to_str(&secret[..]).to_string())
+        Ok(charbuf_to_str(&secret[..charbuf_len(&secret)]).to_string())
     }
 
     /// `key` must also be valid UTF-8
@@ -175,7 +175,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(cstr_to_str(&value[..]).to_string())
+        Ok(charbuf_to_str(&value[..charbuf_len(&value)]).to_string())
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
@@ -215,8 +215,8 @@ impl<'a> Discord<'a> {
             .to_result()?;
 
             let _ = res.insert(
-                cstr_to_str(&key[..]).to_string(),
-                cstr_to_str(&value[..]).to_string(),
+                charbuf_to_str(&key[..charbuf_len(&key)]).to_string(),
+                charbuf_to_str(&value[..charbuf_len(&value)]).to_string(),
             );
         }
 
@@ -330,8 +330,8 @@ impl<'a> Discord<'a> {
             .to_result()?;
 
             let _ = res.insert(
-                cstr_to_str(&key[..]).to_string(),
-                cstr_to_str(&value[..]).to_string(),
+                charbuf_to_str(&key[..charbuf_len(&key)]).to_string(),
+                charbuf_to_str(&value[..charbuf_len(&value)]).to_string(),
             );
         }
 

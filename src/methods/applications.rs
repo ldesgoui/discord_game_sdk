@@ -1,15 +1,15 @@
 use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback, ResultStringCallback},
     sys,
-    utils::cstr_to_str,
+    utils::{charbuf_len, charbuf_to_str},
     Discord, OAuth2Token, Result,
 };
 use std::mem::size_of;
 
 /// # Application
-/// https://discordapp.com/developers/docs/game-sdk/applications
+/// <https://discordapp.com/developers/docs/game-sdk/applications>
 impl<'a> Discord<'a> {
-    // tested, returns "en-US" and similar
+    /// <https://discordapp.com/developers/docs/game-sdk/applications#getcurrentlocale>
     pub fn current_locale(&mut self) -> String {
         let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
 
@@ -19,10 +19,10 @@ impl<'a> Discord<'a> {
                 .get_current_locale(&mut locale as *mut _))
         }
 
-        cstr_to_str(&locale[..]).to_string()
+        charbuf_to_str(&locale[..charbuf_len(&locale)]).to_string()
     }
 
-    // tested, returns "master" or whichever `dispatch` branch is in use
+    /// <https://discordapp.com/developers/docs/game-sdk/applications#getcurrentbranch>
     pub fn current_branch(&mut self) -> String {
         let mut branch: sys::DiscordBranch = [0; size_of::<sys::DiscordBranch>()];
 
@@ -32,10 +32,10 @@ impl<'a> Discord<'a> {
                 .get_current_branch(&mut branch as *mut _))
         }
 
-        cstr_to_str(&branch[..]).to_string()
+        charbuf_to_str(&branch[..charbuf_len(&branch)]).to_string()
     }
 
-    // tested, hasn't failed yet
+    /// <https://discordapp.com/developers/docs/game-sdk/applications#validateorexit>
     pub fn validate_or_exit(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
@@ -45,7 +45,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/applications#getoauth2token>
     pub fn oauth2_token(&mut self, callback: impl FnMut(&mut Discord, Result<OAuth2Token>) + 'a) {
         unsafe {
             ffi!(self
@@ -55,7 +55,7 @@ impl<'a> Discord<'a> {
         }
     }
 
-    // tested
+    /// <https://discordapp.com/developers/docs/game-sdk/applications#getticket>
     pub fn app_ticket(&mut self, callback: impl FnMut(&mut Discord, Result<String>) + 'a) {
         unsafe {
             ffi!(self

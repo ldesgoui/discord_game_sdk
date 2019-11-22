@@ -1,5 +1,5 @@
 use crate::{
-    callbacks::ResultCallback, sys, to_result::ToResult, Action, Activity, ActivityKind, Discord,
+    callbacks::ResultCallback, sys, to_result::ToResult, Action, Activity, Discord,
     RequestReply, Result,
 };
 use std::ffi::CStr;
@@ -28,11 +28,7 @@ impl<'a> Discord<'a> {
         activity: &Activity,
         callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
-        let mut activity: sys::DiscordActivity = activity.0;
-
-        // Unsure if this is required
-        activity.type_ = ActivityKind::Playing.into();
-        activity.application_id = self.client_id;
+        let mut activity: sys::DiscordActivity = activity.sys;
 
         unsafe {
             ffi!(self

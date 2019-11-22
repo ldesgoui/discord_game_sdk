@@ -2,7 +2,7 @@ use crate::{
     callbacks::{ResultBytesCallback, ResultCallback},
     sys,
     to_result::ToResult,
-    utils::cstr_to_str,
+    utils::{charbuf_len, charbuf_to_str},
     Discord, FileStat, Result,
 };
 use std::ffi::CStr;
@@ -144,16 +144,16 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#stat>
     pub fn file_stat(&mut self, filename: impl AsRef<CStr>) -> Result<FileStat> {
-        let mut stat = FileStat(sys::DiscordFileStat::default());
+        let mut stat = sys::DiscordFileStat::default();
 
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .stat(filename.as_ref().as_ptr(), &mut stat.0))
+                .stat(filename.as_ref().as_ptr(), &mut stat))
         }
         .to_result()?;
 
-        Ok(stat)
+        Ok(stat.into())
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
@@ -164,17 +164,13 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_storage_manager().count(&mut count)) }
 
         let mut result = Vec::with_capacity(count as usize);
-        let mut stat = FileStat(sys::DiscordFileStat::default());
+        let mut stat = sys::DiscordFileStat::default();
 
         for index in 0..count {
-            unsafe {
-                ffi!(self
-                    .get_storage_manager()
-                    .stat_at(index as i32, &mut stat.0))
-            }
-            .to_result()?;
+            unsafe { ffi!(self.get_storage_manager().stat_at(index as i32, &mut stat)) }
+                .to_result()?;
 
-            result.push(stat)
+            result.push(stat.into())
         }
 
         Ok(result)
@@ -186,6 +182,6 @@ impl<'a> Discord<'a> {
 
         unsafe { ffi!(self.get_storage_manager().get_path(&mut path)) }.to_result()?;
 
-        Ok(cstr_to_str(&path[..]).to_string())
+        Ok(charbuf_to_str(&path[..charbuf_len(&path)]).to_string())
     }
 }

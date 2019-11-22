@@ -44,7 +44,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_image_manager().get_data(
                 handle.into(),
-                data[..].as_mut_ptr(),
+                data.as_mut_ptr(),
                 data.len() as u32
             ))
         }

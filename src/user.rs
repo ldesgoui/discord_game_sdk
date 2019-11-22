@@ -1,22 +1,39 @@
-use crate::{sys, ImageHandle};
+use crate::{
+    sys,
+    utils::{charbuf_len, charbuf_to_str},
+    ImageHandle,
+};
 
 /// User
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/users#data-models-user-struct>
-#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
-pub struct User(pub(crate) sys::DiscordUser);
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub struct User {
+    pub(crate) sys: sys::DiscordUser,
+    username_len: usize,
+    discriminator_len: usize,
+    avatar_len: usize,
+}
 
 impl User {
     pub fn id(&self) -> i64 {
-        self.0.id
+        self.sys.id
     }
 
-    get_str!(username, username);
-    get_str!(discriminator, discriminator);
-    get_str!(avatar, avatar);
+    pub fn username(&self) -> &str {
+        charbuf_to_str(&self.sys.username[..self.username_len])
+    }
+
+    pub fn discriminator(&self) -> &str {
+        charbuf_to_str(&self.sys.discriminator[..self.discriminator_len])
+    }
+
+    pub fn avatar(&self) -> &str {
+        charbuf_to_str(&self.sys.avatar[..self.avatar_len])
+    }
 
     pub fn is_bot(&self) -> bool {
-        self.0.bot
+        self.sys.bot
     }
 
     /// Create a new [Image Handle]
@@ -29,9 +46,20 @@ impl User {
 
         ImageHandle(sys::DiscordImageHandle {
             type_: sys::DiscordImageType_User,
-            id: self.0.id,
+            id: self.sys.id,
             size,
         })
+    }
+}
+
+impl From<sys::DiscordUser> for User {
+    fn from(sys: sys::DiscordUser) -> Self {
+        Self {
+            sys,
+            username_len: charbuf_len(&sys.username[..]),
+            discriminator_len: charbuf_len(&sys.discriminator[..]),
+            avatar_len: charbuf_len(&sys.avatar[..]),
+        }
     }
 }
 

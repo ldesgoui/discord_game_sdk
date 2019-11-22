@@ -33,16 +33,16 @@ impl<'a> Discord<'a> {
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievement>
     pub fn achievement(&mut self, achievement_id: i64) -> Result<Achievement> {
-        let mut achievement = Achievement(sys::DiscordUserAchievement::default());
+        let mut achievement = sys::DiscordUserAchievement::default();
 
         unsafe {
             ffi!(self
                 .get_achievement_manager()
-                .get_user_achievement(achievement_id, &mut achievement.0))
+                .get_user_achievement(achievement_id, &mut achievement))
         }
         .to_result()?;
 
-        Ok(achievement)
+        Ok(achievement.into())
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
@@ -57,17 +57,17 @@ impl<'a> Discord<'a> {
         }
 
         let mut result = Vec::with_capacity(count as usize);
-        let mut achievement = Achievement(sys::DiscordUserAchievement::default());
+        let mut achievement = sys::DiscordUserAchievement::default();
 
         for index in 0..count {
             unsafe {
                 ffi!(self
                     .get_achievement_manager()
-                    .get_user_achievement_at(index, &mut achievement.0))
+                    .get_user_achievement_at(index, &mut achievement))
             }
             .to_result()?;
 
-            result.push(achievement);
+            result.push(achievement.into());
         }
 
         Ok(result)

@@ -1,29 +1,45 @@
-use crate::{sys, utils::cstr_to_str};
+use crate::{
+    sys,
+    utils::{charbuf_len, charbuf_to_str},
+};
 use std::iter::FusedIterator;
 
 /// OAuth2 Token
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/applications#data-models-oauth2token-struct>
-#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
-pub struct OAuth2Token(pub(crate) sys::DiscordOAuth2Token);
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub struct OAuth2Token {
+    pub(crate) sys: sys::DiscordOAuth2Token,
+    access_token_len: usize,
+    scopes_len: usize,
+}
 
 impl OAuth2Token {
-    get_str!(
-        "A bearer token for the current user",
-        access_token,
-        access_token
-    );
+    /// A bearer token for the current user
+    pub fn access_token(&self) -> &str {
+        charbuf_to_str(&self.sys.access_token[..self.access_token_len])
+    }
 
     /// The list of OAuth2 scopes
     pub fn scopes<'a>(
         &'a self,
     ) -> impl Iterator<Item = &'a str> + DoubleEndedIterator + FusedIterator + 'a {
-        cstr_to_str(&self.0.scopes[..]).split(' ')
+        charbuf_to_str(&self.sys.scopes[..self.scopes_len]).split(' ')
     }
 
     /// The UTC Timestamp at which the token expires
     pub fn expires(&self) -> i64 {
-        self.0.expires
+        self.sys.expires
+    }
+}
+
+impl From<sys::DiscordOAuth2Token> for OAuth2Token {
+    fn from(sys: sys::DiscordOAuth2Token) -> Self {
+        Self {
+            sys,
+            access_token_len: charbuf_len(&sys.access_token[..]),
+            scopes_len: charbuf_len(&sys.scopes[..]),
+        }
     }
 }
 
