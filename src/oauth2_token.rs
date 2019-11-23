@@ -37,8 +37,8 @@ impl From<sys::DiscordOAuth2Token> for OAuth2Token {
     fn from(sys: sys::DiscordOAuth2Token) -> Self {
         Self {
             sys,
-            access_token_len: charbuf_len(&sys.access_token[..]),
-            scopes_len: charbuf_len(&sys.scopes[..]),
+            access_token_len: charbuf_len(&sys.access_token),
+            scopes_len: charbuf_len(&sys.scopes),
         }
     }
 }

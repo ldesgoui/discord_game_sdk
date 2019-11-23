@@ -45,8 +45,8 @@ impl From<sys::DiscordSku> for Sku {
     fn from(sys: sys::DiscordSku) -> Self {
         Self {
             sys,
-            name_len: charbuf_len(&sys.name[..]),
-            price_currency_len: charbuf_len(&sys.price.currency[..]),
+            name_len: charbuf_len(&sys.name),
+            price_currency_len: charbuf_len(&sys.price.currency),
         }
     }
 }

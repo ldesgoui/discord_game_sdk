@@ -56,9 +56,9 @@ impl From<sys::DiscordUser> for User {
     fn from(sys: sys::DiscordUser) -> Self {
         Self {
             sys,
-            username_len: charbuf_len(&sys.username[..]),
-            discriminator_len: charbuf_len(&sys.discriminator[..]),
-            avatar_len: charbuf_len(&sys.avatar[..]),
+            username_len: charbuf_len(&sys.username),
+            discriminator_len: charbuf_len(&sys.discriminator),
+            avatar_len: charbuf_len(&sys.avatar),
         }
     }
 }
