@@ -11,7 +11,6 @@ pub enum RequestReply {
     Undefined(sys::EDiscordActivityJoinRequestReply),
 }
 
-#[doc(hidden)]
 impl Into<sys::EDiscordActivityJoinRequestReply> for RequestReply {
     fn into(self) -> sys::EDiscordActivityJoinRequestReply {
         match self {

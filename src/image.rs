@@ -7,14 +7,17 @@ pub struct Image {
 }
 
 impl Image {
+    /// The width and height in pixels of the image
     pub fn dimensions(&self) -> (u32, u32) {
         (self.width, self.height)
     }
 
+    /// The width in pixels of the image
     pub fn width(&self) -> u32 {
         self.width
     }
 
+    /// The height in pixels of the image
     pub fn height(&self) -> u32 {
         self.height
     }

@@ -10,7 +10,6 @@ pub enum ImageKind {
     Undefined(sys::EDiscordImageType),
 }
 
-#[doc(hidden)]
 impl From<sys::EDiscordImageType> for ImageKind {
     fn from(source: sys::EDiscordImageType) -> Self {
         match source {
@@ -20,7 +19,6 @@ impl From<sys::EDiscordImageType> for ImageKind {
     }
 }
 
-#[doc(hidden)]
 impl Into<sys::EDiscordImageType> for ImageKind {
     fn into(self) -> sys::EDiscordImageType {
         match self {

@@ -20,7 +20,6 @@ pub enum RelationshipKind {
     Undefined(sys::EDiscordRelationshipType),
 }
 
-#[doc(hidden)]
 impl From<sys::EDiscordRelationshipType> for RelationshipKind {
     fn from(source: sys::EDiscordRelationshipType) -> Self {
         match source {

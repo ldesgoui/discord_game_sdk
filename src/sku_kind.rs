@@ -16,7 +16,6 @@ pub enum SkuKind {
     Undefined(sys::EDiscordSkuType),
 }
 
-#[doc(hidden)]
 impl From<sys::EDiscordSkuType> for SkuKind {
     fn from(source: sys::EDiscordSkuType) -> Self {
         match source {

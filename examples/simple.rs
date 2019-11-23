@@ -10,7 +10,7 @@ fn main() {
         &Activity::empty()
             .with_details("Trying stuff out")
             .with_state("using discord_game_sdk"),
-        |_, _| {},
+        |_, res| log::info!("update_activity: {:?}", res),
     );
 
     // Game loop
@@ -29,26 +29,32 @@ fn main() {
 
 #[rustfmt::skip]
 fn process_events(gsdk: &Discord) {
-    gsdk.recv_achievements_update().for_each(|x| { dbg!(x); });
-    gsdk.recv_activities_join().for_each(|x| { dbg!(x); });
-    gsdk.recv_activities_spectate().for_each(|x| { dbg!(x); });
-    gsdk.recv_activities_request().for_each(|x| { dbg!(x); });
-    gsdk.recv_activities_invite().for_each(|x| { dbg!(x); });
-    gsdk.recv_lobbies_update().for_each(|x| { dbg!(x); });
-    gsdk.recv_lobbies_delete().for_each(|x| { dbg!(x); });
-    gsdk.recv_lobbies_member_connect().for_each(|x| { dbg!(x); });
-    gsdk.recv_lobbies_member_update().for_each(|x| { dbg!(x); });
-    gsdk.recv_lobbies_member_disconnect().for_each(|x| { dbg!(x); });
-    gsdk.recv_lobbies_message().for_each(|x| { dbg!(x); });
-    gsdk.recv_lobbies_speaking().for_each(|x| { dbg!(x); });
-    gsdk.recv_lobbies_network_message().for_each(|x| { dbg!(x); });
-    gsdk.recv_networking_message().for_each(|x| { dbg!(x); });
-    gsdk.recv_networking_route_update().for_each(|x| { dbg!(x); });
-    gsdk.recv_overlay_toggle().for_each(|x| { dbg!(x); });
-    gsdk.recv_relationships_refresh().for_each(|x| { dbg!(x); });
-    gsdk.recv_relationships_update().for_each(|x| { dbg!(x); });
-    gsdk.recv_store_entitlement_create().for_each(|x| { dbg!(x); });
-    gsdk.recv_store_entitlement_delete().for_each(|x| { dbg!(x); });
-    gsdk.recv_current_user_update().for_each(|x| { dbg!(x); });
-    gsdk.recv_voice_settings_update().for_each(|x| { dbg!(x); });
+    macro_rules! ev {
+        ($name: ident) => {
+            gsdk.$name().for_each(|ev| log::info!("{}: {:?}", stringify!($name), ev));
+        }
+    }
+
+    ev!(recv_achievements_update);
+    ev!(recv_activities_join);
+    ev!(recv_activities_spectate);
+    ev!(recv_activities_request);
+    ev!(recv_activities_invite);
+    ev!(recv_lobbies_update);
+    ev!(recv_lobbies_delete);
+    ev!(recv_lobbies_member_connect);
+    ev!(recv_lobbies_member_update);
+    ev!(recv_lobbies_member_disconnect);
+    ev!(recv_lobbies_message);
+    ev!(recv_lobbies_speaking);
+    ev!(recv_lobbies_network_message);
+    ev!(recv_networking_message);
+    ev!(recv_networking_route_update);
+    ev!(recv_overlay_toggle);
+    ev!(recv_relationships_refresh);
+    ev!(recv_relationships_update);
+    ev!(recv_store_entitlement_create);
+    ev!(recv_store_entitlement_delete);
+    ev!(recv_current_user_update);
+    ev!(recv_voice_settings_update);
 }

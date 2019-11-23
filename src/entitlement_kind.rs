@@ -22,7 +22,6 @@ pub enum EntitlementKind {
     Undefined(sys::EDiscordEntitlementType),
 }
 
-#[doc(hidden)]
 impl From<sys::EDiscordEntitlementType> for EntitlementKind {
     fn from(source: sys::EDiscordEntitlementType) -> Self {
         match source {

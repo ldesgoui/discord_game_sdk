@@ -14,26 +14,32 @@ pub struct Lobby {
 }
 
 impl Lobby {
+    /// The unique ID of the lobby
     pub fn id(&self) -> i64 {
         self.sys.id
     }
 
+    /// What sort of lobby it is
     pub fn kind(&self) -> LobbyKind {
         self.sys.type_.into()
     }
 
+    /// The unique ID of the user owning the lobby
     pub fn owner_id(&self) -> i64 {
         self.sys.owner_id
     }
 
+    /// The password to the lobby
     pub fn secret(&self) -> &str {
         charbuf_to_str(&self.sys.secret[..self.secret_len])
     }
 
+    /// The maximum number of players that can join
     pub fn capacity(&self) -> u32 {
         self.sys.capacity
     }
 
+    /// Whether the lobby can be joined or not
     pub fn locked(&self) -> bool {
         self.sys.locked
     }

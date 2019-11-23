@@ -1,8 +1,8 @@
 use crate::sys;
 
-/// Action to take when invited or inviting to an [`Activity`]
+/// Activity Action
 ///
-/// [`Activity`]: struct.Activity.html
+/// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activityactiontype-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Action {
     Join,
@@ -10,7 +10,6 @@ pub enum Action {
     Undefined(sys::EDiscordActivityActionType),
 }
 
-#[doc(hidden)]
 impl From<sys::EDiscordActivityActionType> for Action {
     fn from(source: sys::EDiscordActivityActionType) -> Self {
         match source {
@@ -21,7 +20,6 @@ impl From<sys::EDiscordActivityActionType> for Action {
     }
 }
 
-#[doc(hidden)]
 impl Into<sys::EDiscordActivityActionType> for Action {
     fn into(self) -> sys::EDiscordActivityActionType {
         match self {

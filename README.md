@@ -66,7 +66,6 @@ I'm not aware of any good ways to test this crate, there are currently no tests.
 This crate relies on the SDK to provide correct data and behavior:
 - Non-null pointers to valid memory
 - UTF-8, NUL-terminated strings
-- Valid enum values
 - No mutation of memory it should have no ownership of
 - No use of pointers after `destroy` is called
 

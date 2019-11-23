@@ -13,15 +13,17 @@ pub struct FileStat {
 }
 
 impl FileStat {
+    /// The name of the file
     pub fn filename(&self) -> &str {
         charbuf_to_str(&self.sys.filename[..self.filename_len])
     }
 
+    /// The total size in bytes
     pub fn size(&self) -> u64 {
         self.sys.size
     }
 
-    /// UTC Timestamp
+    /// When the file was last modified, in UNIX Time
     pub fn last_modified(&self) -> i64 {
         self.sys.last_modified as i64
     }

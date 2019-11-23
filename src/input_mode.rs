@@ -14,10 +14,13 @@ pub struct InputMode {
 }
 
 impl InputMode {
+    /// What triggers voice to be transmitted
     pub fn kind(&self) -> InputModeKind {
         self.sys.type_.into()
     }
 
+    /// The combination of keys to transmit voice when kind is PushToTalk
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>
     pub fn shortcut(&self) -> &str {
         charbuf_to_str(&self.sys.shortcut[..self.shortcut_len])
@@ -28,11 +31,16 @@ impl InputMode {
         Self::from(sys::DiscordInputMode::default())
     }
 
+    /// The combination of keys to transmit voice when kind is PushToTalk
+    ///
+    /// What triggers the voice to be sent
     pub fn with_kind(&'_ mut self, kind: InputModeKind) -> &'_ mut Self {
         self.sys.type_ = kind.into();
         self
     }
 
+    /// The combination of keys to transmit voice when kind is PushToTalk
+    ///
     /// `value` *MUST NOT* contain nul bytes
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>

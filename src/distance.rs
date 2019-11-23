@@ -15,7 +15,6 @@ pub enum Distance {
     Global,
 }
 
-#[doc(hidden)]
 impl Into<sys::EDiscordLobbySearchDistance> for Distance {
     fn into(self) -> sys::EDiscordLobbySearchDistance {
         match self {

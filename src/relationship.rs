@@ -11,14 +11,17 @@ pub struct Relationship {
 }
 
 impl Relationship {
+    /// What sort of relationship it is
     pub fn kind(&self) -> RelationshipKind {
         self.kind
     }
 
+    /// The target of the relationship
     pub fn user(&self) -> &User {
         &self.user
     }
 
+    /// The target's current presence
     pub fn presence(&self) -> &Presence {
         &self.presence
     }

@@ -14,7 +14,6 @@ pub enum PremiumKind {
     Undefined(sys::EDiscordPremiumType),
 }
 
-#[doc(hidden)]
 impl From<sys::EDiscordPremiumType> for PremiumKind {
     fn from(source: sys::EDiscordPremiumType) -> Self {
         match source {

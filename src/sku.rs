@@ -15,22 +15,27 @@ pub struct Sku {
 }
 
 impl Sku {
+    /// The unique ID of the SKU
     pub fn id(&self) -> i64 {
         self.sys.id
     }
 
+    /// What sort of SKU it is
     pub fn kind(&self) -> SkuKind {
         self.sys.type_.into()
     }
 
+    /// The name of the SKU
     pub fn name(&self) -> &str {
         charbuf_to_str(&self.sys.name[..self.name_len])
     }
 
+    /// The amount of money that the SKU costs
     pub fn price_amount(&self) -> u32 {
         self.sys.price.amount
     }
 
+    /// The currency that [`price_amount`](#method.price_currency) is in
     pub fn price_currency(&self) -> &str {
         charbuf_to_str(&self.sys.price.currency[..self.price_currency_len])
     }

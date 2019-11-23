@@ -18,24 +18,32 @@ impl LobbyTransaction {
         Self::default()
     }
 
+    /// Marks the lobby as private or public
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsettype>
     pub fn kind(&mut self, kind: LobbyKind) -> &mut Self {
         self.kind = Some(kind);
         self
     }
 
+    /// Sets the ID of the user owning the lobby
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetowner>
     pub fn owner(&mut self, user_id: i64) -> &mut Self {
         self.owner = Some(user_id);
         self
     }
 
+    /// Sets the maximum amount of players that can join
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetcapacity>
     pub fn capacity(&mut self, capacity: u32) -> &mut Self {
         self.capacity = Some(capacity);
         self
     }
 
+    /// Set metadata value under a given key for the lobby
+    ///
     /// `key` and `value` must not contain any nul bytes, both will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetmetadata>
@@ -46,6 +54,8 @@ impl LobbyTransaction {
         self
     }
 
+    /// Deletes metadata value under a given key for the lobby
+    ///
     /// `key` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactiondeletemetadata>
@@ -55,6 +65,8 @@ impl LobbyTransaction {
         self
     }
 
+    /// Sets whether the lobby is locked or not. When locked, new users cannot join
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetlocked>
     pub fn locked(&mut self, locked: bool) -> &mut Self {
         self.locked = Some(locked);

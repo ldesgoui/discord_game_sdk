@@ -7,14 +7,17 @@ use crate::{sys, ImageKind};
 pub struct ImageHandle(pub(crate) sys::DiscordImageHandle);
 
 impl ImageHandle {
+    /// What sort of image it is
     pub fn kind(&self) -> ImageKind {
         self.0.type_.into()
     }
 
+    /// A unique ID related to the image, when kind is User, it is the ID of said user
     pub fn id(&self) -> i64 {
         self.0.id
     }
 
+    /// The resolution desired
     pub fn size(&self) -> u32 {
         self.0.size
     }
@@ -22,6 +25,7 @@ impl ImageHandle {
     /// Create new Image Handle
     ///
     /// `size` must be 16, 32, 64, 128 or 256.
+    // must it?
     pub fn from_user_id(user_id: i64, size: u32) -> Self {
         debug_assert!([16, 32, 64, 128, 256].contains(&size));
 

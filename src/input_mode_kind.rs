@@ -10,7 +10,6 @@ pub enum InputModeKind {
     Undefined(sys::EDiscordInputModeType),
 }
 
-#[doc(hidden)]
 impl From<sys::EDiscordInputModeType> for InputModeKind {
     fn from(source: sys::EDiscordInputModeType) -> Self {
         match source {
@@ -21,7 +20,6 @@ impl From<sys::EDiscordInputModeType> for InputModeKind {
     }
 }
 
-#[doc(hidden)]
 impl Into<sys::EDiscordInputModeType> for InputModeKind {
     fn into(self) -> sys::EDiscordInputModeType {
         match self {

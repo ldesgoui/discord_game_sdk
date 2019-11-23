@@ -10,10 +10,12 @@ pub struct Presence {
 }
 
 impl Presence {
+    /// The user's current online status
     pub fn status(&self) -> Status {
         self.status
     }
 
+    /// The user's current activity
     pub fn activity(&self) -> &Activity {
         &self.activity
     }

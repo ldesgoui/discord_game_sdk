@@ -27,7 +27,7 @@ impl OAuth2Token {
         charbuf_to_str(&self.sys.scopes[..self.scopes_len]).split(' ')
     }
 
-    /// The UTC Timestamp at which the token expires
+    /// When the token exires, in UNIX Time
     pub fn expires(&self) -> i64 {
         self.sys.expires
     }

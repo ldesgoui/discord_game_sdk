@@ -13,7 +13,6 @@ pub enum Comparison {
     NotEqual,
 }
 
-#[doc(hidden)]
 impl Into<sys::EDiscordLobbySearchComparison> for Comparison {
     fn into(self) -> sys::EDiscordLobbySearchComparison {
         match self {
