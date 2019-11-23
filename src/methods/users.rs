@@ -86,7 +86,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate>
     pub fn recv_current_user_update(
-        &'_ self,
+        &self,
     ) -> impl '_ + Iterator<Item = event::users::CurrentUserUpdate> {
         self.receivers.current_user_update.try_iter()
     }

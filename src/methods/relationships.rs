@@ -67,7 +67,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh>
     pub fn recv_relationships_refresh(
-        &'_ self,
+        &self,
     ) -> impl '_ + Iterator<Item = event::relationships::Refresh> {
         self.receivers.relationships_refresh.try_iter()
     }
@@ -76,7 +76,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate>
     pub fn recv_relationships_update(
-        &'_ self,
+        &self,
     ) -> impl '_ + Iterator<Item = event::relationships::Update> {
         self.receivers.relationships_update.try_iter()
     }

@@ -95,7 +95,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#onuserachievementupdate>
     pub fn recv_achievements_update(
-        &'_ self,
+        &self,
     ) -> impl '_ + Iterator<Item = event::achievements::Update> {
         self.receivers.achievements_update.try_iter()
     }

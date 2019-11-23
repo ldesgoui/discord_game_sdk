@@ -163,7 +163,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate>
     pub fn recv_store_entitlement_create(
-        &'_ self,
+        &self,
     ) -> impl '_ + Iterator<Item = event::store::EntitlementCreate> {
         self.receivers.store_entitlement_create.try_iter()
     }
@@ -173,7 +173,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete>
     pub fn recv_store_entitlement_delete(
-        &'_ self,
+        &self,
     ) -> impl '_ + Iterator<Item = event::store::EntitlementDelete> {
         self.receivers.store_entitlement_delete.try_iter()
     }

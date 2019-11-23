@@ -128,7 +128,7 @@ impl<'a> Discord<'a> {
     /// or receives confirmation from Asking to Join.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoin>
-    pub fn recv_activities_join(&'_ self) -> impl '_ + Iterator<Item = event::activities::Join> {
+    pub fn recv_activities_join(&self) -> impl '_ + Iterator<Item = event::activities::Join> {
         self.receivers.activities_join.try_iter()
     }
 
@@ -137,7 +137,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate>
     pub fn recv_activities_spectate(
-        &'_ self,
+        &self,
     ) -> impl '_ + Iterator<Item = event::activities::Spectate> {
         self.receivers.activities_spectate.try_iter()
     }
@@ -145,18 +145,14 @@ impl<'a> Discord<'a> {
     /// Fires when a user asks to join the game of the current user.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoinrequest>
-    pub fn recv_activities_request(
-        &'_ self,
-    ) -> impl '_ + Iterator<Item = event::activities::Request> {
+    pub fn recv_activities_request(&self) -> impl '_ + Iterator<Item = event::activities::Request> {
         self.receivers.activities_request.try_iter()
     }
 
     /// Fires when the current user receives an invitation to join or spectate.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityinvite>
-    pub fn recv_activities_invite(
-        &'_ self,
-    ) -> impl '_ + Iterator<Item = event::activities::Invite> {
+    pub fn recv_activities_invite(&self) -> impl '_ + Iterator<Item = event::activities::Invite> {
         self.receivers.activities_invite.try_iter()
     }
 }
