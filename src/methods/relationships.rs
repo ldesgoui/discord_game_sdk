@@ -2,10 +2,10 @@ use crate::{across_ffi, event, sys, to_result::ToResult, Discord, Relationship, 
 
 /// # Relationships
 ///
-/// Most methods will return empty/error until event::relationships::Refreshed
-///
 /// <https://discordapp.com/developers/docs/game-sdk/relationships>
 impl<'a> Discord<'a> {
+    /// Get the relationship between the current user and a given user by ID.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#get>
     pub fn relationship_with(&mut self, user_id: i64) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
@@ -20,6 +20,11 @@ impl<'a> Discord<'a> {
         Ok(relationship.into())
     }
 
+    /// Fetches all relationships that match a given predicate.
+    ///
+    /// The event [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// must be fired at least once before using this method.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#filter>  
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
@@ -58,6 +63,8 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// Fires at initialization when Discord has cached a snapshot of all your relationships.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh>
     pub fn recv_relationships_refresh(
         &'_ self,
@@ -65,6 +72,8 @@ impl<'a> Discord<'a> {
         self.receivers.relationships_refresh.try_iter()
     }
 
+    /// Fires when a relationship in the filtered list changes, like an updated presence or user attribute.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate>
     pub fn recv_relationships_update(
         &'_ self,

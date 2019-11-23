@@ -4,8 +4,10 @@ use crate::{
 
 /// # Voice
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/voice>
+/// <https://discordapp.com/developers/docs/game-sdk/discord-voice>
 impl<'a> Discord<'a> {
+    /// Get the voice input mode for the current user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#getinputmode>
     pub fn input_mode(&mut self) -> Result<InputMode> {
         let mut input_mode = sys::DiscordInputMode::default();
@@ -20,6 +22,8 @@ impl<'a> Discord<'a> {
         Ok(input_mode.into())
     }
 
+    /// Sets a new voice input mode for the user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#setinputmode>
     pub fn set_input_mode(
         &mut self,
@@ -34,6 +38,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Whether the current user is muted.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#isselfmute>
     pub fn self_muted(&mut self) -> Result<bool> {
         let mut muted = false;
@@ -43,6 +49,8 @@ impl<'a> Discord<'a> {
         Ok(muted)
     }
 
+    /// Whether the current used is deafened.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#isselfdeaf>
     pub fn self_deafened(&mut self) -> Result<bool> {
         let mut deafened = false;
@@ -57,16 +65,22 @@ impl<'a> Discord<'a> {
         Ok(deafened)
     }
 
+    /// Mutes or unmutes the current user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#setselfmute>
     pub fn set_self_mute(&mut self, muted: bool) -> Result<()> {
         unsafe { ffi!(self.get_voice_manager().set_self_mute(muted)) }.to_result()
     }
 
+    /// Deafens or undeafens the current user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#setselfdeaf>
     pub fn set_self_deaf(&mut self, deafened: bool) -> Result<()> {
         unsafe { ffi!(self.get_voice_manager().set_self_deaf(deafened)) }.to_result()
     }
 
+    /// Whether a given user is locally muted.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#islocalmute>
     pub fn local_muted(&mut self, user_id: i64) -> Result<bool> {
         let mut muted = false;
@@ -81,6 +95,8 @@ impl<'a> Discord<'a> {
         Ok(muted)
     }
 
+    /// Gets the local volume for a given user, in the range `[0..=200]`, `100` being the default.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#getlocalvolume>
     pub fn local_volume(&mut self, user_id: i64) -> Result<u8> {
         let mut volume = 0;
@@ -95,16 +111,21 @@ impl<'a> Discord<'a> {
         Ok(volume)
     }
 
+    /// Locally mutes or unmutes a given user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#setlocalmute>
     pub fn set_local_mute(&mut self, user_id: i64, muted: bool) -> Result<()> {
         unsafe { ffi!(self.get_voice_manager().set_local_mute(user_id, muted)) }.to_result()
     }
 
+    /// Sets the local volume for a given user, in the range `[0..=200]`, `100` being the default.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#setlocalvolume>
     pub fn set_local_volume(&mut self, user_id: i64, volume: u8) -> Result<()> {
         unsafe { ffi!(self.get_voice_manager().set_local_volume(user_id, volume)) }.to_result()
     }
 
+    /// Fires when the current user has updated their voice settings.
     pub fn recv_voice_settings_update(
         &'_ self,
     ) -> impl '_ + Iterator<Item = event::voice::SettingsUpdate> {

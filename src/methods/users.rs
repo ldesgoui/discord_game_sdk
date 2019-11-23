@@ -7,7 +7,8 @@ use crate::{
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/users>
 impl<'a> Discord<'a> {
-    /// Get Current User
+    /// Get the current user.
+    /// More information can be found through the HTTP API.
     ///
     /// Will return Err(_) until event::user::CurrentUserUpdate
     ///
@@ -25,6 +26,8 @@ impl<'a> Discord<'a> {
         Ok(user.into())
     }
 
+    /// Get user information for a given ID.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#getuser>
     pub fn user(&mut self, user_id: i64, callback: impl FnMut(&mut Discord, Result<User>) + 'a) {
         unsafe {
@@ -35,6 +38,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Get the Premium type for the currently connected user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#getcurrentuserpremiumtype>
     pub fn current_user_premium_kind(&mut self) -> Result<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
@@ -49,6 +54,8 @@ impl<'a> Discord<'a> {
         Ok(PremiumKind::from(premium_type))
     }
 
+    /// Return a bitfield of all flags set for the current user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#currentuserhasflag>
     pub fn current_user_flags(&mut self) -> Result<UserFlags> {
         let mut flags = UserFlags::empty();
@@ -75,6 +82,8 @@ impl<'a> Discord<'a> {
         Ok(flags)
     }
 
+    /// Fires when the User struct of the currently connected user changes.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate>
     pub fn recv_current_user_update(
         &'_ self,

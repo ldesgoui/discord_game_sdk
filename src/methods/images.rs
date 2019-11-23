@@ -7,6 +7,8 @@ use crate::{
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/images>
 impl<'a> Discord<'a> {
+    /// Prepares an image.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/images#fetch>
     pub fn fetch_image(
         &mut self,
@@ -22,6 +24,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Get's the dimensions of the source image.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/images#getdimensions>
     pub fn image_dimensions(&mut self, handle: ImageHandle) -> Result<(u32, u32)> {
         let mut dimensions = sys::DiscordImageDimensions::default();
@@ -36,7 +40,12 @@ impl<'a> Discord<'a> {
         Ok((dimensions.width, dimensions.height))
     }
 
+    /// Retrieves the data for an image.
+    ///
+    /// The image must be [fetched](#method.fetch_image) first.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/images#getdata>
+    // TODO: using image crate
     pub fn image(&mut self, handle: ImageHandle) -> Result<Image> {
         let (width, height) = self.image_dimensions(handle)?;
         let mut data: Vec<u8> = vec![0; (4 * width * height) as usize];

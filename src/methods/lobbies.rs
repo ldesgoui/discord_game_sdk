@@ -3,15 +3,25 @@ use crate::{
     event, sys,
     to_result::ToResult,
     utils::{charbuf_len, charbuf_to_str},
-    Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Result, SearchQuery,
+    Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Reliability, Result, SearchQuery,
 };
 use std::collections::HashMap;
 use std::mem::size_of;
 
 /// # Lobbies
 ///
+/// Provides the ability to group players together and run matchmaking-type searches
+/// over the pool of existing groups.
+///
+/// Some operations must be ran from your game backend:
+/// [Reference](https://discordapp.com/developers/docs/game-sdk/lobbies#the-api-way).
+///
 /// <https://discordapp.com/developers/docs/game-sdk/lobbies>
 impl<'a> Discord<'a> {
+    /// Create a new lobby. The current user will automatically join and become the owner.
+    ///
+    /// [`LobbyTransaction::owner`](struct.LobbyTransaction.html#method.owner) *MUST NOT* be called.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#createlobby>
     pub fn create_lobby(
         &mut self,
@@ -41,6 +51,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Updates a lobby with data from the given transaction.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#updatelobby>
     pub fn update_lobby(
         &mut self,
@@ -71,6 +83,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Deletes a given lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#deletelobby>
     pub fn delete_lobby(
         &mut self,
@@ -85,6 +99,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Connects the current user to a given lobby.
+    /// You can be connected to up to five lobbies at a time.
+    ///
     /// `secret` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby>
@@ -104,6 +121,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Connects the current user to a lobby using the special activity secret from the lobby
+    /// which is a concatenated lobby ID and its secret.
+    ///
     /// `activity_secret` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret>
@@ -122,6 +142,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Disconnects the current user from a lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectlobby>
     pub fn disconnect_lobby(
         &mut self,
@@ -136,6 +158,10 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Gets the lobby object for a given ID.
+    ///
+    /// A [`lobby_search`](#method.lobby_search) must have completed before hand.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobby>
     pub fn lobby(&mut self, lobby_id: i64) -> Result<Lobby> {
         let mut lobby = sys::DiscordLobby::default();
@@ -149,6 +175,10 @@ impl<'a> Discord<'a> {
         Ok(Lobby::from(lobby))
     }
 
+    /// Gets the activity secret for a given lobby.
+    /// It should be used to populate
+    /// [`Activity::with_join_secret`](struct.Activity.html#method.with_join_secret).
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyactivitysecret>
     pub fn lobby_activity_secret(&mut self, lobby_id: i64) -> Result<String> {
         let mut secret: sys::DiscordLobbySecret = [0; size_of::<sys::DiscordLobbySecret>()];
@@ -163,8 +193,9 @@ impl<'a> Discord<'a> {
         Ok(charbuf_to_str(&secret[..charbuf_len(&secret)]).to_string())
     }
 
-    /// `key` must not contain any nul bytes, it will grow by one byte.
+    /// Returns lobby metadata value for a given key.
     ///
+    /// `key` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
     pub fn lobby_metadata(&mut self, lobby_id: i64, mut key: String) -> Result<String> {
@@ -184,6 +215,8 @@ impl<'a> Discord<'a> {
         Ok(charbuf_to_str(&value[..charbuf_len(&value)]).to_string())
     }
 
+    /// Returns all metadata for a given lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey>  
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
@@ -229,6 +262,8 @@ impl<'a> Discord<'a> {
         Ok(res)
     }
 
+    /// Updates lobby member info for a given member of the lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#updatemember>
     pub fn update_member(
         &mut self,
@@ -260,6 +295,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Returns the IDs of all lobby members.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membercount>  
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid>
     pub fn all_lobby_member_ids(&mut self, lobby_id: i64) -> Result<Vec<i64>> {
@@ -291,6 +328,8 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// Returns all metadata for a given member.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey>  
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
@@ -344,6 +383,12 @@ impl<'a> Discord<'a> {
         Ok(res)
     }
 
+    /// Sends a message to the lobby on behalf of the current user.
+    /// You must be connected to the lobby you are messaging.
+    /// You should use this function for message sending if you are not using
+    /// the built in networking layer for the lobby.
+    /// If you are, you should use SendNetworkMessage instead.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#sendlobbymessage>
     pub fn send_lobby_message(
         &mut self,
@@ -362,6 +407,11 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Searches available lobbies based on the search criteria.
+    /// Lobbies that meet the criteria are then globally filtered.
+    /// The callback fires when the list of lobbies is stable and ready for iteration.
+    /// You do not necessarily need to access the filtered lobbies within the context of the result callback.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#search>
     pub fn lobby_search(
         &mut self,
@@ -415,6 +465,10 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Connects to the voice channel of the current lobby.
+    /// When connected to voice, the user can open their Discord overlay to see a list of other users,
+    /// allowing them to mute/deafen themselves as well as mute/adjust the volume of other members.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectvoice>
     pub fn connect_lobby_voice(
         &mut self,
@@ -429,6 +483,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Disconnects from the voice channel of a given lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectvoice>
     pub fn disconnect_lobby_voice(
         &mut self,
@@ -443,35 +499,50 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Connects to the networking layer for the given lobby ID.
+    /// Call this when connecting to the lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectnetwork>
     pub fn connect_lobby_network(&mut self, lobby_id: i64) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().connect_network(lobby_id,)) }.to_result()
     }
 
+    /// Disconnects from the networking layer for the given lobby ID.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectnetwork>
     pub fn disconnect_lobby_network(&mut self, lobby_id: i64) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().disconnect_network(lobby_id,)) }.to_result()
     }
 
+    /// Flushes the network. Call this when you're done sending messages.
+    /// This should appear near the end of your game loop.
+    ///
+    /// https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork
     pub fn flush_lobby_network(&mut self) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().flush_network()) }.to_result()
     }
 
+    /// Opens a network channel to all users in a lobby on the given channel number.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#opennetworkchannel>
     pub fn open_lobby_network_channel(
         &mut self,
         lobby_id: i64,
         channel_id: u8,
-        reliable: bool,
+        reliable: Reliability,
     ) -> Result<()> {
         unsafe {
-            ffi!(self
-                .get_lobby_manager()
-                .open_network_channel(lobby_id, channel_id, reliable))
+            ffi!(self.get_lobby_manager().open_network_channel(
+                lobby_id,
+                channel_id,
+                reliable.into()
+            ))
         }
         .to_result()
     }
 
+    /// Sends a network message.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#sendnetworkmessage>
     pub fn send_lobby_network_message(
         &mut self,
@@ -494,16 +565,22 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// Fires when a lobby is updated.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbyupdate>
     pub fn recv_lobbies_update(&'_ self) -> impl '_ + Iterator<Item = event::lobbies::Update> {
         self.receivers.lobbies_update.try_iter()
     }
 
+    /// Fired when a lobby is deleted.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbydelete>
     pub fn recv_lobbies_delete(&'_ self) -> impl '_ + Iterator<Item = event::lobbies::Delete> {
         self.receivers.lobbies_delete.try_iter()
     }
 
+    /// Fires when a new member joins the lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberconnect>
     pub fn recv_lobbies_member_connect(
         &'_ self,
@@ -511,6 +588,8 @@ impl<'a> Discord<'a> {
         self.receivers.lobbies_member_connect.try_iter()
     }
 
+    /// Fires when data for a lobby member is updated.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberupdate>
     pub fn recv_lobbies_member_update(
         &'_ self,
@@ -518,6 +597,8 @@ impl<'a> Discord<'a> {
         self.receivers.lobbies_member_update.try_iter()
     }
 
+    /// Fires when a member leaves the lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberdisconnect>
     pub fn recv_lobbies_member_disconnect(
         &'_ self,
@@ -525,16 +606,22 @@ impl<'a> Discord<'a> {
         self.receivers.lobbies_member_disconnect.try_iter()
     }
 
+    /// Fires when a message is sent to the lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbymessage>
     pub fn recv_lobbies_message(&'_ self) -> impl '_ + Iterator<Item = event::lobbies::Message> {
         self.receivers.lobbies_message.try_iter()
     }
 
+    /// Fires when a user connected to voice starts or stops speaking.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onspeaking>
     pub fn recv_lobbies_speaking(&'_ self) -> impl '_ + Iterator<Item = event::lobbies::Speaking> {
         self.receivers.lobbies_speaking.try_iter()
     }
 
+    /// Fires when the user receives a message from the lobby's networking layer.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onnetworkmessage>
     pub fn recv_lobbies_network_message(
         &'_ self,

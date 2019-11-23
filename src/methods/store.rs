@@ -4,8 +4,16 @@ use crate::{
 
 /// # Store
 ///
+/// Some operations must be ran from your game backend:
+/// [Reference](https://discordapp.com/developers/docs/game-sdk/store#http-apis).
+///
 /// <https://discordapp.com/developers/docs/game-sdk/store>
 impl<'a> Discord<'a> {
+    /// Fetches the list of SKUs for the current application.
+    ///
+    /// Only SKUs that have a price set will be fetched.
+    /// If you aren't seeing any SKUs being returned, make sure they have a price set.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#fetchskus>
     pub fn fetch_skus(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
@@ -16,6 +24,10 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Gets a SKU by its ID.
+    ///
+    /// [`fetch_skus`](#method.fetch_skus) must be called before hand.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getsku>
     pub fn sku(&mut self, id: i64) -> Result<Sku> {
         let mut sku = sys::DiscordSku::default();
@@ -25,6 +37,10 @@ impl<'a> Discord<'a> {
         Ok(sku.into())
     }
 
+    /// Gets all fetched SKUs.
+    ///
+    /// [`fetch_skus`](#method.fetch_skus) must be called before hand.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
     /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
     pub fn all_skus(&mut self) -> Result<Vec<Sku>> {
@@ -45,6 +61,25 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// Fetches a list of entitlements to which the user is entitled.
+    ///
+    /// Applications, DLC, and Bundles will always be returned.
+    /// Consumables will be returned until they are consumed by the application via the HTTP endpoint.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/store#fetchentitlements>
+    pub fn fetch_entitlements(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
+        unsafe {
+            ffi!(self
+                .get_store_manager()
+                .fetch_entitlements()
+                .and_then(ResultCallback::new(callback)))
+        }
+    }
+
+    /// Gets an entitlement by its ID.
+    ///
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlement>
     pub fn entitlement(&mut self, id: i64) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
@@ -59,6 +94,10 @@ impl<'a> Discord<'a> {
         Ok(entitlement)
     }
 
+    /// Gets all fetched entitlements.
+    ///
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
     /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
     pub fn all_entitlements(&mut self) -> Result<Vec<Entitlement>> {
@@ -83,6 +122,10 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// Whether the user is entitled to the given SKU.
+    ///
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#hasskuentitlement>
     pub fn has_entitlement(&mut self, sku_id: i64) -> Result<bool> {
         let mut has_entitlement = false;
@@ -97,6 +140,10 @@ impl<'a> Discord<'a> {
         Ok(has_entitlement)
     }
 
+    /// Opens the overlay to begin the in-app purchase dialogue for the given SKU.
+    ///
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#startpurchase>
     pub fn start_purchase(
         &mut self,
@@ -111,6 +158,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Fires when the connected user receives a new entitlement,
+    /// either through purchase or through a developer grant.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate>
     pub fn recv_store_entitlement_create(
         &'_ self,
@@ -118,6 +168,9 @@ impl<'a> Discord<'a> {
         self.receivers.store_entitlement_create.try_iter()
     }
 
+    /// Fires when the connected user loses an entitlement,
+    /// either by expiration, revocation, or consumption in the case of consumable entitlements.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete>
     pub fn recv_store_entitlement_delete(
         &'_ self,

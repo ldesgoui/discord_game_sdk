@@ -5,10 +5,18 @@ use std::ffi::c_void;
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/discord>
 impl<'a> Discord<'a> {
+    /// Calls [`with_create_flags`](#method.with_create_flags)
+    /// with [`CreateFlags::Default`](enum.CreateFlags.html#variant.Default).
     pub fn new(client_id: i64) -> Result<Self> {
-        Self::with_create_flags(client_id, CreateFlags::default())
+        Self::with_create_flags(client_id, CreateFlags::Default)
     }
 
+    /// Creates an instance of the main interface with the Discord Game SDK.
+    /// It also forwards all log messages to [`log`](https://docs.rs/log)
+    /// and kickstarts all managers that produce events when started.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/discord#create>  
+    /// <https://discordapp.com/developers/docs/game-sdk/discord#setloghook>
     pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
         let (senders, receivers) = event::create_channels();
         let senders_ptr = Box::into_raw(Box::new(senders));
@@ -62,8 +70,14 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Runs all pending SDK callbacks.
+    ///
+    /// Will return [`Error::NotRunning`](enum.Error.html#variant.NotRunning)
+    /// if the Discord client was closed.
+    ///
     /// ## Attention
-    /// Event buffers will grow large if `run_callbacks` is not ran often
+    /// Event buffers will grow large if `run_callbacks` is not ran often, it is recommended to run
+    /// this in the game loop.
     pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()?;
 
@@ -81,10 +95,12 @@ impl<'a> Discord<'a> {
         Ok(())
     }
 
-    /// ## Attention
-    /// Event buffers will grow large if not all used or emptied
+    /// This will discard all events that have not been used.
     ///
-    /// As a rule of thumb, call `empty_event_buffers` before every `run_callbacks`
+    /// ## Attention
+    /// Event buffers will grow large if not all used or emptied.
+    ///
+    /// As a rule of thumb, call `empty_event_buffers` before every `run_callbacks`.
     pub fn empty_event_buffers(&self) {
         self.receivers.empty_channels()
     }

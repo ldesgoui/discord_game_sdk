@@ -4,8 +4,15 @@ use crate::{
 
 /// # Achievements
 ///
+/// Achievements are managed in the [Developer Portal](https://discordapp.com/developers/applications).
+///
+/// Some operations will require an http client, or must be ran from your game backend:
+/// [Reference](https://discordapp.com/developers/docs/game-sdk/achievements#the-api-way).
+///
 /// <https://discordapp.com/developers/docs/game-sdk/achievements>
 impl<'a> Discord<'a> {
+    /// Updates the current user's completion for a given achievement.
+    ///
     /// `percent_complete` must be [0..=100]
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#setuserachievement>
@@ -23,6 +30,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Loads a stable list of the current user's achievements to iterate over.
+    /// Do your iteration within the callback of this function.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#fetchuserachievements>
     pub fn fetch_achievements(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
@@ -33,6 +43,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Gets the user achievement for the given achievement id.
+    /// [`fetch_achievements`](#method.fetch_achievements) must be called before.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievement>
     pub fn achievement(&mut self, achievement_id: i64) -> Result<Achievement> {
         let mut achievement = sys::DiscordUserAchievement::default();
@@ -47,6 +60,9 @@ impl<'a> Discord<'a> {
         Ok(achievement.into())
     }
 
+    /// Gets the user's list of achievements
+    /// [`fetch_achievements`](#method.fetch_achievements) must be called before.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
     pub fn all_achievements(&mut self) -> Result<Vec<Achievement>> {
@@ -75,6 +91,8 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// Fires when an achievement is updated for the current user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#onuserachievementupdate>
     pub fn recv_achievements_update(
         &'_ self,

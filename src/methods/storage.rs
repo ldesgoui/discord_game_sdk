@@ -11,6 +11,10 @@ use std::mem::size_of;
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/storage>
 impl<'a> Discord<'a> {
+    /// Reads data synchronously from the game's allocated save file into a buffer.
+    /// The file is mapped by key-value pair, and this function will read data that exists
+    /// for the given key name.
+    ///
     /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#read>
@@ -34,6 +38,8 @@ impl<'a> Discord<'a> {
         Ok(read)
     }
 
+    /// Reads data asynchronously from the game's allocated save file into a buffer.
+    ///
     /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasync>
@@ -52,6 +58,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Reads data asynchronously from the game's allocated save file into a buffer,
+    /// starting at a given offset and up to a given length.
+    ///
     /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasyncpartial>
@@ -72,6 +81,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Writes data synchronously to disk, under the given key name.
+    ///
     /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#write>
@@ -90,6 +101,8 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// Writes data asynchronously to disk under the given key.
+    ///
     /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#writeasync>
@@ -115,6 +128,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Deletes written data for the given key.
+    ///
     /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#delete>
@@ -129,6 +144,8 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// Checks if data exists for a given key.
+    ///
     /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#exists>
@@ -147,6 +164,8 @@ impl<'a> Discord<'a> {
         Ok(exists)
     }
 
+    /// Returns file info for the given key.
+    ///
     /// `filename` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#stat>
@@ -165,6 +184,8 @@ impl<'a> Discord<'a> {
         Ok(stat.into())
     }
 
+    /// Returns infos to all existing files.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
     /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
     pub fn all_file_stats(&mut self) -> Result<Vec<FileStat>> {
@@ -185,6 +206,9 @@ impl<'a> Discord<'a> {
         Ok(result)
     }
 
+    /// Returns the path to the folder where files are stored.
+    /// It is specific to the application ID, the current branch, and the current user.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#getpath>
     pub fn folder_path(&mut self) -> Result<String> {
         let mut path: sys::DiscordPath = [0; size_of::<sys::DiscordPath>()];

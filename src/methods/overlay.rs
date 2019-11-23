@@ -2,8 +2,20 @@ use crate::{callbacks::ResultCallback, event, Action, Discord, Result};
 
 /// # Overlay
 ///
+/// The terminology employed by the Game SDK is confusing, this crate employs the terms "opened"
+/// and "closed" instead:
+///
+/// |                                          | Game SDK | `discord_game_sdk` |
+/// |------------------------------------------|----------|--------------------|
+/// | Overlay is appearing and has taken focus | unlocked | opened             |
+/// | Overlay is hidden                        | locked   | closed             |
+///
 /// <https://discordapp.com/developers/docs/game-sdk/overlay>
 impl<'a> Discord<'a> {
+    /// Check whether the user has the overlay enabled or disabled.
+    /// If the overlay is disabled, all the functionality in this manager will still work.
+    /// The calls will instead focus the Discord client and show the modal there instead.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#isenabled>
     pub fn overlay_enabled(&mut self) -> bool {
         let mut enabled = false;
@@ -17,6 +29,8 @@ impl<'a> Discord<'a> {
         enabled
     }
 
+    /// Whether the overlay is appearing and has taken focus.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#islocked>
     pub fn overlay_opened(&mut self) -> bool {
         let mut locked = false;
@@ -26,6 +40,8 @@ impl<'a> Discord<'a> {
         !locked
     }
 
+    /// Open or close the overlay.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#setlocked>
     pub fn set_overlay_opened(
         &mut self,
@@ -40,6 +56,9 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Opens the overlay modal for sending game invitations to users, channels, and servers.
+    /// If you do not have a valid activity with all the required fields, this call will error.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#openactivityinvite>
     pub fn open_invite_overlay(
         &mut self,
@@ -54,6 +73,11 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Opens the overlay modal for joining a Discord guild, given its invite code
+    /// (e.g.: `ABCDEF` in `https://discord.gg/ABCDEF` or `https://discordapp.com/invite/ABCDEF`).
+    ///
+    /// Receiving `Ok(())` does not necessarily mean that the user has joined the guild.
+    ///
     /// `code` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#openguildinvite>
@@ -72,6 +96,10 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Opens the overlay widget for voice settings for the currently connected application.
+    /// These settings are unique to each user within the context of your application.
+    /// That means that a user can have different favorite voice settings for each of their games.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#openvoicesettings>
     pub fn open_voice_settings(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
@@ -82,6 +110,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Fires when the overlay is opened or closed.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#ontoggle>
     pub fn recv_overlay_toggle(&'_ self) -> impl '_ + Iterator<Item = event::overlay::Toggle> {
         self.receivers.overlay_toggle.try_iter()
