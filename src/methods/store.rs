@@ -60,16 +60,10 @@ impl<'a> Discord<'a> {
         Ok(sku.into())
     }
 
-    pub fn iter_skus(
-        &'a mut self,
-    ) -> impl 'a
-           + Iterator<Item = Result<Sku>>
-           + DoubleEndedIterator
-           + ExactSizeIterator
-           + std::iter::FusedIterator {
+    pub fn iter_skus<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<Sku>> {
         let count = self.sku_count();
 
-        iter::GenericIter::new(self, |d, i| d.sku_at(i), count)
+        iter::GenericIter::new(self, Box::new(|d, i| d.sku_at(i)), count)
     }
 
     /// Fetches a list of entitlements to which the user is entitled.
@@ -128,16 +122,10 @@ impl<'a> Discord<'a> {
         Ok(entitlement)
     }
 
-    pub fn iter_entitlements(
-        &'a mut self,
-    ) -> impl 'a
-           + Iterator<Item = Result<Entitlement>>
-           + DoubleEndedIterator
-           + ExactSizeIterator
-           + std::iter::FusedIterator {
+    pub fn iter_entitlements<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<Entitlement>> {
         let count = self.entitlement_count();
 
-        iter::GenericIter::new(self, |d, i| d.entitlement_at(i), count)
+        iter::GenericIter::new(self, Box::new(|d, i| d.entitlement_at(i)), count)
     }
 
     /// Whether the user is entitled to the given SKU.

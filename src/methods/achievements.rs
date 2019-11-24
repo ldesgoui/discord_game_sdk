@@ -87,16 +87,10 @@ impl<'a> Discord<'a> {
         Ok(achievement.into())
     }
 
-    pub fn iter_achievements(
-        &'a mut self,
-    ) -> impl 'a
-           + Iterator<Item = Result<Achievement>>
-           + DoubleEndedIterator
-           + ExactSizeIterator
-           + std::iter::FusedIterator {
+    pub fn iter_achievements<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<Achievement>> {
         let count = self.achievement_count();
 
-        iter::GenericIter::new(self, |d, i| d.achievement_at(i), count)
+        iter::GenericIter::new(self, Box::new(|d, i| d.achievement_at(i)), count)
     }
 
     /// Fires when an achievement is updated for the current user.

@@ -204,16 +204,10 @@ impl<'a> Discord<'a> {
         Ok(stat.into())
     }
 
-    pub fn iter_file_stats(
-        &'a mut self,
-    ) -> impl 'a
-           + Iterator<Item = Result<FileStat>>
-           + DoubleEndedIterator
-           + ExactSizeIterator
-           + std::iter::FusedIterator {
+    pub fn iter_file_stats<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<FileStat>> {
         let count = self.file_stat_count();
 
-        iter::GenericIter::new(self, |d, i| d.file_stat_at(i), count)
+        iter::GenericIter::new(self, Box::new(|d, i| d.file_stat_at(i)), count)
     }
 
     /// Returns the path to the folder where files are stored.

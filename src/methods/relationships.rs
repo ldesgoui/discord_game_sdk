@@ -58,20 +58,14 @@ impl<'a> Discord<'a> {
         Ok(relationship.into())
     }
 
-    pub fn iter_relationships(
-        &'a mut self,
-    ) -> Result<
-        impl 'a
-            + Iterator<Item = Result<Relationship>>
-            + DoubleEndedIterator
-            + ExactSizeIterator
-            + std::iter::FusedIterator,
-    > {
+    pub fn iter_relationships<'b>(
+        &'b mut self,
+    ) -> Result<iter::GenericIter<'a, 'b, Result<Relationship>>> {
         let count = self.relationship_count()?;
 
         Ok(iter::GenericIter::new(
             self,
-            |d, i| d.relationship_at(i),
+            Box::new(|d, i| d.relationship_at(i)),
             count,
         ))
     }

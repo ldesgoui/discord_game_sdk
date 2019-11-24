@@ -256,21 +256,15 @@ impl<'a> Discord<'a> {
         ))
     }
 
-    pub fn iter_lobby_metadata(
-        &'a mut self,
+    pub fn iter_lobby_metadata<'b>(
+        &'b mut self,
         lobby_id: i64,
-    ) -> Result<
-        impl 'a
-            + Iterator<Item = Result<(String, String)>>
-            + DoubleEndedIterator
-            + ExactSizeIterator
-            + std::iter::FusedIterator,
-    > {
+    ) -> Result<iter::GenericIter<'a, 'b, Result<(String, String)>>> {
         let count = self.lobby_metadata_count(lobby_id)?;
 
         Ok(iter::GenericIter::new(
             self,
-            move |d, i| d.lobby_metadata_at(lobby_id, i),
+            Box::new(move |d, i| d.lobby_metadata_at(lobby_id, i)),
             count,
         ))
     }
@@ -338,21 +332,15 @@ impl<'a> Discord<'a> {
         Ok(user_id)
     }
 
-    pub fn iter_lobby_member_ids(
-        &'a mut self,
+    pub fn iter_lobby_member_ids<'b>(
+        &'b mut self,
         lobby_id: i64,
-    ) -> Result<
-        impl 'a
-            + Iterator<Item = Result<i64>>
-            + DoubleEndedIterator
-            + ExactSizeIterator
-            + std::iter::FusedIterator,
-    > {
+    ) -> Result<iter::GenericIter<'a, 'b, Result<i64>>> {
         let count = self.lobby_member_count(lobby_id)?;
 
         Ok(iter::GenericIter::new(
             self,
-            move |d, i| d.lobby_member_id_at(lobby_id, i),
+            Box::new(move |d, i| d.lobby_member_id_at(lobby_id, i)),
             count,
         ))
     }
@@ -438,22 +426,16 @@ impl<'a> Discord<'a> {
         ))
     }
 
-    pub fn iter_lobby_member_metadata(
-        &'a mut self,
+    pub fn iter_lobby_member_metadata<'b>(
+        &'b mut self,
         lobby_id: i64,
         user_id: i64,
-    ) -> Result<
-        impl 'a
-            + Iterator<Item = Result<(String, String)>>
-            + DoubleEndedIterator
-            + ExactSizeIterator
-            + std::iter::FusedIterator,
-    > {
+    ) -> Result<iter::GenericIter<'a, 'b, Result<(String, String)>>> {
         let count = self.lobby_member_metadata_count(lobby_id, user_id)?;
 
         Ok(iter::GenericIter::new(
             self,
-            move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i),
+            Box::new(move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i)),
             count,
         ))
     }
@@ -531,16 +513,10 @@ impl<'a> Discord<'a> {
         Ok(lobby_id)
     }
 
-    pub fn iter_lobbies(
-        &'a mut self,
-    ) -> impl 'a
-           + Iterator<Item = Result<i64>>
-           + DoubleEndedIterator
-           + ExactSizeIterator
-           + std::iter::FusedIterator {
+    pub fn iter_lobbies<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<i64>> {
         let count = self.lobby_count();
 
-        iter::GenericIter::new(self, |d, i| d.lobby_id_at(i), count)
+        iter::GenericIter::new(self, Box::new(|d, i| d.lobby_id_at(i)), count)
     }
 
     /// Connects to the voice channel of the current lobby.

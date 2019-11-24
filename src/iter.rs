@@ -1,18 +1,19 @@
 use crate::Discord;
 
-pub(crate) struct GenericIter<'a, T, F: FnMut(&mut Discord, i32) -> T> {
-    discord: &'a mut Discord<'a>,
-    getter: F,
+pub struct GenericIter<'a: 'b, 'b, T> {
+    discord: &'b mut Discord<'a>,
+    getter: Box<dyn FnMut(&mut Discord, i32) -> T>,
     count: i32,
     index: i32,
     back_index: i32,
 }
 
-impl<'a, T, F> GenericIter<'a, T, F>
-where
-    F: FnMut(&mut Discord, i32) -> T,
-{
-    pub(crate) fn new(discord: &'a mut Discord<'a>, getter: F, count: i32) -> Self {
+impl<'a: 'b, 'b, T> GenericIter<'a, 'b, T> {
+    pub(crate) fn new(
+        discord: &'b mut Discord<'a>,
+        getter: Box<dyn FnMut(&mut Discord, i32) -> T>,
+        count: i32,
+    ) -> Self {
         Self {
             discord,
             getter,
@@ -23,10 +24,7 @@ where
     }
 }
 
-impl<T, F> Iterator for GenericIter<'_, T, F>
-where
-    F: FnMut(&mut Discord, i32) -> T,
-{
+impl<T> Iterator for GenericIter<'_, '_, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -43,10 +41,7 @@ where
     }
 }
 
-impl<T, F> DoubleEndedIterator for GenericIter<'_, T, F>
-where
-    F: FnMut(&mut Discord, i32) -> T,
-{
+impl<T> DoubleEndedIterator for GenericIter<'_, '_, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index + self.back_index < self.count {
             self.back_index += 1;
@@ -57,6 +52,6 @@ where
     }
 }
 
-impl<T, F> ExactSizeIterator for GenericIter<'_, T, F> where F: FnMut(&mut Discord, i32) -> T {}
+impl<T> ExactSizeIterator for GenericIter<'_, '_, T> {}
 
-impl<T, F> std::iter::FusedIterator for GenericIter<'_, T, F> where F: FnMut(&mut Discord, i32) -> T {}
+impl<T> std::iter::FusedIterator for GenericIter<'_, '_, T> {}
