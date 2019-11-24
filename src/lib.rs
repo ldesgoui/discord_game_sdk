@@ -212,6 +212,7 @@ pub use self::{
     image_kind::ImageKind,
     input_mode::InputMode,
     input_mode_kind::InputModeKind,
+    iter::GenericIter,
     lobby::Lobby,
     lobby_kind::LobbyKind,
     lobby_member_transaction::LobbyMemberTransaction,
