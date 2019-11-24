@@ -6,7 +6,6 @@ fn main() {
     let client_id = 0;
     let mut gsdk = Discord::new(client_id).unwrap();
 
-    // this is fine
     gsdk.update_activity(
         &Activity::empty()
             .with_details("Trying stuff out")
@@ -14,10 +13,6 @@ fn main() {
         |_, res| log::info!("update_activity: {:?}", res),
     );
 
-    // this is fine
-    let _ = gsdk.self_muted();
-
-    // this isn't ???
     for file_stat in gsdk.iter_file_stats() {
         println!("{:?}", file_stat);
     }
