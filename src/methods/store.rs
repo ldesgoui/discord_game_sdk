@@ -1,5 +1,6 @@
 use crate::{
-    callbacks::ResultCallback, event, sys, to_result::ToResult, Discord, Entitlement, Result, Sku,
+    callbacks::ResultCallback, event, iter, sys, to_result::ToResult, Discord, Entitlement, Result,
+    Sku,
 };
 
 /// # Store
@@ -43,22 +44,32 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
     /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
-    pub fn all_skus(&mut self) -> Result<Vec<Sku>> {
+    pub fn sku_count(&mut self) -> i32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
 
-        let mut result = Vec::with_capacity(count as usize);
+        count
+    }
+
+    pub fn sku_at(&mut self, index: i32) -> Result<Sku> {
         let mut sku = sys::DiscordSku::default();
 
-        for index in 0..count {
-            unsafe { ffi!(self.get_store_manager().get_sku_at(index as i32, &mut sku)) }
-                .to_result()?;
+        unsafe { ffi!(self.get_store_manager().get_sku_at(index as i32, &mut sku)) }.to_result()?;
 
-            result.push(sku.into())
-        }
+        Ok(sku.into())
+    }
 
-        Ok(result)
+    pub fn iter_skus(
+        &'a mut self,
+    ) -> impl 'a
+           + Iterator<Item = Result<Sku>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator {
+        let count = self.sku_count();
+
+        iter::GenericIter::new(self, |d, i| d.sku_at(i), count)
     }
 
     /// Fetches a list of entitlements to which the user is entitled.
@@ -94,32 +105,39 @@ impl<'a> Discord<'a> {
         Ok(entitlement)
     }
 
-    /// Gets all fetched entitlements.
-    ///
-    /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
-    ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
     /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
-    pub fn all_entitlements(&mut self) -> Result<Vec<Entitlement>> {
+    pub fn entitlement_count(&mut self) -> i32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }
 
-        let mut result = Vec::with_capacity(count as usize);
+        count
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
+    pub fn entitlement_at(&mut self, index: i32) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
-        for index in 0..count {
-            unsafe {
-                ffi!(self
-                    .get_store_manager()
-                    .get_entitlement_at(index as i32, &mut entitlement.0))
-            }
-            .to_result()?;
-
-            result.push(entitlement);
+        unsafe {
+            ffi!(self
+                .get_store_manager()
+                .get_entitlement_at(index as i32, &mut entitlement.0))
         }
+        .to_result()?;
 
-        Ok(result)
+        Ok(entitlement)
+    }
+
+    pub fn iter_entitlements(
+        &'a mut self,
+    ) -> impl 'a
+           + Iterator<Item = Result<Entitlement>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator {
+        let count = self.entitlement_count();
+
+        iter::GenericIter::new(self, |d, i| d.entitlement_at(i), count)
     }
 
     /// Whether the user is entitled to the given SKU.

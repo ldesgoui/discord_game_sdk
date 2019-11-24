@@ -1,11 +1,10 @@
 use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback},
-    event, sys,
+    event, iter, sys,
     to_result::ToResult,
     utils::{charbuf_len, charbuf_to_str},
     Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Reliability, Result, SearchQuery,
 };
-use std::collections::HashMap;
 use std::mem::size_of;
 
 /// # Lobbies
@@ -206,8 +205,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_lobby_manager().get_lobby_metadata_value(
                 lobby_id,
-                key.as_ptr() as *mut _,
-                &mut value as *mut _
+                key.as_mut_ptr() as *mut _,
+                &mut value
             ))
         }
         .to_result()?;
@@ -215,13 +214,9 @@ impl<'a> Discord<'a> {
         Ok(charbuf_to_str(&value[..charbuf_len(&value)]).to_string())
     }
 
-    /// Returns all metadata for a given lobby.
-    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey>  
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
-    pub fn all_lobby_metadata(&mut self, lobby_id: i64) -> Result<HashMap<String, String>> {
-        let mut count: i32 = 0;
+    pub fn lobby_metadata_count(&mut self, lobby_id: i64) -> Result<i32> {
+        let mut count = 0;
 
         unsafe {
             ffi!(self
@@ -230,36 +225,54 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        let mut res = HashMap::with_capacity(count as usize);
+        Ok(count)
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
+    pub fn lobby_metadata_at(&mut self, lobby_id: i64, index: i32) -> Result<(String, String)> {
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
-        for index in 0..count {
-            unsafe {
-                ffi!(self.get_lobby_manager().get_lobby_metadata_key(
-                    lobby_id,
-                    index as i32,
-                    &mut key as *mut _
-                ))
-            }
-            .to_result()?;
-
-            unsafe {
-                ffi!(self.get_lobby_manager().get_lobby_metadata_value(
-                    lobby_id,
-                    key.as_mut_ptr(),
-                    &mut value as *mut _
-                ))
-            }
-            .to_result()?;
-
-            let _ = res.insert(
-                charbuf_to_str(&key[..charbuf_len(&key)]).to_string(),
-                charbuf_to_str(&value[..charbuf_len(&value)]).to_string(),
-            );
+        unsafe {
+            ffi!(self
+                .get_lobby_manager()
+                .get_lobby_metadata_key(lobby_id, index as i32, &mut key))
         }
+        .to_result()?;
 
-        Ok(res)
+        unsafe {
+            ffi!(self.get_lobby_manager().get_lobby_metadata_value(
+                lobby_id,
+                key.as_mut_ptr(),
+                &mut value
+            ))
+        }
+        .to_result()?;
+
+        Ok((
+            charbuf_to_str(&key[..charbuf_len(&key)]).to_string(),
+            charbuf_to_str(&value[..charbuf_len(&value)]).to_string(),
+        ))
+    }
+
+    pub fn iter_lobby_metadata(
+        &'a mut self,
+        lobby_id: i64,
+    ) -> Result<
+        impl 'a
+            + Iterator<Item = Result<(String, String)>>
+            + DoubleEndedIterator
+            + ExactSizeIterator
+            + std::iter::FusedIterator,
+    > {
+        let count = self.lobby_metadata_count(lobby_id)?;
+
+        Ok(iter::GenericIter::new(
+            self,
+            move |d, i| d.lobby_metadata_at(lobby_id, i),
+            count,
+        ))
     }
 
     /// Updates lobby member info for a given member of the lobby.
@@ -295,11 +308,8 @@ impl<'a> Discord<'a> {
         }
     }
 
-    /// Returns the IDs of all lobby members.
-    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membercount>  
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid>
-    pub fn all_lobby_member_ids(&mut self, lobby_id: i64) -> Result<Vec<i64>> {
+    pub fn lobby_member_count(&mut self, lobby_id: i64) -> Result<i32> {
         let mut count = 0;
 
         unsafe {
@@ -309,35 +319,74 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        let mut result = Vec::with_capacity(count as usize);
-        let mut user_id = 0;
-
-        for index in 0..count {
-            unsafe {
-                ffi!(self.get_lobby_manager().get_member_user_id(
-                    lobby_id,
-                    index,
-                    &mut user_id as *mut _
-                ))
-            }
-            .to_result()?;
-
-            result.push(user_id)
-        }
-
-        Ok(result)
+        Ok(count)
     }
 
-    /// Returns all metadata for a given member.
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid>
+    pub fn lobby_member_id_at(&mut self, lobby_id: i64, index: i32) -> Result<i64> {
+        let mut user_id = 0;
+
+        unsafe {
+            ffi!(self.get_lobby_manager().get_member_user_id(
+                lobby_id,
+                index,
+                &mut user_id as *mut _
+            ))
+        }
+        .to_result()?;
+
+        Ok(user_id)
+    }
+
+    pub fn iter_lobby_member_ids(
+        &'a mut self,
+        lobby_id: i64,
+    ) -> Result<
+        impl 'a
+            + Iterator<Item = Result<i64>>
+            + DoubleEndedIterator
+            + ExactSizeIterator
+            + std::iter::FusedIterator,
+    > {
+        let count = self.lobby_member_count(lobby_id)?;
+
+        Ok(iter::GenericIter::new(
+            self,
+            move |d, i| d.lobby_member_id_at(lobby_id, i),
+            count,
+        ))
+    }
+
+    /// Returns member metadata value for a given key.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey>  
+    /// `key` must not contain any nul bytes, it will grow by one byte.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
-    pub fn all_lobby_member_metadata(
+    pub fn lobby_member_metadata(
         &mut self,
         lobby_id: i64,
         user_id: i64,
-    ) -> Result<HashMap<String, String>> {
+        mut key: String,
+    ) -> Result<String> {
+        let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
+
+        key.push('\0');
+
+        unsafe {
+            ffi!(self.get_lobby_manager().get_member_metadata_value(
+                lobby_id,
+                user_id,
+                key.as_mut_ptr() as *mut _,
+                &mut value
+            ))
+        }
+        .to_result()?;
+
+        Ok(charbuf_to_str(&value[..charbuf_len(&value)]).to_string())
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
+    pub fn lobby_member_metadata_count(&mut self, lobby_id: i64, user_id: i64) -> Result<i32> {
         let mut count: i32 = 0;
 
         unsafe {
@@ -349,38 +398,64 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        let mut res = HashMap::with_capacity(count as usize);
+        Ok(count)
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey>
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
+    pub fn lobby_member_metadata_at(
+        &mut self,
+        lobby_id: i64,
+        user_id: i64,
+        index: i32,
+    ) -> Result<(String, String)> {
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
-        for index in 0..count {
-            unsafe {
-                ffi!(self.get_lobby_manager().get_member_metadata_key(
-                    lobby_id,
-                    user_id,
-                    index as i32,
-                    &mut key as *mut _
-                ))
-            }
-            .to_result()?;
-
-            unsafe {
-                ffi!(self.get_lobby_manager().get_member_metadata_value(
-                    lobby_id,
-                    user_id,
-                    key.as_mut_ptr(),
-                    &mut value as *mut _
-                ))
-            }
-            .to_result()?;
-
-            let _ = res.insert(
-                charbuf_to_str(&key[..charbuf_len(&key)]).to_string(),
-                charbuf_to_str(&value[..charbuf_len(&value)]).to_string(),
-            );
+        unsafe {
+            ffi!(self.get_lobby_manager().get_member_metadata_key(
+                lobby_id,
+                user_id,
+                index as i32,
+                &mut key as *mut _
+            ))
         }
+        .to_result()?;
 
-        Ok(res)
+        unsafe {
+            ffi!(self.get_lobby_manager().get_member_metadata_value(
+                lobby_id,
+                user_id,
+                key.as_mut_ptr(),
+                &mut value as *mut _
+            ))
+        }
+        .to_result()?;
+
+        Ok((
+            charbuf_to_str(&key[..charbuf_len(&key)]).to_string(),
+            charbuf_to_str(&value[..charbuf_len(&value)]).to_string(),
+        ))
+    }
+
+    pub fn iter_lobby_member_metadata(
+        &'a mut self,
+        lobby_id: i64,
+        user_id: i64,
+    ) -> Result<
+        impl 'a
+            + Iterator<Item = Result<(String, String)>>
+            + DoubleEndedIterator
+            + ExactSizeIterator
+            + std::iter::FusedIterator,
+    > {
+        let count = self.lobby_member_metadata_count(lobby_id, user_id)?;
+
+        Ok(iter::GenericIter::new(
+            self,
+            move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i),
+            count,
+        ))
     }
 
     /// Sends a message to the lobby on behalf of the current user.
@@ -416,7 +491,7 @@ impl<'a> Discord<'a> {
     pub fn lobby_search(
         &mut self,
         search: &SearchQuery,
-        mut callback: impl FnMut(&mut Discord, Result<Vec<i64>>) + 'a,
+        mut callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -430,39 +505,42 @@ impl<'a> Discord<'a> {
             return callback(self, Err(e));
         }
 
-        let inner = move |gsdk: &mut Discord, res: Result<()>| {
-            if let Err(e) = res {
-                return callback(gsdk, Err(e));
-            }
-
-            let mut count = 0;
-
-            unsafe { ffi!(gsdk.get_lobby_manager().lobby_count(&mut count)) }
-
-            let mut vec = Vec::with_capacity(count as usize);
-            let mut lobby_id = 0;
-
-            for index in 0..count {
-                let res =
-                    unsafe { ffi!(gsdk.get_lobby_manager().get_lobby_id(index, &mut lobby_id)) }
-                        .to_result();
-
-                if let Err(e) = res {
-                    return callback(gsdk, Err(e));
-                }
-
-                vec.push(lobby_id);
-            }
-
-            callback(gsdk, Ok(vec))
-        };
-
         unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .search(ptr)
-                .and_then(ResultCallback::new(inner)))
+                .and_then(ResultCallback::new(callback)))
         }
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount>
+    pub fn lobby_count(&mut self) -> i32 {
+        let mut count = 0;
+
+        unsafe { ffi!(self.get_lobby_manager().lobby_count(&mut count)) }
+
+        count
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid>
+    pub fn lobby_id_at(&mut self, index: i32) -> Result<i64> {
+        let mut lobby_id = 0;
+
+        unsafe { ffi!(self.get_lobby_manager().get_lobby_id(index, &mut lobby_id)) }.to_result()?;
+
+        Ok(lobby_id)
+    }
+
+    pub fn iter_lobbies(
+        &'a mut self,
+    ) -> impl 'a
+           + Iterator<Item = Result<i64>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator {
+        let count = self.lobby_count();
+
+        iter::GenericIter::new(self, |d, i| d.lobby_id_at(i), count)
     }
 
     /// Connects to the voice channel of the current lobby.

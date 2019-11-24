@@ -1,6 +1,6 @@
 use crate::{
     callbacks::{ResultBytesCallback, ResultCallback},
-    sys,
+    iter, sys,
     to_result::ToResult,
     utils::{charbuf_len, charbuf_to_str},
     Discord, FileStat, Result,
@@ -187,23 +187,33 @@ impl<'a> Discord<'a> {
     /// Returns infos to all existing files.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
-    pub fn all_file_stats(&mut self) -> Result<Vec<FileStat>> {
+    pub fn file_stat_count(&mut self) -> i32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_storage_manager().count(&mut count)) }
 
-        let mut result = Vec::with_capacity(count as usize);
+        count
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
+    pub fn file_stat_at(&mut self, index: i32) -> Result<FileStat> {
         let mut stat = sys::DiscordFileStat::default();
 
-        for index in 0..count {
-            unsafe { ffi!(self.get_storage_manager().stat_at(index as i32, &mut stat)) }
-                .to_result()?;
+        unsafe { ffi!(self.get_storage_manager().stat_at(index as i32, &mut stat)) }.to_result()?;
 
-            result.push(stat.into())
-        }
+        Ok(stat.into())
+    }
 
-        Ok(result)
+    pub fn iter_file_stats(
+        &'a mut self,
+    ) -> impl 'a
+           + Iterator<Item = Result<FileStat>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator {
+        let count = self.file_stat_count();
+
+        iter::GenericIter::new(self, |d, i| d.file_stat_at(i), count)
     }
 
     /// Returns the path to the folder where files are stored.

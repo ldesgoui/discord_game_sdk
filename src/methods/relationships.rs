@@ -1,4 +1,4 @@
-use crate::{across_ffi, event, sys, to_result::ToResult, Discord, Relationship, Result};
+use crate::{across_ffi, event, iter, sys, to_result::ToResult, Discord, Relationship, Result};
 
 /// # Relationships
 ///
@@ -20,47 +20,60 @@ impl<'a> Discord<'a> {
         Ok(relationship.into())
     }
 
-    /// Fetches all relationships that match a given predicate.
+    /// Filter all relationships by a given predicate.
     ///
     /// The event [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
-    /// must be fired at least once before using this method.
+    /// must be fired before using this method.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#filter>  
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
-    pub fn all_relationships<F: FnMut(Relationship) -> bool>(
-        &mut self,
-        filter: F,
-    ) -> Result<Vec<Relationship>> {
-        let filter_ptr = Box::into_raw(Box::new(filter));
-        let _filter = unsafe { Box::from_raw(filter_ptr) };
-
+    pub fn filter_relationships<F: FnMut(Relationship) -> bool>(&mut self, mut filter: F) {
         unsafe {
             ffi!(self.get_relationship_manager().filter(
-                filter_ptr as *mut _,
+                &mut filter as *mut _ as *mut _,
                 Some(across_ffi::callbacks::filter_relationship::<F>)
             ))
         }
+    }
 
+    /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
+    pub fn relationship_count(&mut self) -> Result<i32> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_relationship_manager().count(&mut count)) }.to_result()?;
 
-        let mut result = Vec::with_capacity(count as usize);
+        Ok(count)
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
+    pub fn relationship_at(&mut self, index: i32) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
-        for index in 0..count {
-            unsafe {
-                ffi!(self
-                    .get_relationship_manager()
-                    .get_at(index as u32, &mut relationship))
-            }
-            .to_result()?;
-
-            result.push(relationship.into())
+        unsafe {
+            ffi!(self
+                .get_relationship_manager()
+                .get_at(index as u32, &mut relationship))
         }
+        .to_result()?;
 
-        Ok(result)
+        Ok(relationship.into())
+    }
+
+    pub fn iter_relationships(
+        &'a mut self,
+    ) -> Result<
+        impl 'a
+            + Iterator<Item = Result<Relationship>>
+            + DoubleEndedIterator
+            + ExactSizeIterator
+            + std::iter::FusedIterator,
+    > {
+        let count = self.relationship_count()?;
+
+        Ok(iter::GenericIter::new(
+            self,
+            |d, i| d.relationship_at(i),
+            count,
+        ))
     }
 
     /// Fires at initialization when Discord has cached a snapshot of all your relationships.

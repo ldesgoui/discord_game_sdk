@@ -121,6 +121,7 @@ mod image_handle;
 mod image_kind;
 mod input_mode;
 mod input_mode_kind;
+mod iter;
 mod lobby;
 mod lobby_kind;
 mod lobby_member_transaction;

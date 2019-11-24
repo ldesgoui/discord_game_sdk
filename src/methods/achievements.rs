@@ -1,5 +1,5 @@
 use crate::{
-    callbacks::ResultCallback, event, sys, to_result::ToResult, Achievement, Discord, Result,
+    callbacks::ResultCallback, event, iter, sys, to_result::ToResult, Achievement, Discord, Result,
 };
 
 /// # Achievements
@@ -60,13 +60,9 @@ impl<'a> Discord<'a> {
         Ok(achievement.into())
     }
 
-    /// Gets the user's list of achievements
-    /// [`fetch_achievements`](#method.fetch_achievements) must be called before.
-    ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
-    pub fn all_achievements(&mut self) -> Result<Vec<Achievement>> {
-        let mut count: i32 = 0;
+    pub fn achievement_count(&mut self) -> i32 {
+        let mut count = 0;
 
         unsafe {
             ffi!(self
@@ -74,21 +70,33 @@ impl<'a> Discord<'a> {
                 .count_user_achievements(&mut count))
         }
 
-        let mut result = Vec::with_capacity(count as usize);
+        count
+    }
+
+    /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
+    pub fn achievement_at(&mut self, index: i32) -> Result<Achievement> {
         let mut achievement = sys::DiscordUserAchievement::default();
 
-        for index in 0..count {
-            unsafe {
-                ffi!(self
-                    .get_achievement_manager()
-                    .get_user_achievement_at(index, &mut achievement))
-            }
-            .to_result()?;
-
-            result.push(achievement.into());
+        unsafe {
+            ffi!(self
+                .get_achievement_manager()
+                .get_user_achievement_at(index, &mut achievement))
         }
+        .to_result()?;
 
-        Ok(result)
+        Ok(achievement.into())
+    }
+
+    pub fn iter_achievements(
+        &'a mut self,
+    ) -> impl 'a
+           + Iterator<Item = Result<Achievement>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator {
+        let count = self.achievement_count();
+
+        iter::GenericIter::new(self, |d, i| d.achievement_at(i), count)
     }
 
     /// Fires when an achievement is updated for the current user.
