@@ -20,7 +20,7 @@ impl<'a> Discord<'a> {
     /// `command` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#registercommand>
-    pub fn register_launch_command(&mut self, mut command: String) -> Result<()> {
+    pub fn register_launch_command(&self, mut command: String) -> Result<()> {
         command.push('\0');
 
         unsafe {

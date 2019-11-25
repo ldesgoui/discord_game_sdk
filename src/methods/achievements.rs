@@ -48,7 +48,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_achievements`](#method.fetch_achievements) must be called before.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievement>
-    pub fn user_achievement(&mut self, achievement_id: i64) -> Result<UserAchievement> {
+    pub fn user_achievement(&self, achievement_id: i64) -> Result<UserAchievement> {
         let mut achievement = sys::DiscordUserAchievement::default();
 
         unsafe {
@@ -62,7 +62,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
-    pub fn user_achievement_count(&mut self) -> i32 {
+    pub fn user_achievement_count(&self) -> i32 {
         let mut count = 0;
 
         unsafe {
@@ -75,7 +75,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
-    pub fn user_achievement_at(&mut self, index: i32) -> Result<UserAchievement> {
+    pub fn user_achievement_at(&self, index: i32) -> Result<UserAchievement> {
         let mut achievement = sys::DiscordUserAchievement::default();
 
         unsafe {
@@ -89,7 +89,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn iter_user_achievements<'b>(
-        &'b mut self,
+        &'b self,
     ) -> iter::GenericIter<'a, 'b, Result<UserAchievement>> {
         let count = self.user_achievement_count();
 

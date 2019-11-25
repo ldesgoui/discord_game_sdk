@@ -162,7 +162,7 @@ impl<'a> Discord<'a> {
     /// A [`lobby_search`](#method.lobby_search) must have completed before hand.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobby>
-    pub fn lobby(&mut self, lobby_id: i64) -> Result<Lobby> {
+    pub fn lobby(&self, lobby_id: i64) -> Result<Lobby> {
         let mut lobby = sys::DiscordLobby::default();
         unsafe {
             ffi!(self
@@ -179,7 +179,7 @@ impl<'a> Discord<'a> {
     /// [`Activity::with_join_secret`](struct.Activity.html#method.with_join_secret).
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyactivitysecret>
-    pub fn lobby_activity_secret(&mut self, lobby_id: i64) -> Result<String> {
+    pub fn lobby_activity_secret(&self, lobby_id: i64) -> Result<String> {
         let mut secret: sys::DiscordLobbySecret = [0; size_of::<sys::DiscordLobbySecret>()];
 
         unsafe {
@@ -197,7 +197,7 @@ impl<'a> Discord<'a> {
     /// `key` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
-    pub fn lobby_metadata(&mut self, lobby_id: i64, mut key: String) -> Result<String> {
+    pub fn lobby_metadata(&self, lobby_id: i64, mut key: String) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
         key.push('\0');
@@ -215,7 +215,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
-    pub fn lobby_metadata_count(&mut self, lobby_id: i64) -> Result<i32> {
+    pub fn lobby_metadata_count(&self, lobby_id: i64) -> Result<i32> {
         let mut count = 0;
 
         unsafe {
@@ -230,7 +230,7 @@ impl<'a> Discord<'a> {
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey>  
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
-    pub fn lobby_metadata_at(&mut self, lobby_id: i64, index: i32) -> Result<(String, String)> {
+    pub fn lobby_metadata_at(&self, lobby_id: i64, index: i32) -> Result<(String, String)> {
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
@@ -257,7 +257,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn iter_lobby_metadata<'b>(
-        &'b mut self,
+        &'b self,
         lobby_id: i64,
     ) -> Result<iter::GenericIter<'a, 'b, Result<(String, String)>>> {
         let count = self.lobby_metadata_count(lobby_id)?;
@@ -303,7 +303,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membercount>  
-    pub fn lobby_member_count(&mut self, lobby_id: i64) -> Result<i32> {
+    pub fn lobby_member_count(&self, lobby_id: i64) -> Result<i32> {
         let mut count = 0;
 
         unsafe {
@@ -317,7 +317,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid>
-    pub fn lobby_member_id_at(&mut self, lobby_id: i64, index: i32) -> Result<i64> {
+    pub fn lobby_member_id_at(&self, lobby_id: i64, index: i32) -> Result<i64> {
         let mut user_id = 0;
 
         unsafe {
@@ -333,7 +333,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn iter_lobby_member_ids<'b>(
-        &'b mut self,
+        &'b self,
         lobby_id: i64,
     ) -> Result<iter::GenericIter<'a, 'b, Result<i64>>> {
         let count = self.lobby_member_count(lobby_id)?;
@@ -351,7 +351,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
     pub fn lobby_member_metadata(
-        &mut self,
+        &self,
         lobby_id: i64,
         user_id: i64,
         mut key: String,
@@ -374,7 +374,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
-    pub fn lobby_member_metadata_count(&mut self, lobby_id: i64, user_id: i64) -> Result<i32> {
+    pub fn lobby_member_metadata_count(&self, lobby_id: i64, user_id: i64) -> Result<i32> {
         let mut count: i32 = 0;
 
         unsafe {
@@ -392,7 +392,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey>
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
     pub fn lobby_member_metadata_at(
-        &mut self,
+        &self,
         lobby_id: i64,
         user_id: i64,
         index: i32,
@@ -427,7 +427,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn iter_lobby_member_metadata<'b>(
-        &'b mut self,
+        &'b self,
         lobby_id: i64,
         user_id: i64,
     ) -> Result<iter::GenericIter<'a, 'b, Result<(String, String)>>> {
@@ -496,7 +496,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount>
-    pub fn lobby_count(&mut self) -> i32 {
+    pub fn lobby_count(&self) -> i32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_lobby_manager().lobby_count(&mut count)) }
@@ -505,7 +505,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid>
-    pub fn lobby_id_at(&mut self, index: i32) -> Result<i64> {
+    pub fn lobby_id_at(&self, index: i32) -> Result<i64> {
         let mut lobby_id = 0;
 
         unsafe { ffi!(self.get_lobby_manager().get_lobby_id(index, &mut lobby_id)) }.to_result()?;
@@ -513,7 +513,7 @@ impl<'a> Discord<'a> {
         Ok(lobby_id)
     }
 
-    pub fn iter_lobbies<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<i64>> {
+    pub fn iter_lobbies<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<i64>> {
         let count = self.lobby_count();
 
         iter::GenericIter::new(self, Box::new(|d, i| d.lobby_id_at(i)), count)
@@ -557,14 +557,14 @@ impl<'a> Discord<'a> {
     /// Call this when connecting to the lobby.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectnetwork>
-    pub fn connect_lobby_network(&mut self, lobby_id: i64) -> Result<()> {
+    pub fn connect_lobby_network(&self, lobby_id: i64) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().connect_network(lobby_id,)) }.to_result()
     }
 
     /// Disconnects from the networking layer for the given lobby ID.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectnetwork>
-    pub fn disconnect_lobby_network(&mut self, lobby_id: i64) -> Result<()> {
+    pub fn disconnect_lobby_network(&self, lobby_id: i64) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().disconnect_network(lobby_id,)) }.to_result()
     }
 
@@ -572,7 +572,7 @@ impl<'a> Discord<'a> {
     /// This should appear near the end of your game loop.
     ///
     /// https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork
-    pub fn flush_lobby_network(&mut self) -> Result<()> {
+    pub fn flush_lobby_network(&self) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().flush_network()) }.to_result()
     }
 
@@ -580,7 +580,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#opennetworkchannel>
     pub fn open_lobby_network_channel(
-        &mut self,
+        &self,
         lobby_id: i64,
         channel_id: u8,
         reliable: Reliability,
@@ -599,7 +599,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#sendnetworkmessage>
     pub fn send_lobby_network_message(
-        &mut self,
+        &self,
         lobby_id: i64,
         user_id: i64,
         channel_id: u8,

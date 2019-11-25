@@ -15,7 +15,7 @@ impl<'a> Discord<'a> {
     /// The locale that was set by the current user in their Discord settings.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/applications#getcurrentlocale>
-    pub fn current_locale(&mut self) -> String {
+    pub fn current_locale(&self) -> String {
         let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
 
         unsafe {
@@ -32,7 +32,7 @@ impl<'a> Discord<'a> {
     /// [Dispatch](https://discordapp.com/developers/docs/dispatch/dispatch-and-you).
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/applications#getcurrentbranch>
-    pub fn current_branch(&mut self) -> String {
+    pub fn current_branch(&self) -> String {
         let mut branch: sys::DiscordBranch = [0; size_of::<sys::DiscordBranch>()];
 
         unsafe {

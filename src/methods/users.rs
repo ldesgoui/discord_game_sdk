@@ -13,7 +13,7 @@ impl<'a> Discord<'a> {
     /// Will return Err(_) until event::user::CurrentUserUpdate
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#getcurrentuser>
-    pub fn current_user(&mut self) -> Result<User> {
+    pub fn current_user(&self) -> Result<User> {
         let mut user = sys::DiscordUser::default();
 
         unsafe {
@@ -41,7 +41,7 @@ impl<'a> Discord<'a> {
     /// Get the Premium type for the currently connected user.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#getcurrentuserpremiumtype>
-    pub fn current_user_premium_kind(&mut self) -> Result<PremiumKind> {
+    pub fn current_user_premium_kind(&self) -> Result<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
         unsafe {
@@ -57,7 +57,7 @@ impl<'a> Discord<'a> {
     /// Return a bitfield of all flags set for the current user.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#currentuserhasflag>
-    pub fn current_user_flags(&mut self) -> Result<UserFlags> {
+    pub fn current_user_flags(&self) -> Result<UserFlags> {
         let mut flags = UserFlags::empty();
 
         for flag in &[

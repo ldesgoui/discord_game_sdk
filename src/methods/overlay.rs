@@ -17,7 +17,7 @@ impl<'a> Discord<'a> {
     /// The calls will instead focus the Discord client and show the modal there instead.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#isenabled>
-    pub fn overlay_enabled(&mut self) -> bool {
+    pub fn overlay_enabled(&self) -> bool {
         let mut enabled = false;
 
         unsafe {
@@ -32,7 +32,7 @@ impl<'a> Discord<'a> {
     /// Whether the overlay is appearing and has taken focus.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#islocked>
-    pub fn overlay_opened(&mut self) -> bool {
+    pub fn overlay_opened(&self) -> bool {
         let mut locked = false;
 
         unsafe { ffi!(self.get_overlay_manager().is_locked(&mut locked as *mut _)) }

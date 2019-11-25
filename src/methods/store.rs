@@ -30,7 +30,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_skus`](#method.fetch_skus) must be called before hand.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getsku>
-    pub fn sku(&mut self, id: i64) -> Result<Sku> {
+    pub fn sku(&self, id: i64) -> Result<Sku> {
         let mut sku = sys::DiscordSku::default();
 
         unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku as *mut _,)) }.to_result()?;
@@ -44,7 +44,7 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
     /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
-    pub fn sku_count(&mut self) -> i32 {
+    pub fn sku_count(&self) -> i32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
@@ -52,7 +52,7 @@ impl<'a> Discord<'a> {
         count
     }
 
-    pub fn sku_at(&mut self, index: i32) -> Result<Sku> {
+    pub fn sku_at(&self, index: i32) -> Result<Sku> {
         let mut sku = sys::DiscordSku::default();
 
         unsafe { ffi!(self.get_store_manager().get_sku_at(index as i32, &mut sku)) }.to_result()?;
@@ -60,7 +60,7 @@ impl<'a> Discord<'a> {
         Ok(sku.into())
     }
 
-    pub fn iter_skus<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<Sku>> {
+    pub fn iter_skus<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Sku>> {
         let count = self.sku_count();
 
         iter::GenericIter::new(self, Box::new(|d, i| d.sku_at(i)), count)
@@ -86,7 +86,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlement>
-    pub fn entitlement(&mut self, id: i64) -> Result<Entitlement> {
+    pub fn entitlement(&self, id: i64) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
         unsafe {
@@ -100,7 +100,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
-    pub fn entitlement_count(&mut self) -> i32 {
+    pub fn entitlement_count(&self) -> i32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }
@@ -109,7 +109,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
-    pub fn entitlement_at(&mut self, index: i32) -> Result<Entitlement> {
+    pub fn entitlement_at(&self, index: i32) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
         unsafe {
@@ -122,7 +122,7 @@ impl<'a> Discord<'a> {
         Ok(entitlement)
     }
 
-    pub fn iter_entitlements<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<Entitlement>> {
+    pub fn iter_entitlements<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Entitlement>> {
         let count = self.entitlement_count();
 
         iter::GenericIter::new(self, Box::new(|d, i| d.entitlement_at(i)), count)
@@ -133,7 +133,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#hasskuentitlement>
-    pub fn has_entitlement(&mut self, sku_id: i64) -> Result<bool> {
+    pub fn has_entitlement(&self, sku_id: i64) -> Result<bool> {
         let mut has_entitlement = false;
 
         unsafe {

@@ -30,7 +30,7 @@ impl<'a> Discord<'a> {
 
         log::trace!("received pointer to {:p}", core);
 
-        let mut instance = Self {
+        let instance = Self {
             core,
             client_id,
             senders,
@@ -44,7 +44,7 @@ impl<'a> Discord<'a> {
         Ok(instance)
     }
 
-    fn set_log_hook(&mut self) {
+    fn set_log_hook(&self) {
         unsafe {
             ffi!(self.set_log_hook(
                 sys::DiscordLogLevel_Debug,
@@ -54,7 +54,7 @@ impl<'a> Discord<'a> {
         };
     }
 
-    fn kickstart_managers(&mut self) {
+    fn kickstart_managers(&self) {
         unsafe {
             // In this order to prioritize managers that instantly generate events
             ffi!(self.get_network_manager());

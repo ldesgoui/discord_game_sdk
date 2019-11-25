@@ -7,7 +7,7 @@ impl<'a> Discord<'a> {
     /// Get the relationship between the current user and a given user by ID.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#get>
-    pub fn relationship_with(&mut self, user_id: i64) -> Result<Relationship> {
+    pub fn relationship_with(&self, user_id: i64) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
         unsafe {
@@ -26,7 +26,7 @@ impl<'a> Discord<'a> {
     /// must be fired before using this method.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#filter>  
-    pub fn filter_relationships<F: FnMut(Relationship) -> bool>(&mut self, mut filter: F) {
+    pub fn filter_relationships<F: FnMut(Relationship) -> bool>(&self, mut filter: F) {
         unsafe {
             ffi!(self.get_relationship_manager().filter(
                 &mut filter as *mut _ as *mut _,
@@ -36,7 +36,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
-    pub fn relationship_count(&mut self) -> Result<i32> {
+    pub fn relationship_count(&self) -> Result<i32> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_relationship_manager().count(&mut count)) }.to_result()?;
@@ -45,7 +45,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
-    pub fn relationship_at(&mut self, index: i32) -> Result<Relationship> {
+    pub fn relationship_at(&self, index: i32) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
         unsafe {
@@ -59,7 +59,7 @@ impl<'a> Discord<'a> {
     }
 
     pub fn iter_relationships<'b>(
-        &'b mut self,
+        &'b self,
     ) -> Result<iter::GenericIter<'a, 'b, Result<Relationship>>> {
         let count = self.relationship_count()?;
 
