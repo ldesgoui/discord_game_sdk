@@ -159,7 +159,7 @@ impl<'a> Discord<'a> {
 
     /// Gets the lobby object for a given ID.
     ///
-    /// A [`lobby_search`](#method.lobby_search) must have completed before hand.
+    /// [`lobby_search`](#method.lobby_search) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobby>
     pub fn lobby(&self, lobby_id: i64) -> Result<Lobby> {
@@ -214,6 +214,8 @@ impl<'a> Discord<'a> {
         Ok(charbuf_to_str(&value).to_string())
     }
 
+    /// Returns the number of metadata key-value pairs available for a given lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
     pub fn lobby_metadata_count(&self, lobby_id: i64) -> Result<i32> {
         let mut count = 0;
@@ -228,6 +230,8 @@ impl<'a> Discord<'a> {
         Ok(count)
     }
 
+    /// Returns metadata key-value pair at a certain index for a given lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey>  
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
     pub fn lobby_metadata_at(&self, lobby_id: i64, index: i32) -> Result<(String, String)> {
@@ -256,6 +260,11 @@ impl<'a> Discord<'a> {
         ))
     }
 
+    /// Returns an `Iterator` over the metadata key-value pairs for a given lobby.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
     pub fn iter_lobby_metadata<'b>(
         &'b self,
         lobby_id: i64,
@@ -302,6 +311,8 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Returns the number of members connected to a lobby.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membercount>  
     pub fn lobby_member_count(&self, lobby_id: i64) -> Result<i32> {
         let mut count = 0;
@@ -316,6 +327,8 @@ impl<'a> Discord<'a> {
         Ok(count)
     }
 
+    /// Returns the user ID of the lobby member at a certain index.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid>
     pub fn lobby_member_id_at(&self, lobby_id: i64, index: i32) -> Result<i64> {
         let mut user_id = 0;
@@ -332,6 +345,10 @@ impl<'a> Discord<'a> {
         Ok(user_id)
     }
 
+    /// Returns an `Iterator` over the user IDs of the members of a lobby.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membercount>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid>
     pub fn iter_lobby_member_ids<'b>(
         &'b self,
         lobby_id: i64,
@@ -373,6 +390,8 @@ impl<'a> Discord<'a> {
         Ok(charbuf_to_str(&value).to_string())
     }
 
+    /// Returns the number of metadata key-value pairs for a given lobby member.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
     pub fn lobby_member_metadata_count(&self, lobby_id: i64, user_id: i64) -> Result<i32> {
         let mut count: i32 = 0;
@@ -389,6 +408,8 @@ impl<'a> Discord<'a> {
         Ok(count)
     }
 
+    /// Returns the metadata key-value pair at a certain index for a given lobby member.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey>
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
     pub fn lobby_member_metadata_at(
@@ -426,6 +447,11 @@ impl<'a> Discord<'a> {
         ))
     }
 
+    /// Returns an `Iterator` over the metadata key-value pairs of a given lobby member.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey>
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
     pub fn iter_lobby_member_metadata<'b>(
         &'b self,
         lobby_id: i64,
@@ -495,6 +521,10 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Returns the number of lobbies found via the search query.
+    ///
+    /// [`lobby_search`](#method.lobby_search) must have completed first.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount>
     pub fn lobby_count(&self) -> i32 {
         let mut count = 0;
@@ -504,6 +534,10 @@ impl<'a> Discord<'a> {
         count
     }
 
+    /// Returns the lobby ID at a given index.
+    ///
+    /// [`lobby_search`](#method.lobby_search) must have completed first.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid>
     pub fn lobby_id_at(&self, index: i32) -> Result<i64> {
         let mut lobby_id = 0;
@@ -513,6 +547,12 @@ impl<'a> Discord<'a> {
         Ok(lobby_id)
     }
 
+    /// Returns an `Iterator` over the IDs of lobbies found via the lobby search.
+    ///
+    /// [`lobby_search`](#method.lobby_search) must have completed first.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount>
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid>
     pub fn iter_lobbies<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<i64>> {
         let count = self.lobby_count();
 

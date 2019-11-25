@@ -27,7 +27,7 @@ impl<'a> Discord<'a> {
 
     /// Gets a SKU by its ID.
     ///
-    /// [`fetch_skus`](#method.fetch_skus) must be called before hand.
+    /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getsku>
     pub fn sku(&self, id: i64) -> Result<Sku> {
@@ -38,11 +38,10 @@ impl<'a> Discord<'a> {
         Ok(sku)
     }
 
-    /// Gets all fetched SKUs.
+    /// Returns the number of SKUs available.
     ///
-    /// [`fetch_skus`](#method.fetch_skus) must be called before hand.
+    /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
     /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
     pub fn sku_count(&self) -> i32 {
         let mut count = 0;
@@ -52,6 +51,11 @@ impl<'a> Discord<'a> {
         count
     }
 
+    /// Returns the SKU at a given index.
+    ///
+    /// [`fetch_skus`](#method.fetch_skus) must have completed first.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
     pub fn sku_at(&self, index: i32) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
@@ -65,6 +69,12 @@ impl<'a> Discord<'a> {
         Ok(sku)
     }
 
+    /// Returns an `Iterator` over the SKUs available.
+    ///
+    /// [`fetch_skus`](#method.fetch_skus) must have completed first.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
+    /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
     pub fn iter_skus<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Sku>> {
         let count = self.sku_count();
 
@@ -88,7 +98,7 @@ impl<'a> Discord<'a> {
 
     /// Gets an entitlement by its ID.
     ///
-    /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlement>
     pub fn entitlement(&self, id: i64) -> Result<Entitlement> {
@@ -104,6 +114,10 @@ impl<'a> Discord<'a> {
         Ok(entitlement)
     }
 
+    /// Returns the number of Entitlements available.
+    ///
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
     pub fn entitlement_count(&self) -> i32 {
         let mut count = 0;
@@ -113,6 +127,10 @@ impl<'a> Discord<'a> {
         count
     }
 
+    /// Returns Entitlement at a given index.
+    ///
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
     pub fn entitlement_at(&self, index: i32) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
@@ -127,6 +145,12 @@ impl<'a> Discord<'a> {
         Ok(entitlement)
     }
 
+    /// Returns an `Iterator` over the Entitlements available.
+    ///
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
+    /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
     pub fn iter_entitlements<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Entitlement>> {
         let count = self.entitlement_count();
 
@@ -135,7 +159,7 @@ impl<'a> Discord<'a> {
 
     /// Whether the user is entitled to the given SKU.
     ///
-    /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#hasskuentitlement>
     pub fn has_entitlement(&self, sku_id: i64) -> Result<bool> {
@@ -153,7 +177,7 @@ impl<'a> Discord<'a> {
 
     /// Opens the overlay to begin the in-app purchase dialogue for the given SKU.
     ///
-    /// [`fetch_entitlements`](#method.fetch_entitlements) must be called before hand.
+    /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#startpurchase>
     pub fn start_purchase(

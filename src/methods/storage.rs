@@ -184,9 +184,9 @@ impl<'a> Discord<'a> {
         Ok(stat)
     }
 
-    /// Returns infos to all existing files.
+    /// Returns the number of file stats.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
     pub fn file_stat_count(&self) -> i32 {
         let mut count = 0;
 
@@ -195,7 +195,9 @@ impl<'a> Discord<'a> {
         count
     }
 
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
+    /// Returns the file stat at a given index.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
     pub fn file_stat_at(&self, index: i32) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
@@ -209,6 +211,10 @@ impl<'a> Discord<'a> {
         Ok(stat)
     }
 
+    /// Returns an `Iterator` over file stats.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
+    /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
     pub fn iter_file_stats<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<FileStat>> {
         let count = self.file_stat_count();
 

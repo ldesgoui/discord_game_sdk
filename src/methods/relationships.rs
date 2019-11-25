@@ -22,8 +22,8 @@ impl<'a> Discord<'a> {
 
     /// Filter all relationships by a given predicate.
     ///
-    /// The event [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
-    /// must be fired before using this method.
+    /// [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// must have fired first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#filter>  
     pub fn filter_relationships<F: FnMut(Relationship) -> bool>(&self, mut filter: F) {
@@ -35,6 +35,11 @@ impl<'a> Discord<'a> {
         }
     }
 
+    /// Returns the number of relationships matching the filter.
+    ///
+    /// [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// must have fired first.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
     pub fn relationship_count(&self) -> Result<i32> {
         let mut count = 0;
@@ -44,6 +49,11 @@ impl<'a> Discord<'a> {
         Ok(count)
     }
 
+    /// Returns the relationship matching the filter at a given index.
+    ///
+    /// [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// must have fired first.
+    ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
     pub fn relationship_at(&self, index: i32) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
@@ -58,6 +68,13 @@ impl<'a> Discord<'a> {
         Ok(relationship.into())
     }
 
+    /// Returns an `Iterator` over the relationships matching the filter.
+    ///
+    /// [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// must have fired first.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
+    /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
     pub fn iter_relationships<'b>(
         &'b self,
     ) -> Result<iter::GenericIter<'a, 'b, Result<Relationship>>> {

@@ -45,7 +45,7 @@ impl<'a> Discord<'a> {
     /// The image must be [fetched](#method.fetch_image) first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/images#getdata>
-    // TODO: using image crate
+    // TODO: example using image crate
     pub fn image(&self, handle: ImageHandle) -> Result<Image> {
         let (width, height) = self.image_dimensions(handle)?;
         let mut data: Vec<u8> = vec![0; (4 * width * height) as usize];

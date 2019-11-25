@@ -14,7 +14,7 @@ impl LobbyMemberTransaction {
         Self::default()
     }
 
-    /// Sets metadata value under a given key for the current user
+    /// Sets metadata value under a given key for the user
     ///
     /// `key` and `value` must not contain any nul bytes, both will grow by one byte.
     ///
@@ -28,7 +28,7 @@ impl LobbyMemberTransaction {
         self
     }
 
-    /// Deletes metadata value under a given key for the current user
+    /// Deletes metadata value under a given key for the user
     ///
     /// `key` must not contain any nul bytes, it will grow by one byte.
     ///
