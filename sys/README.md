@@ -62,7 +62,7 @@ at your option.
 # Communication and Support
 
 I can be reached via Discord `twiikuu#0047`, on the [Official Game SDK Server] (nicked as
-`ldesgoui (rust wrapper)`, as well as [twitter] and [email].
+`ldesgoui (rust wrapper)`), as well as [twitter] and [email].
 I reserve myself no obligation to support you, although I'm generally nice.
 
 
