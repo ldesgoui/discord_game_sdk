@@ -4,6 +4,7 @@ use crate::{sys, utils::charbuf_to_str};
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/storage#data-models-filestat-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[repr(transparent)]
 pub struct FileStat(pub(crate) sys::DiscordFileStat);
 
 impl FileStat {

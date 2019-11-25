@@ -3,30 +3,19 @@ use crate::{sys, Activity, Status};
 /// User Presence
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/relationships#data-models-presence-struct>
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct Presence {
-    status: Status,
-    activity: Activity,
-}
+#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[repr(transparent)]
+pub struct Presence(pub(crate) sys::DiscordPresence);
 
 impl Presence {
     /// The user's current online status
     pub fn status(&self) -> Status {
-        self.status
+        self.0.status.into()
     }
 
     /// The user's current activity
     pub fn activity(&self) -> &Activity {
-        &self.activity
-    }
-}
-
-impl From<sys::DiscordPresence> for Presence {
-    fn from(sys: sys::DiscordPresence) -> Self {
-        Self {
-            status: sys.status.into(),
-            activity: sys.activity.into(),
-        }
+        unsafe { &*(&self.0.activity as *const _ as *const _) }
     }
 }
 

@@ -8,6 +8,7 @@ use crate::{
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmode-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[repr(transparent)]
 pub struct InputMode(pub(crate) sys::DiscordInputMode);
 
 impl InputMode {

@@ -8,6 +8,7 @@ use crate::{
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activity-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[repr(transparent)]
 pub struct Activity(pub(crate) sys::DiscordActivity);
 
 impl Activity {

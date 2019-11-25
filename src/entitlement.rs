@@ -6,6 +6,7 @@ use crate::{sys, EntitlementKind};
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/store#data-models-entitlement-struct>
 #[derive(Clone, Copy, Eq, Hash, PartialEq, derive_more::From, derive_more::Into)]
+#[repr(transparent)]
 pub struct Entitlement(pub(crate) sys::DiscordEntitlement);
 
 impl Entitlement {

@@ -4,6 +4,7 @@ use crate::{sys, utils::charbuf_to_str};
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/achievements#data-models-user-achievement-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[repr(transparent)]
 pub struct UserAchievement(pub(crate) sys::DiscordUserAchievement);
 
 impl UserAchievement {

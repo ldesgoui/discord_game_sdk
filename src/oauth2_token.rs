@@ -5,6 +5,7 @@ use std::iter::FusedIterator;
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/applications#data-models-oauth2token-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[repr(transparent)]
 pub struct OAuth2Token(pub(crate) sys::DiscordOAuth2Token);
 
 impl OAuth2Token {
