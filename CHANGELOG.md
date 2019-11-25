@@ -2,6 +2,20 @@
 
 This document contains information about the releases of this crate.
 
+## [Unreleased]
+
+- For `discord_game_sdk`, a `link` feature was added to make the provided linking optional.
+- Most `Discord` do not require `&mut self` anymore, only the ones with callbacks remain otherwise.
+- The event APIs (`Discord::receivers`, `event::Receivers`) have been replaced with methods returning `Iterator`s to prevent misuse.
+- Achievement has been renamed to UserAchievement, some methods had their name updated to reflect this change.
+- All enums received a new option, `Undefined(u32)`, to handle cases where a mismatch exists between our API and the SDK.
+- All appearances of CStr and CString in the API have been replaced with &str and String for ease of use, no unsafety has been introduced.
+- Fixed an integer overflow in `Image::pixel`
+- Replaced methods that produced a Vec<T> with their original count+index counterparts, and built an `Iterator` to handle their use easily.
+- Doc is two times better
+- `Discord::open_lobby_network_channel` now uses `Reliability`, that was missing.
+- The difference in terminology in the overlay methods is clearly explained.
+
 ## [0.4.2]
 
 - fix Apple OS X regression
