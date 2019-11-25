@@ -17,7 +17,7 @@ impl User {
         charbuf_to_str(&self.0.username)
     }
 
-    /// The four number unique discriminator, often attached to a `#`
+    /// The four digit unique discriminator, often attached to a `#`
     pub fn discriminator(&self) -> &str {
         charbuf_to_str(&self.0.discriminator)
     }
@@ -32,7 +32,7 @@ impl User {
         self.0.bot
     }
 
-    /// Create an [Image Handle](struct.ImageHandle.html) targetting the user's avatar
+    /// Create an [Image Handle](struct.ImageHandle.html) targeting the user's avatar
     pub fn image_handle(&self, size: u32) -> ImageHandle {
         ImageHandle(sys::DiscordImageHandle {
             type_: sys::DiscordImageType_User,
