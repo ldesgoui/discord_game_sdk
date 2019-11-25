@@ -7,7 +7,7 @@ pub(crate) fn to_charbuf(bytes: &[u8]) -> &[i8] {
 }
 
 pub(crate) fn charbuf_to_str(charbuf: &[i8]) -> &str {
-    unsafe { std::str::from_utf8_unchecked(from_charbuf(charbuf)) }
+    unsafe { std::str::from_utf8_unchecked(from_charbuf(&charbuf[..charbuf_len(&charbuf)])) }
 }
 
 pub(crate) fn charbuf_len(charbuf: &[i8]) -> usize {

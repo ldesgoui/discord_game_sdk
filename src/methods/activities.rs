@@ -46,7 +46,7 @@ impl<'a> Discord<'a> {
         activity: &Activity,
         callback: impl FnMut(&mut Discord, Result<()>) + 'a,
     ) {
-        let mut activity: sys::DiscordActivity = activity.sys;
+        let mut activity: sys::DiscordActivity = activity.0;
 
         unsafe {
             ffi!(self

@@ -1,45 +1,30 @@
-use crate::{
-    sys,
-    utils::{charbuf_len, charbuf_to_str},
-};
+use crate::{sys, utils::charbuf_to_str};
 
 /// User Achievement
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/achievements#data-models-user-achievement-struct>
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub struct UserAchievement {
-    pub(crate) sys: sys::DiscordUserAchievement,
-    unlocked_at_len: usize,
-}
+#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+pub struct UserAchievement(pub(crate) sys::DiscordUserAchievement);
 
 impl UserAchievement {
     /// The unique id of the user completing the achievement
     pub fn user_id(&self) -> i64 {
-        self.sys.user_id
+        self.0.user_id
     }
 
     /// The unique id of the achievement
     pub fn achievement_id(&self) -> i64 {
-        self.sys.achievement_id
+        self.0.achievement_id
     }
 
     /// How far along the user is to completing the achievement [0..=100]
     pub fn percent_complete(&self) -> u8 {
-        self.sys.percent_complete
+        self.0.percent_complete
     }
 
     /// Date at which the user completed the achievement
     pub fn unlocked_at(&self) -> &str {
-        charbuf_to_str(&self.sys.unlocked_at[..self.unlocked_at_len])
-    }
-}
-
-impl From<sys::DiscordUserAchievement> for UserAchievement {
-    fn from(sys: sys::DiscordUserAchievement) -> Self {
-        Self {
-            sys,
-            unlocked_at_len: charbuf_len(&sys.unlocked_at),
-        }
+        charbuf_to_str(&self.0.unlocked_at)
     }
 }
 

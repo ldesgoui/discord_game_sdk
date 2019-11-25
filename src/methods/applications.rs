@@ -1,7 +1,7 @@
 use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback, ResultStringCallback},
     sys,
-    utils::{charbuf_len, charbuf_to_str},
+    utils::charbuf_to_str,
     Discord, OAuth2Token, Result,
 };
 use std::mem::size_of;
@@ -24,7 +24,7 @@ impl<'a> Discord<'a> {
                 .get_current_locale(&mut locale as *mut _))
         }
 
-        charbuf_to_str(&locale[..charbuf_len(&locale)]).to_string()
+        charbuf_to_str(&locale).to_string()
     }
 
     /// Get the name of pushed branch on which the game is running.
@@ -41,7 +41,7 @@ impl<'a> Discord<'a> {
                 .get_current_branch(&mut branch as *mut _))
         }
 
-        charbuf_to_str(&branch[..charbuf_len(&branch)]).to_string()
+        charbuf_to_str(&branch).to_string()
     }
 
     /// Checks if the current user has the entitlement to run this game.

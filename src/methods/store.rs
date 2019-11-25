@@ -31,11 +31,11 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getsku>
     pub fn sku(&self, id: i64) -> Result<Sku> {
-        let mut sku = sys::DiscordSku::default();
+        let mut sku = Sku(sys::DiscordSku::default());
 
-        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku as *mut _,)) }.to_result()?;
+        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku.0 as *mut _,)) }.to_result()?;
 
-        Ok(sku.into())
+        Ok(sku)
     }
 
     /// Gets all fetched SKUs.
@@ -53,11 +53,16 @@ impl<'a> Discord<'a> {
     }
 
     pub fn sku_at(&self, index: i32) -> Result<Sku> {
-        let mut sku = sys::DiscordSku::default();
+        let mut sku = Sku(sys::DiscordSku::default());
 
-        unsafe { ffi!(self.get_store_manager().get_sku_at(index as i32, &mut sku)) }.to_result()?;
+        unsafe {
+            ffi!(self
+                .get_store_manager()
+                .get_sku_at(index as i32, &mut sku.0))
+        }
+        .to_result()?;
 
-        Ok(sku.into())
+        Ok(sku)
     }
 
     pub fn iter_skus<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Sku>> {

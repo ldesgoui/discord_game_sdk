@@ -10,16 +10,16 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#getinputmode>
     pub fn input_mode(&self) -> Result<InputMode> {
-        let mut input_mode = sys::DiscordInputMode::default();
+        let mut input_mode = InputMode(sys::DiscordInputMode::default());
 
         unsafe {
             ffi!(self
                 .get_voice_manager()
-                .get_input_mode(&mut input_mode as *mut _))
+                .get_input_mode(&mut input_mode.0 as *mut _))
         }
         .to_result()?;
 
-        Ok(input_mode.into())
+        Ok(input_mode)
     }
 
     /// Sets a new voice input mode for the user.
@@ -33,7 +33,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_voice_manager()
-                .set_input_mode(input_mode.sys)
+                .set_input_mode(input_mode.0)
                 .and_then(ResultCallback::new(callback)))
         }
     }

@@ -23,12 +23,7 @@ impl ImageHandle {
     }
 
     /// Create new Image Handle
-    ///
-    /// `size` must be 16, 32, 64, 128 or 256.
-    // must it?
     pub fn from_user_id(user_id: i64, size: u32) -> Self {
-        debug_assert!([16, 32, 64, 128, 256].contains(&size));
-
         Self(sys::DiscordImageHandle {
             type_: ImageKind::User.into(),
             id: user_id,

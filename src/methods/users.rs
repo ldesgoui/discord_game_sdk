@@ -14,16 +14,16 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#getcurrentuser>
     pub fn current_user(&self) -> Result<User> {
-        let mut user = sys::DiscordUser::default();
+        let mut user = User(sys::DiscordUser::default());
 
         unsafe {
             ffi!(self
                 .get_user_manager()
-                .get_current_user(&mut user as *mut _))
+                .get_current_user(&mut user.0 as *mut _))
         }
         .to_result()?;
 
-        Ok(user.into())
+        Ok(user)
     }
 
     /// Get user information for a given ID.

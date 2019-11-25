@@ -1,6 +1,6 @@
 use crate::{
     sys,
-    utils::{charbuf_len, charbuf_to_str, write_charbuf},
+    utils::{charbuf_to_str, write_charbuf},
     InputModeKind,
 };
 
@@ -8,22 +8,19 @@ use crate::{
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmode-struct>
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
-pub struct InputMode {
-    pub(crate) sys: sys::DiscordInputMode,
-    shortcut_len: usize,
-}
+pub struct InputMode(pub(crate) sys::DiscordInputMode);
 
 impl InputMode {
     /// What triggers voice to be transmitted
     pub fn kind(&self) -> InputModeKind {
-        self.sys.type_.into()
+        self.0.type_.into()
     }
 
     /// The combination of keys to transmit voice when kind is PushToTalk
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>
     pub fn shortcut(&self) -> &str {
-        charbuf_to_str(&self.sys.shortcut[..self.shortcut_len])
+        charbuf_to_str(&self.0.shortcut)
     }
 
     /// Create a new, empty Input Mode
@@ -35,7 +32,7 @@ impl InputMode {
     ///
     /// What triggers the voice to be sent
     pub fn with_kind(&'_ mut self, kind: InputModeKind) -> &'_ mut Self {
-        self.sys.type_ = kind.into();
+        self.0.type_ = kind.into();
         self
     }
 
@@ -45,18 +42,8 @@ impl InputMode {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>
     pub fn with_shortcut(&'_ mut self, value: &str) -> &'_ mut Self {
-        write_charbuf(&mut self.sys.shortcut, value);
-        self.shortcut_len = value.len();
+        write_charbuf(&mut self.0.shortcut, value);
         self
-    }
-}
-
-impl From<sys::DiscordInputMode> for InputMode {
-    fn from(sys: sys::DiscordInputMode) -> Self {
-        Self {
-            sys,
-            shortcut_len: charbuf_len(&sys.shortcut),
-        }
     }
 }
 

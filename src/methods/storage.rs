@@ -2,7 +2,7 @@ use crate::{
     callbacks::{ResultBytesCallback, ResultCallback},
     iter, sys,
     to_result::ToResult,
-    utils::{charbuf_len, charbuf_to_str},
+    utils::charbuf_to_str,
     Discord, FileStat, Result,
 };
 use std::mem::size_of;
@@ -172,16 +172,16 @@ impl<'a> Discord<'a> {
     pub fn file_stat(&self, mut filename: String) -> Result<FileStat> {
         filename.push('\0');
 
-        let mut stat = sys::DiscordFileStat::default();
+        let mut stat = FileStat(sys::DiscordFileStat::default());
 
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .stat(filename.as_ptr() as *const _, &mut stat))
+                .stat(filename.as_ptr() as *const _, &mut stat.0))
         }
         .to_result()?;
 
-        Ok(stat.into())
+        Ok(stat)
     }
 
     /// Returns infos to all existing files.
@@ -197,11 +197,16 @@ impl<'a> Discord<'a> {
 
     /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
     pub fn file_stat_at(&self, index: i32) -> Result<FileStat> {
-        let mut stat = sys::DiscordFileStat::default();
+        let mut stat = FileStat(sys::DiscordFileStat::default());
 
-        unsafe { ffi!(self.get_storage_manager().stat_at(index as i32, &mut stat)) }.to_result()?;
+        unsafe {
+            ffi!(self
+                .get_storage_manager()
+                .stat_at(index as i32, &mut stat.0))
+        }
+        .to_result()?;
 
-        Ok(stat.into())
+        Ok(stat)
     }
 
     pub fn iter_file_stats<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<FileStat>> {
@@ -219,6 +224,6 @@ impl<'a> Discord<'a> {
 
         unsafe { ffi!(self.get_storage_manager().get_path(&mut path)) }.to_result()?;
 
-        Ok(charbuf_to_str(&path[..charbuf_len(&path)]).to_string())
+        Ok(charbuf_to_str(&path).to_string())
     }
 }

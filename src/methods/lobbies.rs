@@ -2,7 +2,7 @@ use crate::{
     callbacks::{ResultCallback, ResultFromPtrCallback},
     event, iter, sys,
     to_result::ToResult,
-    utils::{charbuf_len, charbuf_to_str},
+    utils::charbuf_to_str,
     Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Reliability, Result, SearchQuery,
 };
 use std::mem::size_of;
@@ -189,7 +189,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(charbuf_to_str(&secret[..charbuf_len(&secret)]).to_string())
+        Ok(charbuf_to_str(&secret).to_string())
     }
 
     /// Returns lobby metadata value for a given key.
@@ -211,7 +211,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(charbuf_to_str(&value[..charbuf_len(&value)]).to_string())
+        Ok(charbuf_to_str(&value).to_string())
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
@@ -251,8 +251,8 @@ impl<'a> Discord<'a> {
         .to_result()?;
 
         Ok((
-            charbuf_to_str(&key[..charbuf_len(&key)]).to_string(),
-            charbuf_to_str(&value[..charbuf_len(&value)]).to_string(),
+            charbuf_to_str(&key).to_string(),
+            charbuf_to_str(&value).to_string(),
         ))
     }
 
@@ -370,7 +370,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(charbuf_to_str(&value[..charbuf_len(&value)]).to_string())
+        Ok(charbuf_to_str(&value).to_string())
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
@@ -421,8 +421,8 @@ impl<'a> Discord<'a> {
         .to_result()?;
 
         Ok((
-            charbuf_to_str(&key[..charbuf_len(&key)]).to_string(),
-            charbuf_to_str(&value[..charbuf_len(&value)]).to_string(),
+            charbuf_to_str(&key).to_string(),
+            charbuf_to_str(&value).to_string(),
         ))
     }
 
