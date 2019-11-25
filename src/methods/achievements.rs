@@ -1,5 +1,6 @@
 use crate::{
-    callbacks::ResultCallback, event, iter, sys, to_result::ToResult, Achievement, Discord, Result,
+    callbacks::ResultCallback, event, iter, sys, to_result::ToResult, Discord, Result,
+    UserAchievement,
 };
 
 /// # Achievements
@@ -16,7 +17,7 @@ impl<'a> Discord<'a> {
     /// `percent_complete` must be [0..=100]
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#setuserachievement>
-    pub fn set_achievement(
+    pub fn set_user_achievement(
         &mut self,
         achievement_id: i64,
         percent_complete: u8,
@@ -34,7 +35,7 @@ impl<'a> Discord<'a> {
     /// Do your iteration within the callback of this function.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#fetchuserachievements>
-    pub fn fetch_achievements(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
+    pub fn fetch_user_achievements(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
         unsafe {
             ffi!(self
                 .get_achievement_manager()
@@ -47,7 +48,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_achievements`](#method.fetch_achievements) must be called before.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievement>
-    pub fn achievement(&mut self, achievement_id: i64) -> Result<Achievement> {
+    pub fn user_achievement(&mut self, achievement_id: i64) -> Result<UserAchievement> {
         let mut achievement = sys::DiscordUserAchievement::default();
 
         unsafe {
@@ -61,7 +62,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
-    pub fn achievement_count(&mut self) -> i32 {
+    pub fn user_achievement_count(&mut self) -> i32 {
         let mut count = 0;
 
         unsafe {
@@ -74,7 +75,7 @@ impl<'a> Discord<'a> {
     }
 
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
-    pub fn achievement_at(&mut self, index: i32) -> Result<Achievement> {
+    pub fn user_achievement_at(&mut self, index: i32) -> Result<UserAchievement> {
         let mut achievement = sys::DiscordUserAchievement::default();
 
         unsafe {
@@ -87,10 +88,12 @@ impl<'a> Discord<'a> {
         Ok(achievement.into())
     }
 
-    pub fn iter_achievements<'b>(&'b mut self) -> iter::GenericIter<'a, 'b, Result<Achievement>> {
-        let count = self.achievement_count();
+    pub fn iter_user_achievements<'b>(
+        &'b mut self,
+    ) -> iter::GenericIter<'a, 'b, Result<UserAchievement>> {
+        let count = self.user_achievement_count();
 
-        iter::GenericIter::new(self, Box::new(|d, i| d.achievement_at(i)), count)
+        iter::GenericIter::new(self, Box::new(|d, i| d.user_achievement_at(i)), count)
     }
 
     /// Fires when an achievement is updated for the current user.

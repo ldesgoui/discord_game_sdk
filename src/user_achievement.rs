@@ -7,13 +7,13 @@ use crate::{
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/achievements#data-models-user-achievement-struct>
 #[derive(Clone, Copy, Eq, PartialEq)]
-pub struct Achievement {
+pub struct UserAchievement {
     pub(crate) sys: sys::DiscordUserAchievement,
     unlocked_at_len: usize,
 }
 
-impl Achievement {
-    /// The unique id of the user working on the achievement
+impl UserAchievement {
+    /// The unique id of the user completing the achievement
     pub fn user_id(&self) -> i64 {
         self.sys.user_id
     }
@@ -34,7 +34,7 @@ impl Achievement {
     }
 }
 
-impl From<sys::DiscordUserAchievement> for Achievement {
+impl From<sys::DiscordUserAchievement> for UserAchievement {
     fn from(sys: sys::DiscordUserAchievement) -> Self {
         Self {
             sys,
@@ -43,9 +43,9 @@ impl From<sys::DiscordUserAchievement> for Achievement {
     }
 }
 
-impl std::fmt::Debug for Achievement {
+impl std::fmt::Debug for UserAchievement {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Achievement")
+        fmt.debug_struct("UserAchievement")
             .field("user_id", &self.user_id())
             .field("achievement_id", &self.achievement_id())
             .field("percent_complete", &self.percent_complete())
@@ -78,7 +78,7 @@ mod tests {
 
         write_charbuf(&mut source.unlocked_at, val);
 
-        let achievement = Achievement::from(source);
+        let achievement = UserAchievement::from(source);
 
         assert_eq!(achievement.unlocked_at(), val);
     }

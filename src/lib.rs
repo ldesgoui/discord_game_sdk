@@ -101,7 +101,6 @@
 #[macro_use]
 mod macros;
 
-mod achievement;
 mod action;
 mod activity;
 mod activity_kind;
@@ -141,6 +140,7 @@ mod sku_kind;
 mod status;
 mod to_result;
 mod user;
+mod user_achievement;
 mod user_flags;
 pub(crate) mod utils;
 
@@ -193,7 +193,6 @@ pub(crate) mod across_ffi {
 pub(crate) use discord_game_sdk_sys as sys;
 
 pub use self::{
-    achievement::Achievement,
     action::Action,
     activity::Activity,
     activity_kind::ActivityKind,
@@ -229,5 +228,6 @@ pub use self::{
     sku_kind::SkuKind,
     status::Status,
     user::User,
+    user_achievement::UserAchievement,
     user_flags::UserFlags,
 };

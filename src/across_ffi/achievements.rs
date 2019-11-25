@@ -7,17 +7,17 @@ use std::ffi::c_void;
 
 pub(crate) extern "C" fn on_user_achievement_update(
     senders: *mut c_void,
-    achievement: *mut sys::DiscordUserAchievement,
+    user_achievement: *mut sys::DiscordUserAchievement,
 ) {
     prevent_unwind!();
 
-    debug_assert!(!achievement.is_null());
+    debug_assert!(!user_achievement.is_null());
 
     unsafe { (senders as *mut event::Senders).as_ref() }
         .expect(NULL_PTR)
         .achievements_update
         .try_send(event::achievements::Update {
-            achievement: unsafe { *achievement }.into(),
+            user_achievement: unsafe { *user_achievement }.into(),
         })
         .expect(SEND_FAIL)
 }
