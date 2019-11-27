@@ -5,7 +5,7 @@ use crate::{
     utils::charbuf_to_str,
     Discord, FileStat, Result,
 };
-use std::mem::size_of;
+use std::{borrow::Cow, mem::size_of};
 
 /// # Storage
 ///
@@ -15,11 +15,19 @@ impl<'a> Discord<'a> {
     /// The file is mapped by key-value pair, and this function will read data that exists
     /// for the given key name.
     ///
-    /// `filename` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#read>
-    pub fn read_file(&self, mut filename: String, mut buffer: impl AsMut<[u8]>) -> Result<u32> {
-        filename.push('\0');
+    pub fn read_file<'b>(
+        &self,
+        filename: impl Into<Cow<'b, str>>,
+        mut buffer: impl AsMut<[u8]>,
+    ) -> Result<u32> {
+        let mut filename = filename.into();
+
+        if !filename.contains('\0') {
+            filename.to_mut().push('\0')
+        };
 
         let mut read = 0;
 
@@ -40,15 +48,19 @@ impl<'a> Discord<'a> {
 
     /// Reads data asynchronously from the game's allocated save file into a buffer.
     ///
-    /// `filename` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasync>
-    pub fn read_file_async(
+    pub fn read_file_async<'b>(
         &self,
-        mut filename: String,
+        filename: impl Into<Cow<'b, str>>,
         callback: impl 'a + FnMut(&Discord, Result<Vec<u8>>),
     ) {
-        filename.push('\0');
+        let mut filename = filename.into();
+
+        if !filename.contains('\0') {
+            filename.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self
@@ -61,17 +73,21 @@ impl<'a> Discord<'a> {
     /// Reads data asynchronously from the game's allocated save file into a buffer,
     /// starting at a given offset and up to a given length.
     ///
-    /// `filename` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasyncpartial>
-    pub fn read_file_async_partial(
+    pub fn read_file_async_partial<'b>(
         &self,
-        mut filename: String,
+        filename: impl Into<Cow<'b, str>>,
         offset: u64,
         length: u64,
         callback: impl 'a + FnMut(&Discord, Result<Vec<u8>>),
     ) {
-        filename.push('\0');
+        let mut filename = filename.into();
+
+        if !filename.contains('\0') {
+            filename.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self
@@ -83,11 +99,19 @@ impl<'a> Discord<'a> {
 
     /// Writes data synchronously to disk, under the given key name.
     ///
-    /// `filename` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#write>
-    pub fn write_file(&self, mut filename: String, buffer: impl AsRef<[u8]>) -> Result<()> {
-        filename.push('\0');
+    pub fn write_file<'b>(
+        &self,
+        filename: impl Into<Cow<'b, str>>,
+        buffer: impl AsRef<[u8]>,
+    ) -> Result<()> {
+        let mut filename = filename.into();
+
+        if !filename.contains('\0') {
+            filename.to_mut().push('\0')
+        };
 
         let buffer = buffer.as_ref();
 
@@ -103,16 +127,20 @@ impl<'a> Discord<'a> {
 
     /// Writes data asynchronously to disk under the given key.
     ///
-    /// `filename` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#writeasync>
-    pub fn write_file_async(
+    pub fn write_file_async<'b>(
         &self,
-        mut filename: String,
+        filename: impl Into<Cow<'b, str>>,
         buffer: impl AsRef<[u8]>,
         callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
-        filename.push('\0');
+        let mut filename = filename.into();
+
+        if !filename.contains('\0') {
+            filename.to_mut().push('\0')
+        };
 
         let buffer = buffer.as_ref();
 
@@ -130,11 +158,15 @@ impl<'a> Discord<'a> {
 
     /// Deletes written data for the given key.
     ///
-    /// `filename` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#delete>
-    pub fn delete_file(&self, mut filename: String) -> Result<()> {
-        filename.push('\0');
+    pub fn delete_file<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<()> {
+        let mut filename = filename.into();
+
+        if !filename.contains('\0') {
+            filename.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self
@@ -146,11 +178,15 @@ impl<'a> Discord<'a> {
 
     /// Checks if data exists for a given key.
     ///
-    /// `filename` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#exists>
-    pub fn file_exists(&self, mut filename: String) -> Result<bool> {
-        filename.push('\0');
+    pub fn file_exists<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<bool> {
+        let mut filename = filename.into();
+
+        if !filename.contains('\0') {
+            filename.to_mut().push('\0')
+        };
 
         let mut exists = false;
 
@@ -166,11 +202,15 @@ impl<'a> Discord<'a> {
 
     /// Returns file info for the given key.
     ///
-    /// `filename` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#stat>
-    pub fn file_stat(&self, mut filename: String) -> Result<FileStat> {
-        filename.push('\0');
+    pub fn file_stat<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<FileStat> {
+        let mut filename = filename.into();
+
+        if !filename.contains('\0') {
+            filename.to_mut().push('\0')
+        };
 
         let mut stat = FileStat(sys::DiscordFileStat::default());
 

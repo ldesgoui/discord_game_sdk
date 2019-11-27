@@ -18,9 +18,9 @@ impl SearchQuery {
         Self::default()
     }
 
-    /// Filters lobbies based on metadata comparison
+    /// Filters lobbies based on metadata comparison.
     ///
-    /// `key` and `value` must also be valid UTF-8
+    /// A nul byte will be appended to `key` and `value` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchfilter>
     pub fn filter(
@@ -30,20 +30,32 @@ impl SearchQuery {
         mut value: String,
         cast: Cast,
     ) -> &mut Self {
-        key.push('\0');
-        value.push('\0');
+        if !key.contains('\0') {
+            key.push('\0')
+        };
+
+        if !value.contains('\0') {
+            value.push('\0')
+        };
+
         self.filter = Some((key, value, comparison, cast));
         self
     }
 
     /// Sorts the filtered lobbies based on "near-ness" to a given value
     ///
-    /// `key` and `value` must also be valid UTF-8
+    /// A nul byte will be appended to `key` and `value` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchsort>
     pub fn sort(&mut self, mut key: String, mut value: String, cast: Cast) -> &mut Self {
-        key.push('\0');
-        value.push('\0');
+        if !key.contains('\0') {
+            key.push('\0')
+        };
+
+        if !value.contains('\0') {
+            value.push('\0')
+        };
+
         self.sort = Some((key, value, cast));
         self
     }

@@ -1,4 +1,5 @@
 use crate::{callbacks::ResultCallback, event, Action, Discord, Result};
+use std::borrow::Cow;
 
 /// # Overlay
 ///
@@ -78,15 +79,19 @@ impl<'a> Discord<'a> {
     ///
     /// Receiving `Ok(())` does not necessarily mean that the user has joined the guild.
     ///
-    /// `code` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `code` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#openguildinvite>
-    pub fn open_guild_invite_overlay(
+    pub fn open_guild_invite_overlay<'b>(
         &self,
-        mut code: String,
+        code: impl Into<Cow<'b, str>>,
         callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
-        code.push('\0');
+        let mut code = code.into();
+
+        if !code.contains('\0') {
+            code.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self

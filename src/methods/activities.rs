@@ -2,6 +2,7 @@ use crate::{
     callbacks::ResultCallback, event, sys, to_result::ToResult, Action, Activity, Discord,
     RequestReply, Result,
 };
+use std::borrow::Cow;
 
 /// # Activities
 ///
@@ -17,11 +18,15 @@ impl<'a> Discord<'a> {
     /// your game needs to be bundled for this command to work.
     /// That means it should be a .app.
     ///
-    /// `command` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `command` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#registercommand>
-    pub fn register_launch_command(&self, mut command: String) -> Result<()> {
-        command.push('\0');
+    pub fn register_launch_command<'b>(&self, command: impl Into<Cow<'b, str>>) -> Result<()> {
+        let mut command = command.into();
+
+        if !command.contains('\0') {
+            command.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self
@@ -88,17 +93,21 @@ impl<'a> Discord<'a> {
     /// Sends a game invite to a given user.
     /// If you do not have a valid activity with all the required fields, this call will error.
     ///
-    /// `content` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `content` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#sendinvite>
-    pub fn send_invite(
+    pub fn send_invite<'b>(
         &self,
         user_id: i64,
         action: Action,
-        mut content: String,
+        content: impl Into<Cow<'b, str>>,
         callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
-        content.push('\0');
+        let mut content = content.into();
+
+        if !content.contains('\0') {
+            content.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self

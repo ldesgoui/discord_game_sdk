@@ -16,12 +16,17 @@ impl LobbyMemberTransaction {
 
     /// Sets metadata value under a given key for the user
     ///
-    /// `key` and `value` must not contain any nul bytes, both will grow by one byte.
+    /// A nul byte will be appended to `key` and `value` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactionsetmetadata>
     pub fn add_metadata(&mut self, mut key: String, mut value: String) -> &mut Self {
-        key.push('\0');
-        value.push('\0');
+        if !key.contains('\0') {
+            key.push('\0')
+        };
+
+        if !value.contains('\0') {
+            value.push('\0')
+        };
 
         let _ = self.metadata.insert(key, Some(value));
 
@@ -30,11 +35,14 @@ impl LobbyMemberTransaction {
 
     /// Deletes metadata value under a given key for the user
     ///
-    /// `key` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `key` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactiondeletemetadata>
     pub fn delete_metadata<S>(&mut self, mut key: String) -> &mut Self {
-        key.push('\0');
+        if !key.contains('\0') {
+            key.push('\0')
+        };
+
         let _ = self.metadata.insert(key, None);
         self
     }

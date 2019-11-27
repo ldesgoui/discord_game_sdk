@@ -5,7 +5,7 @@ use crate::{
     utils::charbuf_to_str,
     Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Reliability, Result, SearchQuery,
 };
-use std::mem::size_of;
+use std::{borrow::Cow, mem::size_of};
 
 /// # Lobbies
 ///
@@ -100,13 +100,17 @@ impl<'a> Discord<'a> {
     /// `secret` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby>
-    pub fn connect_lobby(
+    pub fn connect_lobby<'b>(
         &self,
         lobby_id: i64,
-        mut secret: String,
+        secret: impl Into<Cow<'b, str>>,
         callback: impl 'a + FnMut(&Discord, Result<Lobby>),
     ) {
-        secret.push('\0');
+        let mut secret = secret.into();
+
+        if !secret.contains('\0') {
+            secret.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self
@@ -122,12 +126,16 @@ impl<'a> Discord<'a> {
     /// `activity_secret` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret>
-    pub fn connect_lobby_with_activity_secret(
+    pub fn connect_lobby_with_activity_secret<'b>(
         &self,
-        mut activity_secret: String,
+        activity_secret: impl Into<Cow<'b, str>>,
         callback: impl 'a + FnMut(&Discord, Result<Lobby>),
     ) {
-        activity_secret.push('\0');
+        let mut activity_secret = activity_secret.into();
+
+        if !activity_secret.contains('\0') {
+            activity_secret.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self
@@ -189,15 +197,23 @@ impl<'a> Discord<'a> {
     /// `key` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
-    pub fn lobby_metadata(&self, lobby_id: i64, mut key: String) -> Result<String> {
+    pub fn lobby_metadata<'b>(
+        &self,
+        lobby_id: i64,
+        key: impl Into<Cow<'b, str>>,
+    ) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
-        key.push('\0');
+        let mut key = key.into();
+
+        if !key.contains('\0') {
+            key.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self.get_lobby_manager().get_lobby_metadata_value(
                 lobby_id,
-                key.as_mut_ptr() as *mut _,
+                key.as_ptr() as *mut _,
                 &mut value
             ))
         }
@@ -359,21 +375,25 @@ impl<'a> Discord<'a> {
     /// `key` must not contain any nul bytes, it will grow by one byte.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
-    pub fn lobby_member_metadata(
+    pub fn lobby_member_metadata<'b>(
         &self,
         lobby_id: i64,
         user_id: i64,
-        mut key: String,
+        key: impl Into<Cow<'b, str>>,
     ) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
-        key.push('\0');
+        let mut key = key.into();
+
+        if !key.contains('\0') {
+            key.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self.get_lobby_manager().get_member_metadata_value(
                 lobby_id,
                 user_id,
-                key.as_mut_ptr() as *mut _,
+                key.as_ptr() as *mut _,
                 &mut value
             ))
         }

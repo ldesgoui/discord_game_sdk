@@ -1,4 +1,5 @@
 use crate::{event, to_result::ToResult, Discord, Reliability, Result};
+use std::borrow::Cow;
 
 /// # Networking
 ///
@@ -27,11 +28,15 @@ impl<'a> Discord<'a> {
 
     /// Opens a network connection to another Discord user.
     ///
-    /// `route` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `route` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#openpeer>
-    pub fn open_peer(&self, peer_id: u64, mut route: String) -> Result<()> {
-        route.push('\0');
+    pub fn open_peer<'b>(&self, peer_id: u64, route: impl Into<Cow<'b, str>>) -> Result<()> {
+        let mut route = route.into();
+
+        if !route.contains('\0') {
+            route.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self
@@ -45,11 +50,15 @@ impl<'a> Discord<'a> {
     /// You'll want to call this when notified that the route to another user has changed,
     /// most likely from a lobby member update event.
     ///
-    /// `route` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `route` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#updatepeer>
-    pub fn update_peer(&self, peer_id: u64, mut route: String) -> Result<()> {
-        route.push('\0');
+    pub fn update_peer<'b>(&self, peer_id: u64, route: impl Into<Cow<'b, str>>) -> Result<()> {
+        let mut route = route.into();
+
+        if !route.contains('\0') {
+            route.to_mut().push('\0')
+        };
 
         unsafe {
             ffi!(self
