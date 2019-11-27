@@ -47,7 +47,7 @@ impl<'a> Discord<'a> {
     /// Checks if the current user has the entitlement to run this game.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/applications#validateorexit>
-    pub fn validate_or_exit(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
+    pub fn validate_or_exit(&self, callback: impl 'a + FnMut(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_application_manager()
@@ -63,7 +63,7 @@ impl<'a> Discord<'a> {
     /// Discord will focus itself and prompt the user for authorization.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/applications#getoauth2token>
-    pub fn oauth2_token(&mut self, callback: impl FnMut(&mut Discord, Result<OAuth2Token>) + 'a) {
+    pub fn oauth2_token(&self, callback: impl 'a + FnMut(&Discord, Result<OAuth2Token>)) {
         unsafe {
             ffi!(self
                 .get_application_manager()
@@ -75,7 +75,7 @@ impl<'a> Discord<'a> {
     /// Get the signed app ticket for the current user.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/applications#getticket>
-    pub fn app_ticket(&mut self, callback: impl FnMut(&mut Discord, Result<String>) + 'a) {
+    pub fn app_ticket(&self, callback: impl 'a + FnMut(&Discord, Result<String>)) {
         unsafe {
             ffi!(self
                 .get_application_manager()

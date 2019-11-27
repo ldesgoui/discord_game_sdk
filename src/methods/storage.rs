@@ -44,9 +44,9 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasync>
     pub fn read_file_async(
-        &mut self,
+        &self,
         mut filename: String,
-        callback: impl FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<Vec<u8>>),
     ) {
         filename.push('\0');
 
@@ -65,11 +65,11 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#readasyncpartial>
     pub fn read_file_async_partial(
-        &mut self,
+        &self,
         mut filename: String,
         offset: u64,
         length: u64,
-        callback: impl FnMut(&mut Discord, Result<Vec<u8>>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<Vec<u8>>),
     ) {
         filename.push('\0');
 
@@ -107,10 +107,10 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#writeasync>
     pub fn write_file_async(
-        &mut self,
+        &self,
         mut filename: String,
         buffer: impl AsRef<[u8]>,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
         filename.push('\0');
 

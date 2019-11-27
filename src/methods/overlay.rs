@@ -44,9 +44,9 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#setlocked>
     pub fn set_overlay_opened(
-        &mut self,
+        &self,
         opened: bool,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -61,9 +61,9 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#openactivityinvite>
     pub fn open_invite_overlay(
-        &mut self,
+        &self,
         action: Action,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -82,9 +82,9 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#openguildinvite>
     pub fn open_guild_invite_overlay(
-        &mut self,
+        &self,
         mut code: String,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
         code.push('\0');
 
@@ -101,7 +101,7 @@ impl<'a> Discord<'a> {
     /// That means that a user can have different favorite voice settings for each of their games.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#openvoicesettings>
-    pub fn open_voice_settings(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
+    pub fn open_voice_settings(&self, callback: impl 'a + FnMut(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()

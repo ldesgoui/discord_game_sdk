@@ -23,12 +23,12 @@ pub struct Discord<'a> {
     #[allow(dead_code)]
     pub(crate) senders: Box<event::Senders>,
     pub(crate) receivers: event::Receivers,
-    pub(crate) callbacks: Vec<Box<dyn AnyCallback + 'a>>,
+    pub(crate) callbacks: std::cell::UnsafeCell<Vec<Box<dyn AnyCallback + 'a>>>,
 }
 
 impl<'a> Discord<'a> {
-    pub(crate) fn register_callback(&mut self, callback: impl AnyCallback + 'a) {
-        self.callbacks.push(Box::new(callback))
+    pub(crate) fn register_callback(&self, callback: impl AnyCallback + 'a) {
+        unsafe { &mut *self.callbacks.get() }.push(Box::new(callback))
     }
 }
 

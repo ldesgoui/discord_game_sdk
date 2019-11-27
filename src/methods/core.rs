@@ -35,7 +35,7 @@ impl<'a> Discord<'a> {
             client_id,
             senders,
             receivers,
-            callbacks: Vec::new(),
+            callbacks: Default::default(),
         };
 
         instance.set_log_hook();
@@ -81,11 +81,13 @@ impl<'a> Discord<'a> {
     pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()?;
 
+        let callbacks = unsafe { &mut *self.callbacks.get() };
+
         // https://github.com/rust-lang/rust/issues/43244
         let mut i = 0;
-        while i < self.callbacks.len() {
-            if self.callbacks[i].is_ready() {
-                let mut callback = self.callbacks.remove(i);
+        while i < callbacks.len() {
+            if callbacks[i].is_ready() {
+                let mut callback = callbacks.remove(i);
                 callback.run(self);
             } else {
                 i += 1;

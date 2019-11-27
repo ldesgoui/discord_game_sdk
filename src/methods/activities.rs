@@ -42,9 +42,9 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#updateactivity>
     pub fn update_activity(
-        &mut self,
+        &self,
         activity: &Activity,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
         let mut activity: sys::DiscordActivity = activity.0;
 
@@ -59,7 +59,7 @@ impl<'a> Discord<'a> {
     /// Clear's a user's presence in Discord to make it show nothing.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#clearactivity>
-    pub fn clear_activity(&mut self, callback: impl FnMut(&mut Discord, Result<()>) + 'a) {
+    pub fn clear_activity(&self, callback: impl 'a + FnMut(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
@@ -72,10 +72,10 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#sendrequestreply>
     pub fn send_request_reply(
-        &mut self,
+        &self,
         user_id: i64,
         reply: RequestReply,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -92,11 +92,11 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#sendinvite>
     pub fn send_invite(
-        &mut self,
+        &self,
         user_id: i64,
         action: Action,
         mut content: String,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
         content.push('\0');
 
@@ -111,11 +111,7 @@ impl<'a> Discord<'a> {
     /// Accepts a user's game invitation.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#acceptinvite>
-    pub fn accept_invite(
-        &mut self,
-        user_id: i64,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
-    ) {
+    pub fn accept_invite(&self, user_id: i64, callback: impl 'a + FnMut(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_activity_manager()

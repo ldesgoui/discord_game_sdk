@@ -26,9 +26,9 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#setinputmode>
     pub fn set_input_mode(
-        &mut self,
+        &self,
         input_mode: InputMode,
-        callback: impl FnMut(&mut Discord, Result<()>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self

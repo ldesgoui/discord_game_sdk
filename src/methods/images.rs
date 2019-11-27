@@ -11,10 +11,10 @@ impl<'a> Discord<'a> {
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/images#fetch>
     pub fn fetch_image(
-        &mut self,
+        &self,
         handle: ImageHandle,
         refresh: FetchKind,
-        callback: impl FnMut(&mut Discord, Result<ImageHandle>) + 'a,
+        callback: impl 'a + FnMut(&Discord, Result<ImageHandle>),
     ) {
         unsafe {
             ffi!(self
