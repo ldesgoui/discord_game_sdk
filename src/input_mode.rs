@@ -39,7 +39,7 @@ impl InputMode {
 
     /// The combination of keys to transmit voice when kind is PushToTalk
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 256 bytes will be written.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>
     pub fn with_shortcut(&'_ mut self, value: &str) -> &'_ mut Self {

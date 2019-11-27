@@ -114,7 +114,7 @@ impl Activity {
 
     /// The player's current party status
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_state(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.state, value);
         self
@@ -122,7 +122,7 @@ impl Activity {
 
     /// What the player is currently doing
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_details(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.details, value);
         self
@@ -142,7 +142,7 @@ impl Activity {
 
     /// The key of an asset to display
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_large_image_key(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.assets.large_image, value);
         self
@@ -150,7 +150,7 @@ impl Activity {
 
     /// The tooltip displayed when hovering over the large image
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_large_image_tooltip(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.assets.large_text, value);
         self
@@ -158,7 +158,7 @@ impl Activity {
 
     /// The key of an asset to display
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_small_image_key(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.assets.small_image, value);
         self
@@ -166,7 +166,7 @@ impl Activity {
 
     /// The tooltip displayed when hovering over the small image
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_small_image_tooltip(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.assets.small_text, value);
         self
@@ -174,7 +174,7 @@ impl Activity {
 
     /// The unique identifier for the party
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_party_id(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.party.id, value);
         self
@@ -200,7 +200,7 @@ impl Activity {
 
     /// The unique hash for the given match context
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_match_secret(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.secrets.match_, value);
         self
@@ -208,7 +208,7 @@ impl Activity {
 
     /// The unique hash for chat invites and Ask to Join
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_join_secret(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.secrets.join, value);
         self
@@ -216,7 +216,7 @@ impl Activity {
 
     /// The unique hash for Spectate button
     ///
-    /// `value` *MUST NOT* contain nul bytes
+    /// Only the first 128 bytes will be written.
     pub fn with_spectate_secret(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.secrets.spectate, value);
         self

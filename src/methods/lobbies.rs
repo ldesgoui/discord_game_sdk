@@ -97,7 +97,7 @@ impl<'a> Discord<'a> {
     /// Connects the current user to a given lobby.
     /// You can be connected to up to five lobbies at a time.
     ///
-    /// `secret` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `secret` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby>
     pub fn connect_lobby<'b>(
@@ -123,7 +123,7 @@ impl<'a> Discord<'a> {
     /// Connects the current user to a lobby using the special activity secret from the lobby
     /// which is a concatenated lobby ID and its secret.
     ///
-    /// `activity_secret` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `activity_secret` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret>
     pub fn connect_lobby_with_activity_secret<'b>(
@@ -194,7 +194,7 @@ impl<'a> Discord<'a> {
 
     /// Returns lobby metadata value for a given key.
     ///
-    /// `key` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `key` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
     pub fn lobby_metadata<'b>(
@@ -372,7 +372,7 @@ impl<'a> Discord<'a> {
 
     /// Returns member metadata value for a given key.
     ///
-    /// `key` must not contain any nul bytes, it will grow by one byte.
+    /// A nul byte will be appended to `key` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue>
     pub fn lobby_member_metadata<'b>(
