@@ -12,8 +12,8 @@ pub enum Reliability {
 impl Into<bool> for Reliability {
     fn into(self) -> bool {
         match self {
-            Reliability::Reliable => true,
-            Reliability::Unreliable => false,
+            Self::Reliable => true,
+            Self::Unreliable => false,
         }
     }
 }
