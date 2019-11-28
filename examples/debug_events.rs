@@ -3,7 +3,7 @@ use discord_game_sdk::*;
 fn main() {
     pretty_env_logger::init();
 
-    let client_id = 0;
+    let client_id = env!("DISCORD_APPLICATION_ID").parse().unwrap();
     let mut gsdk = Discord::new(client_id).unwrap();
 
     gsdk.update_activity(
@@ -12,10 +12,6 @@ fn main() {
             .with_state("using discord_game_sdk"),
         |_, res| log::info!("update_activity: {:?}", res),
     );
-
-    for file_stat in gsdk.iter_file_stats() {
-        println!("{:?}", file_stat);
-    }
 
     // Game loop
     loop {
