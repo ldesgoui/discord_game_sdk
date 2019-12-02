@@ -7,32 +7,30 @@ use crate::{
 use crossbeam_channel::Sender;
 use std::ffi::{c_void, CStr};
 
-pub(crate) extern "C" fn result(ptr: *mut c_void, res: sys::EDiscordResult) {
+pub(crate) unsafe extern "C" fn result(ptr: *mut c_void, res: sys::EDiscordResult) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<()>>) }
+    Box::from_raw(ptr as *mut Sender<Result<()>>)
         .try_send(res.to_result())
         .expect(SEND_FAIL)
 }
 
-pub(crate) extern "C" fn result_string(
+pub(crate) unsafe extern "C" fn result_string(
     ptr: *mut c_void,
     res: sys::EDiscordResult,
     cstr: *const i8,
 ) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<String>>) }
-        .try_send(res.to_result().map(|()| {
-            unsafe { CStr::from_ptr(cstr) }
-                .to_str()
-                .expect(NOT_UTF8)
-                .to_string()
-        }))
+    Box::from_raw(ptr as *mut Sender<Result<String>>)
+        .try_send(
+            res.to_result()
+                .map(|()| CStr::from_ptr(cstr).to_str().expect(NOT_UTF8).to_string()),
+        )
         .expect(SEND_FAIL)
 }
 
-pub(crate) extern "C" fn result_bytes(
+pub(crate) unsafe extern "C" fn result_bytes(
     ptr: *mut c_void,
     res: sys::EDiscordResult,
     buffer_ptr: *mut u8,
@@ -40,26 +38,29 @@ pub(crate) extern "C" fn result_bytes(
 ) {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<Vec<u8>>>) }
+    Box::from_raw(ptr as *mut Sender<Result<Vec<u8>>>)
         .try_send(
             res.to_result()
-                .map(|()| unsafe { std::slice::from_raw_parts(buffer_ptr, len as usize) }.to_vec()),
+                .map(|()| std::slice::from_raw_parts(buffer_ptr, len as usize).to_vec()),
         )
         .expect(SEND_FAIL)
 }
 
-pub(crate) extern "C" fn result_from<S, E>(ptr: *mut c_void, res: sys::EDiscordResult, source: S)
-where
+pub(crate) unsafe extern "C" fn result_from<S, E>(
+    ptr: *mut c_void,
+    res: sys::EDiscordResult,
+    source: S,
+) where
     S: Into<E>,
 {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<E>>) }
+    Box::from_raw(ptr as *mut Sender<Result<E>>)
         .try_send(res.to_result().map(|()| source.into()))
         .expect(SEND_FAIL)
 }
 
-pub(crate) extern "C" fn result_from_ptr<S, E>(
+pub(crate) unsafe extern "C" fn result_from_ptr<S, E>(
     ptr: *mut c_void,
     res: sys::EDiscordResult,
     source_ptr: *mut S,
@@ -68,12 +69,12 @@ pub(crate) extern "C" fn result_from_ptr<S, E>(
 {
     prevent_unwind!();
 
-    unsafe { Box::from_raw(ptr as *mut Sender<Result<E>>) }
-        .try_send(res.to_result().map(|()| unsafe { *source_ptr }.into()))
+    Box::from_raw(ptr as *mut Sender<Result<E>>)
+        .try_send(res.to_result().map(|()| (*source_ptr).into()))
         .expect(SEND_FAIL)
 }
 
-pub(crate) extern "C" fn filter_relationship<F>(
+pub(crate) unsafe extern "C" fn filter_relationship<F>(
     callback_ptr: *mut c_void,
     relationship_ptr: *mut sys::DiscordRelationship,
 ) -> bool
@@ -84,10 +85,14 @@ where
 
     let callback: *mut F = callback_ptr as *mut F;
 
-    unsafe { (*callback)((*relationship_ptr).into()) }
+    (*callback)((*relationship_ptr).into())
 }
 
-pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, message: *const i8) {
+pub(crate) unsafe extern "C" fn log(
+    _: *mut c_void,
+    level: sys::EDiscordLogLevel,
+    message: *const i8,
+) {
     use log::Level::*;
 
     prevent_unwind!();
@@ -100,7 +105,7 @@ pub(crate) extern "C" fn log(_: *mut c_void, level: sys::EDiscordLogLevel, messa
         _ => Debug,
     };
 
-    let message = unsafe { CStr::from_ptr(message) }.to_str().expect(NOT_UTF8);
+    let message = CStr::from_ptr(message).to_str().expect(NOT_UTF8);
 
     log::log!(level, "SDK: {}", message);
 }
