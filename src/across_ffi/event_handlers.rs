@@ -1,4 +1,4 @@
-use crate::{channels, panic_messages::*};
+use crate::{channels, panic_messages::NOT_UTF8};
 use crossbeam_channel::Sender;
 use std::ffi::{c_void, CStr};
 
