@@ -5,16 +5,45 @@ This document contains information about the releases of this crate.
 ## [Unreleased]
 
 - For `discord_game_sdk`, a `link` feature was added to make the provided linking optional.
-- Most `Discord` do not require `&mut self` anymore, only the ones with callbacks remain otherwise.
-- The event APIs (`Discord::receivers`, `event::Receivers`) have been replaced with methods returning `Iterator`s to prevent misuse.
+- All `Discord` methods do not require `&mut self` anymore except for `run_callbacks`.
+- Events have been renamed (sorry)
+- Event APIs (`Discord::receivers`, `event::Receivers`) have been replaced with methods returning `Iterator`s to prevent misuse.
 - Achievement has been renamed to UserAchievement, some methods had their name updated to reflect this change.
 - All enums received a new option, `Undefined(u32)`, to handle cases where a mismatch exists between our API and the SDK.
-- All appearances of CStr and CString in the API have been replaced with &str and String for ease of use, no unsafety has been introduced.
-- Fixed an integer overflow in `Image::pixel`
-- Replaced methods that produced a Vec<T> with their original count+index counterparts, and built an `Iterator` to handle their use easily.
-- Doc is two times better
+- All appearances of `CStr` and `CString` in the API have been replaced with `&str` and `Cow<str>` for ease of use, no unsafety has been introduced. In the case of `Cow<str>`, it is possible to prevent reallocation by nul-terminating strings manually.
+- Fixed an integer overflow in `Image::pixel`.
+- Replaced methods that produced a `Vec<T>` with their original `_count` and `_index` method counterparts, as well as methods producing `Iterator`s using these methods
 - `Discord::open_lobby_network_channel` now uses `Reliability`, that was missing.
 - The difference in terminology in the overlay methods is clearly explained.
+- The field in `event::OverlayToggle` has flipped (was opened now is closed)
+
+```sh
+sed -i '
+    s/achievements::Update/UserAchievementUpdate/g;
+    s/activities::Join/ActivityJoin/g;
+    s/activities::Spectate/ActivitySpectate/g;
+    s/activities::Request/ActivityRequest/g;
+    s/activities::Invite/ActivityInvite/g;
+    s/lobbies::Update/LobbyUpdate/g;
+    s/lobbies::Delete/LobbyDelete/g;
+    s/lobbies::MemberConnect/LobbyMemberConnect/g;
+    s/lobbies::MemberUpdate/LobbyMemberUpdate/g;
+    s/lobbies::MemberDisconnect/LobbyMemberDisconnect/g;
+    s/lobbies::Message/LobbyMessage/g;
+    s/lobbies::Speaking/LobbySpeaking/g;
+    s/lobbies::NetworkMessage/LobbyNetworkMessage/g;
+    s/networking::Message/NetworkMessage/g;
+    s/networking::RouteUpdate/NetworkRouteUpdate/g;
+    s/overlay::Toggle/OverlayToggle/g;
+    s/relationships::Refresh/RelationshipsRefresh/g;
+    s/relationships::Update/RelationshipUpdate/g;
+    s/store::EntitlementCreate/StoreEntitlementCreate/g;
+    s/store::EntitlementDelete/StoreEntitlementDelete/g;
+    s/users::CurrentUserUpdate/CurrentUserUpdate/g;
+    s/voice::SettingsUpdate/VoiceSettingsUpdate/g;
+' $(find . -name '*.rs')
+```
+
 
 ## [0.4.2]
 
