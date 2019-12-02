@@ -1,7 +1,7 @@
 use crate::event;
 use crossbeam_channel::{Receiver, Sender};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, derive_more::AsRef)]
 pub(crate) struct Senders {
     pub(crate) achievements_update: Sender<event::UserAchievementUpdate>,
     pub(crate) activities_join: Sender<event::ActivityJoin>,

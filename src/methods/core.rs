@@ -1,4 +1,6 @@
-use crate::{across_ffi, channels, sys, to_result::ToResult, CreateFlags, Discord, Result};
+use crate::{
+    across_ffi::*, channels, event, sys, to_result::ToResult, CreateFlags, Discord, Result,
+};
 use std::ffi::c_void;
 
 /// # Core
@@ -49,7 +51,7 @@ impl<'a> Discord<'a> {
             ffi!(self.set_log_hook(
                 sys::DiscordLogLevel_Debug,
                 std::ptr::null_mut(),
-                Some(across_ffi::callbacks::log),
+                Some(callbacks::log),
             ))
         };
     }
@@ -167,50 +169,111 @@ fn create_params(
 }
 
 const ACHIEVEMENT: &sys::IDiscordAchievementEvents = &sys::IDiscordAchievementEvents {
-    on_user_achievement_update: Some(across_ffi::achievements::on_user_achievement_update),
+    on_user_achievement_update: Some(
+        event_handlers::ptr::<event::UserAchievementUpdate, sys::DiscordUserAchievement>,
+    ),
 };
 
 const ACTIVITY: &sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
-    on_activity_join: Some(across_ffi::activities::on_activity_join),
-    on_activity_spectate: Some(across_ffi::activities::on_activity_spectate),
-    on_activity_join_request: Some(across_ffi::activities::on_activity_join_request),
-    on_activity_invite: Some(across_ffi::activities::on_activity_invite),
+    on_activity_join: Some(event_handlers::string::<event::ActivityJoin>),
+    on_activity_spectate: Some(event_handlers::string::<event::ActivitySpectate>),
+    on_activity_join_request: Some(event_handlers::ptr::<event::ActivityRequest, sys::DiscordUser>),
+    on_activity_invite: Some(
+        event_handlers::plain_ptr_ptr::<
+            event::ActivityInvite,
+            sys::EDiscordActivityActionType,
+            sys::DiscordUser,
+            sys::DiscordActivity,
+        >,
+    ),
 };
 
 const LOBBY: &sys::IDiscordLobbyEvents = &sys::IDiscordLobbyEvents {
-    on_lobby_update: Some(across_ffi::lobbies::on_lobby_update),
-    on_lobby_delete: Some(across_ffi::lobbies::on_lobby_delete),
-    on_member_connect: Some(across_ffi::lobbies::on_member_connect),
-    on_member_update: Some(across_ffi::lobbies::on_member_update),
-    on_member_disconnect: Some(across_ffi::lobbies::on_member_disconnect),
-    on_lobby_message: Some(across_ffi::lobbies::on_lobby_message),
-    on_speaking: Some(across_ffi::lobbies::on_speaking),
-    on_network_message: Some(across_ffi::lobbies::on_network_message),
+    on_lobby_update: Some(event_handlers::plain::<event::LobbyUpdate, sys::DiscordLobbyId>),
+    on_lobby_delete: Some(
+        event_handlers::plain_plain::<event::LobbyDelete, sys::DiscordLobbyId, u32>,
+    ),
+    on_member_connect: Some(
+        event_handlers::plain_plain::<
+            event::LobbyMemberConnect,
+            sys::DiscordLobbyId,
+            sys::DiscordUserId,
+        >,
+    ),
+    on_member_update: Some(
+        event_handlers::plain_plain::<
+            event::LobbyMemberUpdate,
+            sys::DiscordLobbyId,
+            sys::DiscordUserId,
+        >,
+    ),
+    on_member_disconnect: Some(
+        event_handlers::plain_plain::<
+            event::LobbyMemberDisconnect,
+            sys::DiscordLobbyId,
+            sys::DiscordUserId,
+        >,
+    ),
+    on_lobby_message: Some(
+        event_handlers::plain_plain_buffer::<
+            event::LobbyMessage,
+            sys::DiscordLobbyId,
+            sys::DiscordUserId,
+        >,
+    ),
+    on_speaking: Some(
+        event_handlers::plain_plain_plain::<
+            event::LobbySpeaking,
+            sys::DiscordLobbyId,
+            sys::DiscordUserId,
+            bool,
+        >,
+    ),
+    on_network_message: Some(
+        event_handlers::plain_plain_plain_buffer::<
+            event::LobbyNetworkMessage,
+            sys::DiscordLobbyId,
+            sys::DiscordUserId,
+            sys::DiscordNetworkChannelId,
+        >,
+    ),
 };
 
 const NETWORK: &sys::IDiscordNetworkEvents = &sys::IDiscordNetworkEvents {
-    on_message: Some(across_ffi::networking::on_message),
-    on_route_update: Some(across_ffi::networking::on_route_update),
+    on_message: Some(
+        event_handlers::plain_plain_buffer::<
+            event::NetworkMessage,
+            sys::DiscordNetworkPeerId,
+            sys::DiscordNetworkChannelId,
+        >,
+    ),
+    on_route_update: Some(event_handlers::string::<event::NetworkRouteUpdate>),
 };
 
 const OVERLAY: &sys::IDiscordOverlayEvents = &sys::IDiscordOverlayEvents {
-    on_toggle: Some(across_ffi::overlay::on_toggle),
+    on_toggle: Some(event_handlers::plain::<event::OverlayToggle, bool>),
 };
 
 const RELATIONSHIP: &sys::IDiscordRelationshipEvents = &sys::IDiscordRelationshipEvents {
-    on_refresh: Some(across_ffi::relationships::on_refresh),
-    on_relationship_update: Some(across_ffi::relationships::on_relationship_update),
+    on_refresh: Some(event_handlers::empty::<event::RelationshipsRefresh>),
+    on_relationship_update: Some(
+        event_handlers::ptr::<event::RelationshipUpdate, sys::DiscordRelationship>,
+    ),
 };
 
 const STORE: &sys::IDiscordStoreEvents = &sys::IDiscordStoreEvents {
-    on_entitlement_create: Some(across_ffi::store::on_entitlement_create),
-    on_entitlement_delete: Some(across_ffi::store::on_entitlement_delete),
+    on_entitlement_create: Some(
+        event_handlers::ptr::<event::StoreEntitlementCreate, sys::DiscordEntitlement>,
+    ),
+    on_entitlement_delete: Some(
+        event_handlers::ptr::<event::StoreEntitlementDelete, sys::DiscordEntitlement>,
+    ),
 };
 
 const USER: &sys::IDiscordUserEvents = &sys::IDiscordUserEvents {
-    on_current_user_update: Some(across_ffi::users::on_current_user_update),
+    on_current_user_update: Some(event_handlers::empty::<event::CurrentUserUpdate>),
 };
 
 const VOICE: &sys::IDiscordVoiceEvents = &sys::IDiscordVoiceEvents {
-    on_settings_update: Some(across_ffi::voice::on_settings_update),
+    on_settings_update: Some(event_handlers::empty::<event::VoiceSettingsUpdate>),
 };

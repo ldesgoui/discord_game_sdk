@@ -164,16 +164,8 @@ mod methods {
 }
 
 pub(crate) mod across_ffi {
-    pub(crate) mod achievements;
-    pub(crate) mod activities;
     pub(crate) mod callbacks;
-    pub(crate) mod lobbies;
-    pub(crate) mod networking;
-    pub(crate) mod overlay;
-    pub(crate) mod relationships;
-    pub(crate) mod store;
-    pub(crate) mod users;
-    pub(crate) mod voice;
+    pub(crate) mod event_handlers;
 }
 
 pub(crate) use discord_game_sdk_sys as sys;
