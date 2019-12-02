@@ -172,7 +172,7 @@ pub struct NetworkRouteUpdate {
 /// <https://discordapp.com/developers/docs/game-sdk/overlay#ontoggle>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct OverlayToggle {
-    pub opened: bool,
+    pub closed: bool,
 }
 
 /// On Relationships Refresh
