@@ -1,5 +1,5 @@
 use crate::{
-    event,
+    channels, event,
     panic_messages::{NOT_UTF8, NULL_PTR, SEND_FAIL},
     sys,
 };
@@ -15,10 +15,10 @@ pub(crate) extern "C" fn on_activity_join(senders: *mut c_void, secret: *const i
         .expect(NOT_UTF8)
         .to_string();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .activities_join
-        .try_send(event::activities::Join { secret })
+        .try_send(event::ActivityJoin { secret })
         .expect(SEND_FAIL)
 }
 
@@ -32,10 +32,10 @@ pub(crate) extern "C" fn on_activity_spectate(senders: *mut c_void, secret: *con
         .expect(NOT_UTF8)
         .to_string();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .activities_spectate
-        .try_send(event::activities::Spectate { secret })
+        .try_send(event::ActivitySpectate { secret })
         .expect(SEND_FAIL)
 }
 
@@ -47,10 +47,10 @@ pub(crate) extern "C" fn on_activity_join_request(
 
     debug_assert!(!user.is_null());
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .activities_request
-        .try_send(event::activities::Request {
+        .try_send(event::ActivityRequest {
             user: unsafe { *user }.into(),
         })
         .expect(SEND_FAIL)
@@ -67,10 +67,10 @@ pub(crate) extern "C" fn on_activity_invite(
     debug_assert!(!user.is_null());
     debug_assert!(!activity.is_null());
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .activities_invite
-        .try_send(event::activities::Invite {
+        .try_send(event::ActivityInvite {
             action: action.into(),
             user: unsafe { *user }.into(),
             activity: unsafe { *activity }.into(),

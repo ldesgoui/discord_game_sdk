@@ -118,7 +118,7 @@ impl<'a> Discord<'a> {
     /// Fires when the overlay is opened or closed.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/overlay#ontoggle>
-    pub fn recv_overlay_toggle(&self) -> impl '_ + Iterator<Item = event::overlay::Toggle> {
+    pub fn recv_overlay_toggle(&self) -> impl '_ + Iterator<Item = event::OverlayToggle> {
         self.receivers.overlay_toggle.try_iter()
     }
 }

@@ -117,7 +117,7 @@ impl<'a> Discord<'a> {
     /// This callback will only fire if you already have an open channel with the user sending you data.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#onmessage>
-    pub fn recv_networking_message(&self) -> impl '_ + Iterator<Item = event::networking::Message> {
+    pub fn recv_networking_message(&self) -> impl '_ + Iterator<Item = event::NetworkMessage> {
         self.receivers.networking_message.try_iter()
     }
 
@@ -126,7 +126,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/networking#onrouteupdate>
     pub fn recv_networking_route_update(
         &self,
-    ) -> impl '_ + Iterator<Item = event::networking::RouteUpdate> {
+    ) -> impl '_ + Iterator<Item = event::NetworkRouteUpdate> {
         self.receivers.networking_route_update.try_iter()
     }
 }

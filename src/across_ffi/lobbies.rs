@@ -1,5 +1,5 @@
 use crate::{
-    event,
+    channels, event,
     panic_messages::{NULL_PTR, SEND_FAIL},
 };
 use std::ffi::c_void;
@@ -7,50 +7,50 @@ use std::ffi::c_void;
 pub(crate) extern "C" fn on_lobby_update(senders: *mut c_void, id: i64) {
     prevent_unwind!();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .lobbies_update
-        .try_send(event::lobbies::Update { id })
+        .try_send(event::LobbyUpdate { id })
         .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn on_lobby_delete(senders: *mut c_void, id: i64, reason: u32) {
     prevent_unwind!();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .lobbies_delete
-        .try_send(event::lobbies::Delete { id, reason })
+        .try_send(event::LobbyDelete { id, reason })
         .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn on_member_connect(senders: *mut c_void, id: i64, user_id: i64) {
     prevent_unwind!();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .lobbies_member_connect
-        .try_send(event::lobbies::MemberConnect { id, user_id })
+        .try_send(event::LobbyMemberConnect { id, user_id })
         .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn on_member_update(senders: *mut c_void, id: i64, user_id: i64) {
     prevent_unwind!();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .lobbies_member_update
-        .try_send(event::lobbies::MemberUpdate { id, user_id })
+        .try_send(event::LobbyMemberUpdate { id, user_id })
         .expect(SEND_FAIL)
 }
 
 pub(crate) extern "C" fn on_member_disconnect(senders: *mut c_void, id: i64, user_id: i64) {
     prevent_unwind!();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .lobbies_member_disconnect
-        .try_send(event::lobbies::MemberDisconnect { id, user_id })
+        .try_send(event::LobbyMemberDisconnect { id, user_id })
         .expect(SEND_FAIL)
 }
 
@@ -67,10 +67,10 @@ pub(crate) extern "C" fn on_lobby_message(
 
     let buffer = unsafe { std::slice::from_raw_parts(data, len as usize) }.to_vec();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .lobbies_message
-        .try_send(event::lobbies::Message {
+        .try_send(event::LobbyMessage {
             id,
             user_id,
             buffer,
@@ -81,10 +81,10 @@ pub(crate) extern "C" fn on_lobby_message(
 pub(crate) extern "C" fn on_speaking(senders: *mut c_void, id: i64, user_id: i64, speaking: bool) {
     prevent_unwind!();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .lobbies_speaking
-        .try_send(event::lobbies::Speaking {
+        .try_send(event::LobbySpeaking {
             id,
             user_id,
             speaking,
@@ -106,10 +106,10 @@ pub(crate) extern "C" fn on_network_message(
 
     let buffer = unsafe { std::slice::from_raw_parts(data, len as usize) }.to_vec();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .lobbies_network_message
-        .try_send(event::lobbies::NetworkMessage {
+        .try_send(event::LobbyNetworkMessage {
             id,
             user_id,
             chan_id,

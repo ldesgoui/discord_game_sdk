@@ -22,7 +22,7 @@ impl<'a> Discord<'a> {
 
     /// Filter all relationships by a given predicate.
     ///
-    /// [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// [`RelationshipsRefreshed`](event/relationships/struct.Refresh.html)
     /// must have fired first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#filter>  
@@ -37,7 +37,7 @@ impl<'a> Discord<'a> {
 
     /// Returns the number of relationships matching the filter.
     ///
-    /// [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// [`RelationshipsRefreshed`](event/relationships/struct.Refresh.html)
     /// must have fired first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
@@ -51,7 +51,7 @@ impl<'a> Discord<'a> {
 
     /// Returns the relationship matching the filter at a given index.
     ///
-    /// [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// [`RelationshipsRefreshed`](event/relationships/struct.Refresh.html)
     /// must have fired first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
@@ -70,7 +70,7 @@ impl<'a> Discord<'a> {
 
     /// Returns an `Iterator` over the relationships matching the filter.
     ///
-    /// [`relationships::Refreshed`](event/relationships/struct.Refresh.html)
+    /// [`RelationshipsRefreshed`](event/relationships/struct.Refresh.html)
     /// must have fired first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
@@ -92,7 +92,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh>
     pub fn recv_relationships_refresh(
         &self,
-    ) -> impl '_ + Iterator<Item = event::relationships::Refresh> {
+    ) -> impl '_ + Iterator<Item = event::RelationshipsRefresh> {
         self.receivers.relationships_refresh.try_iter()
     }
 
@@ -101,7 +101,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate>
     pub fn recv_relationships_update(
         &self,
-    ) -> impl '_ + Iterator<Item = event::relationships::Update> {
+    ) -> impl '_ + Iterator<Item = event::RelationshipUpdate> {
         self.receivers.relationships_update.try_iter()
     }
 }

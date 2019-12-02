@@ -1,5 +1,5 @@
 use crate::{
-    event,
+    channels, event,
     panic_messages::{NOT_UTF8, NULL_PTR, SEND_FAIL},
     sys,
 };
@@ -18,10 +18,10 @@ pub(crate) extern "C" fn on_message(
 
     let buffer = unsafe { std::slice::from_raw_parts(data, len as usize) }.to_vec();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .networking_message
-        .try_send(event::networking::Message {
+        .try_send(event::NetworkMessage {
             peer_id,
             chan_id,
             buffer,
@@ -39,9 +39,9 @@ pub(crate) extern "C" fn on_route_update(senders: *mut c_void, route: *const i8)
         .expect(NOT_UTF8)
         .to_string();
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .networking_route_update
-        .try_send(event::networking::RouteUpdate { route })
+        .try_send(event::NetworkRouteUpdate { route })
         .expect(SEND_FAIL)
 }

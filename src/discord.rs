@@ -1,4 +1,4 @@
-use crate::{callbacks::AnyCallback, event, sys};
+use crate::{callbacks::AnyCallback, channels, sys};
 
 /// Main interface with SDK
 ///
@@ -21,8 +21,8 @@ pub struct Discord<'a> {
     pub(crate) core: *mut sys::IDiscordCore,
     pub(crate) client_id: i64,
     #[allow(dead_code)]
-    pub(crate) senders: Box<event::Senders>,
-    pub(crate) receivers: event::Receivers,
+    pub(crate) senders: Box<channels::Senders>,
+    pub(crate) receivers: channels::Receivers,
     pub(crate) callbacks: std::cell::UnsafeCell<Vec<Box<dyn AnyCallback + 'a>>>,
 }
 

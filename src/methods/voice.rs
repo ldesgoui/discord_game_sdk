@@ -128,7 +128,7 @@ impl<'a> Discord<'a> {
     /// Fires when the current user has updated their voice settings.
     pub fn recv_voice_settings_update(
         &self,
-    ) -> impl '_ + Iterator<Item = event::voice::SettingsUpdate> {
+    ) -> impl '_ + Iterator<Item = event::VoiceSettingsUpdate> {
         self.receivers.voice_settings_update.try_iter()
     }
 }

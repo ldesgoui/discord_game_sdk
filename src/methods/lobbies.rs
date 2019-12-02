@@ -674,14 +674,14 @@ impl<'a> Discord<'a> {
     /// Fires when a lobby is updated.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbyupdate>
-    pub fn recv_lobbies_update(&self) -> impl '_ + Iterator<Item = event::lobbies::Update> {
+    pub fn recv_lobbies_update(&self) -> impl '_ + Iterator<Item = event::LobbyUpdate> {
         self.receivers.lobbies_update.try_iter()
     }
 
     /// Fired when a lobby is deleted.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbydelete>
-    pub fn recv_lobbies_delete(&self) -> impl '_ + Iterator<Item = event::lobbies::Delete> {
+    pub fn recv_lobbies_delete(&self) -> impl '_ + Iterator<Item = event::LobbyDelete> {
         self.receivers.lobbies_delete.try_iter()
     }
 
@@ -690,7 +690,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberconnect>
     pub fn recv_lobbies_member_connect(
         &self,
-    ) -> impl '_ + Iterator<Item = event::lobbies::MemberConnect> {
+    ) -> impl '_ + Iterator<Item = event::LobbyMemberConnect> {
         self.receivers.lobbies_member_connect.try_iter()
     }
 
@@ -699,7 +699,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberupdate>
     pub fn recv_lobbies_member_update(
         &self,
-    ) -> impl '_ + Iterator<Item = event::lobbies::MemberUpdate> {
+    ) -> impl '_ + Iterator<Item = event::LobbyMemberUpdate> {
         self.receivers.lobbies_member_update.try_iter()
     }
 
@@ -708,21 +708,21 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberdisconnect>
     pub fn recv_lobbies_member_disconnect(
         &self,
-    ) -> impl '_ + Iterator<Item = event::lobbies::MemberDisconnect> {
+    ) -> impl '_ + Iterator<Item = event::LobbyMemberDisconnect> {
         self.receivers.lobbies_member_disconnect.try_iter()
     }
 
     /// Fires when a message is sent to the lobby.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbymessage>
-    pub fn recv_lobbies_message(&self) -> impl '_ + Iterator<Item = event::lobbies::Message> {
+    pub fn recv_lobbies_message(&self) -> impl '_ + Iterator<Item = event::LobbyMessage> {
         self.receivers.lobbies_message.try_iter()
     }
 
     /// Fires when a user connected to voice starts or stops speaking.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onspeaking>
-    pub fn recv_lobbies_speaking(&self) -> impl '_ + Iterator<Item = event::lobbies::Speaking> {
+    pub fn recv_lobbies_speaking(&self) -> impl '_ + Iterator<Item = event::LobbySpeaking> {
         self.receivers.lobbies_speaking.try_iter()
     }
 
@@ -731,7 +731,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#onnetworkmessage>
     pub fn recv_lobbies_network_message(
         &self,
-    ) -> impl '_ + Iterator<Item = event::lobbies::NetworkMessage> {
+    ) -> impl '_ + Iterator<Item = event::LobbyNetworkMessage> {
         self.receivers.lobbies_network_message.try_iter()
     }
 }

@@ -106,6 +106,7 @@ mod activity;
 mod activity_kind;
 mod callbacks;
 mod cast;
+pub(crate) mod channels;
 mod comparison;
 mod create_flags;
 mod discord;
@@ -113,6 +114,7 @@ mod distance;
 mod entitlement;
 mod entitlement_kind;
 mod error;
+pub mod event;
 mod fetch_kind;
 mod file_stat;
 mod image;
@@ -159,22 +161,6 @@ mod methods {
     mod store;
     mod users;
     mod voice;
-}
-
-/// # Event Types
-pub mod event {
-    pub mod achievements;
-    pub mod activities;
-    mod channels;
-    pub mod lobbies;
-    pub mod networking;
-    pub mod overlay;
-    pub mod relationships;
-    pub mod store;
-    pub mod users;
-    pub mod voice;
-
-    pub(crate) use self::channels::*;
 }
 
 pub(crate) mod across_ffi {

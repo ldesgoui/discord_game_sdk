@@ -1,4 +1,4 @@
-use crate::{across_ffi, event, sys, to_result::ToResult, CreateFlags, Discord, Result};
+use crate::{across_ffi, channels, sys, to_result::ToResult, CreateFlags, Discord, Result};
 use std::ffi::c_void;
 
 /// # Core
@@ -18,7 +18,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/discord#create>  
     /// <https://discordapp.com/developers/docs/game-sdk/discord#setloghook>
     pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
-        let (senders, receivers) = event::create_channels();
+        let (senders, receivers) = channels::create_channels();
         let senders_ptr = Box::into_raw(Box::new(senders));
         let senders = unsafe { Box::from_raw(senders_ptr) };
 

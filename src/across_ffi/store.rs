@@ -1,5 +1,5 @@
 use crate::{
-    event,
+    channels, event,
     panic_messages::{NULL_PTR, SEND_FAIL},
     sys,
 };
@@ -13,10 +13,10 @@ pub(crate) extern "C" fn on_entitlement_create(
 
     debug_assert!(!entitlement.is_null());
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .store_entitlement_create
-        .try_send(event::store::EntitlementCreate {
+        .try_send(event::StoreEntitlementCreate {
             entitlement: unsafe { *entitlement }.into(),
         })
         .expect(SEND_FAIL)
@@ -30,10 +30,10 @@ pub(crate) extern "C" fn on_entitlement_delete(
 
     debug_assert!(!entitlement.is_null());
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .store_entitlement_delete
-        .try_send(event::store::EntitlementDelete {
+        .try_send(event::StoreEntitlementDelete {
             entitlement: unsafe { *entitlement }.into(),
         })
         .expect(SEND_FAIL)

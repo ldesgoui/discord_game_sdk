@@ -1,5 +1,5 @@
 use crate::{
-    event,
+    channels, event,
     panic_messages::{NULL_PTR, SEND_FAIL},
     sys,
 };
@@ -13,10 +13,10 @@ pub(crate) extern "C" fn on_user_achievement_update(
 
     debug_assert!(!user_achievement.is_null());
 
-    unsafe { (senders as *mut event::Senders).as_ref() }
+    unsafe { (senders as *mut channels::Senders).as_ref() }
         .expect(NULL_PTR)
         .achievements_update
-        .try_send(event::achievements::Update {
+        .try_send(event::UserAchievementUpdate {
             user_achievement: unsafe { *user_achievement }.into(),
         })
         .expect(SEND_FAIL)
