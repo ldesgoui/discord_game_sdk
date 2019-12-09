@@ -1,13 +1,17 @@
-use crate::{panic_messages::NOT_UTF8, sys, to_result::ToResult, Relationship, Result};
+use crate::{panic_messages::NOT_UTF8, sys, to_result::ToResult, Relationship};
 use crossbeam_channel::Sender;
 use std::ffi::{c_void, CStr};
+
+unsafe fn send<T>(ptr: *mut c_void, msg: T) {
+    let res = Box::from_raw(ptr as *mut Sender<T>).try_send(msg);
+
+    debug_assert!(res.is_ok())
+}
 
 pub(crate) unsafe extern "C" fn result(ptr: *mut c_void, res: sys::EDiscordResult) {
     prevent_unwind!();
 
-    let res = Box::from_raw(ptr as *mut Sender<Result<()>>).try_send(res.to_result());
-
-    debug_assert!(res.is_ok())
+    send(ptr, res.to_result());
 }
 
 pub(crate) unsafe extern "C" fn result_string(
@@ -17,12 +21,11 @@ pub(crate) unsafe extern "C" fn result_string(
 ) {
     prevent_unwind!();
 
-    let res = Box::from_raw(ptr as *mut Sender<Result<String>>).try_send(
+    send(
+        ptr,
         res.to_result()
             .map(|()| CStr::from_ptr(cstr).to_str().expect(NOT_UTF8).to_string()),
     );
-
-    debug_assert!(res.is_ok())
 }
 
 pub(crate) unsafe extern "C" fn result_bytes(
@@ -33,12 +36,13 @@ pub(crate) unsafe extern "C" fn result_bytes(
 ) {
     prevent_unwind!();
 
-    let res = Box::from_raw(ptr as *mut Sender<Result<Vec<u8>>>).try_send(
+    debug_assert!(!buffer_ptr.is_null());
+
+    send(
+        ptr,
         res.to_result()
             .map(|()| std::slice::from_raw_parts(buffer_ptr, len as usize).to_vec()),
     );
-
-    debug_assert!(res.is_ok())
 }
 
 pub(crate) unsafe extern "C" fn result_from<S, E>(
@@ -50,10 +54,7 @@ pub(crate) unsafe extern "C" fn result_from<S, E>(
 {
     prevent_unwind!();
 
-    let res = Box::from_raw(ptr as *mut Sender<Result<E>>)
-        .try_send(res.to_result().map(|()| source.into()));
-
-    debug_assert!(res.is_ok())
+    send(ptr, res.to_result().map(|()| source.into()));
 }
 
 pub(crate) unsafe extern "C" fn result_from_ptr<S, E>(
@@ -65,10 +66,7 @@ pub(crate) unsafe extern "C" fn result_from_ptr<S, E>(
 {
     prevent_unwind!();
 
-    let res = Box::from_raw(ptr as *mut Sender<Result<E>>)
-        .try_send(res.to_result().map(|()| (*source_ptr).into()));
-
-    debug_assert!(res.is_ok())
+    send(ptr, res.to_result().map(|()| (*source_ptr).into()));
 }
 
 pub(crate) unsafe extern "C" fn filter_relationship<F>(
