@@ -1,6 +1,6 @@
 [package]
 name = "discord_game_sdk_sys"
-version = "0.5.0-alpha.1"
+version = "0.5.0-alpha.2"
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Low-level bindings for the Discord Game SDK"
@@ -18,4 +18,4 @@ doc = [] # DO NOT RELY ON THIS
 link = []
 
 [build-dependencies]
-bindgen = { version = "0.52.0", default-features = false }
+bindgen = { version = "0.52.0", default-features = false, features = ["runtime"] }
