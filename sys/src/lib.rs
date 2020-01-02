@@ -31,18 +31,11 @@
 //! export DISCORD_GAME_SDK_PATH=/path/to/discord_game_sdk
 //! ```
 //!
-//! Ensure that appropriately named dynamic libraries are available when launching the program:
-//!
-//! On Linux and OS X, the dynamic library must be renamed to `libdiscord_game_sdk.so` or
-//! `libdiscord_game_sdk.dylib`.
-//!
-//! (TODO: ^ might be unnecessary, how to set the rpath in the output binary)
-//!
 //!
 //! # Features:
 //!
 //! - `link`: (enabled by default)
-//!     Provides the linker with an appropriately named dynamic library.
+//!     Provides the linker with copy of the dynamic library.
 //!     This allows for `cargo run` to run flawlessly on Linux.
 //!
 //!
@@ -74,6 +67,9 @@
 
 #![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 #![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys")]
+
+#[cfg_attr(feature = "link", link(name = "discord_game_sdk"))]
+extern "C" {}
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 

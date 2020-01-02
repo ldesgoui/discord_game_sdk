@@ -31,18 +31,11 @@ Set the following environment variable:
 export DISCORD_GAME_SDK_PATH=/path/to/discord_game_sdk
 ```
 
-Ensure that appropriately named dynamic libraries are available when launching the program:
-
-On Linux and OS X, the dynamic library must be renamed to `libdiscord_game_sdk.so` or
-`libdiscord_game_sdk.dylib`.
-
-(TODO: ^ might be unnecessary, how to set the rpath in the output binary)
-
 
 # Features:
 
 - `link`: (enabled by default)
-    Provides the linker with an appropriately named dynamic library.
+    Provides the linker with a copy of the dynamic library.
     This allows for `cargo run` to run flawlessly on Linux.
 
 
