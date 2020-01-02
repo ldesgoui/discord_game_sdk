@@ -136,7 +136,7 @@ fn create_params(
         event_data,
 
         // XXX: *mut should be *const
-        application_events: ACHIEVEMENT as *const _ as *mut _,
+        application_events: std::ptr::null_mut(),
         application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
 
         // XXX: *mut should be *const
@@ -180,7 +180,7 @@ fn create_params(
         voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
 
         // XXX: *mut should be *const
-        achievement_events: std::ptr::null_mut(),
+        achievement_events: ACHIEVEMENT as *const _ as *mut _,
         achievement_version: sys::DISCORD_ACHIEVEMENT_MANAGER_VERSION,
     }
 }

@@ -234,7 +234,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .lobby_metadata_count(lobby_id, &mut count as *mut _))
+                .lobby_metadata_count(lobby_id, &mut count))
         }
         .to_result()?;
 
@@ -259,7 +259,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_lobby_manager().get_lobby_metadata_value(
                 lobby_id,
-                key.as_mut_ptr(),
+                // XXX: *mut should be *const
+                key.as_ptr() as *mut _,
                 &mut value
             ))
         }
@@ -328,12 +329,7 @@ impl<'a> Discord<'a> {
     pub fn lobby_member_count(&self, lobby_id: i64) -> Result<i32> {
         let mut count = 0;
 
-        unsafe {
-            ffi!(self
-                .get_lobby_manager()
-                .member_count(lobby_id, &mut count as *mut _))
-        }
-        .to_result()?;
+        unsafe { ffi!(self.get_lobby_manager().member_count(lobby_id, &mut count)) }.to_result()?;
 
         Ok(count)
     }
@@ -345,11 +341,9 @@ impl<'a> Discord<'a> {
         let mut user_id = 0;
 
         unsafe {
-            ffi!(self.get_lobby_manager().get_member_user_id(
-                lobby_id,
-                index,
-                &mut user_id as *mut _
-            ))
+            ffi!(self
+                .get_lobby_manager()
+                .get_member_user_id(lobby_id, index, &mut user_id))
         }
         .to_result()?;
 
@@ -396,6 +390,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().get_member_metadata_value(
                 lobby_id,
                 user_id,
+                // XXX: *mut should be *const
                 key.as_ptr() as *mut _,
                 &mut value
             ))
@@ -412,11 +407,9 @@ impl<'a> Discord<'a> {
         let mut count: i32 = 0;
 
         unsafe {
-            ffi!(self.get_lobby_manager().member_metadata_count(
-                lobby_id,
-                user_id,
-                &mut count as *mut _
-            ))
+            ffi!(self
+                .get_lobby_manager()
+                .member_metadata_count(lobby_id, user_id, &mut count))
         }
         .to_result()?;
 
@@ -441,7 +434,7 @@ impl<'a> Discord<'a> {
                 lobby_id,
                 user_id,
                 index as i32,
-                &mut key as *mut _
+                &mut key
             ))
         }
         .to_result()?;
@@ -450,8 +443,9 @@ impl<'a> Discord<'a> {
             ffi!(self.get_lobby_manager().get_member_metadata_value(
                 lobby_id,
                 user_id,
-                key.as_mut_ptr(),
-                &mut value as *mut _
+                // XXX: *mut should be *const
+                key.as_ptr() as *mut _,
+                &mut value
             ))
         }
         .to_result()?;
@@ -500,7 +494,12 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .send_lobby_message(lobby_id, buf.as_ptr() as *mut _, buf.len() as u32)
+                .send_lobby_message(
+                    lobby_id,
+                    // XXX: *mut should be *const
+                    buf.as_ptr() as *mut _,
+                    buf.len() as u32
+                )
                 .and_then(ResultCallback::new(callback)))
         }
     }
@@ -667,6 +666,7 @@ impl<'a> Discord<'a> {
                 lobby_id,
                 user_id,
                 channel_id,
+                // XXX: *mut should be *const
                 buf.as_ptr() as *mut _,
                 buf.len() as u32
             ))
