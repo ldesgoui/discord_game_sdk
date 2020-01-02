@@ -1,6 +1,6 @@
 use crate::{
-    callbacks::ResultCallback, event, sys, to_result::ToResult, Action, Activity, Discord,
-    RequestReply, Result,
+    callbacks::ResultCallback, event, to_result::ToResult, Action, Activity, Discord, RequestReply,
+    Result,
 };
 use std::borrow::Cow;
 
@@ -51,12 +51,13 @@ impl<'a> Discord<'a> {
         activity: &Activity,
         callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
-        let mut activity: sys::DiscordActivity = activity.0;
-
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .update_activity(&mut activity as *mut _)
+                .update_activity(
+                    // XXX: *mut should be *const
+                    &activity.0 as *const _ as *mut _
+                )
                 .and_then(ResultCallback::new(callback)))
         }
     }
@@ -141,9 +142,7 @@ impl<'a> Discord<'a> {
     /// or clicks the Spectate button on another user's profile.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate>
-    pub fn recv_activities_spectate(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::ActivitySpectate> {
+    pub fn recv_activities_spectate(&self) -> impl '_ + Iterator<Item = event::ActivitySpectate> {
         self.receivers.activities_spectate.try_iter()
     }
 

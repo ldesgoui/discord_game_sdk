@@ -12,12 +12,7 @@ impl<'a> Discord<'a> {
     pub fn input_mode(&self) -> Result<InputMode> {
         let mut input_mode = InputMode(sys::DiscordInputMode::default());
 
-        unsafe {
-            ffi!(self
-                .get_voice_manager()
-                .get_input_mode(&mut input_mode.0 as *mut _))
-        }
-        .to_result()?;
+        unsafe { ffi!(self.get_voice_manager().get_input_mode(&mut input_mode.0)) }.to_result()?;
 
         Ok(input_mode)
     }
@@ -44,7 +39,7 @@ impl<'a> Discord<'a> {
     pub fn self_muted(&self) -> Result<bool> {
         let mut muted = false;
 
-        unsafe { ffi!(self.get_voice_manager().is_self_mute(&mut muted as *mut _)) }.to_result()?;
+        unsafe { ffi!(self.get_voice_manager().is_self_mute(&mut muted)) }.to_result()?;
 
         Ok(muted)
     }
@@ -55,12 +50,7 @@ impl<'a> Discord<'a> {
     pub fn self_deafened(&self) -> Result<bool> {
         let mut deafened = false;
 
-        unsafe {
-            ffi!(self
-                .get_voice_manager()
-                .is_self_deaf(&mut deafened as *mut _))
-        }
-        .to_result()?;
+        unsafe { ffi!(self.get_voice_manager().is_self_deaf(&mut deafened)) }.to_result()?;
 
         Ok(deafened)
     }
@@ -85,12 +75,7 @@ impl<'a> Discord<'a> {
     pub fn local_muted(&self, user_id: i64) -> Result<bool> {
         let mut muted = false;
 
-        unsafe {
-            ffi!(self
-                .get_voice_manager()
-                .is_local_mute(user_id, &mut muted as *mut _))
-        }
-        .to_result()?;
+        unsafe { ffi!(self.get_voice_manager().is_local_mute(user_id, &mut muted)) }.to_result()?;
 
         Ok(muted)
     }
@@ -104,7 +89,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_voice_manager()
-                .get_local_volume(user_id, &mut volume as *mut _))
+                .get_local_volume(user_id, &mut volume))
         }
         .to_result()?;
 

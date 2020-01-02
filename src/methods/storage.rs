@@ -38,7 +38,7 @@ impl<'a> Discord<'a> {
                 filename.as_ptr() as *const _,
                 buffer.as_mut_ptr(),
                 std::cmp::min(buffer.len(), u32::max_value() as usize) as u32,
-                &mut read as *mut _
+                &mut read
             ))
         }
         .to_result()?;
@@ -118,6 +118,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_storage_manager().write(
                 filename.as_ptr() as *const _,
+                // XXX: *mut should be *const
                 buffer.as_ptr() as *mut _,
                 buffer.len() as u32,
             ))
@@ -149,6 +150,7 @@ impl<'a> Discord<'a> {
                 .get_storage_manager()
                 .write_async(
                     filename.as_ptr() as *const _,
+                    // XXX: *mut should be *const
                     buffer.as_ptr() as *mut _,
                     buffer.len() as u32
                 )

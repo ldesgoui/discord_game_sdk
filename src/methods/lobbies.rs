@@ -115,7 +115,11 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .connect_lobby(lobby_id, secret.as_ptr() as *mut _)
+                .connect_lobby(
+                    lobby_id,
+                    // XXX: *mut should be *const
+                    secret.as_ptr() as *mut _
+                )
                 .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
@@ -140,7 +144,10 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .connect_lobby_with_activity_secret(activity_secret.as_ptr() as *mut _)
+                .connect_lobby_with_activity_secret(
+                    // XXX: *mut should be *const
+                    activity_secret.as_ptr() as *mut _
+                )
                 .and_then(ResultFromPtrCallback::new(callback)))
         }
     }
@@ -164,12 +171,7 @@ impl<'a> Discord<'a> {
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobby>
     pub fn lobby(&self, lobby_id: i64) -> Result<Lobby> {
         let mut lobby = sys::DiscordLobby::default();
-        unsafe {
-            ffi!(self
-                .get_lobby_manager()
-                .get_lobby(lobby_id, &mut lobby as *mut _))
-        }
-        .to_result()?;
+        unsafe { ffi!(self.get_lobby_manager().get_lobby(lobby_id, &mut lobby)) }.to_result()?;
 
         Ok(Lobby::from(lobby))
     }
@@ -185,7 +187,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
-                .get_lobby_activity_secret(lobby_id, &mut secret as *mut _))
+                .get_lobby_activity_secret(lobby_id, &mut secret))
         }
         .to_result()?;
 
@@ -213,6 +215,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_lobby_manager().get_lobby_metadata_value(
                 lobby_id,
+                // XXX: *mut should be *const
                 key.as_ptr() as *mut _,
                 &mut value
             ))

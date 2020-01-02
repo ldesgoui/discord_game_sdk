@@ -29,7 +29,7 @@ impl<'a> Discord<'a> {
     pub fn filter_relationships<F: FnMut(Relationship) -> bool>(&self, mut filter: F) {
         unsafe {
             ffi!(self.get_relationship_manager().filter(
-                &mut filter as *mut _ as *mut _,
+                &mut filter as *mut _ as *mut std::ffi::c_void,
                 Some(across_ffi::callbacks::filter_relationship::<F>)
             ))
         }

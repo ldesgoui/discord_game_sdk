@@ -21,11 +21,7 @@ impl<'a> Discord<'a> {
     pub fn overlay_enabled(&self) -> bool {
         let mut enabled = false;
 
-        unsafe {
-            ffi!(self
-                .get_overlay_manager()
-                .is_enabled(&mut enabled as *mut _))
-        }
+        unsafe { ffi!(self.get_overlay_manager().is_enabled(&mut enabled)) }
 
         enabled
     }
@@ -36,7 +32,7 @@ impl<'a> Discord<'a> {
     pub fn overlay_opened(&self) -> bool {
         let mut locked = false;
 
-        unsafe { ffi!(self.get_overlay_manager().is_locked(&mut locked as *mut _)) }
+        unsafe { ffi!(self.get_overlay_manager().is_locked(&mut locked)) }
 
         !locked
     }

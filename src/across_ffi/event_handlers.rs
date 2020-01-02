@@ -2,13 +2,13 @@ use crate::{channels, panic_messages::NOT_UTF8};
 use crossbeam_channel::Sender;
 use std::ffi::{c_void, CStr};
 
-unsafe fn send<Event>(senders: *mut c_void, ev: impl Into<Event>)
+unsafe fn send<Event>(senders: *const c_void, ev: impl Into<Event>)
 where
     channels::Senders: AsRef<Sender<Event>>,
 {
     debug_assert!(!senders.is_null());
 
-    let res = (&*(senders as *mut channels::Senders))
+    let res = (&*(senders as *const channels::Senders))
         .as_ref()
         .try_send(ev.into());
 

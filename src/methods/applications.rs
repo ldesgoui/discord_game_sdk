@@ -21,7 +21,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_application_manager()
-                .get_current_locale(&mut locale as *mut _))
+                .get_current_locale(&mut locale))
         }
 
         charbuf_to_str(&locale).to_string()
@@ -38,7 +38,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_application_manager()
-                .get_current_branch(&mut branch as *mut _))
+                .get_current_branch(&mut branch))
         }
 
         charbuf_to_str(&branch).to_string()

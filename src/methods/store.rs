@@ -33,7 +33,7 @@ impl<'a> Discord<'a> {
     pub fn sku(&self, id: i64) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
-        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku.0 as *mut _,)) }.to_result()?;
+        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku.0)) }.to_result()?;
 
         Ok(sku)
     }
@@ -107,7 +107,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_store_manager()
-                .get_entitlement(id, &mut entitlement.0 as *mut _,))
+                .get_entitlement(id, &mut entitlement.0))
         }
         .to_result()?;
 
@@ -168,7 +168,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_store_manager()
-                .has_sku_entitlement(sku_id, &mut has_entitlement as *mut _))
+                .has_sku_entitlement(sku_id, &mut has_entitlement))
         }
         .to_result()?;
 

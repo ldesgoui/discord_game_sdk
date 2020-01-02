@@ -104,12 +104,21 @@ impl LobbyTransaction {
         for (key, value) in &self.metadata {
             match value {
                 Some(value) => {
-                    ffi!(tx.set_metadata(key.as_ptr() as *mut _, value.as_ptr() as *mut _))
-                        .to_result()?;
+                    ffi!(tx.set_metadata(
+                        // XXX: *mut should be *const
+                        key.as_ptr() as *mut _,
+                        // XXX: *mut should be *const
+                        value.as_ptr() as *mut _
+                    ))
+                    .to_result()?;
                 }
 
                 None => {
-                    ffi!(tx.delete_metadata(key.as_ptr() as *mut _)).to_result()?;
+                    ffi!(tx.delete_metadata(
+                        // XXX: *mut should be *const
+                        key.as_ptr() as *mut _
+                    ))
+                    .to_result()?;
                 }
             }
         }

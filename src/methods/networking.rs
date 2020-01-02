@@ -106,6 +106,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_network_manager().send_message(
                 peer_id,
                 chan_id,
+                // XXX: *mut should be *const
                 buf.as_ptr() as *mut _,
                 buf.len() as u32
             ))

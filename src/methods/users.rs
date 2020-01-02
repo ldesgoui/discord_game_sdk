@@ -16,12 +16,7 @@ impl<'a> Discord<'a> {
     pub fn current_user(&self) -> Result<User> {
         let mut user = User(sys::DiscordUser::default());
 
-        unsafe {
-            ffi!(self
-                .get_user_manager()
-                .get_current_user(&mut user.0 as *mut _))
-        }
-        .to_result()?;
+        unsafe { ffi!(self.get_user_manager().get_current_user(&mut user.0)) }.to_result()?;
 
         Ok(user)
     }
@@ -47,7 +42,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_user_manager()
-                .get_current_user_premium_type(&mut premium_type as *mut _))
+                .get_current_user_premium_type(&mut premium_type))
         }
         .to_result()?;
 
@@ -72,7 +67,7 @@ impl<'a> Discord<'a> {
             unsafe {
                 ffi!(self
                     .get_user_manager()
-                    .current_user_has_flag(flag.bits(), &mut contains as *mut _))
+                    .current_user_has_flag(flag.bits(), &mut contains))
             }
             .to_result()?;
 
@@ -85,9 +80,7 @@ impl<'a> Discord<'a> {
     /// Fires when the User struct of the currently connected user changes.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate>
-    pub fn recv_current_user_update(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::CurrentUserUpdate> {
+    pub fn recv_current_user_update(&self) -> impl '_ + Iterator<Item = event::CurrentUserUpdate> {
         self.receivers.current_user_update.try_iter()
     }
 }
