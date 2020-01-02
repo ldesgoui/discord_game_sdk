@@ -54,10 +54,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .update_activity(
-                    // XXX: *mut should be *const
-                    &activity.0 as *const _ as *mut _
-                )
+                .update_activity(&activity.0)
                 .and_then(ResultCallback::new(callback)))
         }
     }

@@ -15,12 +15,12 @@ impl Relationship {
 
     /// The target of the relationship
     pub fn user(&self) -> &User {
-        unsafe { &*(&self.0.user as *const _ as *const _) }
+        unsafe { &*(&self.0.user as *const sys::DiscordUser as *const User) }
     }
 
     /// The target's current presence
     pub fn presence(&self) -> &Presence {
-        unsafe { &*(&self.0.presence as *const _ as *const _) }
+        unsafe { &*(&self.0.presence as *const sys::DiscordPresence as *const Presence) }
     }
 }
 

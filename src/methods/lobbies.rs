@@ -259,7 +259,8 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_lobby_manager().get_lobby_metadata_value(
                 lobby_id,
-                key.as_mut_ptr(),
+                // XXX: *mut should be *const
+                key.as_ptr() as *mut _,
                 &mut value
             ))
         }

@@ -118,8 +118,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self.get_storage_manager().write(
                 filename.as_ptr() as *const _,
-                // XXX: *mut should be *const
-                buffer.as_ptr() as *mut _,
+                buffer.as_ptr(),
                 buffer.len() as u32,
             ))
         }
@@ -150,8 +149,7 @@ impl<'a> Discord<'a> {
                 .get_storage_manager()
                 .write_async(
                     filename.as_ptr() as *const _,
-                    // XXX: *mut should be *const
-                    buffer.as_ptr() as *mut _,
+                    buffer.as_ptr(),
                     buffer.len() as u32
                 )
                 .and_then(ResultCallback::new(callback)))
