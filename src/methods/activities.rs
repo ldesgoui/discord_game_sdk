@@ -31,7 +31,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .register_command(command.as_ptr() as *const _))
+                .register_command(command.as_ptr()))
         }
         .to_result()
     }
@@ -113,7 +113,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_activity_manager()
-                .send_invite(user_id, action.into(), content.as_ptr() as *const _)
+                .send_invite(user_id, action.into(), content.as_ptr())
                 .and_then(ResultCallback::new(callback)))
         }
     }

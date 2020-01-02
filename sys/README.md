@@ -34,6 +34,9 @@ export DISCORD_GAME_SDK_PATH=/path/to/discord_game_sdk
 
 # Features:
 
+- `force-char-as-u8`:
+    Forces C chars to be unsigned.
+
 - `link`: (enabled by default)
     Provides the linker with a copy of the dynamic library.
     This allows for `cargo run` to run flawlessly on Linux.

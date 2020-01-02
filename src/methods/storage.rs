@@ -35,9 +35,11 @@ impl<'a> Discord<'a> {
 
         let buffer = buffer.as_mut();
 
+        debug_assert!(buffer.len() <= u32::max_value() as usize);
+
         unsafe {
             ffi!(self.get_storage_manager().read(
-                filename.as_ptr() as *const _,
+                filename.as_ptr(),
                 buffer.as_mut_ptr(),
                 buffer.len() as u32,
                 &mut read
@@ -67,7 +69,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .read_async(filename.as_ptr() as *const _)
+                .read_async(filename.as_ptr())
                 .and_then(ResultBytesCallback::new(callback)))
         }
     }
@@ -94,7 +96,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .read_async_partial(filename.as_ptr() as *const i8, offset, length)
+                .read_async_partial(filename.as_ptr(), offset, length)
                 .and_then(ResultBytesCallback::new(callback)))
         }
     }
@@ -119,9 +121,11 @@ impl<'a> Discord<'a> {
 
         let buffer = buffer.as_ref();
 
+        debug_assert!(buffer.len() <= u32::max_value() as usize);
+
         unsafe {
             ffi!(self.get_storage_manager().write(
-                filename.as_ptr() as *const _,
+                filename.as_ptr(),
                 // XXX: *mut should be *const
                 buffer.as_ptr() as *mut _,
                 buffer.len() as u32,
@@ -151,11 +155,13 @@ impl<'a> Discord<'a> {
 
         let buffer = buffer.as_ref();
 
+        debug_assert!(buffer.len() <= u32::max_value() as usize);
+
         unsafe {
             ffi!(self
                 .get_storage_manager()
                 .write_async(
-                    filename.as_ptr() as *const _,
+                    filename.as_ptr(),
                     // XXX: *mut should be *const
                     buffer.as_ptr() as *mut _,
                     buffer.len() as u32
@@ -176,12 +182,7 @@ impl<'a> Discord<'a> {
             filename.to_mut().push('\0')
         };
 
-        unsafe {
-            ffi!(self
-                .get_storage_manager()
-                .delete_(filename.as_ptr() as *const _))
-        }
-        .to_result()
+        unsafe { ffi!(self.get_storage_manager().delete_(filename.as_ptr())) }.to_result()
     }
 
     /// Checks if data exists for a given key.
@@ -201,7 +202,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .exists(filename.as_ptr() as *const _, &mut exists))
+                .exists(filename.as_ptr(), &mut exists))
         }
         .to_result()?;
 
@@ -225,7 +226,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .stat(filename.as_ptr() as *const _, &mut stat.0))
+                .stat(filename.as_ptr(), &mut stat.0))
         }
         .to_result()?;
 

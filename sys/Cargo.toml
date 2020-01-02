@@ -15,6 +15,7 @@ features = ["doc"]
 
 [features]
 doc = [] # DO NOT RELY ON THIS
+force-char-as-u8 = []
 link = []
 
 [build-dependencies]

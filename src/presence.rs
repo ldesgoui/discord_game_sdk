@@ -15,7 +15,7 @@ impl Presence {
 
     /// The user's current activity
     pub fn activity(&self) -> &Activity {
-        unsafe { &*(&self.0.activity as *const _ as *const _) }
+        unsafe { &*(&self.0.activity as *const sys::DiscordActivity as *const Activity) }
     }
 }
 

@@ -92,7 +92,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
-                .open_guild_invite(code.as_ptr() as *const _)
+                .open_guild_invite(code.as_ptr())
                 .and_then(ResultCallback::new(callback)))
         }
     }

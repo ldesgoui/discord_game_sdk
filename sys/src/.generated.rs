@@ -13,11 +13,11 @@ pub const DISCORD_STORAGE_MANAGER_VERSION: i32 = 1;
 pub const DISCORD_STORE_MANAGER_VERSION: i32 = 1;
 pub const DISCORD_VOICE_MANAGER_VERSION: i32 = 1;
 pub const DISCORD_ACHIEVEMENT_MANAGER_VERSION: i32 = 1;
-pub type __uint8_t = ::std::os::raw::c_uchar;
-pub type __int32_t = ::std::os::raw::c_int;
-pub type __uint32_t = ::std::os::raw::c_uint;
-pub type __int64_t = ::std::os::raw::c_long;
-pub type __uint64_t = ::std::os::raw::c_ulong;
+pub type __uint8_t = ctypes::c_uchar;
+pub type __int32_t = ctypes::c_int;
+pub type __uint32_t = ctypes::c_uint;
+pub type __int64_t = ctypes::c_long;
+pub type __uint64_t = ctypes::c_ulong;
 pub const DiscordResult_Ok: EDiscordResult = 0;
 pub const DiscordResult_ServiceUnavailable: EDiscordResult = 1;
 pub const DiscordResult_InvalidVersion: EDiscordResult = 2;
@@ -146,23 +146,23 @@ pub type DiscordVersion = i32;
 pub type DiscordSnowflake = i64;
 pub type DiscordTimestamp = i64;
 pub type DiscordUserId = DiscordSnowflake;
-pub type DiscordLocale = [::std::os::raw::c_char; 128usize];
-pub type DiscordBranch = [::std::os::raw::c_char; 4096usize];
+pub type DiscordLocale = [ctypes::c_char; 128usize];
+pub type DiscordBranch = [ctypes::c_char; 4096usize];
 pub type DiscordLobbyId = DiscordSnowflake;
-pub type DiscordLobbySecret = [::std::os::raw::c_char; 128usize];
-pub type DiscordMetadataKey = [::std::os::raw::c_char; 256usize];
-pub type DiscordMetadataValue = [::std::os::raw::c_char; 4096usize];
+pub type DiscordLobbySecret = [ctypes::c_char; 128usize];
+pub type DiscordMetadataKey = [ctypes::c_char; 256usize];
+pub type DiscordMetadataValue = [ctypes::c_char; 4096usize];
 pub type DiscordNetworkPeerId = u64;
 pub type DiscordNetworkChannelId = u8;
-pub type DiscordPath = [::std::os::raw::c_char; 4096usize];
-pub type DiscordDateTime = [::std::os::raw::c_char; 64usize];
+pub type DiscordPath = [ctypes::c_char; 4096usize];
+pub type DiscordDateTime = [ctypes::c_char; 64usize];
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct DiscordUser {
     pub id: DiscordUserId,
-    pub username: [::std::os::raw::c_char; 256usize],
-    pub discriminator: [::std::os::raw::c_char; 8usize],
-    pub avatar: [::std::os::raw::c_char; 128usize],
+    pub username: [ctypes::c_char; 256usize],
+    pub discriminator: [ctypes::c_char; 8usize],
+    pub avatar: [ctypes::c_char; 128usize],
     pub bot: bool,
 }
 #[test]
@@ -250,8 +250,8 @@ impl ::std::cmp::PartialEq for DiscordUser {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct DiscordOAuth2Token {
-    pub access_token: [::std::os::raw::c_char; 128usize],
-    pub scopes: [::std::os::raw::c_char; 1024usize],
+    pub access_token: [ctypes::c_char; 128usize],
+    pub scopes: [ctypes::c_char; 1024usize],
     pub expires: DiscordTimestamp,
 }
 #[test]
@@ -464,10 +464,10 @@ fn bindgen_test_layout_DiscordActivityTimestamps() {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct DiscordActivityAssets {
-    pub large_image: [::std::os::raw::c_char; 128usize],
-    pub large_text: [::std::os::raw::c_char; 128usize],
-    pub small_image: [::std::os::raw::c_char; 128usize],
-    pub small_text: [::std::os::raw::c_char; 128usize],
+    pub large_image: [ctypes::c_char; 128usize],
+    pub large_text: [ctypes::c_char; 128usize],
+    pub small_image: [ctypes::c_char; 128usize],
+    pub small_text: [ctypes::c_char; 128usize],
 }
 #[test]
 fn bindgen_test_layout_DiscordActivityAssets() {
@@ -590,7 +590,7 @@ fn bindgen_test_layout_DiscordPartySize() {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct DiscordActivityParty {
-    pub id: [::std::os::raw::c_char; 128usize],
+    pub id: [ctypes::c_char; 128usize],
     pub size: DiscordPartySize,
 }
 #[test]
@@ -653,9 +653,9 @@ impl ::std::cmp::PartialEq for DiscordActivityParty {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct DiscordActivitySecrets {
-    pub match_: [::std::os::raw::c_char; 128usize],
-    pub join: [::std::os::raw::c_char; 128usize],
-    pub spectate: [::std::os::raw::c_char; 128usize],
+    pub match_: [ctypes::c_char; 128usize],
+    pub join: [ctypes::c_char; 128usize],
+    pub spectate: [ctypes::c_char; 128usize],
 }
 #[test]
 fn bindgen_test_layout_DiscordActivitySecrets() {
@@ -740,9 +740,9 @@ impl ::std::cmp::PartialEq for DiscordActivitySecrets {
 pub struct DiscordActivity {
     pub type_: EDiscordActivityType,
     pub application_id: i64,
-    pub name: [::std::os::raw::c_char; 128usize],
-    pub state: [::std::os::raw::c_char; 128usize],
-    pub details: [::std::os::raw::c_char; 128usize],
+    pub name: [ctypes::c_char; 128usize],
+    pub state: [ctypes::c_char; 128usize],
+    pub details: [ctypes::c_char; 128usize],
     pub timestamps: DiscordActivityTimestamps,
     pub assets: DiscordActivityAssets,
     pub party: DiscordActivityParty,
@@ -1119,7 +1119,7 @@ impl ::std::cmp::PartialEq for DiscordLobby {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct DiscordFileStat {
-    pub filename: [::std::os::raw::c_char; 260usize],
+    pub filename: [ctypes::c_char; 260usize],
     pub size: u64,
     pub last_modified: u64,
 }
@@ -1252,7 +1252,7 @@ impl Default for DiscordEntitlement {
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct DiscordSkuPrice {
     pub amount: u32,
-    pub currency: [::std::os::raw::c_char; 16usize],
+    pub currency: [ctypes::c_char; 16usize],
 }
 #[test]
 fn bindgen_test_layout_DiscordSkuPrice() {
@@ -1292,7 +1292,7 @@ fn bindgen_test_layout_DiscordSkuPrice() {
 pub struct DiscordSku {
     pub id: DiscordSnowflake,
     pub type_: EDiscordSkuType,
-    pub name: [::std::os::raw::c_char; 256usize],
+    pub name: [ctypes::c_char; 256usize],
     pub price: DiscordSkuPrice,
 }
 #[test]
@@ -1381,7 +1381,7 @@ impl ::std::cmp::PartialEq for DiscordSku {
 #[derive(Copy, Clone)]
 pub struct DiscordInputMode {
     pub type_: EDiscordInputModeType,
-    pub shortcut: [::std::os::raw::c_char; 256usize],
+    pub shortcut: [ctypes::c_char; 256usize],
 }
 #[test]
 fn bindgen_test_layout_DiscordInputMode() {
@@ -1549,14 +1549,14 @@ pub struct IDiscordLobbyTransaction {
     pub set_metadata: ::std::option::Option<
         unsafe extern "C" fn(
             lobby_transaction: *mut IDiscordLobbyTransaction,
-            key: *mut ::std::os::raw::c_char,
-            value: *mut ::std::os::raw::c_char,
+            key: *mut ctypes::c_char,
+            value: *mut ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub delete_metadata: ::std::option::Option<
         unsafe extern "C" fn(
             lobby_transaction: *mut IDiscordLobbyTransaction,
-            key: *mut ::std::os::raw::c_char,
+            key: *mut ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub set_locked: ::std::option::Option<
@@ -1658,14 +1658,14 @@ pub struct IDiscordLobbyMemberTransaction {
     pub set_metadata: ::std::option::Option<
         unsafe extern "C" fn(
             lobby_member_transaction: *mut IDiscordLobbyMemberTransaction,
-            key: *mut ::std::os::raw::c_char,
-            value: *mut ::std::os::raw::c_char,
+            key: *mut ctypes::c_char,
+            value: *mut ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub delete_metadata: ::std::option::Option<
         unsafe extern "C" fn(
             lobby_member_transaction: *mut IDiscordLobbyMemberTransaction,
-            key: *mut ::std::os::raw::c_char,
+            key: *mut ctypes::c_char,
         ) -> EDiscordResult,
     >,
 }
@@ -1714,18 +1714,18 @@ pub struct IDiscordLobbySearchQuery {
     pub filter: ::std::option::Option<
         unsafe extern "C" fn(
             lobby_search_query: *mut IDiscordLobbySearchQuery,
-            key: *mut ::std::os::raw::c_char,
+            key: *mut ctypes::c_char,
             comparison: EDiscordLobbySearchComparison,
             cast: EDiscordLobbySearchCast,
-            value: *mut ::std::os::raw::c_char,
+            value: *mut ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub sort: ::std::option::Option<
         unsafe extern "C" fn(
             lobby_search_query: *mut IDiscordLobbySearchQuery,
-            key: *mut ::std::os::raw::c_char,
+            key: *mut ctypes::c_char,
             cast: EDiscordLobbySearchCast,
-            value: *mut ::std::os::raw::c_char,
+            value: *mut ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub limit: ::std::option::Option<
@@ -1796,19 +1796,16 @@ fn bindgen_test_layout_IDiscordLobbySearchQuery() {
         )
     );
 }
-pub type IDiscordApplicationEvents = *mut ::std::os::raw::c_void;
+pub type IDiscordApplicationEvents = *mut ctypes::c_void;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordApplicationManager {
     pub validate_or_exit: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordApplicationManager,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -1821,10 +1818,10 @@ pub struct IDiscordApplicationManager {
     pub get_oauth2_token: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordApplicationManager,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
                     oauth2_token: *mut DiscordOAuth2Token,
                 ),
@@ -1834,12 +1831,12 @@ pub struct IDiscordApplicationManager {
     pub get_ticket: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordApplicationManager,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
-                    data: *const ::std::os::raw::c_char,
+                    data: *const ctypes::c_char,
                 ),
             >,
         ),
@@ -1926,7 +1923,7 @@ fn bindgen_test_layout_IDiscordApplicationManager() {
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordUserEvents {
     pub on_current_user_update:
-        ::std::option::Option<unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void)>,
+        ::std::option::Option<unsafe extern "C" fn(event_data: *mut ctypes::c_void)>,
 }
 #[test]
 fn bindgen_test_layout_IDiscordUserEvents() {
@@ -1967,10 +1964,10 @@ pub struct IDiscordUserManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordUserManager,
             user_id: DiscordUserId,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
                     user: *mut DiscordUser,
                 ),
@@ -2052,7 +2049,7 @@ fn bindgen_test_layout_IDiscordUserManager() {
         )
     );
 }
-pub type IDiscordImageEvents = *mut ::std::os::raw::c_void;
+pub type IDiscordImageEvents = *mut ctypes::c_void;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordImageManager {
@@ -2061,10 +2058,10 @@ pub struct IDiscordImageManager {
             manager: *mut IDiscordImageManager,
             handle: DiscordImageHandle,
             refresh: bool,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
                     handle_result: DiscordImageHandle,
                 ),
@@ -2136,23 +2133,17 @@ fn bindgen_test_layout_IDiscordImageManager() {
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordActivityEvents {
     pub on_activity_join: ::std::option::Option<
-        unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
-            secret: *const ::std::os::raw::c_char,
-        ),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, secret: *const ctypes::c_char),
     >,
     pub on_activity_spectate: ::std::option::Option<
-        unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
-            secret: *const ::std::os::raw::c_char,
-        ),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, secret: *const ctypes::c_char),
     >,
     pub on_activity_join_request: ::std::option::Option<
-        unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, user: *mut DiscordUser),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, user: *mut DiscordUser),
     >,
     pub on_activity_invite: ::std::option::Option<
         unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
+            event_data: *mut ctypes::c_void,
             type_: EDiscordActivityActionType,
             user: *mut DiscordUser,
             activity: *mut DiscordActivity,
@@ -2229,7 +2220,7 @@ pub struct IDiscordActivityManager {
     pub register_command: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordActivityManager,
-            command: *const ::std::os::raw::c_char,
+            command: *const ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub register_steam: ::std::option::Option<
@@ -2242,24 +2233,18 @@ pub struct IDiscordActivityManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordActivityManager,
             activity: *mut DiscordActivity,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
     pub clear_activity: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordActivityManager,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2268,12 +2253,9 @@ pub struct IDiscordActivityManager {
             manager: *mut IDiscordActivityManager,
             user_id: DiscordUserId,
             reply: EDiscordActivityJoinRequestReply,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2282,13 +2264,10 @@ pub struct IDiscordActivityManager {
             manager: *mut IDiscordActivityManager,
             user_id: DiscordUserId,
             type_: EDiscordActivityActionType,
-            content: *const ::std::os::raw::c_char,
-            callback_data: *mut ::std::os::raw::c_void,
+            content: *const ctypes::c_char,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2296,12 +2275,9 @@ pub struct IDiscordActivityManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordActivityManager,
             user_id: DiscordUserId,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2408,11 +2384,10 @@ fn bindgen_test_layout_IDiscordActivityManager() {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordRelationshipEvents {
-    pub on_refresh:
-        ::std::option::Option<unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void)>,
+    pub on_refresh: ::std::option::Option<unsafe extern "C" fn(event_data: *mut ctypes::c_void)>,
     pub on_relationship_update: ::std::option::Option<
         unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
+            event_data: *mut ctypes::c_void,
             relationship: *mut DiscordRelationship,
         ),
     >,
@@ -2461,10 +2436,10 @@ pub struct IDiscordRelationshipManager {
     pub filter: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordRelationshipManager,
-            filter_data: *mut ::std::os::raw::c_void,
+            filter_data: *mut ctypes::c_void,
             filter: ::std::option::Option<
                 unsafe extern "C" fn(
-                    filter_data: *mut ::std::os::raw::c_void,
+                    filter_data: *mut ctypes::c_void,
                     relationship: *mut DiscordRelationship,
                 ) -> bool,
             >,
@@ -2553,24 +2528,23 @@ fn bindgen_test_layout_IDiscordRelationshipManager() {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordLobbyEvents {
-    pub on_lobby_update: ::std::option::Option<
-        unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, lobby_id: i64),
-    >,
+    pub on_lobby_update:
+        ::std::option::Option<unsafe extern "C" fn(event_data: *mut ctypes::c_void, lobby_id: i64)>,
     pub on_lobby_delete: ::std::option::Option<
-        unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, lobby_id: i64, reason: u32),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, lobby_id: i64, reason: u32),
     >,
     pub on_member_connect: ::std::option::Option<
-        unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, lobby_id: i64, user_id: i64),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, lobby_id: i64, user_id: i64),
     >,
     pub on_member_update: ::std::option::Option<
-        unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, lobby_id: i64, user_id: i64),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, lobby_id: i64, user_id: i64),
     >,
     pub on_member_disconnect: ::std::option::Option<
-        unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, lobby_id: i64, user_id: i64),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, lobby_id: i64, user_id: i64),
     >,
     pub on_lobby_message: ::std::option::Option<
         unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
+            event_data: *mut ctypes::c_void,
             lobby_id: i64,
             user_id: i64,
             data: *mut u8,
@@ -2579,7 +2553,7 @@ pub struct IDiscordLobbyEvents {
     >,
     pub on_speaking: ::std::option::Option<
         unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
+            event_data: *mut ctypes::c_void,
             lobby_id: i64,
             user_id: i64,
             speaking: bool,
@@ -2587,7 +2561,7 @@ pub struct IDiscordLobbyEvents {
     >,
     pub on_network_message: ::std::option::Option<
         unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
+            event_data: *mut ctypes::c_void,
             lobby_id: i64,
             user_id: i64,
             channel_id: u8,
@@ -2732,10 +2706,10 @@ pub struct IDiscordLobbyManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
             transaction: *mut IDiscordLobbyTransaction,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
                     lobby: *mut DiscordLobby,
                 ),
@@ -2747,12 +2721,9 @@ pub struct IDiscordLobbyManager {
             manager: *mut IDiscordLobbyManager,
             lobby_id: DiscordLobbyId,
             transaction: *mut IDiscordLobbyTransaction,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2760,12 +2731,9 @@ pub struct IDiscordLobbyManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
             lobby_id: DiscordLobbyId,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2773,11 +2741,11 @@ pub struct IDiscordLobbyManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
             lobby_id: DiscordLobbyId,
-            secret: *mut ::std::os::raw::c_char,
-            callback_data: *mut ::std::os::raw::c_void,
+            secret: *mut ctypes::c_char,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
                     lobby: *mut DiscordLobby,
                 ),
@@ -2787,11 +2755,11 @@ pub struct IDiscordLobbyManager {
     pub connect_lobby_with_activity_secret: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
-            activity_secret: *mut ::std::os::raw::c_char,
-            callback_data: *mut ::std::os::raw::c_void,
+            activity_secret: *mut ctypes::c_char,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
                     lobby: *mut DiscordLobby,
                 ),
@@ -2802,12 +2770,9 @@ pub struct IDiscordLobbyManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
             lobby_id: DiscordLobbyId,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2829,7 +2794,7 @@ pub struct IDiscordLobbyManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
             lobby_id: DiscordLobbyId,
-            key: *mut ::std::os::raw::c_char,
+            key: *mut ctypes::c_char,
             value: *mut DiscordMetadataValue,
         ) -> EDiscordResult,
     >,
@@ -2876,7 +2841,7 @@ pub struct IDiscordLobbyManager {
             manager: *mut IDiscordLobbyManager,
             lobby_id: DiscordLobbyId,
             user_id: DiscordUserId,
-            key: *mut ::std::os::raw::c_char,
+            key: *mut ctypes::c_char,
             value: *mut DiscordMetadataValue,
         ) -> EDiscordResult,
     >,
@@ -2903,12 +2868,9 @@ pub struct IDiscordLobbyManager {
             lobby_id: DiscordLobbyId,
             user_id: DiscordUserId,
             transaction: *mut IDiscordLobbyMemberTransaction,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2918,12 +2880,9 @@ pub struct IDiscordLobbyManager {
             lobby_id: DiscordLobbyId,
             data: *mut u8,
             data_length: u32,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2937,12 +2896,9 @@ pub struct IDiscordLobbyManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
             query: *mut IDiscordLobbySearchQuery,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2960,12 +2916,9 @@ pub struct IDiscordLobbyManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
             lobby_id: DiscordLobbyId,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -2973,12 +2926,9 @@ pub struct IDiscordLobbyManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordLobbyManager,
             lobby_id: DiscordLobbyId,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -3439,7 +3389,7 @@ fn bindgen_test_layout_IDiscordLobbyManager() {
 pub struct IDiscordNetworkEvents {
     pub on_message: ::std::option::Option<
         unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
+            event_data: *mut ctypes::c_void,
             peer_id: DiscordNetworkPeerId,
             channel_id: DiscordNetworkChannelId,
             data: *mut u8,
@@ -3447,10 +3397,7 @@ pub struct IDiscordNetworkEvents {
         ),
     >,
     pub on_route_update: ::std::option::Option<
-        unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
-            route_data: *const ::std::os::raw::c_char,
-        ),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, route_data: *const ctypes::c_char),
     >,
 }
 #[test]
@@ -3506,14 +3453,14 @@ pub struct IDiscordNetworkManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordNetworkManager,
             peer_id: DiscordNetworkPeerId,
-            route_data: *const ::std::os::raw::c_char,
+            route_data: *const ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub update_peer: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordNetworkManager,
             peer_id: DiscordNetworkPeerId,
-            route_data: *const ::std::os::raw::c_char,
+            route_data: *const ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub close_peer: ::std::option::Option<
@@ -3657,9 +3604,8 @@ fn bindgen_test_layout_IDiscordNetworkManager() {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordOverlayEvents {
-    pub on_toggle: ::std::option::Option<
-        unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void, locked: bool),
-    >,
+    pub on_toggle:
+        ::std::option::Option<unsafe extern "C" fn(event_data: *mut ctypes::c_void, locked: bool)>,
 }
 #[test]
 fn bindgen_test_layout_IDiscordOverlayEvents() {
@@ -3697,12 +3643,9 @@ pub struct IDiscordOverlayManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordOverlayManager,
             locked: bool,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -3710,37 +3653,28 @@ pub struct IDiscordOverlayManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordOverlayManager,
             type_: EDiscordActivityActionType,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
     pub open_guild_invite: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordOverlayManager,
-            code: *const ::std::os::raw::c_char,
-            callback_data: *mut ::std::os::raw::c_void,
+            code: *const ctypes::c_char,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
     pub open_voice_settings: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordOverlayManager,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -3833,14 +3767,14 @@ fn bindgen_test_layout_IDiscordOverlayManager() {
         )
     );
 }
-pub type IDiscordStorageEvents = *mut ::std::os::raw::c_void;
+pub type IDiscordStorageEvents = *mut ctypes::c_void;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordStorageManager {
     pub read: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStorageManager,
-            name: *const ::std::os::raw::c_char,
+            name: *const ctypes::c_char,
             data: *mut u8,
             data_length: u32,
             read: *mut u32,
@@ -3849,11 +3783,11 @@ pub struct IDiscordStorageManager {
     pub read_async: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStorageManager,
-            name: *const ::std::os::raw::c_char,
-            callback_data: *mut ::std::os::raw::c_void,
+            name: *const ctypes::c_char,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
                     data: *mut u8,
                     data_length: u32,
@@ -3864,13 +3798,13 @@ pub struct IDiscordStorageManager {
     pub read_async_partial: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStorageManager,
-            name: *const ::std::os::raw::c_char,
+            name: *const ctypes::c_char,
             offset: u64,
             length: u64,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
                 unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
+                    callback_data: *mut ctypes::c_void,
                     result: EDiscordResult,
                     data: *mut u8,
                     data_length: u32,
@@ -3881,7 +3815,7 @@ pub struct IDiscordStorageManager {
     pub write: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStorageManager,
-            name: *const ::std::os::raw::c_char,
+            name: *const ctypes::c_char,
             data: *mut u8,
             data_length: u32,
         ) -> EDiscordResult,
@@ -3889,28 +3823,25 @@ pub struct IDiscordStorageManager {
     pub write_async: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStorageManager,
-            name: *const ::std::os::raw::c_char,
+            name: *const ctypes::c_char,
             data: *mut u8,
             data_length: u32,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
     pub delete_: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStorageManager,
-            name: *const ::std::os::raw::c_char,
+            name: *const ctypes::c_char,
         ) -> EDiscordResult,
     >,
     pub exists: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStorageManager,
-            name: *const ::std::os::raw::c_char,
+            name: *const ctypes::c_char,
             exists: *mut bool,
         ) -> EDiscordResult,
     >,
@@ -3920,7 +3851,7 @@ pub struct IDiscordStorageManager {
     pub stat: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStorageManager,
-            name: *const ::std::os::raw::c_char,
+            name: *const ctypes::c_char,
             stat: *mut DiscordFileStat,
         ) -> EDiscordResult,
     >,
@@ -4072,16 +4003,10 @@ fn bindgen_test_layout_IDiscordStorageManager() {
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordStoreEvents {
     pub on_entitlement_create: ::std::option::Option<
-        unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
-            entitlement: *mut DiscordEntitlement,
-        ),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, entitlement: *mut DiscordEntitlement),
     >,
     pub on_entitlement_delete: ::std::option::Option<
-        unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
-            entitlement: *mut DiscordEntitlement,
-        ),
+        unsafe extern "C" fn(event_data: *mut ctypes::c_void, entitlement: *mut DiscordEntitlement),
     >,
 }
 #[test]
@@ -4129,12 +4054,9 @@ pub struct IDiscordStoreManager {
     pub fetch_skus: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStoreManager,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -4158,12 +4080,9 @@ pub struct IDiscordStoreManager {
     pub fetch_entitlements: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordStoreManager,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -4195,12 +4114,9 @@ pub struct IDiscordStoreManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordStoreManager,
             sku_id: DiscordSnowflake,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -4335,7 +4251,7 @@ fn bindgen_test_layout_IDiscordStoreManager() {
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordVoiceEvents {
     pub on_settings_update:
-        ::std::option::Option<unsafe extern "C" fn(event_data: *mut ::std::os::raw::c_void)>,
+        ::std::option::Option<unsafe extern "C" fn(event_data: *mut ctypes::c_void)>,
 }
 #[test]
 fn bindgen_test_layout_IDiscordVoiceEvents() {
@@ -4375,12 +4291,9 @@ pub struct IDiscordVoiceManager {
         unsafe extern "C" fn(
             manager: *mut IDiscordVoiceManager,
             input_mode: DiscordInputMode,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -4563,7 +4476,7 @@ fn bindgen_test_layout_IDiscordVoiceManager() {
 pub struct IDiscordAchievementEvents {
     pub on_user_achievement_update: ::std::option::Option<
         unsafe extern "C" fn(
-            event_data: *mut ::std::os::raw::c_void,
+            event_data: *mut ctypes::c_void,
             user_achievement: *mut DiscordUserAchievement,
         ),
     >,
@@ -4602,24 +4515,18 @@ pub struct IDiscordAchievementManager {
             manager: *mut IDiscordAchievementManager,
             achievement_id: DiscordSnowflake,
             percent_complete: u8,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
     pub fetch_user_achievements: ::std::option::Option<
         unsafe extern "C" fn(
             manager: *mut IDiscordAchievementManager,
-            callback_data: *mut ::std::os::raw::c_void,
+            callback_data: *mut ctypes::c_void,
             callback: ::std::option::Option<
-                unsafe extern "C" fn(
-                    callback_data: *mut ::std::os::raw::c_void,
-                    result: EDiscordResult,
-                ),
+                unsafe extern "C" fn(callback_data: *mut ctypes::c_void, result: EDiscordResult),
             >,
         ),
     >,
@@ -4719,7 +4626,7 @@ fn bindgen_test_layout_IDiscordAchievementManager() {
         )
     );
 }
-pub type IDiscordCoreEvents = *mut ::std::os::raw::c_void;
+pub type IDiscordCoreEvents = *mut ctypes::c_void;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct IDiscordCore {
@@ -4730,12 +4637,12 @@ pub struct IDiscordCore {
         unsafe extern "C" fn(
             core: *mut IDiscordCore,
             min_level: EDiscordLogLevel,
-            hook_data: *mut ::std::os::raw::c_void,
+            hook_data: *mut ctypes::c_void,
             hook: ::std::option::Option<
                 unsafe extern "C" fn(
-                    hook_data: *mut ::std::os::raw::c_void,
+                    hook_data: *mut ctypes::c_void,
                     level: EDiscordLogLevel,
-                    message: *const ::std::os::raw::c_char,
+                    message: *const ctypes::c_char,
                 ),
             >,
         ),
@@ -4960,7 +4867,7 @@ pub struct DiscordCreateParams {
     pub client_id: DiscordClientId,
     pub flags: u64,
     pub events: *mut IDiscordCoreEvents,
-    pub event_data: *mut ::std::os::raw::c_void,
+    pub event_data: *mut ctypes::c_void,
     pub application_events: *mut IDiscordApplicationEvents,
     pub application_version: DiscordVersion,
     pub user_events: *mut IDiscordUserEvents,

@@ -62,7 +62,7 @@ where
 
     pub(crate) fn c_fn(
         &self,
-    ) -> Option<unsafe extern "C" fn(*mut c_void, sys::EDiscordResult, *const i8)> {
+    ) -> Option<unsafe extern "C" fn(*mut c_void, sys::EDiscordResult, *const u8)> {
         Some(callbacks::result_string)
     }
 }

@@ -41,7 +41,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_network_manager()
-                .open_peer(peer_id, route.as_ptr() as *const _))
+                .open_peer(peer_id, route.as_ptr()))
         }
         .to_result()
     }
@@ -63,7 +63,7 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_network_manager()
-                .update_peer(peer_id, route.as_ptr() as *const _))
+                .update_peer(peer_id, route.as_ptr()))
         }
         .to_result()
     }

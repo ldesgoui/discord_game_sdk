@@ -18,7 +18,7 @@ no-default-features = true
 bitflags = "1.2.1"
 crossbeam-channel = "0.4.0"
 derive_more = "0.99.2"
-discord_game_sdk_sys = { path = "./sys", version = "0.5.0-alpha.1" }
+discord_game_sdk_sys = { features = ["force-char-as-u8"], path = "./sys", version = "0.5.0-alpha.1" }
 err-derive = "0.2.1"
 log = "0.4"
 memchr = "2.2.1"

@@ -1,21 +1,21 @@
-pub(crate) fn from_charbuf(charbuf: &[i8]) -> &[u8] {
-    unsafe { &*(charbuf as *const [i8] as *const [u8]) }
+use std::os::raw::c_uchar;
+
+pub(crate) fn charbuf_to_str(charbuf: &[c_uchar]) -> &str {
+    let bytes = &charbuf[..charbuf_len(charbuf)];
+
+    if cfg!(debug_assertions) {
+        std::str::from_utf8(bytes).unwrap()
+    } else {
+        unsafe { std::str::from_utf8_unchecked(bytes) }
+    }
 }
 
-pub(crate) fn to_charbuf(bytes: &[u8]) -> &[i8] {
-    unsafe { &*(bytes as *const [u8] as *const [i8]) }
+pub(crate) fn charbuf_len(charbuf: &[c_uchar]) -> usize {
+    memchr::memchr(0, charbuf).unwrap_or_else(|| charbuf.len())
 }
 
-pub(crate) fn charbuf_to_str(charbuf: &[i8]) -> &str {
-    unsafe { std::str::from_utf8_unchecked(from_charbuf(&charbuf[..charbuf_len(charbuf)])) }
-}
-
-pub(crate) fn charbuf_len(charbuf: &[i8]) -> usize {
-    memchr::memchr(0, from_charbuf(charbuf)).unwrap_or_else(|| charbuf.len())
-}
-
-pub(crate) fn write_charbuf(charbuf: &mut [i8], value: &str) {
-    let bytes = to_charbuf(value.as_bytes());
+pub(crate) fn write_charbuf(charbuf: &mut [c_uchar], value: &str) {
+    let bytes = value.as_bytes();
     let len = bytes.len();
 
     debug_assert!(len <= charbuf.len());
@@ -24,5 +24,15 @@ pub(crate) fn write_charbuf(charbuf: &mut [i8], value: &str) {
 
     if len < charbuf.len() {
         charbuf[len] = 0;
+    }
+}
+
+pub(crate) fn charptr_to_str<'a>(ptr: *const c_uchar) -> &'a str {
+    let bytes = unsafe { std::ffi::CStr::from_ptr(ptr as *const i8) }.to_bytes();
+
+    if cfg!(debug_assertions) {
+        std::str::from_utf8(bytes).unwrap()
+    } else {
+        unsafe { std::str::from_utf8_unchecked(bytes) }
     }
 }

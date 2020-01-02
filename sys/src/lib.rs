@@ -34,6 +34,9 @@
 //!
 //! # Features:
 //!
+//! - `force-char-as-u8`:
+//!     Forces C chars to be unsigned.
+//!
 //! - `link`: (enabled by default)
 //!     Provides the linker with copy of the dynamic library.
 //!     This allows for `cargo run` to run flawlessly on Linux.
@@ -70,6 +73,13 @@
 
 #[cfg_attr(feature = "link", link(name = "discord_game_sdk"))]
 extern "C" {}
+
+pub(crate) mod ctypes {
+    pub(crate) use std::os::raw::*;
+
+    #[cfg(feature = "force-char-as-u8")]
+    pub(crate) use std::os::raw::c_uchar as c_char;
+}
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 

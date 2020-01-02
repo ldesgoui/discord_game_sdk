@@ -48,7 +48,7 @@ impl<'a> Discord<'a> {
     // TODO: example using image crate
     pub fn image(&self, handle: ImageHandle) -> Result<Image> {
         let (width, height) = self.image_dimensions(handle)?;
-        let mut data: Vec<u8> = vec![0; (4 * width * height) as usize];
+        let mut data: Vec<u8> = vec![0; 4 * width as usize * height as usize];
 
         unsafe {
             ffi!(self.get_image_manager().get_data(

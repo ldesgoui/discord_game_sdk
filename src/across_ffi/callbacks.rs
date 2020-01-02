@@ -1,6 +1,6 @@
-use crate::{panic_messages::NOT_UTF8, sys, to_result::ToResult, Relationship};
+use crate::{sys, to_result::ToResult, utils::charptr_to_str, Relationship};
 use crossbeam_channel::Sender;
-use std::ffi::{c_void, CStr};
+use std::ffi::c_void;
 
 unsafe fn send<T>(ptr: *mut c_void, msg: T) {
     let res = Box::from_raw(ptr as *mut Sender<T>).try_send(msg);
@@ -17,14 +17,13 @@ pub(crate) unsafe extern "C" fn result(ptr: *mut c_void, res: sys::EDiscordResul
 pub(crate) unsafe extern "C" fn result_string(
     ptr: *mut c_void,
     res: sys::EDiscordResult,
-    cstr: *const i8,
+    cstr: *const u8,
 ) {
     prevent_unwind!();
 
     send(
         ptr,
-        res.to_result()
-            .map(|()| CStr::from_ptr(cstr).to_str().expect(NOT_UTF8).to_string()),
+        res.to_result().map(|()| charptr_to_str(cstr).to_string()),
     );
 }
 
@@ -86,7 +85,7 @@ where
 pub(crate) unsafe extern "C" fn log(
     _: *mut c_void,
     level: sys::EDiscordLogLevel,
-    message: *const i8,
+    message: *const u8,
 ) {
     use log::Level::*;
 
@@ -100,7 +99,7 @@ pub(crate) unsafe extern "C" fn log(
         _ => Debug,
     };
 
-    let message = CStr::from_ptr(message).to_str().expect(NOT_UTF8);
+    let message = charptr_to_str(message);
 
     log::log!(level, "SDK: {}", message);
 }

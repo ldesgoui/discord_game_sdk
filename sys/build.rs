@@ -61,6 +61,7 @@ fn main() {
 
     bindgen::builder()
         .header(sdk_path.join("c/discord_game_sdk.h").to_str().unwrap())
+        .ctypes_prefix("ctypes")
         .derive_copy(true)
         .derive_debug(true)
         .derive_default(true)

@@ -1,6 +1,6 @@
-use crate::{channels, panic_messages::NOT_UTF8};
+use crate::{channels, utils::charptr_to_str};
 use crossbeam_channel::Sender;
-use std::ffi::{c_void, CStr};
+use std::ffi::c_void;
 
 unsafe fn send<Event>(senders: *const c_void, ev: impl Into<Event>)
 where
@@ -45,7 +45,7 @@ where
     send(senders, *sys1);
 }
 
-pub(crate) unsafe extern "C" fn string<Event>(senders: *mut c_void, string: *const i8)
+pub(crate) unsafe extern "C" fn string<Event>(senders: *mut c_void, string: *const u8)
 where
     channels::Senders: AsRef<Sender<Event>>,
     Event: From<String>,
@@ -53,7 +53,7 @@ where
     prevent_unwind!();
     debug_assert!(!string.is_null());
 
-    let string = CStr::from_ptr(string).to_str().expect(NOT_UTF8).to_string();
+    let string = charptr_to_str(string).to_string();
 
     send(senders, string);
 }
