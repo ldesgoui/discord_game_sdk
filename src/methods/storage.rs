@@ -15,6 +15,8 @@ impl<'a> Discord<'a> {
     /// The file is mapped by key-value pair, and this function will read data that exists
     /// for the given key name.
     ///
+    /// Writes the first 4_294_967_295 bytes.
+    ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#read>
@@ -37,7 +39,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_storage_manager().read(
                 filename.as_ptr() as *const _,
                 buffer.as_mut_ptr(),
-                std::cmp::min(buffer.len(), u32::max_value() as usize) as u32,
+                buffer.len() as u32,
                 &mut read
             ))
         }
@@ -92,12 +94,14 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .read_async_partial(filename.as_ptr() as *const _, offset, length)
+                .read_async_partial(filename.as_ptr() as *const i8, offset, length)
                 .and_then(ResultBytesCallback::new(callback)))
         }
     }
 
     /// Writes data synchronously to disk, under the given key name.
+    ///
+    /// Writes the first 4_294_967_295 bytes.
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
@@ -127,6 +131,8 @@ impl<'a> Discord<'a> {
     }
 
     /// Writes data asynchronously to disk under the given key.
+    ///
+    /// Writes the first 4_294_967_295 bytes.
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
@@ -243,12 +249,7 @@ impl<'a> Discord<'a> {
     pub fn file_stat_at(&self, index: i32) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
-        unsafe {
-            ffi!(self
-                .get_storage_manager()
-                .stat_at(index as i32, &mut stat.0))
-        }
-        .to_result()?;
+        unsafe { ffi!(self.get_storage_manager().stat_at(index, &mut stat.0)) }.to_result()?;
 
         Ok(stat)
     }
