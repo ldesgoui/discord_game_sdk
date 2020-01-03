@@ -626,7 +626,7 @@ impl<'a> Discord<'a> {
     /// Flushes the network. Call this when you're done sending messages.
     /// This should appear near the end of your game loop.
     ///
-    /// https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork>
     pub fn flush_lobby_network(&self) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().flush_network()) }.to_result()
     }
