@@ -23,7 +23,7 @@ impl UserAchievement {
         self.0.percent_complete
     }
 
-    /// Date at which the user completed the achievement
+    /// ISO 8601 formatted date at which the user completed the achievement
     pub fn unlocked_at(&self) -> &str {
         charbuf_to_str(&self.0.unlocked_at)
     }
