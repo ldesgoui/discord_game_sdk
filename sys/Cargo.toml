@@ -9,13 +9,13 @@ repository = "https://github.com/ldesgoui/discord_game_sdk"
 keywords = ["discord", "sdk", "gamedev"]
 categories = ["external-ffi-bindings", "game-engines"]
 readme = "README.md"
+build = "build.rs"
 
 [package.metadata.docs.rs]
 features = ["doc"]
 
 [features]
 doc = [] # DO NOT RELY ON THIS
-force-char-as-u8 = []
 link = []
 
 [build-dependencies]

@@ -22,7 +22,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! discord_game_sdk_sys = "0.5.0-alpha.1"
+//! discord_game_sdk_sys = "0.5.0-alpha.2"
 //! ```
 //!
 //! Set the following environment variable:
@@ -34,11 +34,8 @@
 //!
 //! # Features:
 //!
-//! - `force-char-as-u8`:
-//!     Forces C chars to be unsigned.
-//!
-//! - `link`: (enabled by default)
-//!     Provides the linker with copy of the dynamic library.
+//! - `link`: (enabled by default)  
+//!     Provides the linker with a copy of the dynamic library.  
 //!     This allows for `cargo run` to run flawlessly on Linux.
 //!
 //!
@@ -46,19 +43,22 @@
 //!
 //! You *MUST* acquaint yourself with and agree to the [official terms of the Discord Game SDK].
 //!
-//! The code of the Rust crates `discord_game_sdk` and `discord_game_sdk_sys` are licensed under
-//! either of:
+//! The code of the Rust crates `discord_game_sdk` and `discord_game_sdk_sys`
+//! are licensed at your option under either of:
 //!
 //! * [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 //! * [MIT License](https://opensource.org/licenses/MIT)
 //!
-//! at your option.
+//! Unless you explicitly state otherwise, any contribution intentionally
+//! submitted for inclusion in the work by you, as defined in the Apache-2.0
+//! license, shall be dual licensed as above, without any additional terms or
+//! conditions.
 //!
 //!
 //! # Communication and Support
 //!
-//! I can be reached via Discord `twiikuu#0047`, on the [Official Game SDK Server] (nicked as
-//! `ldesgoui (rust wrapper)`), as well as [twitter] and [email].
+//! I can be reached via Discord `twiikuu#0047`, on the [Official Game SDK Server]
+//! (nicked as `ldesgoui (rust wrapper)`), as well as [twitter] and [email].
 //! I reserve myself no obligation to support you, although I'm generally nice.
 //!
 //!
@@ -74,22 +74,19 @@
     non_snake_case,
     non_upper_case_globals
 )]
-#![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys")]
+#![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys/0.5.0-alpha.2")]
+
+pub(crate) mod ctypes {
+    pub(crate) use std::os::raw::{c_uchar as c_char, *};
+}
 
 #[cfg_attr(feature = "link", link(name = "discord_game_sdk"))]
 extern "C" {}
 
-pub(crate) mod ctypes {
-    pub(crate) use std::os::raw::*;
-
-    #[cfg(feature = "force-char-as-u8")]
-    pub(crate) use std::os::raw::c_uchar as c_char;
-}
-
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
-// bindgen knows how to automatically implement PartialEq when it can't be derived but it won't
-// automatically implement Eq
+// bindgen knows how to automatically implement PartialEq when it can't be derived
+// but it won't automatically implement Eq, so we do
 impl Eq for DiscordActivity {}
 impl Eq for DiscordActivityAssets {}
 impl Eq for DiscordActivityParty {}
