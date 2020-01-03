@@ -5,7 +5,7 @@ use crate::{
     utils::charbuf_to_str,
     Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Reliability, Result, SearchQuery,
 };
-use std::{borrow::Cow, mem::size_of};
+use std::{borrow::Cow, convert::TryFrom, mem::size_of};
 
 /// # Lobbies
 ///
@@ -485,11 +485,12 @@ impl<'a> Discord<'a> {
     pub fn send_lobby_message(
         &self,
         lobby_id: i64,
-        buf: impl AsRef<[u8]>,
+        buffer: impl AsRef<[u8]>,
         callback: impl 'a + FnMut(&Discord, Result<()>),
     ) {
-        let buf = buf.as_ref();
-        assert!(buf.len() <= u32::max_value() as usize);
+        let buffer = buffer.as_ref();
+
+        debug_assert!(u32::try_from(buffer.len()).is_ok());
 
         unsafe {
             ffi!(self
@@ -497,8 +498,8 @@ impl<'a> Discord<'a> {
                 .send_lobby_message(
                     lobby_id,
                     // XXX: *mut should be *const
-                    buf.as_ptr() as *mut _,
-                    buf.len() as u32
+                    buffer.as_ptr() as *mut _,
+                    buffer.len() as u32
                 )
                 .and_then(ResultCallback::new(callback)))
         }
@@ -625,7 +626,7 @@ impl<'a> Discord<'a> {
     /// Flushes the network. Call this when you're done sending messages.
     /// This should appear near the end of your game loop.
     ///
-    /// https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork>
     pub fn flush_lobby_network(&self) -> Result<()> {
         unsafe { ffi!(self.get_lobby_manager().flush_network()) }.to_result()
     }
@@ -657,9 +658,9 @@ impl<'a> Discord<'a> {
         lobby_id: i64,
         user_id: i64,
         channel_id: u8,
-        buf: &[u8],
+        buffer: &[u8],
     ) -> Result<()> {
-        assert!(buf.len() <= u32::max_value() as usize);
+        debug_assert!(u32::try_from(buffer.len()).is_ok());
 
         unsafe {
             ffi!(self.get_lobby_manager().send_network_message(
@@ -667,8 +668,8 @@ impl<'a> Discord<'a> {
                 user_id,
                 channel_id,
                 // XXX: *mut should be *const
-                buf.as_ptr() as *mut _,
-                buf.len() as u32
+                buffer.as_ptr() as *mut _,
+                buffer.len() as u32
             ))
         }
         .to_result()

@@ -37,7 +37,7 @@ impl InputMode {
         self
     }
 
-    /// The combination of keys to transmit voice when kind is PushToTalk
+    /// The combination of keys to transmit voice when `kind` is `PushToTalk`
     ///
     /// Only the first 256 bytes will be written.
     ///

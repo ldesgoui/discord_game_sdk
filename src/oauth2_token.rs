@@ -14,7 +14,7 @@ impl OAuth2Token {
         charbuf_to_str(&self.0.access_token)
     }
 
-    /// The list of OAuth2 scopes
+    /// The list of `OAuth2` scopes
     pub fn scopes<'a>(
         &'a self,
     ) -> impl Iterator<Item = &'a str> + DoubleEndedIterator + FusedIterator + 'a {

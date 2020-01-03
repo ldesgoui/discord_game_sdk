@@ -2,6 +2,7 @@ use crate::{
     callbacks::ResultFromCallback, sys, to_result::ToResult, Discord, FetchKind, Image,
     ImageHandle, Result,
 };
+use std::convert::TryFrom;
 
 /// # Images
 ///
@@ -49,6 +50,8 @@ impl<'a> Discord<'a> {
     pub fn image(&self, handle: ImageHandle) -> Result<Image> {
         let (width, height) = self.image_dimensions(handle)?;
         let mut data: Vec<u8> = vec![0; 4 * width as usize * height as usize];
+
+        debug_assert!(u32::try_from(data.len()).is_ok());
 
         unsafe {
             ffi!(self.get_image_manager().get_data(

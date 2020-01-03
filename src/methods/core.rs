@@ -1,7 +1,7 @@
 use crate::{
     across_ffi::*, channels, event, sys, to_result::ToResult, CreateFlags, Discord, Result,
 };
-use std::ffi::c_void;
+use std::{convert::TryFrom, ffi::c_void};
 
 /// # Core
 ///
@@ -129,7 +129,7 @@ fn create_params(
 
     sys::DiscordCreateParams {
         client_id,
-        flags: flags as u64,
+        flags: u64::try_from(flags).unwrap(),
 
         // XXX: *mut should be *const
         events: std::ptr::null_mut(),

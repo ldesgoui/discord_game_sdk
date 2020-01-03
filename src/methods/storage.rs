@@ -5,7 +5,7 @@ use crate::{
     utils::charbuf_to_str,
     Discord, FileStat, Result,
 };
-use std::{borrow::Cow, mem::size_of};
+use std::{borrow::Cow, convert::TryFrom, mem::size_of};
 
 /// # Storage
 ///
@@ -15,7 +15,7 @@ impl<'a> Discord<'a> {
     /// The file is mapped by key-value pair, and this function will read data that exists
     /// for the given key name.
     ///
-    /// Writes the first 4_294_967_295 bytes.
+    /// `buffer` should not exceed 4 294 967 295 bytes.
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
@@ -35,7 +35,7 @@ impl<'a> Discord<'a> {
 
         let buffer = buffer.as_mut();
 
-        debug_assert!(buffer.len() <= u32::max_value() as usize);
+        debug_assert!(u32::try_from(buffer.len()).is_ok());
 
         unsafe {
             ffi!(self.get_storage_manager().read(
@@ -103,7 +103,7 @@ impl<'a> Discord<'a> {
 
     /// Writes data synchronously to disk, under the given key name.
     ///
-    /// Writes the first 4_294_967_295 bytes.
+    /// `buffer` should not exceed 4 294 967 295 bytes.
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
@@ -121,7 +121,7 @@ impl<'a> Discord<'a> {
 
         let buffer = buffer.as_ref();
 
-        debug_assert!(buffer.len() <= u32::max_value() as usize);
+        debug_assert!(u32::try_from(buffer.len()).is_ok());
 
         unsafe {
             ffi!(self.get_storage_manager().write(
@@ -136,7 +136,7 @@ impl<'a> Discord<'a> {
 
     /// Writes data asynchronously to disk under the given key.
     ///
-    /// Writes the first 4_294_967_295 bytes.
+    /// `buffer` should not exceed 4 294 967 295 bytes.
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
@@ -155,7 +155,7 @@ impl<'a> Discord<'a> {
 
         let buffer = buffer.as_ref();
 
-        debug_assert!(buffer.len() <= u32::max_value() as usize);
+        debug_assert!(u32::try_from(buffer.len()).is_ok());
 
         unsafe {
             ffi!(self

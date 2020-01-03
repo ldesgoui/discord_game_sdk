@@ -10,7 +10,7 @@ impl<'a> Discord<'a> {
     /// Get the current user.
     /// More information can be found through the HTTP API.
     ///
-    /// Will return Err(_) until event::user::CurrentUserUpdate
+    /// Will return `Err(_)` until [`event::user::CurrentUserUpdate`](struct.CurrentUserUpdate.html).
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/users#getcurrentuser>
     pub fn current_user(&self) -> Result<User> {

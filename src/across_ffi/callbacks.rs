@@ -95,7 +95,6 @@ pub(crate) unsafe extern "C" fn log(
         sys::DiscordLogLevel_Error => Error,
         sys::DiscordLogLevel_Warn => Warn,
         sys::DiscordLogLevel_Info => Info,
-        sys::DiscordLogLevel_Debug => Debug,
         _ => Debug,
     };
 

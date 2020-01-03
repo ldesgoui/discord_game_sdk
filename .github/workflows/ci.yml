@@ -3,20 +3,18 @@ name: Continuous Integration
 on: [push, pull_request]
 
 jobs:
-  tests:
-    name: Tests
+  full:
+    name: Build, Test, Check formatting, Check lints
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        os: 
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
         rust:
+          - nightly
           - stable
+          - 1.37.0
 
     steps:
       - name: Checkout
@@ -29,12 +27,23 @@ jobs:
           curl -sO https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
           unzip ./discord_game_sdk.zip
 
-      - name: Install LLVM and set LIBCLANG_PATH
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          choco install llvm -y
-          refreshenv
-          echo "::set-env name=LIBCLANG_PATH::C:\Program Files\LLVM\bin"
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-registry-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-index-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-build-target-${{ hashFiles('**/Cargo.toml') }}
 
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
@@ -58,13 +67,6 @@ jobs:
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
-  lints:
-    name: Lints
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-
       - name: Check formatting
         uses: actions-rs/cargo@v1
         with:
@@ -78,5 +80,90 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+        env:
+          DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
+
+  partial:
+    name: Build, Test
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          # - macos-latest
+          - windows-latest
+        rust:
+          - stable
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Download Discord Game SDK
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -sO https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
+          unzip ./discord_game_sdk.zip
+
+      - name: Cache libclang
+        id: cache-libclang
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v1
+        with:
+          path: 'C:\just-libclang'
+          key: windows-libclang
+
+      - name: Install LLVM
+        if: startsWith(matrix.os, 'windows') && steps.cache-libclang.outputs.cache-hit != 'true'
+        run: |
+          choco install llvm -r -y
+          mkdir 'C:\just-libclang'
+          cp 'C:\Program Files\LLVM\bin\libclang.dll' 'C:\just-libclang'
+
+      - name: Set LIBCLANG_PATH
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          echo '::set-env name=LIBCLANG_PATH::C:\just-libclang'
+
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-registry-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-index-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-build-target-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt, clippy
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+        env:
+          DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
+
+      - name: Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}

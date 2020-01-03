@@ -1,5 +1,5 @@
 use crate::{event, to_result::ToResult, Discord, Reliability, Result};
-use std::borrow::Cow;
+use std::{borrow::Cow, convert::TryFrom};
 
 /// # Networking
 ///
@@ -97,18 +97,18 @@ impl<'a> Discord<'a> {
     /// Sends data to a given peer ID through the given channel.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#sendmessage>
-    pub fn send_message(&self, peer_id: u64, chan_id: u8, buf: impl AsRef<[u8]>) -> Result<()> {
-        let buf = buf.as_ref();
+    pub fn send_message(&self, peer_id: u64, chan_id: u8, buffer: impl AsRef<[u8]>) -> Result<()> {
+        let buffer = buffer.as_ref();
 
-        assert!(buf.len() <= u32::max_value() as usize);
+        debug_assert!(u32::try_from(buffer.len()).is_ok());
 
         unsafe {
             ffi!(self.get_network_manager().send_message(
                 peer_id,
                 chan_id,
                 // XXX: *mut should be *const
-                buf.as_ptr() as *mut _,
-                buf.len() as u32
+                buffer.as_ptr() as *mut _,
+                buffer.len() as u32
             ))
         }
         .to_result()
