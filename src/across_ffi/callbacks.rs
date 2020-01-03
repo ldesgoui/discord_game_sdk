@@ -73,13 +73,13 @@ pub(crate) unsafe extern "C" fn filter_relationship<F>(
     relationship_ptr: *mut sys::DiscordRelationship,
 ) -> bool
 where
-    F: FnMut(Relationship) -> bool,
+    F: FnMut(&Relationship) -> bool,
 {
     prevent_unwind!();
 
     let callback: *mut F = callback_ptr as *mut F;
 
-    (*callback)((*relationship_ptr).into())
+    (*callback)(&*(relationship_ptr as *const Relationship))
 }
 
 pub(crate) unsafe extern "C" fn log(

@@ -26,7 +26,7 @@ impl<'a> Discord<'a> {
     /// must have fired first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#filter>  
-    pub fn filter_relationships<F: FnMut(Relationship) -> bool>(&self, mut filter: F) {
+    pub fn filter_relationships<F: FnMut(&Relationship) -> bool>(&self, mut filter: F) {
         unsafe {
             ffi!(self.get_relationship_manager().filter(
                 &mut filter as *mut _ as *mut std::ffi::c_void,
