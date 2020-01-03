@@ -62,6 +62,9 @@ jobs:
     name: Lints
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
       - name: Check formatting
         uses: actions-rs/cargo@v1
         with:
