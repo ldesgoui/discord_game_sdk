@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   full:
-    name: Build, Test, Check formating, Check lints
+    name: Build, Test, Check formatting, Check lints
 
     runs-on: ubuntu-latest
 
