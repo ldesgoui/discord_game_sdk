@@ -141,7 +141,7 @@ fn main() {
             .unwrap();
 
             println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
-            println!("cargo:rustc-link-lib=dylib=discord_game_sdk::discord_game_sdk.dll");
+            println!("cargo:rustc-link-lib=dylib=discord_game_sdk:discord_game_sdk");
         }
 
         _ => panic!(INCOMPATIBLE_PLATFORM),

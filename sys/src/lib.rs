@@ -68,7 +68,12 @@
 //! [twitter]: https://twitter.com/ldesgoui
 //! [email]: mailto:ldesgoui@ldesgoui.xyz
 
-#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
+#![allow(
+    clippy::all,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals
+)]
 #![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys")]
 
 #[cfg_attr(feature = "link", link(name = "discord_game_sdk"))]

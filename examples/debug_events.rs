@@ -3,7 +3,10 @@ use discord_game_sdk::*;
 fn main() {
     pretty_env_logger::init();
 
-    let client_id = env!("DISCORD_APPLICATION_ID").parse().unwrap();
+    let client_id = std::env::var("DISCORD_APPLICATION_ID")
+        .unwrap()
+        .parse()
+        .unwrap();
     let mut gsdk = Discord::new(client_id).unwrap();
 
     gsdk.update_activity(
