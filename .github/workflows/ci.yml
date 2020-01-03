@@ -13,6 +13,8 @@ jobs:
       matrix:
         rust:
           - stable
+          - 1.38.0
+          - 1.35.0
 
     steps:
       - name: Checkout
@@ -106,24 +108,25 @@ jobs:
           curl -sO https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
           unzip ./discord_game_sdk.zip
 
-      - name: Cache LLVM installation
-        id: cache-llvm
+      - name: Cache libclang
+        id: cache-libclang
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v1
         with:
-          path: 'C:\Program Files\LLVM\bin\libclang.dll'
+          path: 'C:\just-libclang'
           key: chocolatey-llvm
 
       - name: Install LLVM
-        if: startsWith(matrix.os, 'windows') && steps.cache-llvm.outputs.cache-hit != 'true'
+        if: startsWith(matrix.os, 'windows') && steps.cache-libclang.outputs.cache-hit != 'true'
         run: |
-          choco install llvm -y
-          refreshenv
+          choco install llvm -r -y
+          mkdir 'C:\just-libclang'
+          cp 'C:\Program Files\LLVM\bin\libclang.dll' 'C:\just-libclang'
 
       - name: Set LIBCLANG_PATH
         if: startsWith(matrix.os, 'windows')
         run: |
-          echo '::set-env name=LIBCLANG_PATH::C:\Program Files\LLVM\bin'
+          echo '::set-env name=LIBCLANG_PATH::C:\just-libclang'
 
       - name: Cache cargo registry
         uses: actions/cache@v1
