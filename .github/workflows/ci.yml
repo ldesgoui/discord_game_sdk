@@ -114,7 +114,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: 'C:\just-libclang'
-          key: chocolatey-llvm
+          key: windows-libclang
 
       - name: Install LLVM
         if: startsWith(matrix.os, 'windows') && steps.cache-libclang.outputs.cache-hit != 'true'
