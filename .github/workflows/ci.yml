@@ -111,7 +111,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v1
         with:
-          path: 'C:\Program Files\LLVM\bin'
+          path: 'C:\Program Files\LLVM\bin\libclang.dll'
           key: chocolatey-llvm
 
       - name: Install LLVM
