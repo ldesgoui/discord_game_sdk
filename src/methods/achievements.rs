@@ -66,7 +66,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_achievements`](#method.fetch_achievements) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
-    pub fn user_achievement_count(&self) -> i32 {
+    pub fn user_achievement_count(&self) -> usize {
         let mut count = 0;
 
         unsafe {
@@ -75,7 +75,7 @@ impl<'a> Discord<'a> {
                 .count_user_achievements(&mut count))
         }
 
-        count
+        count as usize
     }
 
     /// Gets a user achievement by index.
@@ -83,13 +83,13 @@ impl<'a> Discord<'a> {
     /// [`fetch_achievements`](#method.fetch_achievements) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
-    pub fn user_achievement_at(&self, index: i32) -> Result<UserAchievement> {
+    pub fn user_achievement_at(&self, index: usize) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
         unsafe {
             ffi!(self
                 .get_achievement_manager()
-                .get_user_achievement_at(index, &mut achievement.0))
+                .get_user_achievement_at(index as i32, &mut achievement.0))
         }
         .to_result()?;
 

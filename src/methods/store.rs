@@ -43,12 +43,12 @@ impl<'a> Discord<'a> {
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
-    pub fn sku_count(&self) -> i32 {
+    pub fn sku_count(&self) -> usize {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
 
-        count
+        count as usize
     }
 
     /// Returns the SKU at a given index.
@@ -56,7 +56,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
-    pub fn sku_at(&self, index: i32) -> Result<Sku> {
+    pub fn sku_at(&self, index: usize) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
         unsafe {
@@ -119,12 +119,12 @@ impl<'a> Discord<'a> {
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
-    pub fn entitlement_count(&self) -> i32 {
+    pub fn entitlement_count(&self) -> usize {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }
 
-        count
+        count as usize
     }
 
     /// Returns Entitlement at a given index.
@@ -132,7 +132,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
-    pub fn entitlement_at(&self, index: i32) -> Result<Entitlement> {
+    pub fn entitlement_at(&self, index: usize) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
         unsafe {

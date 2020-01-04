@@ -41,12 +41,12 @@ impl<'a> Discord<'a> {
     /// must have fired first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
-    pub fn relationship_count(&self) -> Result<i32> {
+    pub fn relationship_count(&self) -> Result<usize> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_relationship_manager().count(&mut count)) }.to_result()?;
 
-        Ok(count)
+        Ok(count as usize)
     }
 
     /// Returns the relationship matching the filter at a given index.
@@ -55,7 +55,7 @@ impl<'a> Discord<'a> {
     /// must have fired first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
-    pub fn relationship_at(&self, index: i32) -> Result<Relationship> {
+    pub fn relationship_at(&self, index: usize) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
         unsafe {

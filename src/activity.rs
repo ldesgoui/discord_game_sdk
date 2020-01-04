@@ -83,13 +83,15 @@ impl Activity {
     }
 
     /// The number of players currently in the party
-    pub fn party_amount(&self) -> i32 {
-        self.0.party.size.current_size
+    pub fn party_amount(&self) -> u32 {
+        // XXX: i32 should be u32
+        self.0.party.size.current_size as u32
     }
 
     /// The maximum capacity of the party
-    pub fn party_capacity(&self) -> i32 {
-        self.0.party.size.max_size
+    pub fn party_capacity(&self) -> u32 {
+        // XXX: i32 should be u32
+        self.0.party.size.max_size as u32
     }
 
     /// Whether this activity is an instanced context, like a match
@@ -181,14 +183,16 @@ impl Activity {
     }
 
     /// The number of players currently in the party
-    pub fn with_party_amount(&'_ mut self, value: i32) -> &'_ mut Self {
-        self.0.party.size.current_size = value;
+    pub fn with_party_amount(&'_ mut self, value: u32) -> &'_ mut Self {
+        // XXX: i32 should be u32
+        self.0.party.size.current_size = value as i32;
         self
     }
 
     /// The maximum capacity of the party
-    pub fn with_party_capacity(&'_ mut self, value: i32) -> &'_ mut Self {
-        self.0.party.size.max_size = value;
+    pub fn with_party_capacity(&'_ mut self, value: u32) -> &'_ mut Self {
+        // XXX: i32 should be u32
+        self.0.party.size.max_size = value as i32;
         self
     }
 

@@ -5,7 +5,11 @@ use crate::{
     utils::charbuf_to_str,
     Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Reliability, Result, SearchQuery,
 };
-use std::{borrow::Cow, convert::TryFrom, mem::size_of};
+use std::{
+    borrow::Cow,
+    convert::{TryFrom, TryInto},
+    mem::size_of,
+};
 
 /// # Lobbies
 ///
@@ -228,7 +232,7 @@ impl<'a> Discord<'a> {
     /// Returns the number of metadata key-value pairs available for a given lobby.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount>  
-    pub fn lobby_metadata_count(&self, lobby_id: i64) -> Result<i32> {
+    pub fn lobby_metadata_count(&self, lobby_id: i64) -> Result<usize> {
         let mut count = 0;
 
         unsafe {
@@ -238,14 +242,14 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(count)
+        Ok(count as usize)
     }
 
     /// Returns metadata key-value pair at a certain index for a given lobby.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey>  
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue>
-    pub fn lobby_metadata_at(&self, lobby_id: i64, index: i32) -> Result<(String, String)> {
+    pub fn lobby_metadata_at(&self, lobby_id: i64, index: usize) -> Result<(String, String)> {
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
@@ -326,24 +330,26 @@ impl<'a> Discord<'a> {
     /// Returns the number of members connected to a lobby.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membercount>  
-    pub fn lobby_member_count(&self, lobby_id: i64) -> Result<i32> {
+    pub fn lobby_member_count(&self, lobby_id: i64) -> Result<usize> {
         let mut count = 0;
 
         unsafe { ffi!(self.get_lobby_manager().member_count(lobby_id, &mut count)) }.to_result()?;
 
-        Ok(count)
+        Ok(count.try_into().unwrap())
     }
 
     /// Returns the user ID of the lobby member at a certain index.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid>
-    pub fn lobby_member_id_at(&self, lobby_id: i64, index: i32) -> Result<i64> {
+    pub fn lobby_member_id_at(&self, lobby_id: i64, index: usize) -> Result<i64> {
         let mut user_id = 0;
 
         unsafe {
-            ffi!(self
-                .get_lobby_manager()
-                .get_member_user_id(lobby_id, index, &mut user_id))
+            ffi!(self.get_lobby_manager().get_member_user_id(
+                lobby_id,
+                index.try_into().unwrap(),
+                &mut user_id
+            ))
         }
         .to_result()?;
 
@@ -403,8 +409,8 @@ impl<'a> Discord<'a> {
     /// Returns the number of metadata key-value pairs for a given lobby member.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount>  
-    pub fn lobby_member_metadata_count(&self, lobby_id: i64, user_id: i64) -> Result<i32> {
-        let mut count: i32 = 0;
+    pub fn lobby_member_metadata_count(&self, lobby_id: i64, user_id: i64) -> Result<usize> {
+        let mut count = 0;
 
         unsafe {
             ffi!(self
@@ -413,7 +419,7 @@ impl<'a> Discord<'a> {
         }
         .to_result()?;
 
-        Ok(count)
+        Ok(count as usize)
     }
 
     /// Returns the metadata key-value pair at a certain index for a given lobby member.
@@ -424,7 +430,7 @@ impl<'a> Discord<'a> {
         &self,
         lobby_id: i64,
         user_id: i64,
-        index: i32,
+        index: usize,
     ) -> Result<(String, String)> {
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
@@ -541,12 +547,12 @@ impl<'a> Discord<'a> {
     /// [`lobby_search`](#method.lobby_search) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount>
-    pub fn lobby_count(&self) -> i32 {
+    pub fn lobby_count(&self) -> usize {
         let mut count = 0;
 
         unsafe { ffi!(self.get_lobby_manager().lobby_count(&mut count)) }
 
-        count
+        count as usize
     }
 
     /// Returns the lobby ID at a given index.
@@ -554,10 +560,15 @@ impl<'a> Discord<'a> {
     /// [`lobby_search`](#method.lobby_search) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid>
-    pub fn lobby_id_at(&self, index: i32) -> Result<i64> {
+    pub fn lobby_id_at(&self, index: usize) -> Result<i64> {
         let mut lobby_id = 0;
 
-        unsafe { ffi!(self.get_lobby_manager().get_lobby_id(index, &mut lobby_id)) }.to_result()?;
+        unsafe {
+            ffi!(self
+                .get_lobby_manager()
+                .get_lobby_id(index as i32, &mut lobby_id))
+        }
+        .to_result()?;
 
         Ok(lobby_id)
     }

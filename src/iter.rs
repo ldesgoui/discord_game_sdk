@@ -3,17 +3,17 @@ use crate::Discord;
 /// A reusable Iterator for the SDK's methods to acquire collections.
 pub struct GenericIter<'a: 'b, 'b, T> {
     discord: &'b Discord<'a>,
-    getter: Box<dyn FnMut(&Discord, i32) -> T>,
-    count: i32,
-    index: i32,
-    back_index: i32,
+    getter: Box<dyn FnMut(&Discord, usize) -> T>,
+    count: usize,
+    index: usize,
+    back_index: usize,
 }
 
 impl<'a: 'b, 'b, T> GenericIter<'a, 'b, T> {
     pub(crate) fn new(
         discord: &'b Discord<'a>,
-        getter: Box<dyn FnMut(&Discord, i32) -> T>,
-        count: i32,
+        getter: Box<dyn FnMut(&Discord, usize) -> T>,
+        count: usize,
     ) -> Self {
         Self {
             discord,

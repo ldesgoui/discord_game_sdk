@@ -14,12 +14,14 @@ impl FileStat {
     }
 
     /// The total size in bytes
-    pub fn size(&self) -> u64 {
-        self.0.size
+    pub fn size(&self) -> usize {
+        // XXX: u64 should be usize
+        self.0.size as usize
     }
 
     /// When the file was last modified, in UNIX Time
     pub fn last_modified(&self) -> i64 {
+        // XXX: u64 should be i64
         self.0.last_modified as i64
     }
 }

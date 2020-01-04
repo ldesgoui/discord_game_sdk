@@ -41,6 +41,7 @@ impl<'a> Discord<'a> {
             ffi!(self.get_storage_manager().read(
                 filename.as_ptr(),
                 buffer.as_mut_ptr(),
+                // u32 should be usize
                 buffer.len() as u32,
                 &mut read
             ))
@@ -83,8 +84,8 @@ impl<'a> Discord<'a> {
     pub fn read_file_async_partial<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
-        offset: u64,
-        length: u64,
+        offset: usize,
+        length: usize,
         callback: impl 'a + FnMut(&Discord, Result<Vec<u8>>),
     ) {
         let mut filename = filename.into();
@@ -96,7 +97,13 @@ impl<'a> Discord<'a> {
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .read_async_partial(filename.as_ptr(), offset, length)
+                .read_async_partial(
+                    filename.as_ptr(),
+                    // XXX: u64 should be usize
+                    offset as u64,
+                    // XXX: u64 should be usize
+                    length as u64
+                )
                 .and_then(ResultBytesCallback::new(callback)))
         }
     }
@@ -128,6 +135,7 @@ impl<'a> Discord<'a> {
                 filename.as_ptr(),
                 // XXX: *mut should be *const
                 buffer.as_ptr() as *mut _,
+                // XXX: u32 should be usize
                 buffer.len() as u32,
             ))
         }
@@ -164,6 +172,7 @@ impl<'a> Discord<'a> {
                     filename.as_ptr(),
                     // XXX: *mut should be *const
                     buffer.as_ptr() as *mut _,
+                    // XXX: u32 should be usize
                     buffer.len() as u32
                 )
                 .and_then(ResultCallback::new(callback)))
@@ -236,21 +245,29 @@ impl<'a> Discord<'a> {
     /// Returns the number of file stats.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
-    pub fn file_stat_count(&self) -> i32 {
+    pub fn file_stat_count(&self) -> usize {
         let mut count = 0;
 
         unsafe { ffi!(self.get_storage_manager().count(&mut count)) }
 
-        count
+        // XXX: i32 should be usize
+        count as usize
     }
 
     /// Returns the file stat at a given index.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
-    pub fn file_stat_at(&self, index: i32) -> Result<FileStat> {
+    pub fn file_stat_at(&self, index: usize) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
-        unsafe { ffi!(self.get_storage_manager().stat_at(index, &mut stat.0)) }.to_result()?;
+        unsafe {
+            ffi!(self.get_storage_manager().stat_at(
+                // XXX: i32 should be usize
+                index as i32,
+                &mut stat.0
+            ))
+        }
+        .to_result()?;
 
         Ok(stat)
     }
