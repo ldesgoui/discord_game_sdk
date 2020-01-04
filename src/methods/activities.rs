@@ -8,9 +8,10 @@ use std::borrow::Cow;
 ///
 /// Also known as Rich Presence.
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities>
+/// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/activities)
 impl<'a> Discord<'a> {
     /// Registers a command by which Discord can launch your game.
+    ///
     /// This might be a custom protocol, like `my-awesome-game://`, or a path to an executable.
     /// It also supports any launch parameters that may be needed, like `game.exe --full-screen`.
     ///
@@ -18,9 +19,11 @@ impl<'a> Discord<'a> {
     /// your game needs to be bundled for this command to work.
     /// That means it should be a .app.
     ///
-    /// A nul byte will be appended to `command` if necessary.
+    /// ## Performance
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#registercommand>
+    /// A nul byte will be appended to `command` if one is not present.
+    ///
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#registercommand)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -44,9 +47,10 @@ impl<'a> Discord<'a> {
     }
 
     /// Used if you are distributing this SDK on Steam.
-    /// Registers your game's Steam app id for the protocol `steam://run-game-id/<id>`.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#registersteam>
+    /// Registers your game's Steam app ID for the protocol `steam://run-game-id/<id>`.
+    ///
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#registersteam)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -59,20 +63,18 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn register_steam(&self, steam_id: u32) -> Result<()> {
-        unsafe { ffi!(self.get_activity_manager().register_steam(steam_id)) }.to_result()
+    pub fn register_steam(&self, steam_game_id: u32) -> Result<()> {
+        unsafe { ffi!(self.get_activity_manager().register_steam(steam_game_id)) }.to_result()
     }
 
-    /// Sets a user's presence in Discord to a new activity.
-    /// Certain fields are required in order to make use of optional features,
-    /// [reference here](https://discordapp.com/developers/docs/game-sdk/activities#activity-action-field-requirements).
+    /// Sets a user's presence in Discord to a new Activity.
     ///
     /// This has a rate limit of 5 updates per 20 seconds.
     ///
     /// It is possible for users to hide their presence on Discord (User Settings -> Game Activity).
     /// Presence set through this SDK may not be visible when this setting is toggled off.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#updateactivity>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#updateactivity)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -106,9 +108,9 @@ impl<'a> Discord<'a> {
         }
     }
 
-    /// Clear's a user's presence in Discord to make it show nothing.
+    /// Clears a user's presence in Discord to make it show nothing.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#clearactivity>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#clearactivity)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -132,7 +134,7 @@ impl<'a> Discord<'a> {
 
     /// Sends a reply to an Ask to Join request.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#sendrequestreply>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#sendrequestreply)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -167,11 +169,18 @@ impl<'a> Discord<'a> {
     }
 
     /// Sends a game invite to a given user.
-    /// If you do not have a valid activity with all the required fields, this call will error.
     ///
-    /// A nul byte will be appended to `content` if necessary.
+    /// ## Performance
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#sendinvite>
+    /// A nul byte will be appended to `content` if one is not present.
+    ///
+    /// ## Error
+    ///
+    /// If the [required fields] are missing, this will return an error.
+    ///
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#sendinvite)
+    ///
+    /// [required fields]: struct.Activity.html
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -212,7 +221,7 @@ impl<'a> Discord<'a> {
 
     /// Accepts a user's game invitation.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#acceptinvite>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#acceptinvite)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -245,7 +254,7 @@ impl<'a> Discord<'a> {
     /// Fires when the current user accepts an invitation to join in chat
     /// or receives confirmation from Asking to Join.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoin>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoin)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -271,7 +280,7 @@ impl<'a> Discord<'a> {
     /// Fires when the current user accepts an invitation to spectate in chat
     /// or clicks the Spectate button on another user's profile.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -295,7 +304,7 @@ impl<'a> Discord<'a> {
 
     /// Fires when a user asks to join the game of the current user.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoinrequest>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoinrequest)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
@@ -321,7 +330,7 @@ impl<'a> Discord<'a> {
 
     /// Fires when the current user receives an invitation to join or spectate.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityinvite>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityinvite)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;

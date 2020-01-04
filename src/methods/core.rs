@@ -5,20 +5,62 @@ use std::{convert::TryFrom, ffi::c_void};
 
 /// # Core
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/discord>
+/// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/discord)
 impl Discord<'_> {
-    /// Calls [`with_create_flags`](#method.with_create_flags)
-    /// with [`CreateFlags::Default`](enum.CreateFlags.html#variant.Default).
+    /// Calls [`with_create_flags`] with [`CreateFlags::Default`].
+    ///
+    /// [`with_create_flags`]: #method.with_create_flags
+    /// [`CreateFlags::Default`]: enum.CreateFlags.html#variant.Default
+    ///
+    /// ```rust
+    /// # fn example() {
+    /// use discord_game_sdk::Discord;
+    ///
+    /// # const DISCORD_APPLICATION_ID: i64 = 0;
+    ///
+    /// fn main() -> Result<()> {
+    ///     let mut discord = Discord::new(DISCORD_APPLICATION_ID)?;
+    ///
+    ///     loop {
+    ///         discord.empty_event_buffers();
+    ///         discord.run_callbacks()?;
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// # }
+    /// ```
     pub fn new(client_id: i64) -> Result<Self> {
         Self::with_create_flags(client_id, CreateFlags::Default)
     }
 
     /// Creates an instance of the main interface with the Discord Game SDK.
-    /// It also forwards all log messages to [`log`](https://docs.rs/log)
+    ///
+    /// It also forwards all logging messages to [`log`](https://docs.rs/log)
     /// and kickstarts all managers that produce events.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/discord#create>  
-    /// <https://discordapp.com/developers/docs/game-sdk/discord#setloghook>
+    /// > [`Create` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#create)  
+    /// > [`SetLogHook` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#setloghook)
+    ///
+    /// ```rust
+    /// # fn example() {
+    /// use discord_game_sdk::{CreateFlags, Discord};
+    ///
+    /// # const DISCORD_APPLICATION_ID: i64 = 0;
+    ///
+    /// fn main() -> Result<()> {
+    ///     let mut discord =
+    ///         Discord::with_create_flags(DISCORD_APPLICATION_ID, CreateFlags::NoRequireDiscord)?;
+    ///
+    ///     loop {
+    ///         discord.empty_event_buffers();
+    ///         discord.run_callbacks()?;
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// # }
+    /// ```
     pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
         let (senders, receivers) = channels::create_channels();
 
@@ -89,12 +131,31 @@ impl Discord<'_> {
 
     /// Runs all pending SDK callbacks.
     ///
-    /// Will return [`Error::NotRunning`](enum.Error.html#variant.NotRunning)
-    /// if the Discord client was closed.
+    /// This should be called often, like in the main loop if you're writing a game.
     ///
-    /// ## Attention
-    /// Event buffers will grow large if `run_callbacks` is not ran often, it is recommended to run
-    /// this in the game loop.
+    /// ## Performance
+    ///
+    /// Event buffers may grow large if they are not [emptied] and if this method is not called
+    /// often, resulting in unnecessary allocation and an accompanying performance loss.
+    ///
+    /// ## Errors
+    ///
+    /// If the Discord client was closed, [`Error::NotRunning`] will be returned.
+    ///
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord#runcallbacks)
+    ///
+    /// [emptied]: #method.empty_event_buffers
+    /// [`Error::NotRunning`]: enum.Error.html#variant.NotRunning
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord) -> Result<()> {
+    /// loop { // main application loop
+    ///     discord.empty_event_buffers();
+    ///     discord.run_callbacks()?;
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()?;
 
@@ -116,10 +177,50 @@ impl Discord<'_> {
 
     /// This will discard all events that have not been used.
     ///
-    /// ## Attention
-    /// Event buffers will grow large if not all used or emptied.
+    /// An event is "used" when it is consumed through one of those iterators:
+    /// - [`recv_achievements_update`](#method.recv_achievements_update)
+    /// - [`recv_activities_join`](#method.recv_activities_join)
+    /// - [`recv_activities_spectate`](#method.recv_activities_spectate)
+    /// - [`recv_activities_request`](#method.recv_activities_request)
+    /// - [`recv_activities_invite`](#method.recv_activities_invite)
+    /// - [`recv_lobbies_update`](#method.recv_lobbies_update)
+    /// - [`recv_lobbies_delete`](#method.recv_lobbies_delete)
+    /// - [`recv_lobbies_member_connect`](#method.recv_lobbies_member_connect)
+    /// - [`recv_lobbies_member_update`](#method.recv_lobbies_member_update)
+    /// - [`recv_lobbies_member_disconnect`](#method.recv_lobbies_member_disconnect)
+    /// - [`recv_lobbies_message`](#method.recv_lobbies_message)
+    /// - [`recv_lobbies_speaking`](#method.recv_lobbies_speaking)
+    /// - [`recv_lobbies_network_message`](#method.recv_lobbies_network_message)
+    /// - [`recv_networking_message`](#method.recv_networking_message)
+    /// - [`recv_networking_route_update`](#method.recv_networking_route_update)
+    /// - [`recv_overlay_toggle`](#method.recv_overlay_toggle)
+    /// - [`recv_relationships_refresh`](#method.recv_relationships_refresh)
+    /// - [`recv_relationships_update`](#method.recv_relationships_update)
+    /// - [`recv_store_entitlement_create`](#method.recv_store_entitlement_create)
+    /// - [`recv_store_entitlement_delete`](#method.recv_store_entitlement_delete)
+    /// - [`recv_current_user_update`](#method.recv_current_user_update)
+    /// - [`recv_voice_settings_update`](#method.recv_voice_settings_update)
     ///
-    /// As a rule of thumb, call `empty_event_buffers` before every `run_callbacks`.
+    /// This should be called before [`run_callbacks`].
+    ///
+    /// ## Performance
+    ///
+    /// Event buffers may grow large if they are not emptied and if [`run_callbacks`] is not called
+    /// often, resulting in unnecessary allocation and an accompanying performance loss.
+    ///
+    /// [`run_callbacks`]: #method.run_callbacks
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord) -> Result<()> {
+    /// loop { // main application loop
+    ///     discord.empty_event_buffers();
+    ///     discord.run_callbacks()?;
+    ///
+    ///     // use discord.recv_XXX()
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn empty_event_buffers(&self) {
         self.receivers.empty_channels()
     }

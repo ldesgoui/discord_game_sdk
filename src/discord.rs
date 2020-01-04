@@ -2,6 +2,12 @@ use crate::{callbacks::AnyCallback, channels, sys};
 
 /// Main interface with SDK
 ///
+/// The Discord Game SDK is not thread-safe, this struct should only be made `Send`/`Sync` with
+/// appropriate safety measures, and not as-is.
+///
+/// As opposed to the general structure of the Discord Game SDK, and to help with memory and thread
+/// safety, the methods of the Manager "classes" are part of this struct.
+///
 /// ## Table of Contents
 ///
 /// - [Core](#core)

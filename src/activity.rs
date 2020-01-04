@@ -6,7 +6,33 @@ use crate::{
 
 /// Activity (also known as Rich Presence)
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activity-struct>
+/// To enable players to join or spectate via invites and requests, some fields are required:
+/// - Joining
+///     - [`with_party_id`](#method.with_party_id)
+///     - [`with_party_amount`](#method.with_party_amount)
+///     - [`with_party_capacity`](#method.with_party_capacity)
+///     - [`with_join_secret`](#method.with_join_secret)
+/// - Spectating
+///     - [`with_spectate_secret`](#method.with_spectate_secret)
+///
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/activities#data-models-activity-struct)
+///
+/// ```rust
+/// # use discord_game_sdk::*;
+/// # fn example(discord: Discord) -> Result<()> {
+/// # let now = 0;
+/// discord.update_activity(
+///     &Activity::empty()
+///         .with_state("On Main Menu")
+///         .with_start_time(now),
+///     |discord, result| {
+///         if let Err(error) = result {
+///             eprintln!("failed to update activity: {}", error);
+///         }
+///     },
+/// );
+/// # Ok(()) }
+/// ```
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 #[repr(transparent)]
 pub struct Activity(pub(crate) sys::DiscordActivity);
