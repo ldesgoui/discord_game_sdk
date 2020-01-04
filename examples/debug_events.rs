@@ -34,7 +34,7 @@ fn main() {
 fn process_events(gsdk: &Discord) {
     macro_rules! ev {
         ($name: ident) => {
-            gsdk.$name().for_each(|ev| log::info!("{}: {:?}", stringify!($name), ev));
+            gsdk.$name().for_each(|ev| log::info!("{}: {:#?}", stringify!($name), ev));
         }
     }
 
