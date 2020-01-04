@@ -17,6 +17,7 @@ pub enum RelationshipKind {
     PendingIncoming,
     /// Current user has a pending outgoing friend request to user
     PendingOutgoing,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordRelationshipType),
 }
 

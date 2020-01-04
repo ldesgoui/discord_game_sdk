@@ -11,6 +11,7 @@ pub enum PremiumKind {
     Tier1,
     /// Nitro subscriber
     Tier2,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordPremiumType),
 }
 

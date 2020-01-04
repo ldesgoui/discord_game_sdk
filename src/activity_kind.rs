@@ -5,10 +5,15 @@ use crate::sys;
 /// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activitytype-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ActivityKind {
+    /// Listening to music (only Spotify as of Jan 2020)
     Listening,
+    /// Playing a game
     Playing,
+    /// Live streaming (only Twitch as of Jan 2020)
     Streaming,
+    /// Watching a live stream
     Watching,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordActivityType),
 }
 

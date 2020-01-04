@@ -5,8 +5,11 @@ use crate::sys;
 /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmodetype-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum InputModeKind {
+    /// Voice is transmitted when a key is pushed
     PushToTalk,
+    /// Voice is transmitted when detected by Discord
     VoiceActivity,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordInputModeType),
 }
 

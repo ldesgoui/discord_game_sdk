@@ -5,9 +5,13 @@ use crate::sys;
 /// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activityjoinrequestreply-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum RequestReply {
+    /// Accept the request
     Yes,
+    /// Deny the request
     No,
+    /// Ignore the request
     Ignore,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordActivityJoinRequestReply),
 }
 

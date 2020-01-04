@@ -19,6 +19,7 @@ pub enum EntitlementKind {
     TestModePurchase,
     /// Entitlement was gifted by another user
     UserGift,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordEntitlementType),
 }
 

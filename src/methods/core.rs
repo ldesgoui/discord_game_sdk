@@ -30,9 +30,19 @@ impl Discord<'_> {
 
         let mut params = create_params(client_id, flags, senders_ptr as *mut c_void);
 
+        // XXX: should be std::ptr::null()
         let mut core = std::ptr::null_mut();
 
-        unsafe { sys::DiscordCreate(sys::DISCORD_VERSION, &mut params, &mut core) }.to_result()?;
+        unsafe {
+            sys::DiscordCreate(
+                sys::DISCORD_VERSION,
+                // XXX: *mut should be *const
+                &mut params,
+                // XXX: *mut *mut should be *mut *const
+                &mut core,
+            )
+        }
+        .to_result()?;
 
         log::trace!("received pointer to {:p}", core);
 
@@ -130,6 +140,7 @@ fn create_params(
 
     sys::DiscordCreateParams {
         client_id,
+        // XXX: u64 should be sys::EDiscordCreateFlags
         flags: u64::try_from(flags).unwrap(),
 
         // XXX: *mut should be *const

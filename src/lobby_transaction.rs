@@ -14,6 +14,10 @@ pub struct LobbyTransaction {
 }
 
 impl LobbyTransaction {
+    /// Gets a Lobby transaction used for creating or updating a new lobby.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbycreatetransaction>  
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyupdatetransaction>
     pub fn new() -> Self {
         Self::default()
     }

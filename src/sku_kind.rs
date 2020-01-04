@@ -13,6 +13,7 @@ pub enum SkuKind {
     Consumable,
     /// Bundle is a DLC
     DLC,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordSkuType),
 }
 

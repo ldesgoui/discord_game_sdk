@@ -7,6 +7,7 @@ use crate::sys;
 pub enum ImageKind {
     /// User Avatar
     User,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordImageType),
 }
 

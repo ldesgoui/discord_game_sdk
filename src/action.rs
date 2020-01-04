@@ -5,8 +5,11 @@ use crate::sys;
 /// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activityactiontype-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Action {
+    /// Invite to join a game
     Join,
+    /// Invite to spectate a game
     Spectate,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordActivityActionType),
 }
 

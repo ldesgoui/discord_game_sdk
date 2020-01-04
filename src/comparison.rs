@@ -5,11 +5,17 @@ use crate::sys;
 /// <https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbysearchcomparison-enum>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Comparison {
+    /// Metadata must be equal to the search value
     Equal,
+    /// Metadata must be greater than the search value
     GreaterThan,
+    /// Metadata must be greater than or equal to the search value
     GreaterThanOrEqual,
+    /// Metadata must be less than the search value
     LessThan,
+    /// Metadata must be less than or equal to the search value
     LessThanOrEqual,
+    /// Metadata must not be equal to the search value
     NotEqual,
 }
 

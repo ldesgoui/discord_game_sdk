@@ -14,6 +14,9 @@ pub struct SearchQuery {
 }
 
 impl SearchQuery {
+    /// Creates a search object to search available lobbies.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getsearchquery>
     pub fn new() -> Self {
         Self::default()
     }

@@ -5,8 +5,11 @@ use crate::sys;
 /// <https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbytype-enum>
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum LobbyKind {
+    /// Lobby is public
     Public,
+    /// Lobby is private (cannot be joined through matchmaking)
     Private,
+    /// Safety net for missing definitions
     Undefined(sys::EDiscordLobbyType),
 }
 
