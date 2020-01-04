@@ -20,8 +20,6 @@ impl InputMode {
 
     /// The combination of keys to transmit voice when kind is [`PushToTalk`].
     ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys)
-    ///
     /// [`PushToTalk`]: enum.InputModeKind.html#variant.PushToTalk
     pub fn shortcut(&self) -> &str {
         charbuf_to_str(&self.0.shortcut)
