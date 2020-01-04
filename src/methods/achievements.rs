@@ -7,16 +7,32 @@ use crate::{
 ///
 /// Achievements are managed in the [Developer Portal](https://discordapp.com/developers/applications).
 ///
-/// Some operations will require an http client, or must be ran from your game backend:
+/// Some operations will require an HTTP client, or must be ran from your game backend:
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/achievements#the-api-way).
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/achievements>
+/// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/achievements)
 impl<'a> Discord<'a> {
     /// Updates the current user's completion for a given achievement.
     ///
     /// `percent_complete` must be in the range `0..=100`
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#setuserachievement>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#setuserachievement)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # #[derive(Default)] struct GameAchievement { id: i64, progress: u32, completion: u32 }
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// # let achievement = GameAchievement::default();
+    /// discord.set_user_achievement(
+    ///     achievement.id,
+    ///     (achievement.progress * 100 / achievement.completion) as u8,
+    ///     |discord, result| {
+    ///         if let Err(error) = result {
+    ///             eprintln!("failed setting user achievement: {}", error);
+    ///         }
+    ///     },
+    /// );
+    /// # Ok(()) }
     pub fn set_user_achievement(
         &self,
         achievement_id: i64,
@@ -33,7 +49,25 @@ impl<'a> Discord<'a> {
 
     /// Loads the current user's achievements.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#fetchuserachievements>
+    /// The user achievements will remain loaded after `callback` returns.
+    ///
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#fetchuserachievements)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_user_achievements(
+    ///     |discord, result| {
+    ///         if let Err(error) = result {
+    ///             return eprintln!("failed fetching user achievements: {}", error);
+    ///         }
+    ///
+    ///         for achievement in discord.iter_user_achievements() {
+    ///             // ...
+    ///         }
+    ///     },
+    /// );
+    /// # Ok(()) }
     pub fn fetch_user_achievements(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
@@ -45,9 +79,28 @@ impl<'a> Discord<'a> {
 
     /// Gets the user achievement for the given achievement ID.
     ///
-    /// [`fetch_achievements`](#method.fetch_achievements) must have completed first.
+    /// [`fetch_user_achievements`](#method.fetch_user_achievements) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievement>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievement)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # const ACHIEVEMENT_ID: i64 = 0;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_user_achievements(
+    ///     |discord, result| {
+    ///         if let Err(error) = result {
+    ///             return eprintln!("failed fetching user achievements: {}", error);
+    ///         }
+    ///
+    ///         let achievement = discord.user_achievement(ACHIEVEMENT_ID);
+    ///
+    ///         if let Err(error) = achievement {
+    ///             return eprintln!("failed getting user achievement: {}", error);
+    ///         }
+    ///     },
+    /// );
+    /// # Ok(()) }
     pub fn user_achievement(&self, achievement_id: i64) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
@@ -63,9 +116,11 @@ impl<'a> Discord<'a> {
 
     /// Gets the number of user achievements available.
     ///
-    /// [`fetch_achievements`](#method.fetch_achievements) must have completed first.
+    /// Prefer using [`iter_user_achievements`](#method.iter_user_achievements).
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
+    /// [`fetch_user_achievements`](#method.fetch_user_achievements) must have completed first.
+    ///
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements)  
     pub fn user_achievement_count(&self) -> usize {
         let mut count = 0;
 
@@ -75,21 +130,26 @@ impl<'a> Discord<'a> {
                 .count_user_achievements(&mut count))
         }
 
+        // XXX: i32 should be usize
         count as usize
     }
 
     /// Gets a user achievement by index.
     ///
-    /// [`fetch_achievements`](#method.fetch_achievements) must have completed first.
+    /// Prefer using [`iter_user_achievements`](#method.iter_user_achievements).
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
+    /// [`fetch_user_achievements`](#method.fetch_user_achievements) must have completed first.
+    ///
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat)
     pub fn user_achievement_at(&self, index: usize) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
         unsafe {
-            ffi!(self
-                .get_achievement_manager()
-                .get_user_achievement_at(index as i32, &mut achievement.0))
+            ffi!(self.get_achievement_manager().get_user_achievement_at(
+                // XXX: i32 should be usize
+                index as i32,
+                &mut achievement.0
+            ))
         }
         .to_result()?;
 
@@ -98,11 +158,24 @@ impl<'a> Discord<'a> {
 
     /// Returns an `Iterator` over all user achievements available.
     ///
-    /// [`fetch_achievements`](#method.fetch_achievements) must have completed first and must not
+    /// [`fetch_user_achievements`](#method.fetch_user_achievements) must have completed first and must not
     /// be called during the iteration.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements>  
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat>
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_user_achievements(
+    ///     |discord, result| {
+    ///         if let Err(error) = result {
+    ///             return eprintln!("failed fetching user achievements: {}", error);
+    ///         }
+    ///
+    ///         for achievement in discord.iter_user_achievements() {
+    ///             // ...
+    ///         }
+    ///     },
+    /// );
+    /// # Ok(()) }
     pub fn iter_user_achievements<'b>(
         &'b self,
     ) -> iter::GenericIter<'a, 'b, Result<UserAchievement>> {
@@ -113,7 +186,16 @@ impl<'a> Discord<'a> {
 
     /// Fires when an achievement is updated for the current user.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/achievements#onuserachievementupdate>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#onuserachievementupdate)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// for ev in discord.recv_achievements_update() {
+    ///     println!("achievement with id {} updated", ev.user_achievement.achievement_id());
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn recv_achievements_update(
         &self,
     ) -> impl '_ + Iterator<Item = event::UserAchievementUpdate> {

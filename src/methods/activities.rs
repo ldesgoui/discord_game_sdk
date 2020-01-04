@@ -58,7 +58,7 @@ impl<'a> Discord<'a> {
     /// # let now = 0;
     /// discord.clear_activity(|discord, result| {
     ///     if let Err(error) = result {
-    ///         eprintln!("failed to clear activity: {}", error);
+    ///         return eprintln!("failed to clear activity: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
@@ -86,7 +86,7 @@ impl<'a> Discord<'a> {
     ///         .with_start_time(now),
     ///     |discord, result| {
     ///         if let Err(error) = result {
-    ///             eprintln!("failed to update activity: {}", error);
+    ///             return eprintln!("failed to update activity: {}", error);
     ///         }
     ///     },
     /// );
@@ -118,7 +118,7 @@ impl<'a> Discord<'a> {
     /// # let now = 0;
     /// discord.clear_activity(|discord, result| {
     ///     if let Err(error) = result {
-    ///         eprintln!("failed to clear activity: {}", error);
+    ///         return eprintln!("failed to clear activity: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
@@ -148,7 +148,7 @@ impl<'a> Discord<'a> {
     ///
     ///     discord.send_request_reply(request.user.id(), RequestReply::Yes, |discord, result| {
     ///         if let Err(error) = result {
-    ///             eprintln!("failed replying: {}", error);
+    ///             return eprintln!("failed to reply: {}", error);
     ///         }
     ///     });
     /// }
@@ -192,7 +192,7 @@ impl<'a> Discord<'a> {
     ///     "Let's play some Survival!\0",
     ///     |discord, result| {
     ///         if let Err(error) = result {
-    ///             eprintln!("failed inviting: {}", error);
+    ///             return eprintln!("failed to invite: {}", error);
     ///         }
     ///     },
     /// );
@@ -236,7 +236,7 @@ impl<'a> Discord<'a> {
     ///
     ///     discord.accept_invite(request.user.id(), |discord, result| {
     ///         if let Err(error) = result {
-    ///             eprintln!("failed to accept invite: {}", error);
+    ///             return eprintln!("failed to accept invite: {}", error);
     ///         }
     ///     });
     /// }
@@ -264,7 +264,7 @@ impl<'a> Discord<'a> {
     ///
     ///     discord.connect_lobby_with_activity_secret(join.secret, |discord, lobby| {
     ///         match lobby {
-    ///             Err(error) => eprintln!("failed connecting to lobby: {}", error),
+    ///             Err(error) => eprintln!("failed to connect to lobby: {}", error),
     ///             Ok(lobby) => {
     ///                 // Update activity, connect to voice and network, etc.
     ///             }
@@ -290,7 +290,7 @@ impl<'a> Discord<'a> {
     ///
     ///     discord.connect_lobby_with_activity_secret(spectate.secret, |discord, lobby| {
     ///         match lobby {
-    ///             Err(error) => eprintln!("failed connecting to lobby: {}", error),
+    ///             Err(error) => eprintln!("failed to connect to lobby: {}", error),
     ///             Ok(lobby) => {
     ///                 // Update activity, connect to voice and network, etc.
     ///             }
@@ -318,7 +318,7 @@ impl<'a> Discord<'a> {
     ///
     ///     discord.send_request_reply(request.user.id(), RequestReply::Yes, |discord, result| {
     ///         if let Err(error) = result {
-    ///             eprintln!("failed replying: {}", error);
+    ///             return eprintln!("failed to reply: {}", error);
     ///         }
     ///     });
     /// }
@@ -345,7 +345,7 @@ impl<'a> Discord<'a> {
     ///
     ///     discord.accept_invite(request.user.id(), |discord, result| {
     ///         if let Err(error) = result {
-    ///             eprintln!("failed to accept invite: {}", error);
+    ///             return eprintln!("failed to accept invite: {}", error);
     ///         }
     ///     });
     /// }
