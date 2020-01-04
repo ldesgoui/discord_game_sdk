@@ -89,12 +89,12 @@ impl<'a> Discord<'a> {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.oauth_token(|discord, token| {
+    /// discord.oauth2_token(|discord, token| {
     ///     match token {
     ///         Ok(token) => {
     ///             //...
     ///         },
-    ///         Err(error) => eprintln!("failed to retrieve OAuth2 token: {}", error);
+    ///         Err(error) => eprintln!("failed to retrieve OAuth2 token: {}", error),
     ///     }
     /// });
     /// # Ok(()) }
@@ -119,7 +119,7 @@ impl<'a> Discord<'a> {
     ///         Ok(ticket) => {
     ///             //...
     ///         },
-    ///         Err(error) => eprintln!("failed to retrieve signed app ticket: {}", error);
+    ///         Err(error) => eprintln!("failed to retrieve signed app ticket: {}", error),
     ///     }
     /// });
     /// # Ok(()) }

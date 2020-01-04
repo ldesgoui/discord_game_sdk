@@ -6,11 +6,31 @@ use std::convert::TryFrom;
 
 /// # Images
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/images>
+/// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/images)
+///
+/// ```rust
+/// # use discord_game_sdk::*;
+/// # fn example(discord: Discord) -> Result<()> {
+/// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
+/// discord.fetch_image(
+///     ImageHandle::from_user_id(user.id(), 128),
+///     FetchKind::UseCached,
+///     |discord, handle| {
+///         match handle {
+///             Ok(handle) => {
+///                 println!("image dimensions: {:?}", discord.image_dimensions(handle));
+///                 let image = discord.image(handle);
+///                 // ...
+///             },
+///             Err(error) => eprintln!("failed to fetch image: {}", error),
+///         }
+///     },
+/// );
+/// # Ok(()) }
 impl<'a> Discord<'a> {
     /// Prepares an image.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/images#fetch>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#fetch)
     pub fn fetch_image(
         &self,
         handle: ImageHandle,
@@ -27,7 +47,7 @@ impl<'a> Discord<'a> {
 
     /// Get's the dimensions of the source image.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/images#getdimensions>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#getdimensions)
     pub fn image_dimensions(&self, handle: ImageHandle) -> Result<(u32, u32)> {
         let mut dimensions = sys::DiscordImageDimensions::default();
 
@@ -45,8 +65,7 @@ impl<'a> Discord<'a> {
     ///
     /// The image must be [fetched](#method.fetch_image) first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/images#getdata>
-    // TODO: example using image crate
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#getdata)
     pub fn image(&self, handle: ImageHandle) -> Result<Image> {
         let (width, height) = self.image_dimensions(handle)?;
         let mut data: Vec<u8> = vec![0; 4 * width as usize * height as usize];
