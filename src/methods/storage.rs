@@ -59,7 +59,7 @@ impl<'a> Discord<'a> {
     pub fn read_file_async<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord, Result<Vec<u8>>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<Vec<u8>>),
     ) {
         let mut filename = filename.into();
 
@@ -86,7 +86,7 @@ impl<'a> Discord<'a> {
         filename: impl Into<Cow<'b, str>>,
         offset: usize,
         length: usize,
-        callback: impl 'a + FnMut(&Discord, Result<Vec<u8>>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<Vec<u8>>),
     ) {
         let mut filename = filename.into();
 
@@ -153,7 +153,7 @@ impl<'a> Discord<'a> {
         &self,
         filename: impl Into<Cow<'b, str>>,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         let mut filename = filename.into();
 

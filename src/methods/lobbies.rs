@@ -29,7 +29,7 @@ impl<'a> Discord<'a> {
     pub fn create_lobby(
         &self,
         transaction: &LobbyTransaction,
-        mut callback: impl 'a + FnMut(&Discord, Result<Lobby>),
+        mut callback: impl 'a + FnMut(&Discord<'_>, Result<Lobby>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -61,7 +61,7 @@ impl<'a> Discord<'a> {
         &self,
         lobby_id: i64,
         transaction: &LobbyTransaction,
-        mut callback: impl 'a + FnMut(&Discord, Result<()>),
+        mut callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -89,7 +89,7 @@ impl<'a> Discord<'a> {
     /// Deletes a given lobby.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#deletelobby>
-    pub fn delete_lobby(&self, lobby_id: i64, callback: impl 'a + FnMut(&Discord, Result<()>)) {
+    pub fn delete_lobby(&self, lobby_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -108,7 +108,7 @@ impl<'a> Discord<'a> {
         &self,
         lobby_id: i64,
         secret: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord, Result<Lobby>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<Lobby>),
     ) {
         let mut secret = secret.into();
 
@@ -137,7 +137,7 @@ impl<'a> Discord<'a> {
     pub fn connect_lobby_with_activity_secret<'b>(
         &self,
         activity_secret: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord, Result<Lobby>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<Lobby>),
     ) {
         let mut activity_secret = activity_secret.into();
 
@@ -159,7 +159,11 @@ impl<'a> Discord<'a> {
     /// Disconnects the current user from a lobby.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectlobby>
-    pub fn disconnect_lobby(&self, lobby_id: i64, callback: impl 'a + FnMut(&Discord, Result<()>)) {
+    pub fn disconnect_lobby(
+        &self,
+        lobby_id: i64,
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+    ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
@@ -302,7 +306,7 @@ impl<'a> Discord<'a> {
         lobby_id: i64,
         user_id: i64,
         transaction: &LobbyMemberTransaction,
-        mut callback: impl 'a + FnMut(&Discord, Result<()>),
+        mut callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -492,7 +496,7 @@ impl<'a> Discord<'a> {
         &self,
         lobby_id: i64,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         let buffer = buffer.as_ref();
 
@@ -520,7 +524,7 @@ impl<'a> Discord<'a> {
     pub fn lobby_search(
         &self,
         search: &SearchQuery,
-        mut callback: impl 'a + FnMut(&Discord, Result<()>),
+        mut callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -593,7 +597,7 @@ impl<'a> Discord<'a> {
     pub fn connect_lobby_voice(
         &self,
         lobby_id: i64,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -609,7 +613,7 @@ impl<'a> Discord<'a> {
     pub fn disconnect_lobby_voice(
         &self,
         lobby_id: i64,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         unsafe {
             ffi!(self

@@ -21,7 +21,7 @@ impl<'a> Discord<'a> {
         &self,
         achievement_id: i64,
         percent_complete: u8,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -34,7 +34,7 @@ impl<'a> Discord<'a> {
     /// Loads the current user's achievements.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/achievements#fetchuserachievements>
-    pub fn fetch_user_achievements(&self, callback: impl 'a + FnMut(&Discord, Result<()>)) {
+    pub fn fetch_user_achievements(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_achievement_manager()

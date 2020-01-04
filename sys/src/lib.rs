@@ -68,12 +68,7 @@
 //! [twitter]: https://twitter.com/ldesgoui
 //! [email]: mailto:ldesgoui@ldesgoui.xyz
 
-#![allow(
-    clippy::all,
-    non_camel_case_types,
-    non_snake_case,
-    non_upper_case_globals
-)]
+#![allow(clippy::all, warnings)]
 #![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys/0.5.0-alpha.2")]
 
 pub(crate) mod ctypes {

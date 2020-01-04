@@ -15,7 +15,7 @@ impl<'a> Discord<'a> {
         &self,
         handle: ImageHandle,
         refresh: FetchKind,
-        callback: impl 'a + FnMut(&Discord, Result<ImageHandle>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<ImageHandle>),
     ) {
         unsafe {
             ffi!(self

@@ -23,7 +23,7 @@ impl<'a> Discord<'a> {
     pub fn set_input_mode(
         &self,
         input_mode: InputMode,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         unsafe {
             ffi!(self

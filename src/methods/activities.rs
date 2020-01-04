@@ -93,7 +93,7 @@ impl<'a> Discord<'a> {
     pub fn update_activity(
         &self,
         activity: &Activity,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -121,7 +121,7 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn clear_activity(&self, callback: impl 'a + FnMut(&Discord, Result<()>)) {
+    pub fn clear_activity(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
@@ -156,7 +156,7 @@ impl<'a> Discord<'a> {
         &self,
         user_id: i64,
         reply: RequestReply,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -194,7 +194,7 @@ impl<'a> Discord<'a> {
         user_id: i64,
         action: Action,
         content: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord, Result<()>),
+        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
         let mut content = content.into();
 
@@ -233,7 +233,7 @@ impl<'a> Discord<'a> {
     /// }
     /// # Ok(()) }
     /// ```
-    pub fn accept_invite(&self, user_id: i64, callback: impl 'a + FnMut(&Discord, Result<()>)) {
+    pub fn accept_invite(&self, user_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_activity_manager()

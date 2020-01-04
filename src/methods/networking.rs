@@ -6,7 +6,7 @@ use std::{borrow::Cow, convert::TryFrom};
 /// Lower level networking functionality.
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/networking>
-impl<'a> Discord<'a> {
+impl Discord<'_> {
     /// Get the networking peer ID for the current user, allowing other users to send packets to them.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/networking#getpeerid>

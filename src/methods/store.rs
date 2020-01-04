@@ -16,7 +16,7 @@ impl<'a> Discord<'a> {
     /// If you aren't seeing any SKUs being returned, make sure they have a price set.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#fetchskus>
-    pub fn fetch_skus(&self, callback: impl 'a + FnMut(&Discord, Result<()>)) {
+    pub fn fetch_skus(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()
@@ -87,7 +87,7 @@ impl<'a> Discord<'a> {
     /// Consumables will be returned until they are consumed by the application via the HTTP endpoint.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#fetchentitlements>
-    pub fn fetch_entitlements(&self, callback: impl 'a + FnMut(&Discord, Result<()>)) {
+    pub fn fetch_entitlements(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()
@@ -180,7 +180,7 @@ impl<'a> Discord<'a> {
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/store#startpurchase>
-    pub fn start_purchase(&self, sku_id: i64, callback: impl 'a + FnMut(&Discord, Result<()>)) {
+    pub fn start_purchase(&self, sku_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()

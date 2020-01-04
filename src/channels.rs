@@ -54,7 +54,7 @@ pub(crate) struct Receivers {
 }
 
 impl Receivers {
-    pub fn empty_channels(&self) {
+    pub(crate) fn empty_channels(&self) {
         self.achievements_update.try_iter().for_each(drop);
         self.activities_join.try_iter().for_each(drop);
         self.activities_spectate.try_iter().for_each(drop);

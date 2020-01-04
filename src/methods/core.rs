@@ -6,7 +6,7 @@ use std::{convert::TryFrom, ffi::c_void};
 /// # Core
 ///
 /// <https://discordapp.com/developers/docs/game-sdk/discord>
-impl<'a> Discord<'a> {
+impl Discord<'_> {
     /// Calls [`with_create_flags`](#method.with_create_flags)
     /// with [`CreateFlags::Default`](enum.CreateFlags.html#variant.Default).
     pub fn new(client_id: i64) -> Result<Self> {
@@ -60,6 +60,7 @@ impl<'a> Discord<'a> {
         };
     }
 
+    #[allow(unused_results)]
     fn kickstart_managers(&self) {
         unsafe {
             // In this order to prioritize managers that instantly generate events
@@ -114,7 +115,7 @@ impl<'a> Discord<'a> {
     }
 }
 
-impl<'a> Drop for Discord<'a> {
+impl Drop for Discord<'_> {
     fn drop(&mut self) {
         unsafe { ffi!(self.destroy()) }
     }
