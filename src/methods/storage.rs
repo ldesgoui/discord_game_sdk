@@ -9,7 +9,7 @@ use std::{borrow::Cow, convert::TryFrom, mem::size_of};
 
 /// # Storage
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/storage>
+/// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/storage)
 impl<'a> Discord<'a> {
     /// Reads data synchronously from the game's allocated save file into a buffer.
     /// The file is mapped by key-value pair, and this function will read data that exists
@@ -19,7 +19,7 @@ impl<'a> Discord<'a> {
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#read>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#read)
     pub fn read_file<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
@@ -55,7 +55,7 @@ impl<'a> Discord<'a> {
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#readasync>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#readasync)
     pub fn read_file_async<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
@@ -80,7 +80,7 @@ impl<'a> Discord<'a> {
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#readasyncpartial>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#readasyncpartial)
     pub fn read_file_async_partial<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
@@ -114,7 +114,7 @@ impl<'a> Discord<'a> {
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#write>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#write)
     pub fn write_file<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
@@ -148,7 +148,7 @@ impl<'a> Discord<'a> {
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#writeasync>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#writeasync)
     pub fn write_file_async<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
@@ -183,7 +183,7 @@ impl<'a> Discord<'a> {
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#delete>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#delete)
     pub fn delete_file<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<()> {
         let mut filename = filename.into();
 
@@ -198,7 +198,7 @@ impl<'a> Discord<'a> {
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#exists>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#exists)
     pub fn file_exists<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<bool> {
         let mut filename = filename.into();
 
@@ -222,7 +222,7 @@ impl<'a> Discord<'a> {
     ///
     /// A nul byte will be appended to `filename` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#stat>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#stat)
     pub fn file_stat<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<FileStat> {
         let mut filename = filename.into();
 
@@ -244,7 +244,7 @@ impl<'a> Discord<'a> {
 
     /// Returns the number of file stats.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#count)
     pub fn file_stat_count(&self) -> usize {
         let mut count = 0;
 
@@ -256,7 +256,7 @@ impl<'a> Discord<'a> {
 
     /// Returns the file stat at a given index.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#statat)  
     pub fn file_stat_at(&self, index: usize) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
@@ -274,8 +274,8 @@ impl<'a> Discord<'a> {
 
     /// Returns an `Iterator` over file stats.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#count>
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#statat>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#count)
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#statat)  
     pub fn iter_file_stats<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<FileStat>> {
         let count = self.file_stat_count();
 
@@ -285,7 +285,7 @@ impl<'a> Discord<'a> {
     /// Returns the path to the folder where files are stored.
     /// It is specific to the application ID, the current branch, and the current user.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/storage#getpath>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#getpath)
     pub fn folder_path(&self) -> Result<String> {
         let mut path: sys::DiscordPath = [0; size_of::<sys::DiscordPath>()];
 

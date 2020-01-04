@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 /// Lobby Transaction
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies>
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbytransaction-struct)
 #[derive(Clone, Debug, Default)]
 pub struct LobbyTransaction {
     pub(crate) kind: Option<LobbyKind>,
@@ -16,15 +16,15 @@ pub struct LobbyTransaction {
 impl LobbyTransaction {
     /// Gets a Lobby transaction used for creating or updating a new lobby.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbycreatetransaction>  
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyupdatetransaction>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbycreatetransaction)  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyupdatetransaction)
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Marks the lobby as private or public
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsettype>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsettype)
     pub fn kind(&mut self, kind: LobbyKind) -> &mut Self {
         self.kind = Some(kind);
         self
@@ -32,7 +32,7 @@ impl LobbyTransaction {
 
     /// Sets the ID of the user owning the lobby
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetowner>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetowner)
     pub fn owner(&mut self, user_id: i64) -> &mut Self {
         self.owner = Some(user_id);
         self
@@ -40,7 +40,7 @@ impl LobbyTransaction {
 
     /// Sets the maximum amount of players that can join
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetcapacity>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetcapacity)
     pub fn capacity(&mut self, capacity: u32) -> &mut Self {
         self.capacity = Some(capacity);
         self
@@ -50,7 +50,7 @@ impl LobbyTransaction {
     ///
     /// A nul byte will be appended to `key` and `value` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetmetadata>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetmetadata)
     pub fn add_metadata(&mut self, mut key: String, mut value: String) -> &mut Self {
         if !key.contains('\0') {
             key.push('\0')
@@ -68,7 +68,7 @@ impl LobbyTransaction {
     ///
     /// A nul byte will be appended to `key` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactiondeletemetadata>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactiondeletemetadata)
     pub fn delete_metadata<S>(&mut self, mut key: String) -> &mut Self {
         if !key.contains('\0') {
             key.push('\0')
@@ -80,7 +80,7 @@ impl LobbyTransaction {
 
     /// Sets whether the lobby is locked or not. When locked, new users cannot join
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetlocked>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetlocked)
     pub fn locked(&mut self, locked: bool) -> &mut Self {
         self.locked = Some(locked);
         self

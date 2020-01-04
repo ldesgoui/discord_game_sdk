@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Image Type
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/images#data-models-imagetype-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/images#data-models-imagetype-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ImageKind {
     /// User Avatar

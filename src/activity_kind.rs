@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Activity Type
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activitytype-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/activities#data-models-activitytype-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ActivityKind {
     /// Listening to music (only Spotify as of Jan 2020)

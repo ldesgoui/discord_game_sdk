@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Relationship Type
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/relationships#data-models-relationshiptype-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#data-models-relationshiptype-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum RelationshipKind {
     /// User is blocked

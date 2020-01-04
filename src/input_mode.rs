@@ -6,7 +6,7 @@ use crate::{
 
 /// Input Mode
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmode-struct>
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmode-struct)
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 #[repr(transparent)]
 pub struct InputMode(pub(crate) sys::DiscordInputMode);
@@ -19,7 +19,7 @@ impl InputMode {
 
     /// The combination of keys to transmit voice when kind is PushToTalk
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys)
     pub fn shortcut(&self) -> &str {
         charbuf_to_str(&self.0.shortcut)
     }
@@ -41,7 +41,7 @@ impl InputMode {
     ///
     /// Only the first 256 bytes will be written.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys)
     pub fn with_shortcut(&'_ mut self, value: &str) -> &'_ mut Self {
         write_charbuf(&mut self.0.shortcut, value);
         self

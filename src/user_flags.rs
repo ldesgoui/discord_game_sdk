@@ -3,7 +3,7 @@ use crate::sys;
 bitflags::bitflags! {
     /// User Flags
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/users#data-models-userflag-enum>
+    /// > [Bitfield in official docs](https://discordapp.com/developers/docs/game-sdk/users#data-models-userflag-enum)
     pub struct UserFlags: sys::EDiscordUserFlag {
         /// Discord Partner
         const PARTNER = sys::DiscordUserFlag_Partner;

@@ -2,7 +2,7 @@ use crate::{sys, utils::charbuf_to_str, ImageHandle};
 
 /// User
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/users#data-models-user-struct>
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/users#data-models-user-struct)
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 #[repr(transparent)]
 pub struct User(pub(crate) sys::DiscordUser);

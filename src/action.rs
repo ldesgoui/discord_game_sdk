@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Activity Action
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activityactiontype-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/activities#data-models-activityactiontype-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Action {
     /// Invite to join a game

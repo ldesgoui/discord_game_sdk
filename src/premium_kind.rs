@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Premium Type
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/users#data-models-premiumtype-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/users#data-models-premiumtype-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum PremiumKind {
     /// Not a Nitro subscriber

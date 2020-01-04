@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Activity Join Request Reply
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities#data-models-activityjoinrequestreply-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/activities#data-models-activityjoinrequestreply-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum RequestReply {
     /// Accept the request

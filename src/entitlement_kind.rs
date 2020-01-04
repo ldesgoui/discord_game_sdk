@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Entitlement Type
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/store#data-models-entitlementtype-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/store#data-models-entitlementtype-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum EntitlementKind {
     /// Entitlement was gifted by a developer

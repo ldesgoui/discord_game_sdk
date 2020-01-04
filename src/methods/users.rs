@@ -5,14 +5,14 @@ use crate::{
 
 /// # Users
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/users>
+/// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/users)
 impl<'a> Discord<'a> {
     /// Get the current user.
     /// More information can be found through the HTTP API.
     ///
     /// Will return `Err(_)` until [`event::user::CurrentUserUpdate`](struct.CurrentUserUpdate.html).
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/users#getcurrentuser>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/users#getcurrentuser)
     pub fn current_user(&self) -> Result<User> {
         let mut user = User(sys::DiscordUser::default());
 
@@ -23,7 +23,7 @@ impl<'a> Discord<'a> {
 
     /// Get user information for a given ID.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/users#getuser>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/users#getuser)
     pub fn user(&self, user_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<User>)) {
         unsafe {
             ffi!(self
@@ -35,7 +35,7 @@ impl<'a> Discord<'a> {
 
     /// Get the Premium type for the currently connected user.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/users#getcurrentuserpremiumtype>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/users#getcurrentuserpremiumtype)
     pub fn current_user_premium_kind(&self) -> Result<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
@@ -51,7 +51,7 @@ impl<'a> Discord<'a> {
 
     /// Return a bitfield of all flags set for the current user.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/users#currentuserhasflag>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/users#currentuserhasflag)
     pub fn current_user_flags(&self) -> Result<UserFlags> {
         let mut flags = UserFlags::empty();
 
@@ -79,7 +79,7 @@ impl<'a> Discord<'a> {
 
     /// Fires when the User struct of the currently connected user changes.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate)
     pub fn recv_current_user_update(&self) -> impl '_ + Iterator<Item = event::CurrentUserUpdate> {
         self.receivers.current_user_update.try_iter()
     }

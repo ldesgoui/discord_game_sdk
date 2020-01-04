@@ -2,11 +2,11 @@ use crate::{across_ffi, event, iter, sys, to_result::ToResult, Discord, Relation
 
 /// # Relationships
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/relationships>
+/// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/relationships)
 impl<'a> Discord<'a> {
     /// Get the relationship between the current user and a given user by ID.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#get>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#get)
     pub fn relationship_with(&self, user_id: i64) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
@@ -25,7 +25,7 @@ impl<'a> Discord<'a> {
     /// [`RelationshipsRefreshed`](event/relationships/struct.Refresh.html)
     /// must have fired first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#filter>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#filter)  
     pub fn filter_relationships<F: FnMut(&Relationship) -> bool>(&self, mut filter: F) {
         unsafe {
             ffi!(self.get_relationship_manager().filter(
@@ -40,7 +40,7 @@ impl<'a> Discord<'a> {
     /// [`RelationshipsRefreshed`](event/relationships/struct.Refresh.html)
     /// must have fired first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#count)
     pub fn relationship_count(&self) -> Result<usize> {
         let mut count = 0;
 
@@ -54,7 +54,7 @@ impl<'a> Discord<'a> {
     /// [`RelationshipsRefreshed`](event/relationships/struct.Refresh.html)
     /// must have fired first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#getat)  
     pub fn relationship_at(&self, index: usize) -> Result<Relationship> {
         let mut relationship = sys::DiscordRelationship::default();
 
@@ -73,8 +73,8 @@ impl<'a> Discord<'a> {
     /// [`RelationshipsRefreshed`](event/relationships/struct.Refresh.html)
     /// must have fired first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#count>
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#getat>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#count)
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#getat)  
     pub fn iter_relationships<'b>(
         &'b self,
     ) -> Result<iter::GenericIter<'a, 'b, Result<Relationship>>> {
@@ -89,7 +89,7 @@ impl<'a> Discord<'a> {
 
     /// Fires at initialization when Discord has cached a snapshot of all your relationships.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh)
     pub fn recv_relationships_refresh(
         &self,
     ) -> impl '_ + Iterator<Item = event::RelationshipsRefresh> {
@@ -98,7 +98,7 @@ impl<'a> Discord<'a> {
 
     /// Fires when a relationship in the filtered list changes, like an updated presence or user attribute.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate)
     pub fn recv_relationships_update(
         &self,
     ) -> impl '_ + Iterator<Item = event::RelationshipUpdate> {

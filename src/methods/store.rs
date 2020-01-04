@@ -8,14 +8,14 @@ use crate::{
 /// Some operations must be ran from your game backend:
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/store#http-apis).
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/store>
+/// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/store)
 impl<'a> Discord<'a> {
     /// Fetches the list of SKUs for the current application.
     ///
     /// Only SKUs that have a price set will be fetched.
     /// If you aren't seeing any SKUs being returned, make sure they have a price set.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#fetchskus>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#fetchskus)
     pub fn fetch_skus(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
@@ -29,7 +29,7 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#getsku>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getsku)
     pub fn sku(&self, id: i64) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
@@ -42,7 +42,7 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countskus)
     pub fn sku_count(&self) -> usize {
         let mut count = 0;
 
@@ -55,7 +55,7 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getskuat)  
     pub fn sku_at(&self, index: usize) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
@@ -73,8 +73,8 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#countskus>
-    /// <https://discordapp.com/developers/docs/game-sdk/store#getskuat>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countskus)
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getskuat)  
     pub fn iter_skus<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Sku>> {
         let count = self.sku_count();
 
@@ -86,7 +86,7 @@ impl<'a> Discord<'a> {
     /// Applications, DLC, and Bundles will always be returned.
     /// Consumables will be returned until they are consumed by the application via the HTTP endpoint.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#fetchentitlements>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#fetchentitlements)
     pub fn fetch_entitlements(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
@@ -100,7 +100,7 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlement>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getentitlement)
     pub fn entitlement(&self, id: i64) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
@@ -118,7 +118,7 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countentitlements)
     pub fn entitlement_count(&self) -> usize {
         let mut count = 0;
 
@@ -131,7 +131,7 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getentitlementat)  
     pub fn entitlement_at(&self, index: usize) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
@@ -149,8 +149,8 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#countentitlements>
-    /// <https://discordapp.com/developers/docs/game-sdk/store#getentitlementat>  
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countentitlements)
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getentitlementat)  
     pub fn iter_entitlements<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Entitlement>> {
         let count = self.entitlement_count();
 
@@ -161,7 +161,7 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#hasskuentitlement>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#hasskuentitlement)
     pub fn has_entitlement(&self, sku_id: i64) -> Result<bool> {
         let mut has_entitlement = false;
 
@@ -179,7 +179,7 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#startpurchase>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#startpurchase)
     pub fn start_purchase(&self, sku_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
@@ -192,7 +192,7 @@ impl<'a> Discord<'a> {
     /// Fires when the connected user receives a new entitlement,
     /// either through purchase or through a developer grant.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate)
     pub fn recv_store_entitlement_create(
         &self,
     ) -> impl '_ + Iterator<Item = event::StoreEntitlementCreate> {
@@ -202,7 +202,7 @@ impl<'a> Discord<'a> {
     /// Fires when the connected user loses an entitlement,
     /// either by expiration, revocation, or consumption in the case of consumable entitlements.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete)
     pub fn recv_store_entitlement_delete(
         &self,
     ) -> impl '_ + Iterator<Item = event::StoreEntitlementDelete> {

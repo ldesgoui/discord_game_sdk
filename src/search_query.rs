@@ -4,7 +4,7 @@ use crate::{
 
 /// Lobby Search
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#search>
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbysearchquery-struct)
 #[derive(Clone, Debug, Default)]
 pub struct SearchQuery {
     pub(crate) filter: Option<(String, String, Comparison, Cast)>,
@@ -16,7 +16,7 @@ pub struct SearchQuery {
 impl SearchQuery {
     /// Creates a search object to search available lobbies.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getsearchquery>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getsearchquery)
     pub fn new() -> Self {
         Self::default()
     }
@@ -25,7 +25,7 @@ impl SearchQuery {
     ///
     /// A nul byte will be appended to `key` and `value` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchfilter>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchfilter)
     pub fn filter(
         &mut self,
         mut key: String,
@@ -49,7 +49,7 @@ impl SearchQuery {
     ///
     /// A nul byte will be appended to `key` and `value` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchsort>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchsort)
     pub fn sort(&mut self, mut key: String, mut value: String, cast: Cast) -> &mut Self {
         if !key.contains('\0') {
             key.push('\0')
@@ -65,7 +65,7 @@ impl SearchQuery {
 
     /// Limits the number of lobbies returned in a search
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchlimit>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchlimit)
     pub fn limit(&mut self, limit: u32) -> &mut Self {
         self.limit = Some(limit);
         self
@@ -73,7 +73,7 @@ impl SearchQuery {
 
     /// Filters lobby results to within certain regions relative to the user's location
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchdistance>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchdistance)
     pub fn distance(&mut self, distance: Distance) -> &mut Self {
         self.distance = Some(distance);
         self

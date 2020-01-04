@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Input Mode Type
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmodetype-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmodetype-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum InputModeKind {
     /// Voice is transmitted when a key is pushed

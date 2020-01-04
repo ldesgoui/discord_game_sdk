@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 /// Lobby Member Transaction
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies>
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbymembertransaction-struct)
 #[derive(Clone, Debug, Default)]
 pub struct LobbyMemberTransaction {
     pub(crate) metadata: HashMap<String, Option<String>>,
@@ -12,7 +12,7 @@ pub struct LobbyMemberTransaction {
 impl LobbyMemberTransaction {
     /// Gets a member update transaction.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberupdatetransaction>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberupdatetransaction)
     pub fn new() -> Self {
         Self::default()
     }
@@ -21,7 +21,7 @@ impl LobbyMemberTransaction {
     ///
     /// A nul byte will be appended to `key` and `value` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactionsetmetadata>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactionsetmetadata)
     pub fn add_metadata(&mut self, mut key: String, mut value: String) -> &mut Self {
         if !key.contains('\0') {
             key.push('\0')
@@ -40,7 +40,7 @@ impl LobbyMemberTransaction {
     ///
     /// A nul byte will be appended to `key` if necessary.
     ///
-    /// <https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactiondeletemetadata>
+    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymembertransactiondeletemetadata)
     pub fn delete_metadata<S>(&mut self, mut key: String) -> &mut Self {
         if !key.contains('\0') {
             key.push('\0')

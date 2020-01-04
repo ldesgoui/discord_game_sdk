@@ -7,7 +7,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Discord Error
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/discord#data-models-result-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/discord#data-models-result-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, err_derive::Error)]
 pub enum Error {
     /// Service unavailable

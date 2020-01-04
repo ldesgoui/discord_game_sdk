@@ -2,7 +2,7 @@ use crate::sys;
 
 /// User Status
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/relationships#data-models-status-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#data-models-status-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Status {
     /// User does not want to be disturbed (red dot)

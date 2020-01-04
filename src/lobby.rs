@@ -2,7 +2,7 @@ use crate::{sys, utils::charbuf_to_str, LobbyKind};
 
 /// Lobby
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobby-struct>
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobby-struct)
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 #[repr(transparent)]
 pub struct Lobby(pub(crate) sys::DiscordLobby);

@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Lobby Search Max Distance
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbysearchdistance-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbysearchdistance-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Distance {
     /// Within the same region

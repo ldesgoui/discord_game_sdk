@@ -4,7 +4,7 @@ use crate::{sys, Action, Activity, Entitlement, Relationship, User, UserAchievem
 
 /// On User Achievement Update
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/achievements#onuserachievementupdate>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#onuserachievementupdate)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct UserAchievementUpdate {
     /// The achievement that was updated
@@ -21,7 +21,7 @@ impl From<sys::DiscordUserAchievement> for UserAchievementUpdate {
 
 /// On Activity Join
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoin>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoin)
 #[derive(Clone, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct ActivityJoin {
     /// The secret to join the user's game
@@ -30,7 +30,7 @@ pub struct ActivityJoin {
 
 /// On Activity Spectate
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate)
 #[derive(Clone, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct ActivitySpectate {
     /// The secret to join the user's game as a spectator
@@ -39,7 +39,7 @@ pub struct ActivitySpectate {
 
 /// On Activity Join Request
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoinrequest>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoinrequest)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ActivityRequest {
     /// The user asking to join
@@ -54,7 +54,7 @@ impl From<sys::DiscordUser> for ActivityRequest {
 
 /// On Activity Invitation
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityinvite>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityinvite)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ActivityInvite {
     /// Whether the invitation is to play or spectate
@@ -83,7 +83,7 @@ impl From<SysActivityInvite> for ActivityInvite {
 
 /// On Lobby Update
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbyupdate>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbyupdate)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct LobbyUpdate {
     /// ID of the lobby
@@ -92,7 +92,7 @@ pub struct LobbyUpdate {
 
 /// On Lobby Deletion
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbydelete>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbydelete)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct LobbyDelete {
     /// ID of the lobby
@@ -103,7 +103,7 @@ pub struct LobbyDelete {
 
 /// On Member Connect
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberconnect>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberconnect)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct LobbyMemberConnect {
     /// ID of the lobby
@@ -114,7 +114,7 @@ pub struct LobbyMemberConnect {
 
 /// On Member Update
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberupdate>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberupdate)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct LobbyMemberUpdate {
     /// ID of the lobby
@@ -125,7 +125,7 @@ pub struct LobbyMemberUpdate {
 
 /// On Member Disconnect
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberdisconnect>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberdisconnect)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct LobbyMemberDisconnect {
     /// ID of the lobby
@@ -136,7 +136,7 @@ pub struct LobbyMemberDisconnect {
 
 /// On Lobby Message
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbymessage>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbymessage)
 #[derive(Clone, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct LobbyMessage {
     /// ID of the lobby
@@ -149,7 +149,7 @@ pub struct LobbyMessage {
 
 /// On Speaking
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#onspeaking>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onspeaking)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct LobbySpeaking {
     /// ID of the lobby
@@ -162,7 +162,7 @@ pub struct LobbySpeaking {
 
 /// On Lobby Network Message
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#onnetworkmessage>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onnetworkmessage)
 #[derive(Clone, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct LobbyNetworkMessage {
     /// ID of the lobby
@@ -177,7 +177,7 @@ pub struct LobbyNetworkMessage {
 
 /// On Network Message
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/networking#onmessage>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#onmessage)
 #[derive(Clone, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct NetworkMessage {
     /// The peer ID of the sender
@@ -190,7 +190,7 @@ pub struct NetworkMessage {
 
 /// On Route Update
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/networking#onrouteupdate>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#onrouteupdate)
 #[derive(Clone, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct NetworkRouteUpdate {
     /// The new route to the current user
@@ -199,7 +199,7 @@ pub struct NetworkRouteUpdate {
 
 /// On Overlay Toggle
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/overlay#ontoggle>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/overlay#ontoggle)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct OverlayToggle {
     /// Whether the overlay is open or closed
@@ -208,13 +208,13 @@ pub struct OverlayToggle {
 
 /// On Relationships Refresh
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct RelationshipsRefresh;
 
 /// On Relationship Update
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RelationshipUpdate {
     /// The relationship that updated
@@ -231,7 +231,7 @@ impl From<sys::DiscordRelationship> for RelationshipUpdate {
 
 /// On Store Entitlement Create
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct StoreEntitlementCreate {
     /// The entitlement that the user was granted
@@ -248,7 +248,7 @@ impl From<sys::DiscordEntitlement> for StoreEntitlementCreate {
 
 /// On Store Entitlement Delete
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct StoreEntitlementDelete {
     /// The entitlement that the user has lost
@@ -265,7 +265,7 @@ impl From<sys::DiscordEntitlement> for StoreEntitlementDelete {
 
 /// On Current User Update
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, derive_more::From)]
 pub struct CurrentUserUpdate;
 

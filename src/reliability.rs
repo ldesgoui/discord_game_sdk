@@ -1,6 +1,4 @@
 /// Network Channel Reliability
-///
-/// <https://discordapp.com/developers/docs/game-sdk/networking>
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Reliability {
     /// All data will be received

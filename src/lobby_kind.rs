@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Lobby Type
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbytype-enum>
+/// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#data-models-lobbytype-enum)
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum LobbyKind {
     /// Lobby is public

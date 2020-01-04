@@ -2,7 +2,7 @@ use crate::{sys, ImageKind};
 
 /// Image Handle
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/images#data-models-imagehandle-struct>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/images#data-models-imagehandle-struct)
 #[derive(Clone, Copy, Eq, Hash, PartialEq, derive_more::From, derive_more::Into)]
 #[repr(transparent)]
 pub struct ImageHandle(pub(crate) sys::DiscordImageHandle);

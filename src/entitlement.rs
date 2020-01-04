@@ -4,7 +4,7 @@ use crate::{sys, EntitlementKind};
 ///
 /// This must then be consumed by your game's backend
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/store#data-models-entitlement-struct>
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/store#data-models-entitlement-struct)
 #[derive(Clone, Copy, Eq, Hash, PartialEq, derive_more::From, derive_more::Into)]
 #[repr(transparent)]
 pub struct Entitlement(pub(crate) sys::DiscordEntitlement);

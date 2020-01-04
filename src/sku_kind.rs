@@ -2,7 +2,7 @@ use crate::sys;
 
 /// SKU Type
 ///
-/// <https://discordapp.com/developers/docs/game-sdk/store#data-models-skutype-enum>
+/// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/store#data-models-skutype-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SkuKind {
     /// SKU is a game
