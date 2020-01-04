@@ -39,33 +39,3 @@ impl std::fmt::Debug for UserAchievement {
             .finish()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::utils::write_charbuf;
-
-    #[test]
-    fn test_unlocked_at() {
-        run_test("");
-        run_test("1");
-        run_test("2");
-        run_test("64 characters 64 characters 64 characters 64 characters 64 chara");
-    }
-
-    #[test]
-    #[should_panic]
-    fn panic_test_unlocked_at() {
-        run_test("65 characters 65 characters 65 characters 65 characters 65 charac");
-    }
-
-    fn run_test(val: &str) {
-        let mut source = sys::DiscordUserAchievement::default();
-
-        write_charbuf(&mut source.unlocked_at, val);
-
-        let achievement = UserAchievement::from(source);
-
-        assert_eq!(achievement.unlocked_at(), val);
-    }
-}

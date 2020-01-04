@@ -36,3 +36,30 @@ pub(crate) fn charptr_to_str<'a>(ptr: *const c_uchar) -> &'a str {
         unsafe { std::str::from_utf8_unchecked(bytes) }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_write_charbuf() {
+        run_test("");
+        run_test("1");
+        run_test("10 charact");
+        run_test("64 characters 64 characters 64 characters 64 characters 64 chara");
+    }
+
+    #[test]
+    #[should_panic]
+    fn panic_test_write_charbuf() {
+        run_test("65 characters 65 characters 65 characters 65 characters 65 charac");
+    }
+
+    fn run_test(val: &str) {
+        let mut charbuf = [0u8; 64];
+
+        write_charbuf(&mut charbuf, val);
+
+        assert_eq!(charbuf_to_str(&charbuf), val);
+    }
+}
