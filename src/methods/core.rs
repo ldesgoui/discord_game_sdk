@@ -18,7 +18,7 @@ impl Discord<'_> {
     ///
     /// # const DISCORD_APPLICATION_ID: i64 = 0;
     ///
-    /// fn main() -> Result<()> {
+    /// fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///     let mut discord = Discord::new(DISCORD_APPLICATION_ID)?;
     ///
     ///     loop {
@@ -48,7 +48,7 @@ impl Discord<'_> {
     ///
     /// # const DISCORD_APPLICATION_ID: i64 = 0;
     ///
-    /// fn main() -> Result<()> {
+    /// fn main() -> Result<(), Box<dyn std::error::Error>> {
     ///     let mut discord =
     ///         Discord::with_create_flags(DISCORD_APPLICATION_ID, CreateFlags::NoRequireDiscord)?;
     ///
@@ -149,7 +149,7 @@ impl Discord<'_> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord) -> Result<()> {
+    /// # fn example(mut discord: Discord) -> Result<()> {
     /// loop { // main application loop
     ///     discord.empty_event_buffers();
     ///     discord.run_callbacks()?;
@@ -212,7 +212,7 @@ impl Discord<'_> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord) -> Result<()> {
+    /// # fn example(mut discord: Discord) -> Result<()> {
     /// loop { // main application loop
     ///     discord.empty_event_buffers();
     ///     discord.run_callbacks()?;
