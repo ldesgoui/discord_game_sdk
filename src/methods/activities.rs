@@ -36,6 +36,14 @@ impl<'a> Discord<'a> {
         .to_result()
     }
 
+    /// Used if you are distributing this SDK on Steam.
+    /// Registers your game's Steam app id for the protocol `steam://run-game-id/<id>`.
+    ///
+    /// <https://discordapp.com/developers/docs/game-sdk/activities#registersteam>
+    pub fn register_steam(&self, steam_id: u32) -> Result<()> {
+        unsafe { ffi!(self.get_activity_manager().register_steam(steam_id)) }.to_result()
+    }
+
     /// Sets a user's presence in Discord to a new activity.
     /// Certain fields are required in order to make use of optional features,
     /// [reference here](https://discordapp.com/developers/docs/game-sdk/activities#activity-action-field-requirements).
