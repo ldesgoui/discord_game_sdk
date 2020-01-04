@@ -39,6 +39,8 @@ impl<'a> Discord<'a> {
         percent_complete: u8,
         callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
     ) {
+        debug_assert!((0..=100).contains(&percent_complete));
+
         unsafe {
             ffi!(self
                 .get_achievement_manager()

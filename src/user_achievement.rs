@@ -20,6 +20,8 @@ impl UserAchievement {
 
     /// How far along the user is to completing the achievement [0..=100]
     pub fn percent_complete(&self) -> u8 {
+        debug_assert!((0..=100).contains(&self.0.percent_complete));
+
         self.0.percent_complete
     }
 

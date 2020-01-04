@@ -6,7 +6,8 @@ use crate::{
 
 /// Input Mode
 ///
-/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmode-struct)
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-inputmode-struct)  
+/// > [Shortcut keys in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys)
 #[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
 #[repr(transparent)]
 pub struct InputMode(pub(crate) sys::DiscordInputMode);
@@ -17,34 +18,39 @@ impl InputMode {
         self.0.type_.into()
     }
 
-    /// The combination of keys to transmit voice when kind is PushToTalk
+    /// The combination of keys to transmit voice when kind is [`PushToTalk`].
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys)
+    ///
+    /// [`PushToTalk`]: enum.InputModeKind.html#variant.PushToTalk
     pub fn shortcut(&self) -> &str {
         charbuf_to_str(&self.0.shortcut)
     }
 
-    /// Create a new, empty Input Mode
-    pub fn empty() -> Self {
-        Self::from(sys::DiscordInputMode::default())
-    }
-
-    /// The combination of keys to transmit voice when kind is PushToTalk
+    /// Create a new Input Mode with kind [`VoiceActivity`].
     ///
-    /// What triggers the voice to be sent
-    pub fn with_kind(&'_ mut self, kind: InputModeKind) -> &'_ mut Self {
-        self.0.type_ = kind.into();
-        self
+    /// [`VoiceActivity`]: enum.InputModeKind.html#variant.VoiceActivity
+    pub fn voice_activity() -> Self {
+        Self::from(sys::DiscordInputMode {
+            type_: sys::DiscordInputModeType_VoiceActivity,
+            ..Default::default()
+        })
     }
 
-    /// The combination of keys to transmit voice when `kind` is `PushToTalk`
+    /// Create a new Input Mode with kind [`PushToTalk`] and a shortcut.
     ///
     /// Only the first 256 bytes will be written.
     ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#data-models-shortcut-keys)
-    pub fn with_shortcut(&'_ mut self, value: &str) -> &'_ mut Self {
-        write_charbuf(&mut self.0.shortcut, value);
-        self
+    /// [`PushToTalk`]: enum.InputModeKind.html#variant.PushToTalk
+    pub fn push_to_talk(shortcut: &str) -> Self {
+        let mut charbuf = [0u8; 256];
+
+        write_charbuf(&mut charbuf, shortcut);
+
+        Self::from(sys::DiscordInputMode {
+            type_: sys::DiscordInputModeType_PushToTalk,
+            shortcut: charbuf,
+        })
     }
 }
 
