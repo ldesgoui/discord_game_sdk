@@ -21,6 +21,13 @@ impl<'a> Discord<'a> {
     /// A nul byte will be appended to `command` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#registercommand>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.register_launch_command("my-awesome-game://run --full-screen")?;
+    /// # Ok(()) }
+    /// ```
     pub fn register_launch_command<'b>(&self, command: impl Into<Cow<'b, str>>) -> Result<()> {
         let mut command = command.into();
 
@@ -40,6 +47,18 @@ impl<'a> Discord<'a> {
     /// Registers your game's Steam app id for the protocol `steam://run-game-id/<id>`.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#registersteam>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// # let now = 0;
+    /// discord.clear_activity(|discord, result| {
+    ///     if let Err(error) = result {
+    ///         eprintln!("failed to clear activity: {}", error);
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn register_steam(&self, steam_id: u32) -> Result<()> {
         unsafe { ffi!(self.get_activity_manager().register_steam(steam_id)) }.to_result()
     }
@@ -54,6 +73,23 @@ impl<'a> Discord<'a> {
     /// Presence set through this SDK may not be visible when this setting is toggled off.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#updateactivity>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// # let now = 0;
+    /// discord.update_activity(
+    ///     &Activity::empty()
+    ///         .with_state("On Main Menu")
+    ///         .with_start_time(now),
+    ///     |discord, result| {
+    ///         if let Err(error) = result {
+    ///             eprintln!("failed to update activity: {}", error);
+    ///         }
+    ///     },
+    /// );
+    /// # Ok(()) }
+    /// ```
     pub fn update_activity(
         &self,
         activity: &Activity,
@@ -73,6 +109,18 @@ impl<'a> Discord<'a> {
     /// Clear's a user's presence in Discord to make it show nothing.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#clearactivity>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// # let now = 0;
+    /// discord.clear_activity(|discord, result| {
+    ///     if let Err(error) = result {
+    ///         eprintln!("failed to clear activity: {}", error);
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn clear_activity(&self, callback: impl 'a + FnMut(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
@@ -85,6 +133,25 @@ impl<'a> Discord<'a> {
     /// Sends a reply to an Ask to Join request.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#sendrequestreply>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// for request in discord.recv_activities_request() {
+    ///     println!(
+    ///         "received join request from {}#{}",
+    ///         request.user.username(),
+    ///         request.user.discriminator()
+    ///     );
+    ///
+    ///     discord.send_request_reply(request.user.id(), RequestReply::Yes, |discord, result| {
+    ///         if let Err(error) = result {
+    ///             eprintln!("failed replying: {}", error);
+    ///         }
+    ///     });
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn send_request_reply(
         &self,
         user_id: i64,
@@ -105,6 +172,23 @@ impl<'a> Discord<'a> {
     /// A nul byte will be appended to `content` if necessary.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#sendinvite>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// # let friend = User::from(discord_game_sdk_sys::DiscordUser::default());
+    /// discord.send_invite(
+    ///     friend.id(),
+    ///     Action::Join,
+    ///     "Let's play some Survival!\0",
+    ///     |discord, result| {
+    ///         if let Err(error) = result {
+    ///             eprintln!("failed inviting: {}", error);
+    ///         }
+    ///     },
+    /// );
+    /// # Ok(()) }
+    /// ```
     pub fn send_invite<'b>(
         &self,
         user_id: i64,
@@ -129,6 +213,26 @@ impl<'a> Discord<'a> {
     /// Accepts a user's game invitation.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#acceptinvite>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// for request in discord.recv_activities_invite() {
+    ///     println!(
+    ///         "received invitation to {} from {}#{}",
+    ///         if request.action == Action::Join { "join" } else { "spectate" },
+    ///         request.user.username(),
+    ///         request.user.discriminator()
+    ///     );
+    ///
+    ///     discord.accept_invite(request.user.id(), |discord, result| {
+    ///         if let Err(error) = result {
+    ///             eprintln!("failed to accept invite: {}", error);
+    ///         }
+    ///     });
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn accept_invite(&self, user_id: i64, callback: impl 'a + FnMut(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
@@ -142,6 +246,24 @@ impl<'a> Discord<'a> {
     /// or receives confirmation from Asking to Join.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoin>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// if let Some(join) = discord.recv_activities_join().next() {
+    ///     println!("joining a game");
+    ///
+    ///     discord.connect_lobby_with_activity_secret(join.secret, |discord, lobby| {
+    ///         match lobby {
+    ///             Err(error) => eprintln!("failed connecting to lobby: {}", error),
+    ///             Ok(lobby) => {
+    ///                 // Update activity, connect to voice and network, etc.
+    ///             }
+    ///         }
+    ///     });
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn recv_activities_join(&self) -> impl '_ + Iterator<Item = event::ActivityJoin> {
         self.receivers.activities_join.try_iter()
     }
@@ -150,6 +272,23 @@ impl<'a> Discord<'a> {
     /// or clicks the Spectate button on another user's profile.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// if let Some(spectate) = discord.recv_activities_spectate().next() {
+    ///     println!("spectating a game");
+    ///
+    ///     discord.connect_lobby_with_activity_secret(spectate.secret, |discord, lobby| {
+    ///         match lobby {
+    ///             Err(error) => eprintln!("failed connecting to lobby: {}", error),
+    ///             Ok(lobby) => {
+    ///                 // Update activity, connect to voice and network, etc.
+    ///             }
+    ///         }
+    ///     });
+    /// }
+    /// # Ok(()) }
     pub fn recv_activities_spectate(&self) -> impl '_ + Iterator<Item = event::ActivitySpectate> {
         self.receivers.activities_spectate.try_iter()
     }
@@ -157,6 +296,25 @@ impl<'a> Discord<'a> {
     /// Fires when a user asks to join the game of the current user.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoinrequest>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// for request in discord.recv_activities_request() {
+    ///     println!(
+    ///         "received join request from {}#{}",
+    ///         request.user.username(),
+    ///         request.user.discriminator()
+    ///     );
+    ///
+    ///     discord.send_request_reply(request.user.id(), RequestReply::Yes, |discord, result| {
+    ///         if let Err(error) = result {
+    ///             eprintln!("failed replying: {}", error);
+    ///         }
+    ///     });
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn recv_activities_request(&self) -> impl '_ + Iterator<Item = event::ActivityRequest> {
         self.receivers.activities_request.try_iter()
     }
@@ -164,6 +322,26 @@ impl<'a> Discord<'a> {
     /// Fires when the current user receives an invitation to join or spectate.
     ///
     /// <https://discordapp.com/developers/docs/game-sdk/activities#onactivityinvite>
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// for request in discord.recv_activities_invite() {
+    ///     println!(
+    ///         "received invitation to {} from {}#{}",
+    ///         if request.action == Action::Join { "join" } else { "spectate" },
+    ///         request.user.username(),
+    ///         request.user.discriminator()
+    ///     );
+    ///
+    ///     discord.accept_invite(request.user.id(), |discord, result| {
+    ///         if let Err(error) = result {
+    ///             eprintln!("failed to accept invite: {}", error);
+    ///         }
+    ///     });
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn recv_activities_invite(&self) -> impl '_ + Iterator<Item = event::ActivityInvite> {
         self.receivers.activities_invite.try_iter()
     }
