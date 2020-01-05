@@ -2,7 +2,7 @@ use crate::sys;
 
 /// Alias for a `Result` with the error type [`discord_game_sdk::Error`]
 ///
-/// [`discord_game_sdk::Error`](struct.Error.html)
+/// [`discord_game_sdk::Error`]: enum.Error.html
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Discord Error
@@ -10,15 +10,15 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/discord#data-models-result-enum)
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, err_derive::Error)]
 pub enum Error {
-    /// Service unavailable
+    /// Discord isn't working
     #[error(display = "service unavailable")]
     ServiceUnavailable,
 
-    /// Invalid version
+    /// The SDK version is outdated
     #[error(display = "invalid version")]
     InvalidVersion,
 
-    /// Lock failed
+    /// An internal erorr on transactional operations
     #[error(display = "lock failed")]
     LockFailed,
 
@@ -38,7 +38,7 @@ pub enum Error {
     #[error(display = "invalid permissions")]
     InvalidPermissions,
 
-    /// Not fetched
+    /// Could not fetch
     #[error(display = "not fetched")]
     NotFetched,
 
@@ -46,19 +46,19 @@ pub enum Error {
     #[error(display = "not found")]
     NotFound,
 
-    /// Conflict
+    /// User already has network connection open on that channel
     #[error(display = "conflict")]
     Conflict,
 
-    /// Invalid secret
+    /// Activity secrets must be unique and not match party id
     #[error(display = "invalid secret")]
     InvalidSecret,
 
-    /// Invalid join secret
+    /// Join request for that user does not exist
     #[error(display = "invalid join secret")]
     InvalidJoinSecret,
 
-    /// No eligible activity
+    /// Invalid Application ID in Activity payload (none should be set)
     #[error(display = "no eligible activity")]
     NoEligibleActivity,
 
@@ -70,23 +70,23 @@ pub enum Error {
     #[error(display = "not authenticated")]
     NotAuthenticated,
 
-    /// Invalid access token
+    /// The user's bearer token is invalid
     #[error(display = "invalid access token")]
     InvalidAccessToken,
 
-    /// Application mismatch
+    /// Access token belongs to another application
     #[error(display = "application mismatch")]
     ApplicationMismatch,
 
-    /// Invalid data URL
+    /// Internal error fetching image data
     #[error(display = "invalid data URL")]
     InvalidDataUrl,
 
-    /// Invalid base-64
+    /// Invalid base64 data
     #[error(display = "invalid base-64")]
     InvalidBase64,
 
-    /// Not filtered
+    /// Trying to access data before it was filtered
     #[error(display = "not filtered")]
     NotFiltered,
 
@@ -98,11 +98,11 @@ pub enum Error {
     #[error(display = "invalid lobby secret")]
     InvalidLobbySecret,
 
-    /// Invalid filename
+    /// Filename is too long
     #[error(display = "invalid filename")]
     InvalidFilename,
 
-    /// Invalid file size
+    /// File is too big
     #[error(display = "invalid file size")]
     InvalidFileSize,
 
@@ -110,11 +110,11 @@ pub enum Error {
     #[error(display = "invalid entitlement")]
     InvalidEntitlement,
 
-    /// Not installed
+    /// Discord is not installed
     #[error(display = "not installed")]
     NotInstalled,
 
-    /// Not running
+    /// Discord is not running
     #[error(display = "not running")]
     NotRunning,
 
