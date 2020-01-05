@@ -62,6 +62,9 @@ this is tested in CI, just in case we break it.
     Provides the linker with a copy of the dynamic library.
     This allows for `cargo run` to run with no additional setup on Linux and Windows.
 
+- [`image`](https://docs.rs/image): (optional crate)
+    Provides a conversion between our image buffer and `image::RgbaImage`.
+
 
 ## Safety
 

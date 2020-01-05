@@ -46,3 +46,11 @@ impl Image {
         )
     }
 }
+
+#[cfg(feature = "image")]
+impl Into<image::RgbaImage> for Image {
+    fn into(self) -> image::RgbaImage {
+        image::RgbaImage::from_raw(self.width, self.height, self.data)
+            .expect("discord_game_sdk: invalid size for image buffer")
+    }
+}
