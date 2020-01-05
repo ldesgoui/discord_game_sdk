@@ -175,7 +175,9 @@ impl<'a> Discord<'a> {
         unsafe { ffi!(self.get_voice_manager().set_local_mute(user_id, muted)) }.to_result()
     }
 
-    /// Sets the local volume for a given user, in the range `[0..=200]`, `100` being the default.
+    /// Sets the local volume for a given user.
+    ///
+    /// In the range `[0..=200]`, `100` being the default.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#setlocalvolume)
     ///
@@ -192,6 +194,15 @@ impl<'a> Discord<'a> {
     }
 
     /// Fires when the current user has updated their voice settings.
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// if discord.recv_voice_settings_update().count() > 0 {
+    ///     // ...
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn recv_voice_settings_update(
         &self,
     ) -> impl '_ + Iterator<Item = event::VoiceSettingsUpdate> {
