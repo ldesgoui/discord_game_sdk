@@ -159,7 +159,9 @@ impl Discord<'_> {
     pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()?;
 
-        let callbacks = unsafe { &mut *self.callbacks.get() };
+        let cell = std::mem::replace(&mut self.callbacks, Default::default());
+
+        let mut callbacks = cell.into_inner();
 
         // https://github.com/rust-lang/rust/issues/43244
         let mut i = 0;
@@ -171,6 +173,8 @@ impl Discord<'_> {
                 i += 1;
             }
         }
+
+        unsafe { (*self.callbacks.get()).extend(callbacks) };
 
         Ok(())
     }

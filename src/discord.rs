@@ -1,4 +1,5 @@
 use crate::{callbacks::AnyCallback, channels, sys};
+use std::cell::UnsafeCell;
 
 /// Main interface with SDK
 ///
@@ -29,12 +30,14 @@ pub struct Discord<'a> {
     #[allow(dead_code)]
     pub(crate) senders: Box<channels::Senders>,
     pub(crate) receivers: channels::Receivers,
-    pub(crate) callbacks: std::cell::UnsafeCell<Vec<Box<dyn AnyCallback + 'a>>>,
+    pub(crate) callbacks: UnsafeCell<Vec<Box<dyn AnyCallback + 'a>>>,
 }
 
 impl<'a> Discord<'a> {
     pub(crate) fn register_callback(&self, callback: impl AnyCallback + 'a) {
-        unsafe { &mut *self.callbacks.get() }.push(Box::new(callback))
+        let callbacks = unsafe { &mut *self.callbacks.get() };
+
+        callbacks.push(Box::new(callback))
     }
 }
 
