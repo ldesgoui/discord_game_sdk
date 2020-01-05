@@ -115,6 +115,7 @@ impl Discord<'_> {
     }
 
     /// Fires when you receive data from another user.
+    ///
     /// This callback will only fire if you already have an open channel with the user sending you data.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#onmessage)

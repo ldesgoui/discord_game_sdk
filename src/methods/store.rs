@@ -16,6 +16,21 @@ impl<'a> Discord<'a> {
     /// If you aren't seeing any SKUs being returned, make sure they have a price set.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#fetchskus)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_skus(|discord, result| {
+    ///     if let Err(error) = result {
+    ///         return eprintln!("failed to fetch skus: {}", error);
+    ///     }
+    ///
+    ///     for sku in discord.iter_skus() {
+    ///         // ..
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn fetch_skus(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
@@ -30,6 +45,25 @@ impl<'a> Discord<'a> {
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getsku)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # const SKU_ID: i64 = 0;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_skus(|discord, result| {
+    ///     if let Err(error) = result {
+    ///         return eprintln!("failed to fetch skus: {}", error);
+    ///     }
+    ///
+    ///     match discord.sku(SKU_ID) {
+    ///         Ok(sku) => {
+    ///             // ...
+    ///         },
+    ///         Err(error) => eprintln!("failed to get sku: {}", error),
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn sku(&self, id: i64) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
@@ -41,6 +75,8 @@ impl<'a> Discord<'a> {
     /// Returns the number of SKUs available.
     ///
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
+    ///
+    /// Prefer using [`iter_skus`](#method.iter_skus).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countskus)
     pub fn sku_count(&self) -> usize {
@@ -54,6 +90,8 @@ impl<'a> Discord<'a> {
     /// Returns the SKU at a given index.
     ///
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
+    ///
+    /// Prefer using [`iter_skus`](#method.iter_skus).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getskuat)  
     pub fn sku_at(&self, index: usize) -> Result<Sku> {
@@ -73,8 +111,20 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_skus`](#method.fetch_skus) must have completed first.
     ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countskus)
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getskuat)  
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_skus(|discord, result| {
+    ///     if let Err(error) = result {
+    ///         return eprintln!("failed to fetch skus: {}", error);
+    ///     }
+    ///
+    ///     for sku in discord.iter_skus() {
+    ///         // ..
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn iter_skus<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Sku>> {
         let count = self.sku_count();
 
@@ -87,6 +137,21 @@ impl<'a> Discord<'a> {
     /// Consumables will be returned until they are consumed by the application via the HTTP endpoint.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#fetchentitlements)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_entitlements(|discord, result| {
+    ///     if let Err(error) = result {
+    ///         return eprintln!("failed to fetch entitlements: {}", error);
+    ///     }
+    ///
+    ///     for entitlement in discord.iter_entitlements() {
+    ///         // ..
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn fetch_entitlements(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
@@ -101,6 +166,25 @@ impl<'a> Discord<'a> {
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getentitlement)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # const ENTITLEMENT_ID: i64 = 0;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_entitlements(|discord, result| {
+    ///     if let Err(error) = result {
+    ///         return eprintln!("failed to fetch entitlements: {}", error);
+    ///     }
+    ///
+    ///     match discord.entitlement(ENTITLEMENT_ID) {
+    ///         Ok(entitlement) => {
+    ///             // ...
+    ///         },
+    ///         Err(error) => eprintln!("failed to get entitlement: {}", error),
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn entitlement(&self, id: i64) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
@@ -118,6 +202,8 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
+    /// Prefer using [`iter_entitlements`](#method.iter_entitlements).
+    ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countentitlements)
     pub fn entitlement_count(&self) -> usize {
         let mut count = 0;
@@ -130,6 +216,8 @@ impl<'a> Discord<'a> {
     /// Returns Entitlement at a given index.
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
+    ///
+    /// Prefer using [`iter_entitlements`](#method.iter_entitlements).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getentitlementat)  
     pub fn entitlement_at(&self, index: usize) -> Result<Entitlement> {
@@ -149,8 +237,20 @@ impl<'a> Discord<'a> {
     ///
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countentitlements)
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getentitlementat)  
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.fetch_entitlements(|discord, result| {
+    ///     if let Err(error) = result {
+    ///         return eprintln!("failed to fetch entitlements: {}", error);
+    ///     }
+    ///
+    ///     for entitlement in discord.iter_entitlements() {
+    ///         // ..
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn iter_entitlements<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Entitlement>> {
         let count = self.entitlement_count();
 
@@ -162,6 +262,16 @@ impl<'a> Discord<'a> {
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#hasskuentitlement)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # const ENTITLEMENT_ID: i64 = 0;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// if discord.has_entitlement(ENTITLEMENT_ID)? {
+    ///     // ..
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn has_entitlement(&self, sku_id: i64) -> Result<bool> {
         let mut has_entitlement = false;
 
@@ -180,6 +290,18 @@ impl<'a> Discord<'a> {
     /// [`fetch_entitlements`](#method.fetch_entitlements) must have completed first.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#startpurchase)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # const SKU_ID: i64 = 0;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// discord.start_purchase(SKU_ID, |discord, result| {
+    ///     if let Err(error) = result {
+    ///         return eprintln!("failed to start purchase: {}", error);
+    ///     }
+    /// });
+    /// # Ok(()) }
+    /// ```
     pub fn start_purchase(&self, sku_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
         unsafe {
             ffi!(self
@@ -193,6 +315,16 @@ impl<'a> Discord<'a> {
     /// either through purchase or through a developer grant.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # const SKU_ID: i64 = 0;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// for ev in discord.recv_store_entitlement_create() {
+    ///     // ...
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn recv_store_entitlement_create(
         &self,
     ) -> impl '_ + Iterator<Item = event::StoreEntitlementCreate> {
@@ -203,6 +335,16 @@ impl<'a> Discord<'a> {
     /// either by expiration, revocation, or consumption in the case of consumable entitlements.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete)
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # const SKU_ID: i64 = 0;
+    /// # fn example(discord: Discord) -> Result<()> {
+    /// for ev in discord.recv_store_entitlement_delete() {
+    ///     // ...
+    /// }
+    /// # Ok(()) }
+    /// ```
     pub fn recv_store_entitlement_delete(
         &self,
     ) -> impl '_ + Iterator<Item = event::StoreEntitlementDelete> {
