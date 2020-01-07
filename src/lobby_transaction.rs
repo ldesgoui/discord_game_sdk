@@ -1,4 +1,4 @@
-use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, LobbyKind, Result};
+use crate::{sys, to_result::ToResult, utils::MacroHelper, LobbyKind, Result};
 use std::collections::HashMap;
 
 /// Lobby Transaction
@@ -87,7 +87,7 @@ impl LobbyTransaction {
     }
 
     pub(crate) unsafe fn process(&self, ptr: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
-        let tx = MacroHelper { core: ptr };
+        let tx = MacroHelper::new(ptr);
 
         if let Some(kind) = self.kind {
             ffi!(tx.set_type(kind.into())).to_result()?;

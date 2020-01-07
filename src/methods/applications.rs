@@ -1,7 +1,7 @@
 use crate::{
-    callbacks::{ResultCallback, ResultFromPtrCallback, ResultStringCallback},
     sys,
-    utils::charbuf_to_str,
+    to_result::ToResult,
+    utils::{charbuf_to_str, charptr_to_str},
     Discord, OAuth2Token, Result,
 };
 use std::mem::size_of;
@@ -11,7 +11,7 @@ use std::mem::size_of;
 /// Authentication and various helper functions
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/applications)
-impl<'a> Discord<'a> {
+impl Discord {
     /// The locale that was set by the current user in their Discord settings.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/applications#getcurrentlocale)
@@ -68,12 +68,12 @@ impl<'a> Discord<'a> {
     ///     // ...
     /// });
     /// # Ok(()) }
-    pub fn validate_or_exit(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn validate_or_exit(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_application_manager()
                 .validate_or_exit()
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -98,12 +98,15 @@ impl<'a> Discord<'a> {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn oauth2_token(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<OAuth2Token>)) {
+    pub fn oauth2_token(&self, callback: impl 'static + FnOnce(&Discord, Result<&OAuth2Token>)) {
         unsafe {
-            ffi!(self
-                .get_application_manager()
-                .get_oauth2_token()
-                .and_then(ResultFromPtrCallback::new(callback)))
+            ffi!(self.get_application_manager().get_oauth2_token().and_then(
+                |res: sys::EDiscordResult, token: *mut sys::DiscordOAuth2Token| {
+                    callback::<Result<&OAuth2Token>>(
+                        res.to_result().map(|()| &*(token as *mut OAuth2Token)),
+                    )
+                }
+            ))
         }
     }
 
@@ -123,12 +126,13 @@ impl<'a> Discord<'a> {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn app_ticket(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<String>)) {
+    pub fn app_ticket(&self, callback: impl 'static + FnOnce(&Discord, Result<&str>)) {
         unsafe {
-            ffi!(self
-                .get_application_manager()
-                .get_ticket()
-                .and_then(ResultStringCallback::new(callback)))
+            ffi!(self.get_application_manager().get_ticket().and_then(
+                |res: sys::EDiscordResult, string: *const u8| {
+                    callback::<Result<&str>>(res.to_result().map(|()| charptr_to_str(string)))
+                }
+            ))
         }
     }
 }

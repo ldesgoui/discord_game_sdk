@@ -1,9 +1,6 @@
 use crate::{
-    callbacks::{ResultCallback, ResultFromPtrCallback},
-    event, iter, sys,
-    to_result::ToResult,
-    utils::charbuf_to_str,
-    Discord, Lobby, LobbyMemberTransaction, LobbyTransaction, Reliability, Result, SearchQuery,
+    iter, sys, to_result::ToResult, utils::charbuf_to_str, Discord, Lobby, LobbyMemberTransaction,
+    LobbyTransaction, Reliability, Result, SearchQuery,
 };
 use std::{
     borrow::Cow,
@@ -20,7 +17,7 @@ use std::{
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/lobbies#the-api-way).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Create a new lobby. The current user will automatically join and become the owner.
     ///
     /// [`LobbyTransaction::owner`](struct.LobbyTransaction.html#method.owner) *MUST NOT* be called.
@@ -29,7 +26,7 @@ impl<'a> Discord<'a> {
     pub fn create_lobby(
         &self,
         transaction: &LobbyTransaction,
-        mut callback: impl 'a + FnMut(&Discord<'_>, Result<Lobby>),
+        callback: impl 'static + FnOnce(&Discord, Result<&Lobby>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -47,10 +44,11 @@ impl<'a> Discord<'a> {
         }
 
         unsafe {
-            ffi!(self
-                .get_lobby_manager()
-                .create_lobby(ptr)
-                .and_then(ResultFromPtrCallback::new(callback)))
+            ffi!(self.get_lobby_manager().create_lobby(ptr).and_then(
+                |res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                    callback::<Result<&Lobby>>(res.to_result().map(|()| &*(lobby as *mut Lobby)))
+                }
+            ))
         }
     }
 
@@ -61,7 +59,7 @@ impl<'a> Discord<'a> {
         &self,
         lobby_id: i64,
         transaction: &LobbyTransaction,
-        mut callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -82,19 +80,23 @@ impl<'a> Discord<'a> {
             ffi!(self
                 .get_lobby_manager()
                 .update_lobby(lobby_id, ptr)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
     /// Deletes a given lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#deletelobby)
-    pub fn delete_lobby(&self, lobby_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn delete_lobby(
+        &self,
+        lobby_id: i64,
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
+    ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .delete_lobby(lobby_id)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -108,7 +110,7 @@ impl<'a> Discord<'a> {
         &self,
         lobby_id: i64,
         secret: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<Lobby>),
+        callback: impl 'static + FnOnce(&Discord, Result<&Lobby>),
     ) {
         let mut secret = secret.into();
 
@@ -124,7 +126,9 @@ impl<'a> Discord<'a> {
                     // XXX: *mut should be *const
                     secret.as_ptr() as *mut _
                 )
-                .and_then(ResultFromPtrCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                    callback::<Result<&Lobby>>(res.to_result().map(|()| &*(lobby as *mut Lobby)))
+                }))
         }
     }
 
@@ -137,7 +141,7 @@ impl<'a> Discord<'a> {
     pub fn connect_lobby_with_activity_secret<'b>(
         &self,
         activity_secret: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<Lobby>),
+        callback: impl 'static + FnOnce(&Discord, Result<&Lobby>),
     ) {
         let mut activity_secret = activity_secret.into();
 
@@ -152,7 +156,9 @@ impl<'a> Discord<'a> {
                     // XXX: *mut should be *const
                     activity_secret.as_ptr() as *mut _
                 )
-                .and_then(ResultFromPtrCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                    callback::<Result<&Lobby>>(res.to_result().map(|()| &*(lobby as *mut Lobby)))
+                }))
         }
     }
 
@@ -162,13 +168,13 @@ impl<'a> Discord<'a> {
     pub fn disconnect_lobby(
         &self,
         lobby_id: i64,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .disconnect_lobby(lobby_id)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -285,13 +291,13 @@ impl<'a> Discord<'a> {
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount)  
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey)  
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue)
-    pub fn iter_lobby_metadata<'b>(
-        &'b self,
+    pub fn iter_lobby_metadata(
+        &self,
         lobby_id: i64,
-    ) -> Result<iter::GenericIter<'a, 'b, Result<(String, String)>>> {
+    ) -> Result<iter::Collection<Result<(String, String)>>> {
         let count = self.lobby_metadata_count(lobby_id)?;
 
-        Ok(iter::GenericIter::new(
+        Ok(iter::Collection::new(
             self,
             Box::new(move |d, i| d.lobby_metadata_at(lobby_id, i)),
             count,
@@ -306,7 +312,7 @@ impl<'a> Discord<'a> {
         lobby_id: i64,
         user_id: i64,
         transaction: &LobbyMemberTransaction,
-        mut callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -327,7 +333,7 @@ impl<'a> Discord<'a> {
             ffi!(self
                 .get_lobby_manager()
                 .update_member(lobby_id, user_id, ptr)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -364,13 +370,10 @@ impl<'a> Discord<'a> {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#membercount)  
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid)
-    pub fn iter_lobby_member_ids<'b>(
-        &'b self,
-        lobby_id: i64,
-    ) -> Result<iter::GenericIter<'a, 'b, Result<i64>>> {
+    pub fn iter_lobby_member_ids(&self, lobby_id: i64) -> Result<iter::Collection<Result<i64>>> {
         let count = self.lobby_member_count(lobby_id)?;
 
-        Ok(iter::GenericIter::new(
+        Ok(iter::Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_id_at(lobby_id, i)),
             count,
@@ -471,14 +474,14 @@ impl<'a> Discord<'a> {
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount)  
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey)
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue)
-    pub fn iter_lobby_member_metadata<'b>(
-        &'b self,
+    pub fn iter_lobby_member_metadata(
+        &self,
         lobby_id: i64,
         user_id: i64,
-    ) -> Result<iter::GenericIter<'a, 'b, Result<(String, String)>>> {
+    ) -> Result<iter::Collection<Result<(String, String)>>> {
         let count = self.lobby_member_metadata_count(lobby_id, user_id)?;
 
-        Ok(iter::GenericIter::new(
+        Ok(iter::Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i)),
             count,
@@ -496,7 +499,7 @@ impl<'a> Discord<'a> {
         &self,
         lobby_id: i64,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         let buffer = buffer.as_ref();
 
@@ -511,7 +514,7 @@ impl<'a> Discord<'a> {
                     buffer.as_ptr() as *mut _,
                     buffer.len() as u32
                 )
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -524,7 +527,7 @@ impl<'a> Discord<'a> {
     pub fn lobby_search(
         &self,
         search: &SearchQuery,
-        mut callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -542,7 +545,7 @@ impl<'a> Discord<'a> {
             ffi!(self
                 .get_lobby_manager()
                 .search(ptr)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -583,10 +586,10 @@ impl<'a> Discord<'a> {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount)
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid)
-    pub fn iter_lobbies<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<i64>> {
+    pub fn iter_lobbies(&self) -> iter::Collection<Result<i64>> {
         let count = self.lobby_count();
 
-        iter::GenericIter::new(self, Box::new(|d, i| d.lobby_id_at(i)), count)
+        iter::Collection::new(self, Box::new(|d, i| d.lobby_id_at(i)), count)
     }
 
     /// Connects to the voice channel of the current lobby.
@@ -597,13 +600,13 @@ impl<'a> Discord<'a> {
     pub fn connect_lobby_voice(
         &self,
         lobby_id: i64,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .connect_voice(lobby_id)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -613,13 +616,13 @@ impl<'a> Discord<'a> {
     pub fn disconnect_lobby_voice(
         &self,
         lobby_id: i64,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .disconnect_voice(lobby_id)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -688,69 +691,5 @@ impl<'a> Discord<'a> {
             ))
         }
         .to_result()
-    }
-
-    /// Fires when a lobby is updated.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbyupdate)
-    pub fn recv_lobbies_update(&self) -> impl '_ + Iterator<Item = event::LobbyUpdate> {
-        self.receivers.lobbies_update.try_iter()
-    }
-
-    /// Fired when a lobby is deleted.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbydelete)
-    pub fn recv_lobbies_delete(&self) -> impl '_ + Iterator<Item = event::LobbyDelete> {
-        self.receivers.lobbies_delete.try_iter()
-    }
-
-    /// Fires when a new member joins the lobby.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberconnect)
-    pub fn recv_lobbies_member_connect(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::LobbyMemberConnect> {
-        self.receivers.lobbies_member_connect.try_iter()
-    }
-
-    /// Fires when data for a lobby member is updated.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberupdate)
-    pub fn recv_lobbies_member_update(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::LobbyMemberUpdate> {
-        self.receivers.lobbies_member_update.try_iter()
-    }
-
-    /// Fires when a member leaves the lobby.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onmemberdisconnect)
-    pub fn recv_lobbies_member_disconnect(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::LobbyMemberDisconnect> {
-        self.receivers.lobbies_member_disconnect.try_iter()
-    }
-
-    /// Fires when a message is sent to the lobby.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onlobbymessage)
-    pub fn recv_lobbies_message(&self) -> impl '_ + Iterator<Item = event::LobbyMessage> {
-        self.receivers.lobbies_message.try_iter()
-    }
-
-    /// Fires when a user connected to voice starts or stops speaking.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onspeaking)
-    pub fn recv_lobbies_speaking(&self) -> impl '_ + Iterator<Item = event::LobbySpeaking> {
-        self.receivers.lobbies_speaking.try_iter()
-    }
-
-    /// Fires when the user receives a message from the lobby's networking layer.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#onnetworkmessage)
-    pub fn recv_lobbies_network_message(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::LobbyNetworkMessage> {
-        self.receivers.lobbies_network_message.try_iter()
     }
 }

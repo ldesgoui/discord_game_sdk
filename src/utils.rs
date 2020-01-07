@@ -1,4 +1,32 @@
-use std::os::raw::c_uchar;
+use crate::discord::{Discord, DiscordInner};
+use std::{ops::Deref, os::raw::c_uchar};
+
+pub(crate) struct CallbackData<T> {
+    pub(crate) discord: *const DiscordInner,
+    pub(crate) callback: Box<dyn FnOnce(&Discord, T)>,
+}
+
+impl<T> CallbackData<T> {
+    pub(crate) fn new(
+        discord: &Discord,
+        callback: impl 'static + FnOnce(&Discord, T),
+    ) -> Box<Self> {
+        Box::new(Self {
+            discord: discord.0.deref() as *const _,
+            callback: Box::new(callback),
+        })
+    }
+}
+
+pub(crate) struct MacroHelper<T> {
+    pub(crate) core: *mut T,
+}
+
+impl<T> MacroHelper<T> {
+    pub(crate) fn new(core: *mut T) -> (Self,) {
+        (Self { core },)
+    }
+}
 
 pub(crate) fn charbuf_to_str(charbuf: &[c_uchar]) -> &str {
     let bytes = &charbuf[..charbuf_len(charbuf)];

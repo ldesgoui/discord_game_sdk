@@ -1,16 +1,10 @@
-use crate::{
-    callbacks::{ResultBytesCallback, ResultCallback},
-    iter, sys,
-    to_result::ToResult,
-    utils::charbuf_to_str,
-    Discord, FileStat, Result,
-};
+use crate::{iter, sys, to_result::ToResult, utils::charbuf_to_str, Discord, FileStat, Result};
 use std::{borrow::Cow, convert::TryFrom, mem::size_of};
 
 /// # Storage
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/storage)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Reads data synchronously from the game's allocated save file into a buffer.
     /// The file is mapped by key-value pair, and this function will read data that exists
     /// for the given key name.
@@ -59,7 +53,7 @@ impl<'a> Discord<'a> {
     pub fn read_file_async<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<Vec<u8>>),
+        callback: impl 'static + FnOnce(&Discord, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -71,7 +65,12 @@ impl<'a> Discord<'a> {
             ffi!(self
                 .get_storage_manager()
                 .read_async(filename.as_ptr())
-                .and_then(ResultBytesCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
+                    callback::<Result<&[u8]>>(
+                        res.to_result()
+                            .map(|()| std::slice::from_raw_parts(data, data_len as usize)),
+                    )
+                }))
         }
     }
 
@@ -86,7 +85,7 @@ impl<'a> Discord<'a> {
         filename: impl Into<Cow<'b, str>>,
         offset: usize,
         length: usize,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<Vec<u8>>),
+        callback: impl 'static + FnOnce(&Discord, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -104,7 +103,12 @@ impl<'a> Discord<'a> {
                     // XXX: u64 should be usize
                     length as u64
                 )
-                .and_then(ResultBytesCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
+                    callback::<Result<&[u8]>>(
+                        res.to_result()
+                            .map(|()| std::slice::from_raw_parts(data, data_len as usize)),
+                    )
+                }))
         }
     }
 
@@ -153,7 +157,7 @@ impl<'a> Discord<'a> {
         &self,
         filename: impl Into<Cow<'b, str>>,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         let mut filename = filename.into();
 
@@ -175,7 +179,7 @@ impl<'a> Discord<'a> {
                     // XXX: u32 should be usize
                     buffer.len() as u32
                 )
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -276,10 +280,10 @@ impl<'a> Discord<'a> {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#count)
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#statat)  
-    pub fn iter_file_stats<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<FileStat>> {
+    pub fn iter_file_stats(&self) -> iter::Collection<Result<FileStat>> {
         let count = self.file_stat_count();
 
-        iter::GenericIter::new(self, Box::new(|d, i| d.file_stat_at(i)), count)
+        iter::Collection::new(self, Box::new(|d, i| d.file_stat_at(i)), count)
     }
 
     /// Returns the path to the folder where files are stored.

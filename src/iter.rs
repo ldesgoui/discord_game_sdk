@@ -1,18 +1,20 @@
+//! Iterator facilities
+
 use crate::Discord;
 
-/// A reusable Iterator for the SDK's methods to acquire collections.
-pub struct GenericIter<'a, 'b, T> {
-    discord: &'b Discord<'a>,
-    getter: Box<dyn FnMut(&Discord<'_>, usize) -> T>,
+/// An Iterator to acquire collections.
+pub struct Collection<'d, T> {
+    discord: &'d Discord,
+    getter: Box<dyn FnMut(&Discord, usize) -> T>,
     count: usize,
     index: usize,
     back_index: usize,
 }
 
-impl<'a: 'b, 'b, T> GenericIter<'a, 'b, T> {
+impl<'d, T> Collection<'d, T> {
     pub(crate) fn new(
-        discord: &'b Discord<'a>,
-        getter: Box<dyn FnMut(&Discord<'_>, usize) -> T>,
+        discord: &'d Discord,
+        getter: Box<dyn FnMut(&Discord, usize) -> T>,
         count: usize,
     ) -> Self {
         Self {
@@ -25,7 +27,7 @@ impl<'a: 'b, 'b, T> GenericIter<'a, 'b, T> {
     }
 }
 
-impl<T> Iterator for GenericIter<'_, '_, T> {
+impl<T> Iterator for Collection<'_, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -42,7 +44,7 @@ impl<T> Iterator for GenericIter<'_, '_, T> {
     }
 }
 
-impl<T> DoubleEndedIterator for GenericIter<'_, '_, T> {
+impl<T> DoubleEndedIterator for Collection<'_, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index + self.back_index < self.count {
             self.back_index += 1;
@@ -53,15 +55,15 @@ impl<T> DoubleEndedIterator for GenericIter<'_, '_, T> {
     }
 }
 
-impl<T> ExactSizeIterator for GenericIter<'_, '_, T> {}
+impl<T> ExactSizeIterator for Collection<'_, T> {}
 
-impl<T> std::iter::FusedIterator for GenericIter<'_, '_, T> {}
+impl<T> std::iter::FusedIterator for Collection<'_, T> {}
 
-impl<T> std::fmt::Debug for GenericIter<'_, '_, T> {
+impl<T> std::fmt::Debug for Collection<'_, T> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("discord_game_sdk::GenericIter")
+        fmt.debug_struct("discord_game_sdk::Collection")
             .field("discord", &self.discord)
-            .field("getter", &())
+            .field("getter", &(..))
             .field("count", &self.count)
             .field("index", &self.index)
             .field("back_index", &self.back_index)

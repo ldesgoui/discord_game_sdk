@@ -1,12 +1,9 @@
-use crate::{
-    callbacks::ResultFromPtrCallback, event, sys, to_result::ToResult, Discord, PremiumKind,
-    Result, User, UserFlags,
-};
+use crate::{sys, to_result::ToResult, Discord, PremiumKind, Result, User, UserFlags};
 
 /// # Users
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/users)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Get the current user.
     ///
     /// More information can be found through the HTTP API.
@@ -45,18 +42,19 @@ impl<'a> Discord<'a> {
     ///     match result {
     ///         Ok(user) => {
     ///             // ...
-    ///         },
+    ///         }
     ///         Err(error) => eprintln!("failed to fetch user: {}", error),
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn user(&self, user_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<User>)) {
+    pub fn user(&self, user_id: i64, callback: impl 'static + FnOnce(&Discord, Result<User>)) {
         unsafe {
-            ffi!(self
-                .get_user_manager()
-                .get_user(user_id)
-                .and_then(ResultFromPtrCallback::new(callback)))
+            ffi!(self.get_user_manager().get_user(user_id).and_then(
+                |res: sys::EDiscordResult, user: *mut sys::DiscordUser| {
+                    callback::<Result<&User>>(res.to_result().map(|()| &*(user as *mut User)))
+                }
+            ))
         }
     }
 
@@ -116,22 +114,5 @@ impl<'a> Discord<'a> {
         }
 
         Ok(flags)
-    }
-
-    /// Fires when the User struct of the currently connected user changes.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/users#oncurrentuserupdate)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// # let mut can_get_current_user = false;
-    /// if discord.recv_current_user_update().count() > 0 {
-    ///     can_get_current_user = true;
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_current_user_update(&self) -> impl '_ + Iterator<Item = event::CurrentUserUpdate> {
-        self.receivers.current_user_update.try_iter()
     }
 }

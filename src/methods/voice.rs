@@ -1,11 +1,9 @@
-use crate::{
-    callbacks::ResultCallback, event, sys, to_result::ToResult, Discord, InputMode, Result,
-};
+use crate::{sys, to_result::ToResult, Discord, InputMode, Result};
 
 /// # Voice
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Get the voice input mode for the current user.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#getinputmode)
@@ -42,13 +40,13 @@ impl<'a> Discord<'a> {
     pub fn set_input_mode(
         &self,
         input_mode: InputMode,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
                 .get_voice_manager()
                 .set_input_mode(input_mode.0)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -191,21 +189,5 @@ impl<'a> Discord<'a> {
         debug_assert!((0..=200).contains(&volume));
 
         unsafe { ffi!(self.get_voice_manager().set_local_volume(user_id, volume)) }.to_result()
-    }
-
-    /// Fires when the current user has updated their voice settings.
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// if discord.recv_voice_settings_update().count() > 0 {
-    ///     // ...
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_voice_settings_update(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::VoiceSettingsUpdate> {
-        self.receivers.voice_settings_update.try_iter()
     }
 }

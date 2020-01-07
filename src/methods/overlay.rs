@@ -1,4 +1,4 @@
-use crate::{callbacks::ResultCallback, event, Action, Discord, Result};
+use crate::{sys, to_result::ToResult, Action, Discord, Result};
 use std::borrow::Cow;
 
 /// # Overlay
@@ -12,7 +12,7 @@ use std::borrow::Cow;
 /// | Overlay is hidden                        | locked   | closed             |
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/overlay)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Check whether the user has the overlay enabled or disabled.
     ///
     /// If the overlay is disabled, all the functionality in this manager will still work.
@@ -73,13 +73,13 @@ impl<'a> Discord<'a> {
     pub fn set_overlay_opened(
         &self,
         opened: bool,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
                 .set_locked(!opened)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -101,13 +101,13 @@ impl<'a> Discord<'a> {
     pub fn open_invite_overlay(
         &self,
         action: Action,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
                 .open_activity_invite(action.into())
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -135,7 +135,7 @@ impl<'a> Discord<'a> {
     pub fn open_guild_invite_overlay<'b>(
         &self,
         code: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         let mut code = code.into();
 
@@ -147,7 +147,7 @@ impl<'a> Discord<'a> {
             ffi!(self
                 .get_overlay_manager()
                 .open_guild_invite(code.as_ptr())
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -167,31 +167,12 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_voice_settings(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn open_voice_settings(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()
                 .open_voice_settings()
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
-    }
-
-    /// Fires when the overlay is opened or closed.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/overlay#ontoggle)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for toggle in discord.recv_overlay_toggle() {
-    ///     println!(
-    ///         "overlay is {}",
-    ///         if toggle.closed { "opened" } else { "closed" }
-    ///     );
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_overlay_toggle(&self) -> impl '_ + Iterator<Item = event::OverlayToggle> {
-        self.receivers.overlay_toggle.try_iter()
     }
 }

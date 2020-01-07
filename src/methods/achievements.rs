@@ -1,7 +1,4 @@
-use crate::{
-    callbacks::ResultCallback, event, iter, sys, to_result::ToResult, Discord, Result,
-    UserAchievement,
-};
+use crate::{iter, sys, to_result::ToResult, Discord, Result, UserAchievement};
 
 /// # Achievements
 ///
@@ -11,7 +8,7 @@ use crate::{
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/achievements#the-api-way).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/achievements)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Updates the current user's completion for a given achievement.
     ///
     /// `percent_complete` must be in the range `0..=100`
@@ -37,7 +34,7 @@ impl<'a> Discord<'a> {
         &self,
         achievement_id: i64,
         percent_complete: u8,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         debug_assert!((0..=100).contains(&percent_complete));
 
@@ -45,7 +42,7 @@ impl<'a> Discord<'a> {
             ffi!(self
                 .get_achievement_manager()
                 .set_user_achievement(achievement_id, percent_complete)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -70,12 +67,12 @@ impl<'a> Discord<'a> {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn fetch_user_achievements(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn fetch_user_achievements(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_achievement_manager()
                 .fetch_user_achievements()
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -95,7 +92,7 @@ impl<'a> Discord<'a> {
     ///             return eprintln!("failed fetching user achievements: {}", error);
     ///         }
     ///
-    ///         let achievement = discord.user_achievement(ACHIEVEMENT_ID);
+    ///             let achievement = discord.user_achievement(ACHIEVEMENT_ID);
     ///
     ///         if let Err(error) = achievement {
     ///             return eprintln!("failed getting user achievement: {}", error);
@@ -178,29 +175,9 @@ impl<'a> Discord<'a> {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn iter_user_achievements<'b>(
-        &'b self,
-    ) -> iter::GenericIter<'a, 'b, Result<UserAchievement>> {
+    pub fn iter_user_achievements(&self) -> iter::Collection<Result<UserAchievement>> {
         let count = self.user_achievement_count();
 
-        iter::GenericIter::new(self, Box::new(|d, i| d.user_achievement_at(i)), count)
-    }
-
-    /// Fires when an achievement is updated for the current user.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#onuserachievementupdate)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for ev in discord.recv_achievements_update() {
-    ///     println!("achievement with id {} updated", ev.user_achievement.achievement_id());
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_achievements_update(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::UserAchievementUpdate> {
-        self.receivers.achievements_update.try_iter()
+        iter::Collection::new(self, Box::new(|d, i| d.user_achievement_at(i)), count)
     }
 }

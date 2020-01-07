@@ -1,36 +1,6 @@
-use discord_game_sdk::*;
+use crate::{sys, Action, Activity, Discord, Entitlement, Relationship, User, UserAchievement};
 
-fn main() {
-    pretty_env_logger::init();
-
-    let client_id = std::env::var("DISCORD_APPLICATION_ID")
-        .unwrap()
-        .parse()
-        .unwrap();
-
-    let mut gsdk = Discord::new(client_id).unwrap();
-
-    gsdk.update_activity(
-        &Activity::empty()
-            .with_details("Trying stuff out")
-            .with_state("using discord_game_sdk"),
-        |_, res| log::info!("update_activity: {:?}", res),
-    );
-
-    // Game loop
-    loop {
-        if let Err(e) = gsdk.run_callbacks() {
-            log::info!("run_callbacks error: {}", e);
-            return;
-        }
-
-        std::thread::sleep(std::time::Duration::from_millis(16));
-    }
-}
-
-struct LogEvents;
-
-impl EventHandler for LogEvents {
+pub trait EventHandler {
     fn on_log_message(&mut self, _discord: &Discord, _message: &str) {}
 
     fn on_user_achievement_update(
@@ -122,18 +92,19 @@ impl EventHandler for LogEvents {
     fn on_relationships_refresh(&mut self, _discord: &Discord) {}
     fn on_relationship_update(&mut self, _discord: &Discord, _relationship: &Relationship) {}
 
-    fn on_entitlement_create(&mut self, _discord: &Discord, _entitlement: &Entitlement) {
-        log::info!("on entitlement create: {:?}", entitlement);
-    }
-    fn on_entitlement_delete(&mut self, _discord: &Discord, _entitlement: &Entitlement) {
-        log::info!("on entitlement delete: {:?}", entitlement);
-    }
+    fn on_entitlement_create(&mut self, _discord: &Discord, _entitlement: &Entitlement) {}
+    fn on_entitlement_delete(&mut self, _discord: &Discord, _entitlement: &Entitlement) {}
 
-    fn on_current_user_update(&mut self, _discord: &Discord) {
-        log::info!("on current user update");
-    }
+    fn on_current_user_update(&mut self, _discord: &Discord) {}
 
-    fn on_voice_settings_update(&mut self, _discord: &Discord) {
-        log::info!("on voice settings update");
+    fn on_voice_settings_update(&mut self, _discord: &Discord) {}
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct VoidEvents;
+
+impl EventHandler for VoidEvents {
+    fn on_relationships_refresh(&mut self, discord: &Discord) {
+        println!("{:?}", discord);
     }
 }

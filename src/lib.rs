@@ -112,9 +112,7 @@ mod macros;
 mod action;
 mod activity;
 mod activity_kind;
-mod callbacks;
 mod cast;
-pub(crate) mod channels;
 mod comparison;
 mod create_flags;
 mod discord;
@@ -122,7 +120,7 @@ mod distance;
 mod entitlement;
 mod entitlement_kind;
 mod error;
-pub mod event;
+mod event_handler;
 mod fetch_kind;
 mod file_stat;
 mod image;
@@ -130,12 +128,11 @@ mod image_handle;
 mod image_kind;
 mod input_mode;
 mod input_mode_kind;
-mod iter;
+pub mod iter;
 mod lobby;
 mod lobby_kind;
 mod lobby_member_transaction;
 mod lobby_transaction;
-pub(crate) mod macro_helper;
 mod oauth2_token;
 pub(crate) mod panic_messages;
 mod premium_kind;
@@ -172,7 +169,6 @@ mod methods {
 }
 
 pub(crate) mod across_ffi {
-    pub(crate) mod callbacks;
     pub(crate) mod event_handlers;
 }
 
@@ -190,6 +186,7 @@ pub use self::{
     entitlement::Entitlement,
     entitlement_kind::EntitlementKind,
     error::{Error, Result},
+    event_handler::EventHandler,
     fetch_kind::FetchKind,
     file_stat::FileStat,
     image::Image,
@@ -197,7 +194,6 @@ pub use self::{
     image_kind::ImageKind,
     input_mode::InputMode,
     input_mode_kind::InputModeKind,
-    iter::GenericIter,
     lobby::Lobby,
     lobby_kind::LobbyKind,
     lobby_member_transaction::LobbyMemberTransaction,

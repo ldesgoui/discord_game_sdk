@@ -1,7 +1,4 @@
-use crate::{
-    callbacks::ResultFromCallback, sys, to_result::ToResult, Discord, FetchKind, Image,
-    ImageHandle, Result,
-};
+use crate::{sys, to_result::ToResult, Discord, FetchKind, Image, ImageHandle, Result};
 use std::convert::TryFrom;
 
 /// # Images
@@ -27,7 +24,7 @@ use std::convert::TryFrom;
 ///     },
 /// );
 /// # Ok(()) }
-impl<'a> Discord<'a> {
+impl Discord {
     /// Prepares an image.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#fetch)
@@ -35,13 +32,19 @@ impl<'a> Discord<'a> {
         &self,
         handle: ImageHandle,
         refresh: FetchKind,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<ImageHandle>),
+        callback: impl 'static + FnOnce(&Discord, Result<ImageHandle>),
     ) {
         unsafe {
             ffi!(self
                 .get_image_manager()
                 .fetch(handle.into(), refresh.into())
-                .and_then(ResultFromCallback::new(callback)))
+                .and_then(
+                    |res: sys::EDiscordResult, image_handle: sys::DiscordImageHandle| {
+                        callback::<Result<ImageHandle>>(
+                            res.to_result().map(|()| image_handle.into()),
+                        )
+                    }
+                ))
         }
     }
 

@@ -1,7 +1,4 @@
-use crate::{
-    callbacks::ResultCallback, event, to_result::ToResult, Action, Activity, Discord, RequestReply,
-    Result,
-};
+use crate::{sys, to_result::ToResult, Action, Activity, Discord, RequestReply, Result};
 use std::borrow::Cow;
 
 /// # Activities
@@ -9,7 +6,7 @@ use std::borrow::Cow;
 /// Also known as Rich Presence.
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/activities)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Registers a command by which Discord can launch your game.
     ///
     /// This might be a custom protocol, like `my-awesome-game://`, or a path to an executable.
@@ -95,7 +92,7 @@ impl<'a> Discord<'a> {
     pub fn update_activity(
         &self,
         activity: &Activity,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -104,7 +101,7 @@ impl<'a> Discord<'a> {
                     // XXX: *mut should be *const
                     &activity.0 as *const _ as *mut _
                 )
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -123,12 +120,12 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn clear_activity(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn clear_activity(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
                 .clear_activity()
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -138,33 +135,35 @@ impl<'a> Discord<'a> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for request in discord.recv_activities_request() {
-    ///     println!(
-    ///         "received join request from {}#{}",
-    ///         request.user.username(),
-    ///         request.user.discriminator()
-    ///     );
+    /// struct MyEventHandler;
     ///
-    ///     discord.send_request_reply(request.user.id(), RequestReply::Yes, |discord, result| {
-    ///         if let Err(error) = result {
-    ///             return eprintln!("failed to reply: {}", error);
-    ///         }
-    ///     });
+    /// impl EventHandler for MyEventHandler {
+    ///     fn on_activity_join_request(&mut self, discord: &Discord, user: &User) {
+    ///         println!(
+    ///             "received join request from {}#{}",
+    ///             user.username(),
+    ///             user.discriminator()
+    ///         );
+    ///
+    ///         discord.send_request_reply(user.id(), RequestReply::Yes, |discord, result| {
+    ///             if let Err(error) = result {
+    ///                 return eprintln!("failed to reply: {}", error);
+    ///             }
+    ///         });
+    ///     }
     /// }
-    /// # Ok(()) }
     /// ```
     pub fn send_request_reply(
         &self,
         user_id: i64,
         reply: RequestReply,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
                 .send_request_reply(user_id, reply.into())
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -203,7 +202,7 @@ impl<'a> Discord<'a> {
         user_id: i64,
         action: Action,
         content: impl Into<Cow<'b, str>>,
-        callback: impl 'a + FnMut(&Discord<'_>, Result<()>),
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         let mut content = content.into();
 
@@ -215,7 +214,7 @@ impl<'a> Discord<'a> {
             ffi!(self
                 .get_activity_manager()
                 .send_invite(user_id, action.into(), content.as_ptr())
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -225,133 +224,45 @@ impl<'a> Discord<'a> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for request in discord.recv_activities_invite() {
-    ///     println!(
-    ///         "received invitation to {} from {}#{}",
-    ///         if request.action == Action::Join { "join" } else { "spectate" },
-    ///         request.user.username(),
-    ///         request.user.discriminator()
-    ///     );
+    /// struct MyEventHandler;
     ///
-    ///     discord.accept_invite(request.user.id(), |discord, result| {
-    ///         if let Err(error) = result {
-    ///             return eprintln!("failed to accept invite: {}", error);
-    ///         }
-    ///     });
+    /// impl EventHandler for MyEventHandler {
+    ///     fn on_activity_invite(
+    ///         &mut self,
+    ///         discord: &Discord,
+    ///         action: Action,
+    ///         user: &User,
+    ///         activity: &Activity,
+    ///     ) {
+    ///         println!(
+    ///             "received invitation to {} from {}#{}",
+    ///             if action == Action::Join {
+    ///                 "join"
+    ///             } else {
+    ///                 "spectate"
+    ///             },
+    ///             user.username(),
+    ///             user.discriminator()
+    ///         );
+    ///
+    ///         discord.accept_invite(user.id(), |discord, result| {
+    ///             if let Err(error) = result {
+    ///                 return eprintln!("failed to accept invite: {}", error);
+    ///             }
+    ///         });
+    ///     }
     /// }
-    /// # Ok(()) }
     /// ```
-    pub fn accept_invite(&self, user_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn accept_invite(
+        &self,
+        user_id: i64,
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
+    ) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
                 .accept_invite(user_id)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
-    }
-
-    /// Fires when the current user accepts an invitation to join in chat
-    /// or receives confirmation from Asking to Join.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoin)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// if let Some(join) = discord.recv_activities_join().next() {
-    ///     println!("joining a game");
-    ///
-    ///     discord.connect_lobby_with_activity_secret(join.secret, |discord, lobby| {
-    ///         match lobby {
-    ///             Err(error) => eprintln!("failed to connect to lobby: {}", error),
-    ///             Ok(lobby) => {
-    ///                 // Update activity, connect to voice and network, etc.
-    ///             }
-    ///         }
-    ///     });
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_activities_join(&self) -> impl '_ + Iterator<Item = event::ActivityJoin> {
-        self.receivers.activities_join.try_iter()
-    }
-
-    /// Fires when the current user accepts an invitation to spectate in chat
-    /// or clicks the Spectate button on another user's profile.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityspectate)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// if let Some(spectate) = discord.recv_activities_spectate().next() {
-    ///     println!("spectating a game");
-    ///
-    ///     discord.connect_lobby_with_activity_secret(spectate.secret, |discord, lobby| {
-    ///         match lobby {
-    ///             Err(error) => eprintln!("failed to connect to lobby: {}", error),
-    ///             Ok(lobby) => {
-    ///                 // Update activity, connect to voice and network, etc.
-    ///             }
-    ///         }
-    ///     });
-    /// }
-    /// # Ok(()) }
-    pub fn recv_activities_spectate(&self) -> impl '_ + Iterator<Item = event::ActivitySpectate> {
-        self.receivers.activities_spectate.try_iter()
-    }
-
-    /// Fires when a user asks to join the game of the current user.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityjoinrequest)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for request in discord.recv_activities_request() {
-    ///     println!(
-    ///         "received join request from {}#{}",
-    ///         request.user.username(),
-    ///         request.user.discriminator()
-    ///     );
-    ///
-    ///     discord.send_request_reply(request.user.id(), RequestReply::Yes, |discord, result| {
-    ///         if let Err(error) = result {
-    ///             return eprintln!("failed to reply: {}", error);
-    ///         }
-    ///     });
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_activities_request(&self) -> impl '_ + Iterator<Item = event::ActivityRequest> {
-        self.receivers.activities_request.try_iter()
-    }
-
-    /// Fires when the current user receives an invitation to join or spectate.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/activities#onactivityinvite)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for request in discord.recv_activities_invite() {
-    ///     println!(
-    ///         "received invitation to {} from {}#{}",
-    ///         if request.action == Action::Join { "join" } else { "spectate" },
-    ///         request.user.username(),
-    ///         request.user.discriminator()
-    ///     );
-    ///
-    ///     discord.accept_invite(request.user.id(), |discord, result| {
-    ///         if let Err(error) = result {
-    ///             return eprintln!("failed to accept invite: {}", error);
-    ///         }
-    ///     });
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_activities_invite(&self) -> impl '_ + Iterator<Item = event::ActivityInvite> {
-        self.receivers.activities_invite.try_iter()
     }
 }

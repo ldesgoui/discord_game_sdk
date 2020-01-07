@@ -8,181 +8,181 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// Discord Error
 ///
 /// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/discord#data-models-result-enum)
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, err_derive::Error)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, thiserror::Error)]
 pub enum Error {
     /// Discord isn't working
-    #[error(display = "service unavailable")]
+    #[error("service unavailable")]
     ServiceUnavailable,
 
     /// The SDK version is outdated
-    #[error(display = "invalid version")]
+    #[error("invalid version")]
     InvalidVersion,
 
     /// An internal erorr on transactional operations
-    #[error(display = "lock failed")]
+    #[error("lock failed")]
     LockFailed,
 
     /// Internal error
-    #[error(display = "internal error")]
+    #[error("internal error")]
     InternalError,
 
     /// Invalid payload
-    #[error(display = "invalid payload")]
+    #[error("invalid payload")]
     InvalidPayload,
 
     /// Invalid command
-    #[error(display = "invalid command")]
+    #[error("invalid command")]
     InvalidCommand,
 
     /// Invalid permissions
-    #[error(display = "invalid permissions")]
+    #[error("invalid permissions")]
     InvalidPermissions,
 
     /// Could not fetch
-    #[error(display = "not fetched")]
+    #[error("not fetched")]
     NotFetched,
 
     /// Not found
-    #[error(display = "not found")]
+    #[error("not found")]
     NotFound,
 
     /// User already has network connection open on that channel
-    #[error(display = "conflict")]
+    #[error("conflict")]
     Conflict,
 
     /// Activity secrets must be unique and not match party id
-    #[error(display = "invalid secret")]
+    #[error("invalid secret")]
     InvalidSecret,
 
     /// Join request for that user does not exist
-    #[error(display = "invalid join secret")]
+    #[error("invalid join secret")]
     InvalidJoinSecret,
 
     /// Invalid Application ID in Activity payload (none should be set)
-    #[error(display = "no eligible activity")]
+    #[error("no eligible activity")]
     NoEligibleActivity,
 
     /// Invalid invite
-    #[error(display = "invalid invite")]
+    #[error("invalid invite")]
     InvalidInvite,
 
     /// Not authenticated
-    #[error(display = "not authenticated")]
+    #[error("not authenticated")]
     NotAuthenticated,
 
     /// The user's bearer token is invalid
-    #[error(display = "invalid access token")]
+    #[error("invalid access token")]
     InvalidAccessToken,
 
     /// Access token belongs to another application
-    #[error(display = "application mismatch")]
+    #[error("application mismatch")]
     ApplicationMismatch,
 
     /// Internal error fetching image data
-    #[error(display = "invalid data URL")]
+    #[error("invalid data URL")]
     InvalidDataUrl,
 
     /// Invalid base64 data
-    #[error(display = "invalid base-64")]
+    #[error("invalid base-64")]
     InvalidBase64,
 
     /// Trying to access data before it was filtered
-    #[error(display = "not filtered")]
+    #[error("not filtered")]
     NotFiltered,
 
     /// Lobby full
-    #[error(display = "lobby full")]
+    #[error("lobby full")]
     LobbyFull,
 
     /// Invalid lobby secret
-    #[error(display = "invalid lobby secret")]
+    #[error("invalid lobby secret")]
     InvalidLobbySecret,
 
     /// Filename is too long
-    #[error(display = "invalid filename")]
+    #[error("invalid filename")]
     InvalidFilename,
 
     /// File is too big
-    #[error(display = "invalid file size")]
+    #[error("invalid file size")]
     InvalidFileSize,
 
     /// Invalid entitlement
-    #[error(display = "invalid entitlement")]
+    #[error("invalid entitlement")]
     InvalidEntitlement,
 
     /// Discord is not installed
-    #[error(display = "not installed")]
+    #[error("not installed")]
     NotInstalled,
 
     /// Discord is not running
-    #[error(display = "not running")]
+    #[error("not running")]
     NotRunning,
 
     /// Insufficient buffer
-    #[error(display = "insufficient buffer")]
+    #[error("insufficient buffer")]
     InsufficientBuffer,
 
     /// Purchase canceled
-    #[error(display = "purchase canceled")]
+    #[error("purchase canceled")]
     PurchaseCanceled,
 
     /// Invalid guild
-    #[error(display = "invalid guild")]
+    #[error("invalid guild")]
     InvalidGuild,
 
     /// Invalid event
-    #[error(display = "invalid event")]
+    #[error("invalid event")]
     InvalidEvent,
 
     /// Invalid channel
-    #[error(display = "invalid channel")]
+    #[error("invalid channel")]
     InvalidChannel,
 
     /// Invalid origin
-    #[error(display = "invalid origin")]
+    #[error("invalid origin")]
     InvalidOrigin,
 
     /// Rate limited
-    #[error(display = "rate limited")]
+    #[error("rate limited")]
     RateLimited,
 
     /// `OAuth2` error
-    #[error(display = "OAuth 2.0 error")]
+    #[error("OAuth 2.0 error")]
     OAuth2Error,
 
     /// Select channel timeout
-    #[error(display = "select channel timeout")]
+    #[error("select channel timeout")]
     SelectChannelTimeout,
 
     /// Get guild timeout
-    #[error(display = "get guild timeout")]
+    #[error("get guild timeout")]
     GetGuildTimeout,
 
     /// Select voice force required
-    #[error(display = "select voice force required")]
+    #[error("select voice force required")]
     SelectVoiceForceRequired,
 
     /// Capture shortcut already listening
-    #[error(display = "capture shortcut already listening")]
+    #[error("capture shortcut already listening")]
     CaptureShortcutAlreadyListening,
 
     /// Unauthorized for achievement
-    #[error(display = "unauthorized for achievement")]
+    #[error("unauthorized for achievement")]
     UnauthorizedForAchievement,
 
     /// Invalid gift code
-    #[error(display = "invalid gift code")]
+    #[error("invalid gift code")]
     InvalidGiftCode,
 
     /// Purchase Error
-    #[error(display = "purchase error")]
+    #[error("purchase error")]
     PurchaseError,
 
     /// Transaction aborted
-    #[error(display = "transaction aborted")]
+    #[error("transaction aborted")]
     TransactionAborted,
 
     /// Safety net for missing definitions
-    #[error(display = "undefined error {}", _0)]
+    #[error("undefined error {0}")]
     Undefined(sys::EDiscordResult),
 }

@@ -1,6 +1,4 @@
-use crate::{
-    macro_helper::MacroHelper, sys, to_result::ToResult, Cast, Comparison, Distance, Result,
-};
+use crate::{sys, to_result::ToResult, utils::MacroHelper, Cast, Comparison, Distance, Result};
 
 /// Lobby Search
 ///
@@ -80,7 +78,7 @@ impl SearchQuery {
     }
 
     pub(crate) unsafe fn process(&self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
-        let tx = MacroHelper { core: ptr };
+        let tx = MacroHelper::new(ptr);
 
         if let Some((key, value, comparison, cast)) = self.filter.as_ref() {
             ffi!(tx.filter(

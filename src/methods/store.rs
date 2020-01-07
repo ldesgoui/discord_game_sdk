@@ -1,7 +1,4 @@
-use crate::{
-    callbacks::ResultCallback, event, iter, sys, to_result::ToResult, Discord, Entitlement, Result,
-    Sku,
-};
+use crate::{iter, sys, to_result::ToResult, Discord, Entitlement, Result, Sku};
 
 /// # Store
 ///
@@ -9,7 +6,7 @@ use crate::{
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/store#http-apis).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/store)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Fetches the list of SKUs for the current application.
     ///
     /// Only SKUs that have a price set will be fetched.
@@ -31,12 +28,12 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_skus(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn fetch_skus(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()
                 .fetch_skus()
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -58,7 +55,7 @@ impl<'a> Discord<'a> {
     ///     match discord.sku(SKU_ID) {
     ///         Ok(sku) => {
     ///             // ...
-    ///         },
+    ///         }
     ///         Err(error) => eprintln!("failed to get sku: {}", error),
     ///     }
     /// });
@@ -125,10 +122,10 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_skus<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Sku>> {
+    pub fn iter_skus(&self) -> iter::Collection<Result<Sku>> {
         let count = self.sku_count();
 
-        iter::GenericIter::new(self, Box::new(|d, i| d.sku_at(i)), count)
+        iter::Collection::new(self, Box::new(|d, i| d.sku_at(i)), count)
     }
 
     /// Fetches a list of entitlements to which the user is entitled.
@@ -152,12 +149,12 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_entitlements(&self, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn fetch_entitlements(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()
                 .fetch_entitlements()
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
     }
 
@@ -179,7 +176,7 @@ impl<'a> Discord<'a> {
     ///     match discord.entitlement(ENTITLEMENT_ID) {
     ///         Ok(entitlement) => {
     ///             // ...
-    ///         },
+    ///         }
     ///         Err(error) => eprintln!("failed to get entitlement: {}", error),
     ///     }
     /// });
@@ -251,10 +248,10 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_entitlements<'b>(&'b self) -> iter::GenericIter<'a, 'b, Result<Entitlement>> {
+    pub fn iter_entitlements(&self) -> iter::Collection<Result<Entitlement>> {
         let count = self.entitlement_count();
 
-        iter::GenericIter::new(self, Box::new(|d, i| d.entitlement_at(i)), count)
+        iter::Collection::new(self, Box::new(|d, i| d.entitlement_at(i)), count)
     }
 
     /// Whether the user is entitled to the given SKU.
@@ -302,52 +299,16 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn start_purchase(&self, sku_id: i64, callback: impl 'a + FnMut(&Discord<'_>, Result<()>)) {
+    pub fn start_purchase(
+        &self,
+        sku_id: i64,
+        callback: impl 'static + FnOnce(&Discord, Result<()>),
+    ) {
         unsafe {
             ffi!(self
                 .get_store_manager()
                 .start_purchase(sku_id)
-                .and_then(ResultCallback::new(callback)))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
-    }
-
-    /// Fires when the connected user receives a new entitlement,
-    /// either through purchase or through a developer grant.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#onentitlementcreate)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # const SKU_ID: i64 = 0;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for ev in discord.recv_store_entitlement_create() {
-    ///     // ...
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_store_entitlement_create(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::StoreEntitlementCreate> {
-        self.receivers.store_entitlement_create.try_iter()
-    }
-
-    /// Fires when the connected user loses an entitlement,
-    /// either by expiration, revocation, or consumption in the case of consumable entitlements.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#onentitlementdelete)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # const SKU_ID: i64 = 0;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for ev in discord.recv_store_entitlement_delete() {
-    ///     // ...
-    /// }
-    /// # Ok(()) }
-    /// ```
-    pub fn recv_store_entitlement_delete(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::StoreEntitlementDelete> {
-        self.receivers.store_entitlement_delete.try_iter()
     }
 }

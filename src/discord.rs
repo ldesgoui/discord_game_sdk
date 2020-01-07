@@ -1,5 +1,4 @@
-use crate::{callbacks::AnyCallback, channels, sys};
-use std::cell::UnsafeCell;
+use crate::{sys, EventHandler};
 
 /// Main interface with SDK
 ///
@@ -24,28 +23,28 @@ use std::cell::UnsafeCell;
 /// - [Store](#store)
 /// - [Users](#users)
 /// - [Voice](#voice)
-pub struct Discord<'a> {
-    pub(crate) core: *mut sys::IDiscordCore,
-    pub(crate) client_id: i64,
-    #[allow(dead_code)]
-    pub(crate) senders: Box<channels::Senders>,
-    pub(crate) receivers: channels::Receivers,
-    pub(crate) callbacks: UnsafeCell<Vec<Box<dyn AnyCallback + 'a>>>,
-}
+#[derive(Debug)]
+#[repr(transparent)]
+pub struct Discord(pub(crate) Box<DiscordInner>);
 
-impl<'a> Discord<'a> {
-    pub(crate) fn register_callback(&self, callback: impl AnyCallback + 'a) {
-        let callbacks = unsafe { &mut *self.callbacks.get() };
-
-        callbacks.push(Box::new(callback))
+impl Discord {
+    pub fn client_id(&self) -> i64 {
+        self.0.client_id
     }
 }
 
-impl<'a> std::fmt::Debug for Discord<'a> {
+pub(crate) struct DiscordInner {
+    pub(crate) core: *mut sys::IDiscordCore,
+    pub(crate) client_id: i64,
+    pub(crate) event_handler: Box<dyn EventHandler>,
+}
+
+impl std::fmt::Debug for DiscordInner {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("Discord")
+        fmt.debug_struct("DiscordInner")
             .field("ffi_ptr", &self.core)
             .field("client_id", &self.client_id)
+            .field("event_handler", &(..))
             .finish()
     }
 }

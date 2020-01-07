@@ -1,4 +1,4 @@
-use crate::{macro_helper::MacroHelper, sys, to_result::ToResult, Result};
+use crate::{sys, to_result::ToResult, utils::MacroHelper, Result};
 use std::collections::HashMap;
 
 /// Lobby Member Transaction
@@ -54,7 +54,7 @@ impl LobbyMemberTransaction {
         &self,
         ptr: *mut sys::IDiscordLobbyMemberTransaction,
     ) -> Result<()> {
-        let tx = MacroHelper { core: ptr };
+        let tx = MacroHelper::new(ptr);
 
         for (key, value) in &self.metadata {
             match value {

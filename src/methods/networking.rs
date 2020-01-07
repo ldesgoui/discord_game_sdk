@@ -1,4 +1,4 @@
-use crate::{event, to_result::ToResult, Discord, Reliability, Result};
+use crate::{to_result::ToResult, Discord, Reliability, Result};
 use std::{borrow::Cow, convert::TryFrom};
 
 /// # Networking
@@ -6,7 +6,7 @@ use std::{borrow::Cow, convert::TryFrom};
 /// Lower level networking functionality.
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/networking)
-impl Discord<'_> {
+impl Discord {
     /// Get the networking peer ID for the current user, allowing other users to send packets to them.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#getpeerid)
@@ -112,23 +112,5 @@ impl Discord<'_> {
             ))
         }
         .to_result()
-    }
-
-    /// Fires when you receive data from another user.
-    ///
-    /// This callback will only fire if you already have an open channel with the user sending you data.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#onmessage)
-    pub fn recv_networking_message(&self) -> impl '_ + Iterator<Item = event::NetworkMessage> {
-        self.receivers.networking_message.try_iter()
-    }
-
-    /// Fires when your networking route has changed. You should broadcast this change to other users.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#onrouteupdate)
-    pub fn recv_networking_route_update(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::NetworkRouteUpdate> {
-        self.receivers.networking_route_update.try_iter()
     }
 }

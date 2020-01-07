@@ -1,9 +1,9 @@
-use crate::{across_ffi, event, iter, sys, to_result::ToResult, Discord, Relationship, Result};
+use crate::{iter, sys, to_result::ToResult, Discord, Relationship, Result};
 
 /// # Relationships
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/relationships)
-impl<'a> Discord<'a> {
+impl Discord {
     /// Get the relationship between the current user and a given user by ID.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#get)
@@ -43,10 +43,21 @@ impl<'a> Discord<'a> {
     /// });
     /// # Ok(()) }
     pub fn filter_relationships<F: FnMut(&Relationship) -> bool>(&self, mut filter: F) {
+        pub(crate) unsafe extern "C" fn filter_relationship<F>(
+            callback_ptr: *mut std::ffi::c_void,
+            relationship_ptr: *mut sys::DiscordRelationship,
+        ) -> bool
+        where
+            F: FnMut(&Relationship) -> bool,
+        {
+            prevent_unwind!();
+            (*(callback_ptr as *mut F))(&*(relationship_ptr as *const Relationship))
+        }
+
         unsafe {
             ffi!(self.get_relationship_manager().filter(
                 &mut filter as *mut _ as *mut std::ffi::c_void,
-                Some(across_ffi::callbacks::filter_relationship::<F>)
+                Some(filter_relationship::<F>)
             ))
         }
     }
@@ -101,50 +112,13 @@ impl<'a> Discord<'a> {
     ///     // ..
     /// }
     /// # Ok(()) }
-    pub fn iter_relationships<'b>(
-        &'b self,
-    ) -> Result<iter::GenericIter<'a, 'b, Result<Relationship>>> {
+    pub fn iter_relationships(&self) -> Result<iter::Collection<Result<Relationship>>> {
         let count = self.relationship_count()?;
 
-        Ok(iter::GenericIter::new(
+        Ok(iter::Collection::new(
             self,
             Box::new(|d, i| d.relationship_at(i)),
             count,
         ))
-    }
-
-    /// Fires at initialization when Discord has cached a snapshot of all your relationships.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#onrefresh)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// # let mut can_get_relationships = false;
-    /// if discord.recv_relationships_refresh().count() > 0 {
-    ///     can_get_relationships = true;
-    /// }
-    /// # Ok(()) }
-    pub fn recv_relationships_refresh(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::RelationshipsRefresh> {
-        self.receivers.relationships_refresh.try_iter()
-    }
-
-    /// Fires when a relationship in the filtered list changes, like an updated presence or user attribute.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#onrelationshipupdate)
-    ///
-    /// ```rust
-    /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// for ev in discord.recv_relationships_update() {
-    ///     // ..
-    /// }
-    /// # Ok(()) }
-    pub fn recv_relationships_update(
-        &self,
-    ) -> impl '_ + Iterator<Item = event::RelationshipUpdate> {
-        self.receivers.relationships_update.try_iter()
     }
 }
