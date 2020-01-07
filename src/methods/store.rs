@@ -1,4 +1,4 @@
-use crate::{iter, sys, to_result::ToResult, Discord, Entitlement, Result, Sku, Snowflake};
+use crate::{sys, to_result::ToResult, Collection, Discord, Entitlement, Result, Sku, Snowflake};
 
 /// # Store
 ///
@@ -122,10 +122,10 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_skus(&self) -> iter::Collection<Result<Sku>> {
+    pub fn iter_skus(&self) -> Collection<Result<Sku>> {
         let count = self.sku_count();
 
-        iter::Collection::new(self, Box::new(|d, i| d.sku_at(i)), count)
+        Collection::new(self, Box::new(|d, i| d.sku_at(i)), count)
     }
 
     /// Fetches a list of entitlements to which the user is entitled.
@@ -248,10 +248,10 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_entitlements(&self) -> iter::Collection<Result<Entitlement>> {
+    pub fn iter_entitlements(&self) -> Collection<Result<Entitlement>> {
         let count = self.entitlement_count();
 
-        iter::Collection::new(self, Box::new(|d, i| d.entitlement_at(i)), count)
+        Collection::new(self, Box::new(|d, i| d.entitlement_at(i)), count)
     }
 
     /// Whether the user is entitled to the given SKU.

@@ -1,4 +1,4 @@
-use crate::{iter, sys, to_result::ToResult, Discord, Relationship, Result, UserID};
+use crate::{sys, to_result::ToResult, Collection, Discord, Relationship, Result, UserID};
 
 /// # Relationships
 ///
@@ -112,10 +112,10 @@ impl Discord {
     ///     // ..
     /// }
     /// # Ok(()) }
-    pub fn iter_relationships(&self) -> Result<iter::Collection<Result<Relationship>>> {
+    pub fn iter_relationships(&self) -> Result<Collection<Result<Relationship>>> {
         let count = self.relationship_count()?;
 
-        Ok(iter::Collection::new(
+        Ok(Collection::new(
             self,
             Box::new(|d, i| d.relationship_at(i)),
             count,

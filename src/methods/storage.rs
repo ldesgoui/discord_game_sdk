@@ -1,4 +1,6 @@
-use crate::{iter, sys, to_result::ToResult, utils::charbuf_to_str, Discord, FileStat, Result};
+use crate::{
+    sys, to_result::ToResult, utils::charbuf_to_str, Collection, Discord, FileStat, Result,
+};
 use std::{borrow::Cow, convert::TryFrom, mem::size_of};
 
 /// # Storage
@@ -281,10 +283,10 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#count)
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#statat)  
-    pub fn iter_file_stats(&self) -> iter::Collection<Result<FileStat>> {
+    pub fn iter_file_stats(&self) -> Collection<Result<FileStat>> {
         let count = self.file_stat_count();
 
-        iter::Collection::new(self, Box::new(|d, i| d.file_stat_at(i)), count)
+        Collection::new(self, Box::new(|d, i| d.file_stat_at(i)), count)
     }
 
     /// Returns the path to the folder where files are stored.

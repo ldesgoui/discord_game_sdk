@@ -1,5 +1,5 @@
 use crate::{
-    iter, sys, to_result::ToResult, utils::charbuf_to_str, Discord, Lobby, LobbyID,
+    sys, to_result::ToResult, utils::charbuf_to_str, Collection, Discord, Lobby, LobbyID,
     LobbyMemberTransaction, LobbyTransaction, NetworkChannelID, Reliability, Result, SearchQuery,
     UserID,
 };
@@ -296,10 +296,10 @@ impl Discord {
     pub fn iter_lobby_metadata(
         &self,
         lobby_id: LobbyID,
-    ) -> Result<iter::Collection<Result<(String, String)>>> {
+    ) -> Result<Collection<Result<(String, String)>>> {
         let count = self.lobby_metadata_count(lobby_id)?;
 
-        Ok(iter::Collection::new(
+        Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_metadata_at(lobby_id, i)),
             count,
@@ -372,13 +372,10 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#membercount)  
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid)
-    pub fn iter_lobby_member_ids(
-        &self,
-        lobby_id: LobbyID,
-    ) -> Result<iter::Collection<Result<UserID>>> {
+    pub fn iter_lobby_member_ids(&self, lobby_id: LobbyID) -> Result<Collection<Result<UserID>>> {
         let count = self.lobby_member_count(lobby_id)?;
 
-        Ok(iter::Collection::new(
+        Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_id_at(lobby_id, i)),
             count,
@@ -483,10 +480,10 @@ impl Discord {
         &self,
         lobby_id: LobbyID,
         user_id: UserID,
-    ) -> Result<iter::Collection<Result<(String, String)>>> {
+    ) -> Result<Collection<Result<(String, String)>>> {
         let count = self.lobby_member_metadata_count(lobby_id, user_id)?;
 
-        Ok(iter::Collection::new(
+        Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i)),
             count,
@@ -591,10 +588,10 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount)
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid)
-    pub fn iter_lobbies(&self) -> iter::Collection<Result<LobbyID>> {
+    pub fn iter_lobbies(&self) -> Collection<Result<LobbyID>> {
         let count = self.lobby_count();
 
-        iter::Collection::new(self, Box::new(|d, i| d.lobby_id_at(i)), count)
+        Collection::new(self, Box::new(|d, i| d.lobby_id_at(i)), count)
     }
 
     /// Connects to the voice channel of the current lobby.

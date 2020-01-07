@@ -1,4 +1,4 @@
-use crate::{iter, sys, to_result::ToResult, Discord, Result, Snowflake, UserAchievement};
+use crate::{sys, to_result::ToResult, Collection, Discord, Result, Snowflake, UserAchievement};
 
 /// # Achievements
 ///
@@ -175,9 +175,9 @@ impl Discord {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn iter_user_achievements(&self) -> iter::Collection<Result<UserAchievement>> {
+    pub fn iter_user_achievements(&self) -> Collection<Result<UserAchievement>> {
         let count = self.user_achievement_count();
 
-        iter::Collection::new(self, Box::new(|d, i| d.user_achievement_at(i)), count)
+        Collection::new(self, Box::new(|d, i| d.user_achievement_at(i)), count)
     }
 }
