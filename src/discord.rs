@@ -31,6 +31,13 @@ impl Discord {
     pub fn client_id(&self) -> ClientID {
         self.0.client_id
     }
+
+    pub fn set_event_handler<'a>(
+        &'a mut self,
+        event_handler: Box<dyn EventHandler>,
+    ) -> Box<dyn EventHandler> {
+        std::mem::replace(&mut self.0.event_handler, event_handler)
+    }
 }
 
 impl Drop for Discord {
