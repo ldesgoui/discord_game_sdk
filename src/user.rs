@@ -1,4 +1,4 @@
-use crate::{sys, utils::charbuf_to_str, ImageHandle};
+use crate::{sys, utils::charbuf_to_str, ImageHandle, UserID};
 
 /// User
 ///
@@ -9,7 +9,7 @@ pub struct User(pub(crate) sys::DiscordUser);
 
 impl User {
     /// The unique ID of the user
-    pub fn id(&self) -> i64 {
+    pub fn id(&self) -> UserID {
         self.0.id
     }
 

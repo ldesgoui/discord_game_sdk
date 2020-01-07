@@ -1,4 +1,4 @@
-use crate::{sys, utils::charbuf_to_str, LobbyKind};
+use crate::{sys, utils::charbuf_to_str, LobbyID, LobbyKind, UserID};
 
 /// Lobby
 ///
@@ -9,7 +9,7 @@ pub struct Lobby(pub(crate) sys::DiscordLobby);
 
 impl Lobby {
     /// The unique ID of the lobby
-    pub fn id(&self) -> i64 {
+    pub fn id(&self) -> LobbyID {
         self.0.id
     }
 
@@ -19,7 +19,7 @@ impl Lobby {
     }
 
     /// The unique ID of the user owning the lobby
-    pub fn owner_id(&self) -> i64 {
+    pub fn owner_id(&self) -> UserID {
         self.0.owner_id
     }
 

@@ -1,4 +1,4 @@
-use crate::{iter, sys, to_result::ToResult, Discord, Result, UserAchievement};
+use crate::{iter, sys, to_result::ToResult, Discord, Result, Snowflake, UserAchievement};
 
 /// # Achievements
 ///
@@ -17,7 +17,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # #[derive(Default)] struct GameAchievement { id: i64, progress: u32, completion: u32 }
+    /// # #[derive(Default)] struct GameAchievement { id: Snowflake, progress: u32, completion: u32 }
     /// # fn example(discord: Discord) -> Result<()> {
     /// # let achievement = GameAchievement::default();
     /// discord.set_user_achievement(
@@ -32,7 +32,7 @@ impl Discord {
     /// # Ok(()) }
     pub fn set_user_achievement(
         &self,
-        achievement_id: i64,
+        achievement_id: Snowflake,
         percent_complete: u8,
         callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
@@ -84,7 +84,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # const ACHIEVEMENT_ID: i64 = 0;
+    /// # const ACHIEVEMENT_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.fetch_user_achievements(
     ///     |discord, result| {
@@ -100,7 +100,7 @@ impl Discord {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn user_achievement(&self, achievement_id: i64) -> Result<UserAchievement> {
+    pub fn user_achievement(&self, achievement_id: Snowflake) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
         unsafe {

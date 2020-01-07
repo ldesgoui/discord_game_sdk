@@ -1,4 +1,4 @@
-use crate::{sys, EntitlementKind};
+use crate::{sys, EntitlementKind, Snowflake};
 
 /// Proof that user has made a purchase
 ///
@@ -11,7 +11,7 @@ pub struct Entitlement(pub(crate) sys::DiscordEntitlement);
 
 impl Entitlement {
     /// The unique ID of the entitlement
-    pub fn id(&self) -> i64 {
+    pub fn id(&self) -> Snowflake {
         self.0.id
     }
 
@@ -21,7 +21,7 @@ impl Entitlement {
     }
 
     /// The ID of the SKU to which the user is entitled
-    pub fn sku_id(&self) -> i64 {
+    pub fn sku_id(&self) -> Snowflake {
         self.0.sku_id
     }
 }

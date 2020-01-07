@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, utils::MacroHelper, LobbyKind, Result};
+use crate::{sys, to_result::ToResult, utils::MacroHelper, LobbyKind, Result, UserID};
 use std::collections::HashMap;
 
 /// Lobby Transaction
@@ -7,7 +7,7 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, Default)]
 pub struct LobbyTransaction {
     pub(crate) kind: Option<LobbyKind>,
-    pub(crate) owner: Option<i64>,
+    pub(crate) owner: Option<UserID>,
     pub(crate) capacity: Option<u32>,
     pub(crate) locked: Option<bool>,
     pub(crate) metadata: HashMap<String, Option<String>>,
@@ -33,7 +33,7 @@ impl LobbyTransaction {
     /// Sets the ID of the user owning the lobby
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbytransactionsetowner)
-    pub fn owner(&mut self, user_id: i64) -> &mut Self {
+    pub fn owner(&mut self, user_id: UserID) -> &mut Self {
         self.owner = Some(user_id);
         self
     }

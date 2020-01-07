@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, Discord, InputMode, Result};
+use crate::{sys, to_result::ToResult, Discord, InputMode, Result, UserID};
 
 /// # Voice
 ///
@@ -126,7 +126,7 @@ impl Discord {
     ///     // ...
     /// }
     /// # Ok(()) }
-    pub fn local_muted(&self, user_id: i64) -> Result<bool> {
+    pub fn local_muted(&self, user_id: UserID) -> Result<bool> {
         let mut muted = false;
 
         unsafe { ffi!(self.get_voice_manager().is_local_mute(user_id, &mut muted)) }.to_result()?;
@@ -144,7 +144,7 @@ impl Discord {
     /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
     /// discord.set_local_volume(user.id(), discord.local_volume(user.id())? + 10)?;
     /// # Ok(()) }
-    pub fn local_volume(&self, user_id: i64) -> Result<u8> {
+    pub fn local_volume(&self, user_id: UserID) -> Result<u8> {
         let mut volume = 0;
 
         unsafe {
@@ -169,7 +169,7 @@ impl Discord {
     /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
     /// discord.set_local_mute(user.id(), true)?;
     /// # Ok(()) }
-    pub fn set_local_mute(&self, user_id: i64, muted: bool) -> Result<()> {
+    pub fn set_local_mute(&self, user_id: UserID, muted: bool) -> Result<()> {
         unsafe { ffi!(self.get_voice_manager().set_local_mute(user_id, muted)) }.to_result()
     }
 
@@ -185,7 +185,7 @@ impl Discord {
     /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
     /// discord.set_local_volume(user.id(), discord.local_volume(user.id())? + 10)?;
     /// # Ok(()) }
-    pub fn set_local_volume(&self, user_id: i64, volume: u8) -> Result<()> {
+    pub fn set_local_volume(&self, user_id: UserID, volume: u8) -> Result<()> {
         debug_assert!((0..=200).contains(&volume));
 
         unsafe { ffi!(self.get_voice_manager().set_local_volume(user_id, volume)) }.to_result()

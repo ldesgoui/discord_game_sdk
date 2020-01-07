@@ -1,7 +1,10 @@
-use crate::{sys, Action, Activity, Discord, Entitlement, Relationship, User, UserAchievement};
+use crate::{
+    Action, Activity, Discord, Entitlement, LobbyID, LogLevel, NetworkChannelID, NetworkPeerID,
+    Relationship, User, UserAchievement, UserID,
+};
 
 pub trait EventHandler {
-    fn on_log_message(&mut self, _discord: &Discord, _message: &str) {}
+    fn on_log_message(&mut self, _discord: &Discord, _level: LogLevel, _message: &str) {}
 
     fn on_user_achievement_update(
         &mut self,
@@ -22,57 +25,34 @@ pub trait EventHandler {
     ) {
     }
 
-    fn on_lobby_update(&mut self, _discord: &Discord, _lobby_id: sys::DiscordLobbyId) {}
-    fn on_lobby_delete(
-        &mut self,
-        _discord: &Discord,
-        _lobby_id: sys::DiscordLobbyId,
-        _reason: u32,
-    ) {
-    }
-    fn on_member_connect(
-        &mut self,
-        _discord: &Discord,
-        _lobby_id: sys::DiscordLobbyId,
-        _member_id: sys::DiscordUserId,
-    ) {
-    }
-    fn on_member_update(
-        &mut self,
-        _discord: &Discord,
-        _lobby_id: sys::DiscordLobbyId,
-        _member_id: sys::DiscordUserId,
-    ) {
-    }
-    fn on_member_disconnect(
-        &mut self,
-        _discord: &Discord,
-        _lobby_id: sys::DiscordLobbyId,
-        _member_id: sys::DiscordUserId,
-    ) {
+    fn on_lobby_update(&mut self, _discord: &Discord, _lobby_id: LobbyID) {}
+    fn on_lobby_delete(&mut self, _discord: &Discord, _lobby_id: LobbyID, _reason: u32) {}
+    fn on_member_connect(&mut self, _discord: &Discord, _lobby_id: LobbyID, _member_id: UserID) {}
+    fn on_member_update(&mut self, _discord: &Discord, _lobby_id: LobbyID, _member_id: UserID) {}
+    fn on_member_disconnect(&mut self, _discord: &Discord, _lobby_id: LobbyID, _member_id: UserID) {
     }
     fn on_lobby_message(
         &mut self,
         _discord: &Discord,
-        _lobby_id: sys::DiscordLobbyId,
-        _member_id: sys::DiscordUserId,
+        _lobby_id: LobbyID,
+        _member_id: UserID,
         _data: &[u8],
     ) {
     }
     fn on_speaking(
         &mut self,
         _discord: &Discord,
-        _lobby_id: sys::DiscordLobbyId,
-        _member_id: sys::DiscordUserId,
+        _lobby_id: LobbyID,
+        _member_id: UserID,
         _speaking: bool,
     ) {
     }
     fn on_lobby_network_message(
         &mut self,
         _discord: &Discord,
-        _lobby_id: sys::DiscordLobbyId,
-        _member_id: sys::DiscordUserId,
-        _channel_id: sys::DiscordNetworkChannelId,
+        _lobby_id: LobbyID,
+        _member_id: UserID,
+        _channel_id: NetworkChannelID,
         _data: &[u8],
     ) {
     }
@@ -80,8 +60,8 @@ pub trait EventHandler {
     fn on_network_message(
         &mut self,
         _discord: &Discord,
-        _peer_id: sys::DiscordNetworkPeerId,
-        _channel_id: sys::DiscordNetworkChannelId,
+        _peer_id: NetworkPeerID,
+        _channel_id: NetworkChannelID,
         _data: &[u8],
     ) {
     }
@@ -103,8 +83,4 @@ pub trait EventHandler {
 #[derive(Debug, Default)]
 pub(crate) struct VoidEvents;
 
-impl EventHandler for VoidEvents {
-    fn on_relationships_refresh(&mut self, discord: &Discord) {
-        println!("{:?}", discord);
-    }
-}
+impl EventHandler for VoidEvents {}

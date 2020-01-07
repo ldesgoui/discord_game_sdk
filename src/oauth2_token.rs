@@ -1,5 +1,4 @@
-use crate::{sys, utils::charbuf_to_str};
-use std::iter::FusedIterator;
+use crate::{sys, utils::charbuf_to_str, UnixTimestamp};
 
 /// OAuth 2.0 Token
 ///
@@ -15,14 +14,12 @@ impl OAuth2Token {
     }
 
     /// The list of `OAuth2` scopes
-    pub fn scopes<'a>(
-        &'a self,
-    ) -> impl Iterator<Item = &'a str> + DoubleEndedIterator + FusedIterator + 'a {
+    pub fn scopes(&self) -> std::str::Split<char> {
         charbuf_to_str(&self.0.scopes).split(' ')
     }
 
     /// When the token exires, in UNIX Time
-    pub fn expires(&self) -> i64 {
+    pub fn expires(&self) -> UnixTimestamp {
         self.0.expires
     }
 }

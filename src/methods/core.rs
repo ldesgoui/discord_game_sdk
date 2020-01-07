@@ -3,12 +3,10 @@ use crate::{
     event_handler::VoidEvents,
     sys,
     to_result::ToResult,
-    CreateFlags, Result,
+    utils::charptr_to_str,
+    ClientID, CreateFlags, Result,
 };
-use std::convert::TryFrom;
-use std::ops::DerefMut;
-
-// TODO: log & kickstart manager
+use std::{convert::TryFrom, ops::DerefMut};
 
 /// # Core
 ///
@@ -18,10 +16,10 @@ use std::ops::DerefMut;
 /// # fn example() {
 /// use discord_game_sdk::Discord;
 ///
-/// # const DISCORD_APPLICATION_ID: i64 = 0;
+/// # const DISCORD_CLIENT_ID: ClientID = 0;
 ///
 /// fn main() -> Result<(), Box<dyn std::error::Error>> {
-///     let mut discord = Discord::new(DISCORD_APPLICATION_ID)?;
+///     let mut discord = Discord::new(DISCORD_CLIENT_ID)?;
 ///
 ///     loop {
 ///         discord.run_callbacks()?;
@@ -36,21 +34,23 @@ impl Discord {
     ///
     /// [`with_create_flags`]: #method.with_create_flags
     /// [`CreateFlags::Default`]: enum.CreateFlags.html#variant.Default
-    pub fn new(client_id: i64) -> Result<Self> {
+    pub fn new(client_id: ClientID) -> Result<Self> {
         Self::with_create_flags(client_id, CreateFlags::Default)
     }
 
     /// Creates an instance of the main interface with the Discord Game SDK.
     ///
     /// > [`Create` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#create)  
-    pub fn with_create_flags(client_id: i64, flags: CreateFlags) -> Result<Self> {
+    pub fn with_create_flags(client_id: ClientID, flags: CreateFlags) -> Result<Self> {
         let mut inner = Box::new(DiscordInner {
             core: std::ptr::null_mut(),
             client_id,
             event_handler: Box::new(VoidEvents),
         });
 
-        let mut params = create_params(client_id, flags, inner.deref_mut() as *mut _ as *mut _);
+        let ptr = inner.deref_mut() as *mut DiscordInner as *mut std::ffi::c_void;
+
+        let mut params = create_params(client_id, flags.into(), ptr);
 
         unsafe {
             sys::DiscordCreate(
@@ -67,8 +67,27 @@ impl Discord {
 
         let instance = Discord(inner);
 
+        #[allow(unused_results)]
         unsafe {
+            ffi!(instance.set_log_hook(
+                sys::DiscordLogLevel_Debug,
+                ptr,
+                event_handler!(|level: sys::EDiscordLogLevel, message: *const u8| {
+                    EventHandler::on_log_message(level.into(), charptr_to_str(message))
+                })
+            ));
+
+            // Signal managers that we want events ASAP
+            ffi!(instance.get_network_manager());
+            ffi!(instance.get_overlay_manager());
             ffi!(instance.get_relationship_manager());
+            ffi!(instance.get_user_manager());
+
+            ffi!(instance.get_achievement_manager());
+            ffi!(instance.get_activity_manager());
+            ffi!(instance.get_lobby_manager());
+            ffi!(instance.get_store_manager());
+            ffi!(instance.get_voice_manager());
         }
 
         Ok(instance)
@@ -91,20 +110,12 @@ impl Discord {
     }
 }
 
-impl Drop for Discord {
-    fn drop(&mut self) {
-        unsafe { ffi!(self.destroy()) }
-    }
-}
-
 fn create_params(
-    client_id: i64,
-    flags: CreateFlags,
+    client_id: sys::DiscordClientId,
+    flags: sys::EDiscordCreateFlags,
     event_data: *mut std::ffi::c_void,
 ) -> sys::DiscordCreateParams {
     use crate::across_ffi::event_handlers::*;
-
-    let flags: sys::EDiscordCreateFlags = flags.into();
 
     sys::DiscordCreateParams {
         client_id,

@@ -1,4 +1,4 @@
-use crate::{sys, utils::charbuf_to_str};
+use crate::{sys, utils::charbuf_to_str, Snowflake, UserID};
 
 /// User Achievement
 ///
@@ -9,12 +9,12 @@ pub struct UserAchievement(pub(crate) sys::DiscordUserAchievement);
 
 impl UserAchievement {
     /// The unique id of the user completing the achievement
-    pub fn user_id(&self) -> i64 {
+    pub fn user_id(&self) -> UserID {
         self.0.user_id
     }
 
     /// The unique id of the achievement
-    pub fn achievement_id(&self) -> i64 {
+    pub fn achievement_id(&self) -> Snowflake {
         self.0.achievement_id
     }
 

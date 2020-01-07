@@ -1,4 +1,4 @@
-use crate::{iter, sys, to_result::ToResult, Discord, Relationship, Result};
+use crate::{iter, sys, to_result::ToResult, Discord, Relationship, Result, UserID};
 
 /// # Relationships
 ///
@@ -14,7 +14,7 @@ impl Discord {
     /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
     /// let relationship = discord.relationship_with(user.id())?;
     /// # Ok(()) }
-    pub fn relationship_with(&self, user_id: i64) -> Result<Relationship> {
+    pub fn relationship_with(&self, user_id: UserID) -> Result<Relationship> {
         let mut relationship = Relationship(sys::DiscordRelationship::default());
 
         unsafe {
@@ -36,10 +36,10 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # const DISCORD_APPLICATION_ID: i64 = 0;
+    /// # const DISCORD_CLIENT_ID: ClientID = 0;
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.filter_relationships(|relationship| {
-    ///     relationship.presence().activity().application_id() == DISCORD_APPLICATION_ID
+    ///     relationship.presence().activity().application_id() == DISCORD_CLIENT_ID
     /// });
     /// # Ok(()) }
     pub fn filter_relationships<F: FnMut(&Relationship) -> bool>(&self, mut filter: F) {

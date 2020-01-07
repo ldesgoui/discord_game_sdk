@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, Action, Activity, Discord, RequestReply, Result};
+use crate::{sys, to_result::ToResult, Action, Activity, Discord, RequestReply, Result, UserID};
 use std::borrow::Cow;
 
 /// # Activities
@@ -155,7 +155,7 @@ impl Discord {
     /// ```
     pub fn send_request_reply(
         &self,
-        user_id: i64,
+        user_id: UserID,
         reply: RequestReply,
         callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
@@ -199,7 +199,7 @@ impl Discord {
     /// ```
     pub fn send_invite<'b>(
         &self,
-        user_id: i64,
+        user_id: UserID,
         action: Action,
         content: impl Into<Cow<'b, str>>,
         callback: impl 'static + FnOnce(&Discord, Result<()>),
@@ -255,7 +255,7 @@ impl Discord {
     /// ```
     pub fn accept_invite(
         &self,
-        user_id: i64,
+        user_id: UserID,
         callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {

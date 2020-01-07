@@ -1,4 +1,4 @@
-use crate::{sys, utils::charbuf_to_str};
+use crate::{sys, utils::charbuf_to_str, UnixTimestamp};
 
 /// File Metadata
 ///
@@ -20,9 +20,9 @@ impl FileStat {
     }
 
     /// When the file was last modified, in UNIX Time
-    pub fn last_modified(&self) -> i64 {
-        // XXX: u64 should be i64
-        self.0.last_modified as i64
+    pub fn last_modified(&self) -> UnixTimestamp {
+        // XXX: u64 should be UnixTimestamp
+        self.0.last_modified as UnixTimestamp
     }
 }
 

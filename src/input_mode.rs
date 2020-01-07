@@ -29,7 +29,7 @@ impl InputMode {
     ///
     /// [`VoiceActivity`]: enum.InputModeKind.html#variant.VoiceActivity
     pub fn voice_activity() -> Self {
-        Self::from(sys::DiscordInputMode {
+        Self(sys::DiscordInputMode {
             type_: sys::DiscordInputModeType_VoiceActivity,
             ..Default::default()
         })
@@ -41,14 +41,14 @@ impl InputMode {
     ///
     /// [`PushToTalk`]: enum.InputModeKind.html#variant.PushToTalk
     pub fn push_to_talk(shortcut: &str) -> Self {
-        let mut charbuf = [0u8; 256];
-
-        write_charbuf(&mut charbuf, shortcut);
-
-        Self::from(sys::DiscordInputMode {
+        let mut mode = sys::DiscordInputMode {
             type_: sys::DiscordInputModeType_PushToTalk,
-            shortcut: charbuf,
-        })
+            ..Default::default()
+        };
+
+        write_charbuf(&mut mode.shortcut, shortcut);
+
+        Self(mode)
     }
 }
 

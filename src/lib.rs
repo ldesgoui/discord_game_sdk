@@ -112,6 +112,7 @@ mod macros;
 mod action;
 mod activity;
 mod activity_kind;
+mod aliases;
 mod cast;
 mod comparison;
 mod create_flags;
@@ -133,6 +134,7 @@ mod lobby;
 mod lobby_kind;
 mod lobby_member_transaction;
 mod lobby_transaction;
+mod log_level;
 mod oauth2_token;
 pub(crate) mod panic_messages;
 mod premium_kind;
@@ -178,6 +180,7 @@ pub use self::{
     action::Action,
     activity::Activity,
     activity_kind::ActivityKind,
+    aliases::*,
     cast::Cast,
     comparison::Comparison,
     create_flags::CreateFlags,
@@ -198,6 +201,7 @@ pub use self::{
     lobby_kind::LobbyKind,
     lobby_member_transaction::LobbyMemberTransaction,
     lobby_transaction::LobbyTransaction,
+    log_level::LogLevel,
     oauth2_token::OAuth2Token,
     premium_kind::PremiumKind,
     presence::Presence,

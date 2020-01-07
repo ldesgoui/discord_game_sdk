@@ -1,4 +1,4 @@
-use crate::{iter, sys, to_result::ToResult, Discord, Entitlement, Result, Sku};
+use crate::{iter, sys, to_result::ToResult, Discord, Entitlement, Result, Sku, Snowflake};
 
 /// # Store
 ///
@@ -45,7 +45,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # const SKU_ID: i64 = 0;
+    /// # const SKU_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.fetch_skus(|discord, result| {
     ///     if let Err(error) = result {
@@ -61,7 +61,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn sku(&self, id: i64) -> Result<Sku> {
+    pub fn sku(&self, id: Snowflake) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
         unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku.0)) }.to_result()?;
@@ -166,7 +166,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # const ENTITLEMENT_ID: i64 = 0;
+    /// # const ENTITLEMENT_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.fetch_entitlements(|discord, result| {
     ///     if let Err(error) = result {
@@ -182,7 +182,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn entitlement(&self, id: i64) -> Result<Entitlement> {
+    pub fn entitlement(&self, id: Snowflake) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
         unsafe {
@@ -262,14 +262,14 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # const ENTITLEMENT_ID: i64 = 0;
+    /// # const SKU_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// if discord.has_entitlement(ENTITLEMENT_ID)? {
+    /// if discord.has_entitlement(SKU_ID)? {
     ///     // ..
     /// }
     /// # Ok(()) }
     /// ```
-    pub fn has_entitlement(&self, sku_id: i64) -> Result<bool> {
+    pub fn has_entitlement(&self, sku_id: Snowflake) -> Result<bool> {
         let mut has_entitlement = false;
 
         unsafe {
@@ -290,7 +290,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # const SKU_ID: i64 = 0;
+    /// # const SKU_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.start_purchase(SKU_ID, |discord, result| {
     ///     if let Err(error) = result {
@@ -301,7 +301,7 @@ impl Discord {
     /// ```
     pub fn start_purchase(
         &self,
-        sku_id: i64,
+        sku_id: Snowflake,
         callback: impl 'static + FnOnce(&Discord, Result<()>),
     ) {
         unsafe {

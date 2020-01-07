@@ -1,7 +1,7 @@
 use crate::{
     sys,
     utils::{charbuf_to_str, write_charbuf},
-    ActivityKind,
+    ActivityKind, ApplicationID, UnixTimestamp,
 };
 
 /// Activity (also known as Rich Presence)
@@ -54,7 +54,7 @@ impl Activity {
     }
 
     /// The unique ID of the application
-    pub fn application_id(&self) -> i64 {
+    pub fn application_id(&self) -> ApplicationID {
         self.0.application_id
     }
 
@@ -74,12 +74,12 @@ impl Activity {
     }
 
     /// When the current activity has started, in UNIX Time
-    pub fn start_time(&self) -> i64 {
+    pub fn start_time(&self) -> UnixTimestamp {
         self.0.timestamps.start
     }
 
     /// When the current activity will end, in UNIX Time
-    pub fn end_time(&self) -> i64 {
+    pub fn end_time(&self) -> UnixTimestamp {
         self.0.timestamps.end
     }
 
@@ -157,13 +157,13 @@ impl Activity {
     }
 
     /// When the current activity has started, in UNIX time
-    pub fn with_start_time(&'_ mut self, value: i64) -> &'_ mut Self {
+    pub fn with_start_time(&'_ mut self, value: UnixTimestamp) -> &'_ mut Self {
         self.0.timestamps.start = value;
         self
     }
 
     /// When the current activity will end, in UNIX time
-    pub fn with_end_time(&'_ mut self, value: i64) -> &'_ mut Self {
+    pub fn with_end_time(&'_ mut self, value: UnixTimestamp) -> &'_ mut Self {
         self.0.timestamps.end = value;
         self
     }

@@ -1,5 +1,5 @@
 use crate::discord::{Discord, DiscordInner};
-use std::{ops::Deref, os::raw::c_uchar};
+use std::ops::Deref;
 
 pub(crate) struct CallbackData<T> {
     pub(crate) discord: *const DiscordInner,
@@ -28,7 +28,7 @@ impl<T> MacroHelper<T> {
     }
 }
 
-pub(crate) fn charbuf_to_str(charbuf: &[c_uchar]) -> &str {
+pub(crate) fn charbuf_to_str(charbuf: &[u8]) -> &str {
     let bytes = &charbuf[..charbuf_len(charbuf)];
 
     if cfg!(debug_assertions) {
@@ -38,11 +38,11 @@ pub(crate) fn charbuf_to_str(charbuf: &[c_uchar]) -> &str {
     }
 }
 
-pub(crate) fn charbuf_len(charbuf: &[c_uchar]) -> usize {
+pub(crate) fn charbuf_len(charbuf: &[u8]) -> usize {
     memchr::memchr(0, charbuf).unwrap_or_else(|| charbuf.len())
 }
 
-pub(crate) fn write_charbuf(charbuf: &mut [c_uchar], value: &str) {
+pub(crate) fn write_charbuf(charbuf: &mut [u8], value: &str) {
     let bytes = value.as_bytes();
     let len = bytes.len();
 
@@ -55,7 +55,7 @@ pub(crate) fn write_charbuf(charbuf: &mut [c_uchar], value: &str) {
     }
 }
 
-pub(crate) fn charptr_to_str<'a>(ptr: *const c_uchar) -> &'a str {
+pub(crate) fn charptr_to_str<'a>(ptr: *const u8) -> &'a str {
     let bytes = unsafe { std::ffi::CStr::from_ptr(ptr as *const i8) }.to_bytes();
 
     if cfg!(debug_assertions) {

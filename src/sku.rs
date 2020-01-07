@@ -1,4 +1,4 @@
-use crate::{sys, utils::charbuf_to_str, SkuKind};
+use crate::{sys, utils::charbuf_to_str, SkuKind, Snowflake};
 
 /// SKU (stock keeping unit)
 ///
@@ -9,7 +9,7 @@ pub struct Sku(pub(crate) sys::DiscordSku);
 
 impl Sku {
     /// The unique ID of the SKU
-    pub fn id(&self) -> i64 {
+    pub fn id(&self) -> Snowflake {
         self.0.id
     }
 

@@ -1,4 +1,4 @@
-use crate::{sys, ImageKind};
+use crate::{sys, ImageKind, Snowflake, UserID};
 
 /// Image Handle
 ///
@@ -14,7 +14,7 @@ impl ImageHandle {
     }
 
     /// A unique ID related to the image, when kind is User, it is the ID of said user
-    pub fn id(&self) -> i64 {
+    pub fn id(&self) -> Snowflake {
         self.0.id
     }
 
@@ -24,7 +24,7 @@ impl ImageHandle {
     }
 
     /// Create new Image Handle
-    pub fn from_user_id(user_id: i64, size: u32) -> Self {
+    pub fn from_user_id(user_id: UserID, size: u32) -> Self {
         Self(sys::DiscordImageHandle {
             type_: ImageKind::User.into(),
             id: user_id,

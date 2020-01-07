@@ -1,4 +1,4 @@
-use crate::{sys, EventHandler};
+use crate::{sys, ClientID, EventHandler};
 
 /// Main interface with SDK
 ///
@@ -28,14 +28,20 @@ use crate::{sys, EventHandler};
 pub struct Discord(pub(crate) Box<DiscordInner>);
 
 impl Discord {
-    pub fn client_id(&self) -> i64 {
+    pub fn client_id(&self) -> ClientID {
         self.0.client_id
+    }
+}
+
+impl Drop for Discord {
+    fn drop(&mut self) {
+        unsafe { ffi!(self.destroy()) }
     }
 }
 
 pub(crate) struct DiscordInner {
     pub(crate) core: *mut sys::IDiscordCore,
-    pub(crate) client_id: i64,
+    pub(crate) client_id: sys::DiscordClientId,
     pub(crate) event_handler: Box<dyn EventHandler>,
 }
 

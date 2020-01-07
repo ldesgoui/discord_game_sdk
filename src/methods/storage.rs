@@ -18,7 +18,7 @@ impl Discord {
         &self,
         filename: impl Into<Cow<'b, str>>,
         mut buffer: impl AsMut<[u8]>,
-    ) -> Result<u32> {
+    ) -> Result<usize> {
         let mut filename = filename.into();
 
         if !filename.contains('\0') {
@@ -42,7 +42,8 @@ impl Discord {
         }
         .to_result()?;
 
-        Ok(read)
+        // XXX: u32 should be usize
+        Ok(read as usize)
     }
 
     /// Reads data asynchronously from the game's allocated save file into a buffer.
