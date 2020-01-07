@@ -16,7 +16,7 @@ use std::{convert::TryFrom, ops::DerefMut};
 /// # fn example() {
 /// use discord_game_sdk::Discord;
 ///
-/// # const DISCORD_CLIENT_ID: ClientID = 0;
+/// # const DISCORD_CLIENT_ID: discord_game_sdk::ClientID = 0;
 ///
 /// fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///     let mut discord = Discord::new(DISCORD_CLIENT_ID)?;
