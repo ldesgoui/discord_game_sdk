@@ -7,14 +7,11 @@ pub(crate) struct CallbackData<T> {
 }
 
 impl<T> CallbackData<T> {
-    pub(crate) fn new(
-        discord: &Discord,
-        callback: impl 'static + FnOnce(&Discord, T),
-    ) -> Box<Self> {
-        Box::new(Self {
+    pub(crate) fn new(discord: &Discord, callback: impl 'static + FnOnce(&Discord, T)) -> Self {
+        Self {
             discord: discord.0.deref() as *const _,
             callback: Box::new(callback),
-        })
+        }
     }
 }
 
