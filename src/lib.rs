@@ -136,7 +136,6 @@ mod lobby_member_transaction;
 mod lobby_transaction;
 mod log_level;
 mod oauth2_token;
-pub(crate) mod panic_messages;
 mod premium_kind;
 mod presence;
 mod relationship;
@@ -168,10 +167,6 @@ mod methods {
     mod store;
     mod users;
     mod voice;
-}
-
-pub(crate) mod across_ffi {
-    pub(crate) mod event_handlers;
 }
 
 pub(crate) use discord_game_sdk_sys as sys;

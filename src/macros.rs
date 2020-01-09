@@ -1,10 +1,11 @@
 macro_rules! ffi {
     // ffi!(self.destroy())
     ($self:ident.$method:ident($($arg:expr),* $(,)?)) => {{
-        use crate::panic_messages::NULL_PTR;
+        const MISSING_METHOD: &str =
+            "[discord_game_sdk] received a NULL pointer where a valid pointer to a method is expected";
 
         log::trace!("FFI: {}", stringify!($method));
-        let function = (*$self.0.core).$method.expect(NULL_PTR);
+        let function = (*$self.0.core).$method.expect(MISSING_METHOD);
 
         function($self.0.core, $($arg),*)
     }};
@@ -14,12 +15,13 @@ macro_rules! ffi {
         .$get_manager:ident ()
         .$method:ident($($arg:expr),* $(,)?)
     ) => {{
-        use crate::panic_messages::NULL_PTR;
+        const MISSING_METHOD: &str =
+            "[discord_game_sdk] received a NULL pointer where a valid pointer to a method is expected";
 
         let manager = ffi!($self.$get_manager());
 
         log::trace!("FFI: .{}", stringify!($method));
-        let function = (*manager).$method.expect(NULL_PTR);
+        let function = (*manager).$method.expect(MISSING_METHOD);
 
         function(manager, $($arg),*)
     }};
@@ -32,12 +34,15 @@ macro_rules! ffi {
             $callback:ident::<$res:ty>($expr:expr $(,)?)
         })
     ) => {{
-        use crate::{utils::CallbackData, panic_messages::NULL_PTR};
+        use crate::utils::CallbackData;
+
+        const MISSING_METHOD: &str =
+            "[discord_game_sdk] received a NULL pointer where a valid pointer to a method is expected";
 
         let manager = ffi!($self.$get_manager());
 
         log::trace!("FFI: .{}", stringify!($method));
-        let function = (*manager).$method.expect(NULL_PTR);
+        let function = (*manager).$method.expect(MISSING_METHOD);
 
         unsafe extern "C" fn c_fn(
             callback_data: *mut std::ffi::c_void,
@@ -124,7 +129,11 @@ macro_rules! event_handler {
 // https://github.com/rust-lang/project-ffi-unwind
 macro_rules! prevent_unwind {
     () => {
-        use crate::panic_messages::ACROSS_FFI;
+        const ACROSS_FFI: &str = "[discord_game_sdk]
+            The program has encountered a `panic` across FFI bounds, unwinding at this
+            point would be undefined behavior, we will abort the process instead.
+            Please report this issue to https://github.com/ldesgoui/discord_game_sdk
+            Here is the panic message:";
 
         let hook = std::panic::take_hook();
 
