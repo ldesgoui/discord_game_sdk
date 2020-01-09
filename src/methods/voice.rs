@@ -40,7 +40,7 @@ impl Discord {
     pub fn set_input_mode(
         &self,
         input_mode: InputMode,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self

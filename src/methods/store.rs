@@ -28,7 +28,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_skus(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
+    pub fn fetch_skus(&self, callback: impl 'static + FnOnce(&Self, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()
@@ -123,9 +123,7 @@ impl Discord {
     /// # Ok(()) }
     /// ```
     pub fn iter_skus(&self) -> Collection<Result<Sku>> {
-        let count = self.sku_count();
-
-        Collection::new(self, Box::new(|d, i| d.sku_at(i)), count)
+        Collection::new(self, Box::new(Self::sku_at), self.sku_count())
     }
 
     /// Fetches a list of entitlements to which the user is entitled.
@@ -149,7 +147,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_entitlements(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
+    pub fn fetch_entitlements(&self, callback: impl 'static + FnOnce(&Self, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()
@@ -249,9 +247,11 @@ impl Discord {
     /// # Ok(()) }
     /// ```
     pub fn iter_entitlements(&self) -> Collection<Result<Entitlement>> {
-        let count = self.entitlement_count();
-
-        Collection::new(self, Box::new(|d, i| d.entitlement_at(i)), count)
+        Collection::new(
+            self,
+            Box::new(Self::entitlement_at),
+            self.entitlement_count(),
+        )
     }
 
     /// Whether the user is entitled to the given SKU.
@@ -302,7 +302,7 @@ impl Discord {
     pub fn start_purchase(
         &self,
         sku_id: Snowflake,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self

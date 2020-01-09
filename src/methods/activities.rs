@@ -92,7 +92,7 @@ impl Discord {
     pub fn update_activity(
         &self,
         activity: &Activity,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -120,7 +120,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn clear_activity(&self, callback: impl 'static + FnOnce(&Discord, Result<()>)) {
+    pub fn clear_activity(&self, callback: impl 'static + FnOnce(&Self, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_activity_manager()
@@ -157,7 +157,7 @@ impl Discord {
         &self,
         user_id: UserID,
         reply: RequestReply,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -202,7 +202,7 @@ impl Discord {
         user_id: UserID,
         action: Action,
         content: impl Into<Cow<'b, str>>,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         let mut content = content.into();
 
@@ -256,7 +256,7 @@ impl Discord {
     pub fn accept_invite(
         &self,
         user_id: UserID,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self

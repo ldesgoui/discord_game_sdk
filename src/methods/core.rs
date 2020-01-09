@@ -1,10 +1,10 @@
 use crate::{
     discord::{Discord, DiscordInner},
-    event_handler::VoidEvents,
     sys,
     to_result::ToResult,
     utils::charptr_to_str,
-    Activity, ClientID, CreateFlags, Entitlement, Relationship, Result, User, UserAchievement,
+    Activity, ClientID, CreateFlags, Entitlement, EventHandler, Relationship, Result, User,
+    UserAchievement,
 };
 use std::{convert::TryFrom, ops::DerefMut};
 
@@ -19,7 +19,7 @@ use std::{convert::TryFrom, ops::DerefMut};
 /// # const DISCORD_CLIENT_ID: discord_game_sdk::ClientID = 0;
 ///
 /// fn main() -> Result<(), Box<dyn std::error::Error>> {
-///     let mut discord = Discord::new(DISCORD_CLIENT_ID)?;
+///     let mut discord = Self::new(DISCORD_CLIENT_ID)?;
 ///
 ///     loop {
 ///         discord.run_callbacks()?;
@@ -42,6 +42,9 @@ impl Discord {
     ///
     /// > [`Create` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#create)  
     pub fn with_create_flags(client_id: ClientID, flags: CreateFlags) -> Result<Self> {
+        struct VoidEvents;
+        impl EventHandler for VoidEvents {}
+
         let mut inner = Box::new(DiscordInner {
             core: std::ptr::null_mut(),
             client_id,

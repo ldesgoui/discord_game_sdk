@@ -3,7 +3,7 @@ use discord_game_sdk::*;
 fn main() {
     pretty_env_logger::init();
 
-    let client_id = std::env::var("DISCORD_APPLICATION_ID")
+    let client_id = std::env::var("DISCORD_CLIENT_ID")
         .unwrap()
         .parse()
         .unwrap();

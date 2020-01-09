@@ -27,7 +27,7 @@ impl Discord {
     pub fn create_lobby(
         &self,
         transaction: &LobbyTransaction,
-        callback: impl 'static + FnOnce(&Discord, Result<&Lobby>),
+        callback: impl 'static + FnOnce(&Self, Result<&Lobby>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -60,7 +60,7 @@ impl Discord {
         &self,
         lobby_id: LobbyID,
         transaction: &LobbyTransaction,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -91,7 +91,7 @@ impl Discord {
     pub fn delete_lobby(
         &self,
         lobby_id: LobbyID,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -111,7 +111,7 @@ impl Discord {
         &self,
         lobby_id: LobbyID,
         secret: impl Into<Cow<'b, str>>,
-        callback: impl 'static + FnOnce(&Discord, Result<&Lobby>),
+        callback: impl 'static + FnOnce(&Self, Result<&Lobby>),
     ) {
         let mut secret = secret.into();
 
@@ -142,7 +142,7 @@ impl Discord {
     pub fn connect_lobby_with_activity_secret<'b>(
         &self,
         activity_secret: impl Into<Cow<'b, str>>,
-        callback: impl 'static + FnOnce(&Discord, Result<&Lobby>),
+        callback: impl 'static + FnOnce(&Self, Result<&Lobby>),
     ) {
         let mut activity_secret = activity_secret.into();
 
@@ -169,7 +169,7 @@ impl Discord {
     pub fn disconnect_lobby(
         &self,
         lobby_id: LobbyID,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -289,20 +289,14 @@ impl Discord {
     }
 
     /// Returns an `Iterator` over the metadata key-value pairs for a given lobby.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount)  
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey)  
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue)
     pub fn iter_lobby_metadata(
         &self,
         lobby_id: LobbyID,
     ) -> Result<Collection<Result<(String, String)>>> {
-        let count = self.lobby_metadata_count(lobby_id)?;
-
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_metadata_at(lobby_id, i)),
-            count,
+            self.lobby_metadata_count(lobby_id)?,
         ))
     }
 
@@ -314,7 +308,7 @@ impl Discord {
         lobby_id: LobbyID,
         user_id: UserID,
         transaction: &LobbyMemberTransaction,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -369,16 +363,11 @@ impl Discord {
     }
 
     /// Returns an `Iterator` over the user IDs of the members of a lobby.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#membercount)  
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid)
     pub fn iter_lobby_member_ids(&self, lobby_id: LobbyID) -> Result<Collection<Result<UserID>>> {
-        let count = self.lobby_member_count(lobby_id)?;
-
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_id_at(lobby_id, i)),
-            count,
+            self.lobby_member_count(lobby_id)?,
         ))
     }
 
@@ -472,21 +461,15 @@ impl Discord {
     }
 
     /// Returns an `Iterator` over the metadata key-value pairs of a given lobby member.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount)  
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatakey)
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue)
     pub fn iter_lobby_member_metadata(
         &self,
         lobby_id: LobbyID,
         user_id: UserID,
     ) -> Result<Collection<Result<(String, String)>>> {
-        let count = self.lobby_member_metadata_count(lobby_id, user_id)?;
-
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i)),
-            count,
+            self.lobby_member_metadata_count(lobby_id, user_id)?,
         ))
     }
 
@@ -501,7 +484,7 @@ impl Discord {
         &self,
         lobby_id: LobbyID,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         let buffer = buffer.as_ref();
 
@@ -529,7 +512,7 @@ impl Discord {
     pub fn lobby_search(
         &self,
         search: &SearchQuery,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -585,13 +568,8 @@ impl Discord {
     /// Returns an `Iterator` over the IDs of lobbies found via the lobby search.
     ///
     /// [`lobby_search`](#method.lobby_search) must have completed first.
-    ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount)
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid)
     pub fn iter_lobbies(&self) -> Collection<Result<LobbyID>> {
-        let count = self.lobby_count();
-
-        Collection::new(self, Box::new(|d, i| d.lobby_id_at(i)), count)
+        Collection::new(self, Box::new(Self::lobby_id_at), self.lobby_count())
     }
 
     /// Connects to the voice channel of the current lobby.
@@ -602,7 +580,7 @@ impl Discord {
     pub fn connect_lobby_voice(
         &self,
         lobby_id: LobbyID,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -618,7 +596,7 @@ impl Discord {
     pub fn disconnect_lobby_voice(
         &self,
         lobby_id: LobbyID,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self

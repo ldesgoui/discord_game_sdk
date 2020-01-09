@@ -56,7 +56,7 @@ impl Discord {
     pub fn read_file_async<'b>(
         &self,
         filename: impl Into<Cow<'b, str>>,
-        callback: impl 'static + FnOnce(&Discord, Result<&[u8]>),
+        callback: impl 'static + FnOnce(&Self, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -88,7 +88,7 @@ impl Discord {
         filename: impl Into<Cow<'b, str>>,
         offset: usize,
         length: usize,
-        callback: impl 'static + FnOnce(&Discord, Result<&[u8]>),
+        callback: impl 'static + FnOnce(&Self, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -160,7 +160,7 @@ impl Discord {
         &self,
         filename: impl Into<Cow<'b, str>>,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'static + FnOnce(&Discord, Result<()>),
+        callback: impl 'static + FnOnce(&Self, Result<()>),
     ) {
         let mut filename = filename.into();
 
@@ -284,9 +284,7 @@ impl Discord {
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#count)
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#statat)  
     pub fn iter_file_stats(&self) -> Collection<Result<FileStat>> {
-        let count = self.file_stat_count();
-
-        Collection::new(self, Box::new(|d, i| d.file_stat_at(i)), count)
+        Collection::new(self, Box::new(Self::file_stat_at), self.file_stat_count())
     }
 
     /// Returns the path to the folder where files are stored.

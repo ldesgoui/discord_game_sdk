@@ -113,12 +113,10 @@ impl Discord {
     /// }
     /// # Ok(()) }
     pub fn iter_relationships(&self) -> Result<Collection<Result<Relationship>>> {
-        let count = self.relationship_count()?;
-
         Ok(Collection::new(
             self,
-            Box::new(|d, i| d.relationship_at(i)),
-            count,
+            Box::new(Self::relationship_at),
+            self.relationship_count()?,
         ))
     }
 }

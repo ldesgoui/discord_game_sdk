@@ -32,7 +32,7 @@ impl Discord {
         &self,
         handle: ImageHandle,
         refresh: FetchKind,
-        callback: impl 'static + FnOnce(&Discord, Result<ImageHandle>),
+        callback: impl 'static + FnOnce(&Self, Result<ImageHandle>),
     ) {
         unsafe {
             ffi!(self
