@@ -21,7 +21,9 @@ impl SearchQuery {
 
     /// Filters lobbies based on metadata comparison.
     ///
-    /// A nul byte will be appended to `key` and `value` if necessary.
+    /// ## Performance
+    ///
+    /// A nul byte will be appended to `key` and `value` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchfilter)
     pub fn filter(
@@ -31,11 +33,11 @@ impl SearchQuery {
         mut value: String,
         cast: Cast,
     ) -> &mut Self {
-        if !key.contains('\0') {
+        if !key.ends_with('\0') {
             key.push('\0')
         };
 
-        if !value.contains('\0') {
+        if !value.ends_with('\0') {
             value.push('\0')
         };
 
@@ -45,15 +47,17 @@ impl SearchQuery {
 
     /// Sorts the filtered lobbies based on "near-ness" to a given value
     ///
-    /// A nul byte will be appended to `key` and `value` if necessary.
+    /// ## Performance
+    ///
+    /// A nul byte will be appended to `key` and `value` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbysearchsort)
     pub fn sort(&mut self, mut key: String, mut value: String, cast: Cast) -> &mut Self {
-        if !key.contains('\0') {
+        if !key.ends_with('\0') {
             key.push('\0')
         };
 
-        if !value.contains('\0') {
+        if !value.ends_with('\0') {
             value.push('\0')
         };
 

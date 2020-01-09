@@ -23,7 +23,7 @@ impl Discord {
     ) -> Result<usize> {
         let mut filename = filename.into();
 
-        if !filename.contains('\0') {
+        if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
         };
 
@@ -60,7 +60,7 @@ impl Discord {
     ) {
         let mut filename = filename.into();
 
-        if !filename.contains('\0') {
+        if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
         };
 
@@ -92,7 +92,7 @@ impl Discord {
     ) {
         let mut filename = filename.into();
 
-        if !filename.contains('\0') {
+        if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
         };
 
@@ -129,7 +129,7 @@ impl Discord {
     ) -> Result<()> {
         let mut filename = filename.into();
 
-        if !filename.contains('\0') {
+        if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
         };
 
@@ -164,7 +164,7 @@ impl Discord {
     ) {
         let mut filename = filename.into();
 
-        if !filename.contains('\0') {
+        if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
         };
 
@@ -194,7 +194,7 @@ impl Discord {
     pub fn delete_file<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<()> {
         let mut filename = filename.into();
 
-        if !filename.contains('\0') {
+        if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
         };
 
@@ -209,7 +209,7 @@ impl Discord {
     pub fn file_exists<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<bool> {
         let mut filename = filename.into();
 
-        if !filename.contains('\0') {
+        if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
         };
 
@@ -233,7 +233,7 @@ impl Discord {
     pub fn file_stat<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<FileStat> {
         let mut filename = filename.into();
 
-        if !filename.contains('\0') {
+        if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
         };
 

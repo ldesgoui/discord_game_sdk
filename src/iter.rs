@@ -61,7 +61,7 @@ impl<T> std::iter::FusedIterator for Collection<'_, T> {}
 
 impl<T> std::fmt::Debug for Collection<'_, T> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_struct("discord_game_sdk::Collection")
+        fmt.debug_struct("Collection")
             .field("discord", &self.discord)
             .field("getter", &(..))
             .field("count", &self.count)

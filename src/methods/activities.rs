@@ -14,7 +14,7 @@ impl Discord {
     ///
     /// On macOS, due to the way Discord registers executables,
     /// your game needs to be bundled for this command to work.
-    /// That means it should be a .app.
+    /// That means it should be a `.app`.
     ///
     /// ## Performance
     ///
@@ -31,7 +31,7 @@ impl Discord {
     pub fn register_launch_command<'b>(&self, command: impl Into<Cow<'b, str>>) -> Result<()> {
         let mut command = command.into();
 
-        if !command.contains('\0') {
+        if !command.ends_with('\0') {
             command.to_mut().push('\0')
         };
 
@@ -206,7 +206,7 @@ impl Discord {
     ) {
         let mut content = content.into();
 
-        if !content.contains('\0') {
+        if !content.ends_with('\0') {
             content.to_mut().push('\0')
         };
 

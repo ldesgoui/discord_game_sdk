@@ -38,7 +38,7 @@ impl Discord {
     ) -> Result<()> {
         let mut route = route.into();
 
-        if !route.contains('\0') {
+        if !route.ends_with('\0') {
             route.to_mut().push('\0')
         };
 
@@ -64,7 +64,7 @@ impl Discord {
     ) -> Result<()> {
         let mut route = route.into();
 
-        if !route.contains('\0') {
+        if !route.ends_with('\0') {
             route.to_mut().push('\0')
         };
 

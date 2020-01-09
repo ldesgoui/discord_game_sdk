@@ -139,7 +139,7 @@ impl Discord {
     ) {
         let mut code = code.into();
 
-        if !code.contains('\0') {
+        if !code.ends_with('\0') {
             code.to_mut().push('\0')
         };
 

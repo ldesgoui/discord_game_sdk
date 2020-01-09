@@ -11,7 +11,7 @@ use crate::{sys, to_result::ToResult, Collection, Discord, Result, Snowflake, Us
 impl Discord {
     /// Updates the current user's completion for a given achievement.
     ///
-    /// `percent_complete` must be in the range `0..=100`
+    /// `percent_complete` must be in the range `0..=100`.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#setuserachievement)
     ///
@@ -176,8 +176,10 @@ impl Discord {
     /// );
     /// # Ok(()) }
     pub fn iter_user_achievements(&self) -> Collection<Result<UserAchievement>> {
-        let count = self.user_achievement_count();
-
-        Collection::new(self, Box::new(|d, i| d.user_achievement_at(i)), count)
+        Collection::new(
+            self,
+            Box::new(Discord::user_achievement_at),
+            self.user_achievement_count(),
+        )
     }
 }

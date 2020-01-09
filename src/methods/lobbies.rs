@@ -115,7 +115,7 @@ impl Discord {
     ) {
         let mut secret = secret.into();
 
-        if !secret.contains('\0') {
+        if !secret.ends_with('\0') {
             secret.to_mut().push('\0')
         };
 
@@ -146,7 +146,7 @@ impl Discord {
     ) {
         let mut activity_secret = activity_secret.into();
 
-        if !activity_secret.contains('\0') {
+        if !activity_secret.ends_with('\0') {
             activity_secret.to_mut().push('\0')
         };
 
@@ -224,7 +224,7 @@ impl Discord {
 
         let mut key = key.into();
 
-        if !key.contains('\0') {
+        if !key.ends_with('\0') {
             key.to_mut().push('\0')
         };
 
@@ -397,7 +397,7 @@ impl Discord {
 
         let mut key = key.into();
 
-        if !key.contains('\0') {
+        if !key.ends_with('\0') {
             key.to_mut().push('\0')
         };
 
