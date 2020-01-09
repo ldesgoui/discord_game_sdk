@@ -1,0 +1,37 @@
+use crate::{sys, utils::charbuf_to_str, UnixTimestamp};
+
+/// File Metadata
+///
+/// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/storage#data-models-filestat-struct)
+#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[repr(transparent)]
+pub struct FileStat(pub(crate) sys::DiscordFileStat);
+
+impl FileStat {
+    /// The name of the file
+    pub fn filename(&self) -> &str {
+        charbuf_to_str(&self.0.filename)
+    }
+
+    /// The total size in bytes
+    pub fn size(&self) -> usize {
+        // XXX: u64 should be usize
+        self.0.size as usize
+    }
+
+    /// When the file was last modified, in UNIX Time
+    pub fn last_modified(&self) -> UnixTimestamp {
+        // XXX: u64 should be UnixTimestamp
+        self.0.last_modified as UnixTimestamp
+    }
+}
+
+impl std::fmt::Debug for FileStat {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_struct("FileStat")
+            .field("filename", &self.filename())
+            .field("size", &self.size())
+            .field("last_modified", &self.last_modified())
+            .finish()
+    }
+}

@@ -1,0 +1,22 @@
+[package]
+name = "discord_game_sdk_sys"
+version = "0.999.0" # check sys/src/lib.rs
+authors = ["ldesgoui <ldesgoui@gmail.com>"]
+edition = "2018"
+description = "Low-level bindings for the Discord Game SDK"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/ldesgoui/discord_game_sdk"
+keywords = ["discord", "sdk", "gamedev"]
+categories = ["external-ffi-bindings", "game-engines"]
+readme = "README.md"
+build = "build.rs"
+
+[package.metadata.docs.rs]
+features = ["doc"]
+
+[features]
+doc = [] # DO NOT RELY ON THIS
+link = []
+
+[build-dependencies]
+bindgen = { version = "0.52.0", default-features = false, features = ["runtime"] }
