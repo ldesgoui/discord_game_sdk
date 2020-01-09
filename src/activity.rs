@@ -1,7 +1,7 @@
 use crate::{
     sys,
     utils::{charbuf_to_str, write_charbuf},
-    ActivityKind, ApplicationID, UnixTimestamp,
+    ActivityKind, ClientID, UnixTimestamp,
 };
 
 /// Activity (also known as Rich Presence)
@@ -54,7 +54,7 @@ impl Activity {
     }
 
     /// The unique ID of the application
-    pub fn application_id(&self) -> ApplicationID {
+    pub fn application_id(&self) -> ClientID {
         self.0.application_id
     }
 
