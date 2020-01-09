@@ -19,7 +19,7 @@ use std::{convert::TryFrom, ops::DerefMut};
 /// # const DISCORD_CLIENT_ID: discord_game_sdk::ClientID = 0;
 ///
 /// fn main() -> Result<(), Box<dyn std::error::Error>> {
-///     let mut discord = Self::new(DISCORD_CLIENT_ID)?;
+///     let mut discord = Discord::new(DISCORD_CLIENT_ID)?;
 ///
 ///     loop {
 ///         discord.run_callbacks()?;

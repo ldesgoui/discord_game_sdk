@@ -65,6 +65,7 @@ impl EventHandler for LogEvents {
         )
     }
 
+    /*
     fn on_lobby_update(&mut self, _: &Discord, lobby_id: LobbyID) {}
     fn on_lobby_delete(&mut self, _: &Discord, lobby_id: LobbyID, reason: u32) {}
     fn on_member_connect(&mut self, _: &Discord, lobby_id: LobbyID, member_id: UserID) {}
@@ -92,9 +93,10 @@ impl EventHandler for LogEvents {
     ) {
     }
     fn on_network_route_update(&mut self, _: &Discord, route: &str) {}
+    */
 
     fn on_overlay_toggle(&mut self, _: &Discord, closed: bool) {
-        log::info!("on overlay toggle");
+        log::info!("on overlay toggle: closed == {}", closed);
     }
 
     fn on_relationships_refresh(&mut self, _: &Discord) {
