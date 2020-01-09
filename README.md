@@ -3,7 +3,7 @@
 [![Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/discord_game_sdk)
 [![Latest Version](https://img.shields.io/crates/v/discord_game_sdk.svg)](https://crates.io/crates/discord_game_sdk)
 ![License](https://img.shields.io/crates/l/discord_game_sdk)
-![Build Status](https://img.shields.io/github/workflow/status/ldesgoui/discord_game_sdk/Continuous Integration)
+[![Build Status](https://img.shields.io/github/workflow/status/ldesgoui/discord_game_sdk/Continuous%20Integration)](https://github.com/ldesgoui/discord_game_sdk/actions)
 
 This crate provides a safe interface to the [Discord Game SDK].
 
