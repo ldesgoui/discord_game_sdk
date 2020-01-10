@@ -69,12 +69,6 @@ pub(crate) mod ctypes {
     pub(crate) use std::os::raw::{c_uchar as c_char, *};
 }
 
-// We use named linking because of the unconventional filenames,
-// we have to do this to make the compiler shut up even though
-// it accomplishes nothing
-#[cfg_attr(feature = "link", link(name = "discord_game_sdk"))]
-extern "C" {}
-
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 // `bindgen` knows how to automatically implement PartialEq when it can't be derived

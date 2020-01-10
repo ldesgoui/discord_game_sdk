@@ -92,7 +92,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          # - macos-latest
+          - macos-latest
           - windows-latest
         rust:
           - stable
@@ -107,6 +107,14 @@ jobs:
         run: |
           curl -sO https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
           unzip ./discord_game_sdk.zip
+
+      - name: Set up for Mac OS
+        if: startsWith(matrix.os, 'macos')
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        run: |
+          cp lib/x86_64/{,lib}discord_game_sdk.dylib
+          echo "::set-env name=DYLD_LIBRARY_PATH::$DYLD_LIBRARY_PATH:$PWD/lib/x86_64"
 
       - name: Cache libclang
         id: cache-libclang

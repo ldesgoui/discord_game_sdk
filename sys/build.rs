@@ -87,35 +87,39 @@ fn main() {
         return;
     }
 
-    // For each of the supported platforms, we copy the according library files to OUT_DIR
-    // and point the linker there.
-    // This (on Linux anyways) allows `cargo run` to properly build and run, finding the library
-    // with no additional setup.
-    // However, the resulting binary will depend on the library file to be in the runtime path,
+    // We copy the according library files to OUT_DIR and point the linker there.
+    // On Linux and Mac OS, they are renamed (`lib` is prepended).
+    // On Mac OS, `rustc` is given an updated `$DYLD_LIBRARY_PATH` to find the library.
+    // This allows `cargo run` to properly build and run, finding the library with no additional setup.
+    // The resulting binary will depend on the library to be in the runtime path,
     // which this crate does not modify in any way.
-    // The `rustc-link-lib` explicitly points to file names because they are not named
-    // conventionally (`lib...` on UNIX).
     match target.as_ref() {
         "x86_64-unknown-linux-gnu" => {
             std::fs::copy(
                 sdk_path.join("lib/x86_64/discord_game_sdk.so"),
-                out_path.join("discord_game_sdk.so"),
+                out_path.join("libdiscord_game_sdk.so"),
             )
             .unwrap();
 
             println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
-            println!("cargo:rustc-link-lib=dylib=discord_game_sdk::discord_game_sdk.so");
+            println!("cargo:rustc-link-lib=discord_game_sdk");
         }
 
         "x86_64-apple-darwin" => {
             std::fs::copy(
                 sdk_path.join("lib/x86_64/discord_game_sdk.dylib"),
-                out_path.join("discord_game_sdk.dylib"),
+                out_path.join("libdiscord_game_sdk.dylib"),
             )
             .unwrap();
 
             println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
-            println!("cargo:rustc-link-lib=dylib=discord_game_sdk::discord_game_sdk.dylib");
+            println!("cargo:rustc-link-lib=discord_game_sdk");
+
+            println!(
+                "cargo:rustc-env=DYLD_LIBRARY_PATH={}:{}",
+                std::env::var("DYLD_LIBRARY_PATH").unwrap_or_default(),
+                out_path.to_str().unwrap()
+            );
         }
 
         "i686-pc-windows-gnu"
@@ -141,7 +145,7 @@ fn main() {
             .unwrap();
 
             println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
-            println!("cargo:rustc-link-lib=dylib=discord_game_sdk:discord_game_sdk");
+            println!("cargo:rustc-link-lib=discord_game_sdk");
         }
 
         _ => panic!(INCOMPATIBLE_PLATFORM),
