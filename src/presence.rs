@@ -27,3 +27,9 @@ impl std::fmt::Debug for Presence {
             .finish()
     }
 }
+
+impl std::fmt::Display for Presence {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}, {}", self.status(), self.activity())
+    }
+}

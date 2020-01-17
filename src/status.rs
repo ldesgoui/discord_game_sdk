@@ -28,3 +28,19 @@ impl From<sys::EDiscordStatus> for Status {
         }
     }
 }
+
+impl std::fmt::Display for Status {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            fmt,
+            "{}",
+            match self {
+                Self::DoNotDisturb => "do not disturb",
+                Self::Idle => "idle",
+                Self::Offline => "offline",
+                Self::Online => "online",
+                Self::Undefined(n) => return write!(fmt, "undefined status ({})", n),
+            }
+        )
+    }
+}

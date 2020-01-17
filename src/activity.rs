@@ -277,3 +277,31 @@ impl std::fmt::Debug for Activity {
             .finish()
     }
 }
+
+impl std::fmt::Display for Activity {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.is_empty() {
+            return write!(fmt, "no activity");
+        }
+
+        match self.kind() {
+            ActivityKind::Listening => write!(
+                fmt,
+                "listening to {}: {} by {}",
+                self.name(),
+                self.details(),
+                self.state()
+            ),
+
+            ActivityKind::Playing => write!(fmt, "playing {}", self.name()),
+
+            ActivityKind::Streaming => {
+                write!(fmt, "streaming on {}: {}", self.name(), self.state())
+            }
+
+            ActivityKind::Watching => write!(fmt, "watching a live stream"),
+
+            ActivityKind::Undefined(n) => write!(fmt, "undefined activity ({})", n),
+        }
+    }
+}
