@@ -2,7 +2,6 @@ use crate::{
     discord::{Discord, DiscordInner},
     EventHandler,
 };
-use std::ops::Deref;
 
 pub(crate) struct VoidEvents;
 
