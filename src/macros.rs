@@ -1,11 +1,14 @@
 macro_rules! ffi {
     // ffi!(self.destroy())
     ($self:ident.$method:ident($($arg:expr),* $(,)?)) => {{
-        const MISSING_METHOD: &str =
-            "[discord_game_sdk] received a NULL pointer where a valid pointer to a method is expected";
+        debug_assert!(!$self.0.core.is_null());
 
         log::trace!("FFI: {}", stringify!($method));
-        let function = (*$self.0.core).$method.expect(MISSING_METHOD);
+        let function = (*$self.0.core).$method;
+
+        debug_assert!(function.is_some());
+
+        let function = function.unwrap();
 
         function($self.0.core, $($arg),*)
     }};
@@ -15,13 +18,16 @@ macro_rules! ffi {
         .$get_manager:ident ()
         .$method:ident($($arg:expr),* $(,)?)
     ) => {{
-        const MISSING_METHOD: &str =
-            "[discord_game_sdk] received a NULL pointer where a valid pointer to a method is expected";
-
         let manager = ffi!($self.$get_manager());
 
+        debug_assert!(!manager.is_null());
+
         log::trace!("FFI: .{}", stringify!($method));
-        let function = (*manager).$method.expect(MISSING_METHOD);
+        let function = (*manager).$method;
+
+        debug_assert!(function.is_some());
+
+        let function = function.unwrap();
 
         function(manager, $($arg),*)
     }};
@@ -36,13 +42,16 @@ macro_rules! ffi {
     ) => {{
         use crate::utils::CallbackData;
 
-        const MISSING_METHOD: &str =
-            "[discord_game_sdk] received a NULL pointer where a valid pointer to a method is expected";
-
         let manager = ffi!($self.$get_manager());
 
+        debug_assert!(!manager.is_null());
+
         log::trace!("FFI: .{}", stringify!($method));
-        let function = (*manager).$method.expect(MISSING_METHOD);
+        let function = (*manager).$method;
+
+        debug_assert!(function.is_some());
+
+        let function = function.unwrap();
 
         unsafe extern "C" fn c_fn(
             callback_data: *mut std::ffi::c_void,
@@ -50,14 +59,26 @@ macro_rules! ffi {
         ) {
             prevent_unwind!();
 
+            debug_assert!(!callback_data.is_null());
+
+            // SAFETY: Legal, we created the pointer just below
             let callback_data = Box::from_raw(callback_data as *mut CallbackData<$res>);
+
+            // SAFETY: Legal (Mutable aliasing)
+            // - We don't mutate the Box<DiscordInner> (no dropping either)
+            // - We only pass a &Discord
+            // - At this point in time, we are *always* in Discord::run_callbacks
+            // - Which means we're in posession of &mut Discord
+            // - And downgrading to a &Discord and passing it to another function is fine
             let discord = Discord(Box::from_raw(callback_data.discord as *mut _));
 
             (callback_data.callback)(&discord, $expr);
 
+            // SAFETY: We cannot drop Box<DiscordInner>
             std::mem::forget(discord);
         }
 
+        // SAFETY: We create the pointer here
         let callback_data =
             Box::into_raw(Box::new(CallbackData::new($self, $callback))) as *mut _;
 
@@ -97,18 +118,34 @@ macro_rules! event_handler {
             inner: *mut std::ffi::c_void,
             $($param: $ty),*
         ) {
-            use crate::discord::{Discord, DiscordInner};
+            use crate::{discord::{Discord, DiscordInner}, utils::VoidEvents};
 
             prevent_unwind!();
 
-            let event_handler = &mut (*(inner as *mut DiscordInner)).event_handler;
-            let discord = Discord(Box::from_raw(inner as *mut DiscordInner));
+            debug_assert!(!inner.is_null());
+
+            // SAFETY: Legal (Mutable aliasing)
+            // - We don't drop the Box<DiscordInner>
+            // - At this point in time, we are *always* in Discord::run_callbacks
+            // - Which means we're in posession of &mut Discord
+            // - We are absolutely sure that only one of the &mut are used at one time
+            let mut discord = Discord(Box::from_raw(inner as *mut DiscordInner));
+
+            // We're sure that the event handler won't be used through discord,
+            // we replace it with a blank value for now
+            // PERF: Heap-allocs a VTable
+            let mut event_handler = discord.set_event_handler(Box::new(VoidEvents));
 
             event_handler.$method(
                 &discord,
                 $($expr),*
             );
 
+            // We're sure this will go through, otherwise we're panicking
+            // and therefore about to abort
+            discord.set_event_handler(event_handler);
+
+            // SAFETY: We cannot drop Box<DiscordInner>
             std::mem::forget(discord);
         }
 
@@ -126,7 +163,7 @@ macro_rules! event_handler {
     };
 }
 
-// https://github.com/rust-lang/project-ffi-unwind
+// TODO: https://github.com/rust-lang/project-ffi-unwind
 macro_rules! prevent_unwind {
     () => {
         const ACROSS_FFI: &str = "[discord_game_sdk]

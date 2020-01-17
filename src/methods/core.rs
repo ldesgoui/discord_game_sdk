@@ -2,11 +2,11 @@ use crate::{
     discord::{Discord, DiscordInner},
     sys,
     to_result::ToResult,
-    utils::charptr_to_str,
+    utils::{charptr_to_str, VoidEvents},
     Activity, ClientID, CreateFlags, Entitlement, EventHandler, Relationship, Result, User,
     UserAchievement,
 };
-use std::{convert::TryFrom, ops::DerefMut};
+use std::{convert::TryFrom, ops::Deref};
 
 /// # Core
 ///
@@ -42,25 +42,24 @@ impl Discord {
     ///
     /// > [`Create` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#create)  
     /// > [`SetLogHook` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#setloghook)
+    #[allow(clippy::cognitive_complexity)]
     pub fn with_create_flags(client_id: ClientID, flags: CreateFlags) -> Result<Self> {
-        struct VoidEvents;
-        impl EventHandler for VoidEvents {}
-
         let mut inner = Box::new(DiscordInner {
             core: std::ptr::null_mut(),
             client_id,
             event_handler: Box::new(VoidEvents),
         });
 
-        let ptr = inner.deref_mut() as *mut DiscordInner as *mut std::ffi::c_void;
+        // SAFETY: This is the pointer we use in event handler code
+        let ptr = inner.deref() as *const DiscordInner as *mut std::ffi::c_void;
 
-        let mut params = create_params(client_id, flags.into(), ptr);
+        let params = create_params(client_id, flags.into(), ptr);
 
         unsafe {
             sys::DiscordCreate(
                 sys::DISCORD_VERSION,
                 // XXX: *mut should be *const
-                &mut params,
+                &params as *const _ as *mut _,
                 // XXX: *mut *mut should be *mut *const
                 &mut inner.core,
             )
@@ -142,24 +141,20 @@ fn create_params(
         event_data,
 
         // XXX: *mut should be *const
-        application_events: std::ptr::null_mut(),
-        application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
-
-        // XXX: *mut should be *const
-        user_events: USER as *const _ as *mut _,
-        user_version: sys::DISCORD_USER_MANAGER_VERSION,
-
-        // XXX: *mut should be *const
-        image_events: std::ptr::null_mut(),
-        image_version: sys::DISCORD_IMAGE_MANAGER_VERSION,
+        achievement_events: ACHIEVEMENT as *const _ as *mut _,
+        achievement_version: sys::DISCORD_ACHIEVEMENT_MANAGER_VERSION,
 
         // XXX: *mut should be *const
         activity_events: ACTIVITY as *const _ as *mut _,
         activity_version: sys::DISCORD_ACTIVITY_MANAGER_VERSION,
 
         // XXX: *mut should be *const
-        relationship_events: RELATIONSHIP as *const _ as *mut _,
-        relationship_version: sys::DISCORD_RELATIONSHIP_MANAGER_VERSION,
+        application_events: std::ptr::null_mut(),
+        application_version: sys::DISCORD_APPLICATION_MANAGER_VERSION,
+
+        // XXX: *mut should be *const
+        image_events: std::ptr::null_mut(),
+        image_version: sys::DISCORD_IMAGE_MANAGER_VERSION,
 
         // XXX: *mut should be *const
         lobby_events: LOBBY as *const _ as *mut _,
@@ -174,6 +169,10 @@ fn create_params(
         overlay_version: sys::DISCORD_OVERLAY_MANAGER_VERSION,
 
         // XXX: *mut should be *const
+        relationship_events: RELATIONSHIP as *const _ as *mut _,
+        relationship_version: sys::DISCORD_RELATIONSHIP_MANAGER_VERSION,
+
+        // XXX: *mut should be *const
         storage_events: std::ptr::null_mut(),
         storage_version: sys::DISCORD_STORAGE_MANAGER_VERSION,
 
@@ -182,12 +181,12 @@ fn create_params(
         store_version: sys::DISCORD_STORE_MANAGER_VERSION,
 
         // XXX: *mut should be *const
-        voice_events: VOICE as *const _ as *mut _,
-        voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
+        user_events: USER as *const _ as *mut _,
+        user_version: sys::DISCORD_USER_MANAGER_VERSION,
 
         // XXX: *mut should be *const
-        achievement_events: ACHIEVEMENT as *const _ as *mut _,
-        achievement_version: sys::DISCORD_ACHIEVEMENT_MANAGER_VERSION,
+        voice_events: VOICE as *const _ as *mut _,
+        voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
     }
 }
 

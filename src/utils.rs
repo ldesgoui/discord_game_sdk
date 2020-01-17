@@ -1,5 +1,12 @@
-use crate::discord::{Discord, DiscordInner};
+use crate::{
+    discord::{Discord, DiscordInner},
+    EventHandler,
+};
 use std::ops::Deref;
+
+pub(crate) struct VoidEvents;
+
+impl EventHandler for VoidEvents {}
 
 pub(crate) struct CallbackData<T> {
     pub(crate) discord: *const DiscordInner,

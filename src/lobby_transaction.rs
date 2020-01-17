@@ -90,6 +90,7 @@ impl LobbyTransaction {
         self
     }
 
+    #[allow(clippy::cognitive_complexity)]
     pub(crate) unsafe fn process(&self, ptr: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
         let tx = MacroHelper::new(ptr);
 
