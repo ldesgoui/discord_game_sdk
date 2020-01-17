@@ -10,6 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
+          - ubuntu-latest
           - macos-latest
           - windows-latest
         rust:
@@ -28,10 +29,10 @@ jobs:
         run: |
           curl -sO https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
           unzip ./discord_game_sdk.zip
-          cp lib/x86_64/{,lib}discord_game_sdk.so
-          cp lib/x86_64/{,lib}discord_game_sdk.dylib
-          cp lib/x86_64/discord_game_sdk.{dll.lib,lib}
-          cp lib/x86/discord_game_sdk.{dll.lib,lib}
+          cp lib/x86_64/discord_game_sdk.so         lib/x86_64/libdiscord_game_sdk.so
+          cp lib/x86_64/discord_game_sdk.dylib      lib/x86_64/libdiscord_game_sdk.dylib
+          cp lib/x86_64/discord_game_sdk.dll.lib    lib/x86_64/libdiscord_game_sdk.lib
+          cp lib/x86/discord_game_sdk.dll.lib       lib/x86/libdiscord_game_sdk.lib
 
       - name: Set DYLD_LIBRARY_PATH
         working-directory: ${{ runner.temp }}
@@ -89,7 +90,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --workspace --examples --tests
+          args: --all --examples --tests
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
