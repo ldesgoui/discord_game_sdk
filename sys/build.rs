@@ -148,14 +148,16 @@ discord_game_sdk_sys: Hello,
 You are trying to link to the Discord Game SDK.
 Some additional set-up is required, namely some files need to be copied for the linker:
 
+# Linux: prepend with `lib`
 $ cp $DISCORD_GAME_SDK_PATH/lib/x86_64/{,lib}discord_game_sdk.so
+
+# Mac OS: prepend with `lib` and add to library search path
 $ cp $DISCORD_GAME_SDK_PATH/lib/x86_64/{,lib}discord_game_sdk.dylib
+$ export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DISCORD_GAME_SDK_PATH/lib/x86_64
+
+# Windows: copy `*.dll.lib` to `*.lib` (won't affect library search)
 $ cp $DISCORD_GAME_SDK_PATH/lib/x86_64/discord_game_sdk.{dll.lib,lib}
 $ cp $DISCORD_GAME_SDK_PATH/lib/x86/discord_game_sdk.{dll.lib,lib}
-
-Additionally, on Mac OS, the library search path must be updated as such:
-
-$ export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_SEARCH_PATH:$DISCORD_GAME_SDK_PATH/lib/x86_64
 
 After all this, `cargo build` and `cargo run` should function as expected.
 

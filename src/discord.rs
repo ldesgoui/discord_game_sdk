@@ -1,4 +1,4 @@
-use crate::{sys, ClientID, EventHandler};
+use crate::{sys, EventHandler};
 
 /// Main interface with SDK
 ///
@@ -26,21 +26,6 @@ use crate::{sys, ClientID, EventHandler};
 #[derive(Debug)]
 #[repr(transparent)]
 pub struct Discord(pub(crate) Box<DiscordInner>);
-
-impl Discord {
-    /// The Client ID that was supplied during creation
-    pub fn client_id(&self) -> ClientID {
-        self.0.client_id
-    }
-
-    /// Replace the current `EventHandler` with a new one
-    pub fn set_event_handler<'a>(
-        &'a mut self,
-        event_handler: Box<dyn EventHandler>,
-    ) -> Box<dyn EventHandler> {
-        std::mem::replace(&mut self.0.event_handler, event_handler)
-    }
-}
 
 impl Drop for Discord {
     fn drop(&mut self) {

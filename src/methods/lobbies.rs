@@ -104,7 +104,9 @@ impl Discord {
     /// Connects the current user to a given lobby.
     /// You can be connected to up to five lobbies at a time.
     ///
-    /// A nul byte will be appended to `secret` if necessary.
+    /// ## Performance
+    ///
+    /// A nul byte will be appended to `secret` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby)
     pub fn connect_lobby<'b>(
@@ -136,7 +138,9 @@ impl Discord {
     /// Connects the current user to a lobby using the special activity secret from the lobby
     /// which is a concatenated lobby ID and its secret.
     ///
-    /// A nul byte will be appended to `activity_secret` if necessary.
+    /// ## Performance
+    ///
+    /// A nul byte will be appended to `activity_secret` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret)
     pub fn connect_lobby_with_activity_secret<'b>(
@@ -193,6 +197,7 @@ impl Discord {
     }
 
     /// Gets the activity secret for a given lobby.
+    ///
     /// It should be used to populate
     /// [`Activity::with_join_secret`](struct.Activity.html#method.with_join_secret).
     ///
@@ -212,7 +217,9 @@ impl Discord {
 
     /// Returns lobby metadata value for a given key.
     ///
-    /// A nul byte will be appended to `key` if necessary.
+    /// ## Performance
+    ///
+    /// A nul byte will be appended to `key` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue)
     pub fn lobby_metadata<'b>(
@@ -373,7 +380,9 @@ impl Discord {
 
     /// Returns member metadata value for a given key.
     ///
-    /// A nul byte will be appended to `key` if necessary.
+    /// ## Performance
+    ///
+    /// A nul byte will be appended to `key` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue)
     pub fn lobby_member_metadata<'b>(
@@ -504,6 +513,7 @@ impl Discord {
     }
 
     /// Searches available lobbies based on the search criteria.
+    ///
     /// Lobbies that meet the criteria are then globally filtered.
     /// The callback fires when the list of lobbies is stable and ready for iteration.
     /// You do not necessarily need to access the filtered lobbies within the context of the result callback.
@@ -573,6 +583,7 @@ impl Discord {
     }
 
     /// Connects to the voice channel of the current lobby.
+    ///
     /// When connected to voice, the user can open their Discord overlay to see a list of other users,
     /// allowing them to mute/deafen themselves as well as mute/adjust the volume of other members.
     ///
@@ -607,6 +618,7 @@ impl Discord {
     }
 
     /// Connects to the networking layer for the given lobby ID.
+    ///
     /// Call this when connecting to the lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectnetwork)
@@ -622,6 +634,7 @@ impl Discord {
     }
 
     /// Flushes the network. Call this when you're done sending messages.
+    ///
     /// This should appear near the end of your game loop.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork)

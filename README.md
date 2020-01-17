@@ -41,15 +41,39 @@ Download the [Discord Game SDK] and set the following environment variable to wh
 export DISCORD_GAME_SDK_PATH=/path/to/discord_game_sdk
 ```
 
+If you're also planning on using the default `link` feature, keep reading below.
+
 
 ## Features:
 
-- `link`: (enabled by default, delegates to `discord_game_sdk_sys/link`)
-    Provides the linker with a copy of the dynamic library.
-    This allows for `cargo run` to run with no additional setup on Linux and Windows.
+#### `link`
 
-- [`image`](https://docs.rs/image): (optional crate)
-    Provides a conversion from our `Image` to `image::RgbaImage`.
+Enabled by default, delegates to `discord_game_sdk_sys/link`.
+
+Provides functional linking with the caveat that libraries are renamed and some additional
+set-up is required:
+
+```sh
+# Linux: prepend with `lib`
+cp $DISCORD_GAME_SDK_PATH/lib/x86_64/{,lib}discord_game_sdk.so
+
+# Mac OS: prepend with `lib` and add to library search path
+cp $DISCORD_GAME_SDK_PATH/lib/x86_64/{,lib}discord_game_sdk.dylib
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DISCORD_GAME_SDK_PATH/lib/x86_64
+
+# Windows: change `dll.lib` to `lib` (won't affect library searching)
+cp $DISCORD_GAME_SDK_PATH/lib/x86_64/discord_game_sdk.{dll.lib,lib}
+cp $DISCORD_GAME_SDK_PATH/lib/x86/discord_game_sdk.{dll.lib,lib}
+```
+
+This allows for `cargo run` to function.
+
+
+#### [`image`](https://docs.rs/image)
+
+Optional crate.
+
+Provides a conversion from our `Image` to `image::RgbaImage`.
 
 
 ## Safety

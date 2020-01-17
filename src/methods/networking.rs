@@ -28,7 +28,9 @@ impl Discord {
 
     /// Opens a network connection to another Discord user.
     ///
-    /// A nul byte will be appended to `route` if necessary.
+    /// ## Performance
+    ///
+    /// A nul byte will be appended to `route` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#openpeer)
     pub fn open_peer<'b>(
@@ -51,10 +53,13 @@ impl Discord {
     }
 
     /// Updates the network connection to another Discord user.
+    ///
     /// You'll want to call this when notified that the route to another user has changed,
     /// most likely from a lobby member update event.
     ///
-    /// A nul byte will be appended to `route` if necessary.
+    /// ## Performance
+    ///
+    /// A nul byte will be appended to `route` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#updatepeer)
     pub fn update_peer<'b>(

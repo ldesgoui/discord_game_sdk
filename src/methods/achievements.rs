@@ -92,7 +92,7 @@ impl Discord {
     ///             return eprintln!("failed fetching user achievements: {}", error);
     ///         }
     ///
-    ///             let achievement = discord.user_achievement(ACHIEVEMENT_ID);
+    ///         let achievement = discord.user_achievement(ACHIEVEMENT_ID);
     ///
     ///         if let Err(error) = achievement {
     ///             return eprintln!("failed getting user achievement: {}", error);

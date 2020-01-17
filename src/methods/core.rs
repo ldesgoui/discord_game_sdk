@@ -41,6 +41,7 @@ impl Discord {
     /// Creates an instance of the main interface with the Discord Game SDK.
     ///
     /// > [`Create` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#create)  
+    /// > [`SetLogHook` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#setloghook)
     pub fn with_create_flags(client_id: ClientID, flags: CreateFlags) -> Result<Self> {
         struct VoidEvents;
         impl EventHandler for VoidEvents {}
@@ -110,6 +111,19 @@ impl Discord {
     /// [`Error::NotRunning`]: enum.Error.html#variant.NotRunning
     pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()
+    }
+
+    /// The Client ID that was supplied during creation
+    pub fn client_id(&self) -> ClientID {
+        self.0.client_id
+    }
+
+    /// Sets a new Event Handler, returning the previous one
+    pub fn set_event_handler<'a>(
+        &'a mut self,
+        event_handler: Box<dyn EventHandler>,
+    ) -> Box<dyn EventHandler> {
+        std::mem::replace(&mut self.0.event_handler, event_handler)
     }
 }
 
