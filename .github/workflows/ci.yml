@@ -31,8 +31,8 @@ jobs:
           unzip ./discord_game_sdk.zip
           cp lib/x86_64/discord_game_sdk.so         lib/x86_64/libdiscord_game_sdk.so
           cp lib/x86_64/discord_game_sdk.dylib      lib/x86_64/libdiscord_game_sdk.dylib
-          cp lib/x86_64/discord_game_sdk.dll.lib    lib/x86_64/libdiscord_game_sdk.lib
-          cp lib/x86/discord_game_sdk.dll.lib       lib/x86/libdiscord_game_sdk.lib
+          cp lib/x86_64/discord_game_sdk.dll.lib    lib/x86_64/discord_game_sdk.lib
+          cp lib/x86/discord_game_sdk.dll.lib       lib/x86/discord_game_sdk.lib
 
       - name: Set DYLD_LIBRARY_PATH
         working-directory: ${{ runner.temp }}
