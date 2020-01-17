@@ -3,90 +3,8 @@ name: Continuous Integration
 on: [push, pull_request]
 
 jobs:
-  full:
-    name: Build, Test, Check formatting, Check lints
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        rust:
-          - nightly
-          - stable
-          - 1.37.0
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-
-      - name: Download Discord Game SDK
-        shell: bash
-        working-directory: ${{ runner.temp }}
-        run: |
-          curl -sO https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
-          unzip ./discord_game_sdk.zip
-
-      - name: Cache cargo registry
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-registry-${{ hashFiles('**/Cargo.toml') }}
-
-      - name: Cache cargo index
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-index-${{ hashFiles('**/Cargo.toml') }}
-
-      - name: Cache cargo build
-        uses: actions/cache@v1
-        with:
-          path: target
-          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-build-target-${{ hashFiles('**/Cargo.toml') }}
-
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          override: true
-          components: rustfmt, clippy
-
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-        env:
-          DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
-
-      - name: Test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-        env:
-          DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
-
-      - name: Check formatting
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
-        env:
-          DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
-
-      - name: Check lints
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
-        env:
-          DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
-
-  partial:
-    name: Build, Test
-
-    runs-on: ${{ matrix.os }}
+  build-test:
+    name: Build, test
 
     strategy:
       fail-fast: false
@@ -96,17 +14,30 @@ jobs:
           - windows-latest
         rust:
           - stable
+          - nightly
+          - 1.37.0
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v1
 
       - name: Download Discord Game SDK
-        shell: bash
         working-directory: ${{ runner.temp }}
         run: |
           curl -sO https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
           unzip ./discord_game_sdk.zip
+          cp lib/x86_64/{,lib}discord_game_sdk.so
+          cp lib/x86_64/{,lib}discord_game_sdk.dylib
+          cp lib/x86_64/discord_game_sdk.{dll.lib,lib}
+          cp lib/x86/discord_game_sdk.{dll.lib,lib}
+
+      - name: Set DYLD_LIBRARY_PATH
+        working-directory: ${{ runner.temp }}
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          echo "::set-env name=DYLD_LIBRARY_PATH::$DYLD_LIBRARY_PATH:$PWD/lib/x86_64"
 
       - name: Cache libclang
         id: cache-libclang
@@ -158,6 +89,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
+          args: --workspace --examples --tests
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
@@ -167,3 +99,40 @@ jobs:
           command: test
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
+
+  fmt-lint:
+    name: Check format, lints
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - nightly
+          - stable
+          - 1.37.0
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt, clippy
+
+      - name: Check formatting
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+      - name: Check lints
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --features doc -- -D warnings

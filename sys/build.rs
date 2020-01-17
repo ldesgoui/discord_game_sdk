@@ -1,51 +1,8 @@
-use std::ops::Not;
-
-const MISSING_SDK_PATH: &str = r#"
-
-discord_game_sdk_sys: Hello,
-
-You are trying to compile the bindings for the Discord Game SDK.
-You will have to download the SDK yourself.
-Here are the links to get it:
-
-https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
-https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
-
-Once you have downloaded it, extract the contents to a folder
-and set the environment variable `DISCORD_GAME_SDK_PATH` to its path.
-
-Example:
-
-# export DISCORD_GAME_SDK_PATH=$HOME/Downloads/discord_game_sdk/
-
-From there, everything should compile when you run `cargo build` again.
-If not, please report any issues you have at:
-
-https://github.com/ldesgoui/discord_game_sdk
-
-Thanks, and apologies for the inconvenience
-
-"#;
-
-const INCOMPATIBLE_PLATFORM: &str = r#"
-
-discord_game_sdk_sys: Hello,
-
-You are trying to compile the bindings for the Discord Game SDK.
-Unfortunately, the platform you are trying to target is not
-supported by the Discord Game SDK.
-
-You can find more information at:
-
-https://github.com/ldesgoui/discord_game_sdk
-
-Thanks, and apologies for the inconvenience
-
-"#;
+use std::{env, ops::Not, path::PathBuf};
 
 fn main() {
-    let target = std::env::var("TARGET").unwrap();
-    let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    let target = env::var("TARGET").unwrap();
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     // DO NOT RELY ON THIS
     if cfg!(feature = "doc") {
@@ -53,8 +10,7 @@ fn main() {
         return;
     }
 
-    let sdk_path =
-        std::path::PathBuf::from(std::env::var("DISCORD_GAME_SDK_PATH").expect(MISSING_SDK_PATH));
+    let sdk_path = PathBuf::from(env::var("DISCORD_GAME_SDK_PATH").expect(MISSING_SDK_PATH));
 
     println!("cargo:rerun-if-env-changed=DISCORD_GAME_SDK_PATH");
     println!("cargo:rerun-if-changed={}", sdk_path.to_str().unwrap());
@@ -87,68 +43,62 @@ fn main() {
         return;
     }
 
-    // We copy the according library files to OUT_DIR and point the linker there.
-    // On Linux and Mac OS, they are renamed (`lib` is prepended).
-    // On Mac OS, `rustc` is given an updated `$DYLD_LIBRARY_PATH` to find the library.
-    // This allows `cargo run` to properly build and run, finding the library with no additional setup.
-    // The resulting binary will depend on the library to be in the runtime path,
-    // which this crate does not modify in any way.
     match target.as_ref() {
         "x86_64-unknown-linux-gnu" => {
-            std::fs::copy(
-                sdk_path.join("lib/x86_64/discord_game_sdk.so"),
-                out_path.join("libdiscord_game_sdk.so"),
-            )
-            .unwrap();
-
-            println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
-            println!("cargo:rustc-link-lib=discord_game_sdk");
-        }
-
-        "x86_64-apple-darwin" => {
-            std::fs::copy(
-                sdk_path.join("lib/x86_64/discord_game_sdk.dylib"),
-                out_path.join("libdiscord_game_sdk.dylib"),
-            )
-            .unwrap();
-
-            println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
-            println!("cargo:rustc-link-lib=discord_game_sdk");
-
-            println!(
-                "cargo:rustc-env=DYLD_LIBRARY_PATH={}:{}",
-                std::env::var("DYLD_LIBRARY_PATH").unwrap_or_default(),
-                out_path.to_str().unwrap()
+            assert!(
+                sdk_path.join("lib/x86_64/libdiscord_game_sdk.so").exists(),
+                MISSING_SETUP
             );
         }
 
-        "i686-pc-windows-gnu"
-        | "i686-pc-windows-msvc"
-        | "x86_64-pc-windows-gnu"
-        | "x86_64-pc-windows-msvc" => {
-            let path = if target.starts_with("x86_64") {
-                sdk_path.join("lib/x86_64")
-            } else {
-                sdk_path.join("lib/x86")
-            };
+        "x86_64-apple-darwin" => {
+            // TODO: assert SDK is in DYLD_LIBRARY_PATH
+            assert!(
+                sdk_path
+                    .join("lib/x86_64/libdiscord_game_sdk.dylib")
+                    .exists(),
+                MISSING_SETUP
+            );
+        }
 
-            std::fs::copy(
-                path.join("discord_game_sdk.dll.lib"),
-                out_path.join("discord_game_sdk.lib"),
-            )
-            .unwrap();
+        "x86_64-pc-windows-gnu" | "x86_64-pc-windows-msvc" => {
+            assert!(
+                sdk_path.join("lib/x86_64/discord_game_sdk.lib").exists(),
+                MISSING_SETUP
+            );
+        }
 
-            std::fs::copy(
-                path.join("discord_game_sdk.dll"),
-                out_path.join("discord_game_sdk.dll"),
-            )
-            .unwrap();
-
-            println!("cargo:rustc-link-search={}", out_path.to_str().unwrap());
-            println!("cargo:rustc-link-lib=discord_game_sdk");
+        "i686-pc-windows-gnu" | "i686-pc-windows-msvc" => {
+            assert!(
+                sdk_path.join("lib/x86/discord_game_sdk.lib").exists(),
+                MISSING_SETUP
+            );
         }
 
         _ => panic!(INCOMPATIBLE_PLATFORM),
+    }
+
+    match target.as_ref() {
+        "x86_64-unknown-linux-gnu"
+        | "x86_64-apple-darwin"
+        | "x86_64-pc-windows-gnu"
+        | "x86_64-pc-windows-msvc" => {
+            println!("cargo:rustc-link-lib=discord_game_sdk");
+            println!(
+                "cargo:rustc-link-search={}",
+                sdk_path.join("lib/x86_64").to_str().unwrap()
+            );
+        }
+
+        "i686-pc-windows-gnu" | "i686-pc-windows-msvc" => {
+            println!("cargo:rustc-link-lib=discord_game_sdk");
+            println!(
+                "cargo:rustc-link-search={}",
+                sdk_path.join("lib/x86").to_str().unwrap()
+            );
+        }
+
+        _ => {}
     }
 }
 
@@ -165,3 +115,67 @@ impl bindgen::callbacks::ParseCallbacks for Callbacks {
         }
     }
 }
+
+const MISSING_SDK_PATH: &str = r#"
+
+discord_game_sdk_sys: Hello,
+
+You are trying to generate the bindings for the Discord Game SDK.
+You will have to download the SDK yourself.
+Here are the links to get it:
+
+https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
+https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip
+
+Once you have downloaded it, extract the contents to a folder
+and set the environment variable `DISCORD_GAME_SDK_PATH` to its path.
+
+Example:
+
+$ export DISCORD_GAME_SDK_PATH=$HOME/Downloads/discord_game_sdk
+
+Please report any issues you have at:
+https://github.com/ldesgoui/discord_game_sdk
+
+Thanks, and apologies for the inconvenience
+
+"#;
+
+const MISSING_SETUP: &str = r#"
+
+discord_game_sdk_sys: Hello,
+
+You are trying to link to the Discord Game SDK.
+Some additional set-up is required, namely some files need to be copied for the linker:
+
+$ cp $DISCORD_GAME_SDK_PATH/lib/x86_64/{,lib}discord_game_sdk.so
+$ cp $DISCORD_GAME_SDK_PATH/lib/x86_64/{,lib}discord_game_sdk.dylib
+$ cp $DISCORD_GAME_SDK_PATH/lib/x86_64/discord_game_sdk.{dll.lib,lib}
+$ cp $DISCORD_GAME_SDK_PATH/lib/x86/discord_game_sdk.{dll.lib,lib}
+
+Additionally, on Mac OS, the library search path must be updated as such:
+
+$ export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_SEARCH_PATH:$DISCORD_GAME_SDK_PATH/lib/x86_64
+
+After all this, `cargo build` and `cargo run` should function as expected.
+
+Please report any issues you have at:
+https://github.com/ldesgoui/discord_game_sdk
+
+Thanks, and apologies for the inconvenience
+
+"#;
+
+const INCOMPATIBLE_PLATFORM: &str = r#"
+
+discord_game_sdk_sys: Hello,
+
+You are trying to link to the Discord Game SDK.
+Unfortunately, the platform you are trying to target is not supported.
+
+Please report any issues you have at:
+https://github.com/ldesgoui/discord_game_sdk
+
+Thanks, and apologies for the inconvenience
+
+"#;
