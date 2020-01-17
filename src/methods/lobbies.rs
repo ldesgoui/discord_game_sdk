@@ -109,10 +109,10 @@ impl Discord {
     /// A nul byte will be appended to `secret` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby)
-    pub fn connect_lobby<'d, 'b>(
+    pub fn connect_lobby<'d, 's>(
         &'d self,
         lobby_id: LobbyID,
-        secret: impl Into<Cow<'b, str>>,
+        secret: impl Into<Cow<'s, str>>,
         callback: impl 'd + FnOnce(&Self, Result<&Lobby>),
     ) {
         let mut secret = secret.into();
@@ -143,9 +143,9 @@ impl Discord {
     /// A nul byte will be appended to `activity_secret` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret)
-    pub fn connect_lobby_with_activity_secret<'d, 'b>(
+    pub fn connect_lobby_with_activity_secret<'d, 's>(
         &'d self,
-        activity_secret: impl Into<Cow<'b, str>>,
+        activity_secret: impl Into<Cow<'s, str>>,
         callback: impl 'd + FnOnce(&Self, Result<&Lobby>),
     ) {
         let mut activity_secret = activity_secret.into();
@@ -222,10 +222,10 @@ impl Discord {
     /// A nul byte will be appended to `key` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue)
-    pub fn lobby_metadata<'b>(
+    pub fn lobby_metadata<'s>(
         &self,
         lobby_id: LobbyID,
-        key: impl Into<Cow<'b, str>>,
+        key: impl Into<Cow<'s, str>>,
     ) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
@@ -385,11 +385,11 @@ impl Discord {
     /// A nul byte will be appended to `key` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmembermetadatavalue)
-    pub fn lobby_member_metadata<'b>(
+    pub fn lobby_member_metadata<'s>(
         &self,
         lobby_id: LobbyID,
         user_id: UserID,
-        key: impl Into<Cow<'b, str>>,
+        key: impl Into<Cow<'s, str>>,
     ) -> Result<String> {
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 

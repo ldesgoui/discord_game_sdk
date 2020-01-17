@@ -132,9 +132,9 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_guild_invite_overlay<'d, 'b>(
+    pub fn open_guild_invite_overlay<'d, 's>(
         &'d self,
-        code: impl Into<Cow<'b, str>>,
+        code: impl Into<Cow<'s, str>>,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         let mut code = code.into();

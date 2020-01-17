@@ -28,7 +28,7 @@ impl Discord {
     /// discord.register_launch_command("my-awesome-game://run --full-screen")?;
     /// # Ok(()) }
     /// ```
-    pub fn register_launch_command<'b>(&self, command: impl Into<Cow<'b, str>>) -> Result<()> {
+    pub fn register_launch_command<'s>(&self, command: impl Into<Cow<'s, str>>) -> Result<()> {
         let mut command = command.into();
 
         if !command.ends_with('\0') {
@@ -197,11 +197,11 @@ impl Discord {
     /// );
     /// # Ok(()) }
     /// ```
-    pub fn send_invite<'d, 'b>(
+    pub fn send_invite<'d, 's>(
         &'d self,
         user_id: UserID,
         action: Action,
-        content: impl Into<Cow<'b, str>>,
+        content: impl Into<Cow<'s, str>>,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         let mut content = content.into();

@@ -33,10 +33,10 @@ impl Discord {
     /// A nul byte will be appended to `route` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#openpeer)
-    pub fn open_peer<'b>(
+    pub fn open_peer<'s>(
         &self,
         peer_id: NetworkPeerID,
-        route: impl Into<Cow<'b, str>>,
+        route: impl Into<Cow<'s, str>>,
     ) -> Result<()> {
         let mut route = route.into();
 
@@ -62,10 +62,10 @@ impl Discord {
     /// A nul byte will be appended to `route` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#updatepeer)
-    pub fn update_peer<'b>(
+    pub fn update_peer<'s>(
         &self,
         peer_id: NetworkPeerID,
-        route: impl Into<Cow<'b, str>>,
+        route: impl Into<Cow<'s, str>>,
     ) -> Result<()> {
         let mut route = route.into();
 

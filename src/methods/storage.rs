@@ -27,9 +27,9 @@ impl Discord {
     ///
     /// discord.read_file("profile_1.save\0", &mut contents);
     /// # Ok(()) }
-    pub fn read_file<'b>(
+    pub fn read_file<'s>(
         &self,
-        filename: impl Into<Cow<'b, str>>,
+        filename: impl Into<Cow<'s, str>>,
         mut buffer: impl AsMut<[u8]>,
     ) -> Result<usize> {
         let mut filename = filename.into();
@@ -77,9 +77,9 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn read_file_async<'d, 'b>(
+    pub fn read_file_async<'d, 's>(
         &'d self,
-        filename: impl Into<Cow<'b, str>>,
+        filename: impl Into<Cow<'s, str>>,
         callback: impl 'd + FnOnce(&Self, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
@@ -120,9 +120,9 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn read_file_async_partial<'d, 'b>(
+    pub fn read_file_async_partial<'d, 's>(
         &'d self,
-        filename: impl Into<Cow<'b, str>>,
+        filename: impl Into<Cow<'s, str>>,
         offset: usize,
         length: usize,
         callback: impl 'd + FnOnce(&Self, Result<&[u8]>),
@@ -169,9 +169,9 @@ impl Discord {
     ///
     /// discord.write_file("profile_1.save\0", contents)?;
     /// # Ok(()) }
-    pub fn write_file<'b>(
+    pub fn write_file<'s>(
         &self,
-        filename: impl Into<Cow<'b, str>>,
+        filename: impl Into<Cow<'s, str>>,
         buffer: impl AsRef<[u8]>,
     ) -> Result<()> {
         let mut filename = filename.into();
@@ -217,9 +217,9 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn write_file_async<'d, 'b>(
+    pub fn write_file_async<'d, 's>(
         &'d self,
-        filename: impl Into<Cow<'b, str>>,
+        filename: impl Into<Cow<'s, str>>,
         buffer: impl AsRef<[u8]>,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
@@ -260,7 +260,7 @@ impl Discord {
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.delete_file("profile_1.save\0")?;
     /// # Ok(()) }
-    pub fn delete_file<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<()> {
+    pub fn delete_file<'s>(&self, filename: impl Into<Cow<'s, str>>) -> Result<()> {
         let mut filename = filename.into();
 
         if !filename.ends_with('\0') {
@@ -285,7 +285,7 @@ impl Discord {
     ///     // ...
     /// }
     /// # Ok(()) }
-    pub fn file_exists<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<bool> {
+    pub fn file_exists<'s>(&self, filename: impl Into<Cow<'s, str>>) -> Result<bool> {
         let mut filename = filename.into();
 
         if !filename.ends_with('\0') {
@@ -317,7 +317,7 @@ impl Discord {
     /// # fn example(discord: Discord) -> Result<()> {
     /// let file_stat = discord.file_stat("profile_1.save\0")?;
     /// # Ok(()) }
-    pub fn file_stat<'b>(&self, filename: impl Into<Cow<'b, str>>) -> Result<FileStat> {
+    pub fn file_stat<'s>(&self, filename: impl Into<Cow<'s, str>>) -> Result<FileStat> {
         let mut filename = filename.into();
 
         if !filename.ends_with('\0') {
