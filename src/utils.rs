@@ -8,18 +8,9 @@ pub(crate) struct VoidEvents;
 
 impl EventHandler for VoidEvents {}
 
-pub(crate) struct CallbackData<T> {
+pub(crate) struct CallbackData<'d, T> {
     pub(crate) discord: *const DiscordInner,
-    pub(crate) callback: Box<dyn FnOnce(&Discord, T)>,
-}
-
-impl<T> CallbackData<T> {
-    pub(crate) fn new(discord: &Discord, callback: impl 'static + FnOnce(&Discord, T)) -> Self {
-        Self {
-            discord: discord.0.deref() as *const _,
-            callback: Box::new(callback),
-        }
-    }
+    pub(crate) callback: Box<dyn 'd + FnOnce(&Discord, T)>,
 }
 
 pub(crate) struct MacroHelper<T> {

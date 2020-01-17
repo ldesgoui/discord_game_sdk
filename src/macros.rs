@@ -41,6 +41,7 @@ macro_rules! ffi {
         })
     ) => {{
         use crate::utils::CallbackData;
+        use std::ops::Deref;
 
         let manager = ffi!($self.$get_manager());
 
@@ -78,9 +79,15 @@ macro_rules! ffi {
             std::mem::forget(discord);
         }
 
+        let callback = Box::new($callback);
+
+        let callback_data = CallbackData {
+            discord: $self.0.deref() as *const _,
+            callback,
+        };
+
         // SAFETY: We create the pointer here
-        let callback_data =
-            Box::into_raw(Box::new(CallbackData::new($self, $callback))) as *mut _;
+        let callback_data = Box::into_raw(Box::new(callback_data)) as *mut _;
 
         function(manager, $($arg, )* callback_data, Some(c_fn))
     }};

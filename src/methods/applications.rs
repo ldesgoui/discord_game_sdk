@@ -68,7 +68,7 @@ impl Discord {
     ///     // ...
     /// });
     /// # Ok(()) }
-    pub fn validate_or_exit(&self, callback: impl 'static + FnOnce(&Self, Result<()>)) {
+    pub fn validate_or_exit<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_application_manager()
@@ -98,7 +98,7 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn oauth2_token(&self, callback: impl 'static + FnOnce(&Self, Result<&OAuth2Token>)) {
+    pub fn oauth2_token<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<&OAuth2Token>)) {
         unsafe {
             ffi!(self.get_application_manager().get_oauth2_token().and_then(
                 |res: sys::EDiscordResult, token: *mut sys::DiscordOAuth2Token| {
@@ -126,7 +126,7 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn app_ticket(&self, callback: impl 'static + FnOnce(&Self, Result<&str>)) {
+    pub fn app_ticket<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<&str>)) {
         unsafe {
             ffi!(self.get_application_manager().get_ticket().and_then(
                 |res: sys::EDiscordResult, string: *const u8| {

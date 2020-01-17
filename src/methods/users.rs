@@ -48,7 +48,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn user(&self, user_id: UserID, callback: impl 'static + FnOnce(&Self, Result<User>)) {
+    pub fn user<'d>(&'d self, user_id: UserID, callback: impl 'd + FnOnce(&Self, Result<User>)) {
         unsafe {
             ffi!(self.get_user_manager().get_user(user_id).and_then(
                 |res: sys::EDiscordResult, user: *mut sys::DiscordUser| {

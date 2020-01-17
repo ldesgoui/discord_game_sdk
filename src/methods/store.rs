@@ -28,7 +28,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_skus(&self, callback: impl 'static + FnOnce(&Self, Result<()>)) {
+    pub fn fetch_skus<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()
@@ -147,7 +147,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_entitlements(&self, callback: impl 'static + FnOnce(&Self, Result<()>)) {
+    pub fn fetch_entitlements<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_store_manager()
@@ -299,10 +299,10 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn start_purchase(
-        &self,
+    pub fn start_purchase<'d>(
+        &'d self,
         sku_id: Snowflake,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self

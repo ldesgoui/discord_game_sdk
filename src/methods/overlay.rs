@@ -70,10 +70,10 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn set_overlay_opened(
-        &self,
+    pub fn set_overlay_opened<'d>(
+        &'d self,
         opened: bool,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -98,10 +98,10 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_invite_overlay(
-        &self,
+    pub fn open_invite_overlay<'d>(
+        &'d self,
         action: Action,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -132,10 +132,10 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_guild_invite_overlay<'b>(
-        &self,
+    pub fn open_guild_invite_overlay<'d, 'b>(
+        &'d self,
         code: impl Into<Cow<'b, str>>,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         let mut code = code.into();
 
@@ -167,7 +167,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_voice_settings(&self, callback: impl 'static + FnOnce(&Self, Result<()>)) {
+    pub fn open_voice_settings<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_overlay_manager()

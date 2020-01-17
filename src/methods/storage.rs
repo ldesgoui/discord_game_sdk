@@ -77,10 +77,10 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn read_file_async<'b>(
-        &self,
+    pub fn read_file_async<'d, 'b>(
+        &'d self,
         filename: impl Into<Cow<'b, str>>,
-        callback: impl 'static + FnOnce(&Self, Result<&[u8]>),
+        callback: impl 'd + FnOnce(&Self, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -120,12 +120,12 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn read_file_async_partial<'b>(
-        &self,
+    pub fn read_file_async_partial<'d, 'b>(
+        &'d self,
         filename: impl Into<Cow<'b, str>>,
         offset: usize,
         length: usize,
-        callback: impl 'static + FnOnce(&Self, Result<&[u8]>),
+        callback: impl 'd + FnOnce(&Self, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -217,11 +217,11 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn write_file_async<'b>(
-        &self,
+    pub fn write_file_async<'d, 'b>(
+        &'d self,
         filename: impl Into<Cow<'b, str>>,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         let mut filename = filename.into();
 

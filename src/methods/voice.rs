@@ -37,10 +37,10 @@ impl Discord {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn set_input_mode(
-        &self,
+    pub fn set_input_mode<'d>(
+        &'d self,
         input_mode: InputMode,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self

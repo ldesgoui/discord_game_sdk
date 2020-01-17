@@ -24,10 +24,10 @@ impl Discord {
     /// [`LobbyTransaction::owner`](struct.LobbyTransaction.html#method.owner) *MUST NOT* be called.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#createlobby)
-    pub fn create_lobby(
-        &self,
+    pub fn create_lobby<'d>(
+        &'d self,
         transaction: &LobbyTransaction,
-        callback: impl 'static + FnOnce(&Self, Result<&Lobby>),
+        callback: impl 'd + FnOnce(&Self, Result<&Lobby>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -56,11 +56,11 @@ impl Discord {
     /// Updates a lobby with data from the given transaction.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#updatelobby)
-    pub fn update_lobby(
-        &self,
+    pub fn update_lobby<'d>(
+        &'d self,
         lobby_id: LobbyID,
         transaction: &LobbyTransaction,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -88,10 +88,10 @@ impl Discord {
     /// Deletes a given lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#deletelobby)
-    pub fn delete_lobby(
-        &self,
+    pub fn delete_lobby<'d>(
+        &'d self,
         lobby_id: LobbyID,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -109,11 +109,11 @@ impl Discord {
     /// A nul byte will be appended to `secret` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby)
-    pub fn connect_lobby<'b>(
-        &self,
+    pub fn connect_lobby<'d, 'b>(
+        &'d self,
         lobby_id: LobbyID,
         secret: impl Into<Cow<'b, str>>,
-        callback: impl 'static + FnOnce(&Self, Result<&Lobby>),
+        callback: impl 'd + FnOnce(&Self, Result<&Lobby>),
     ) {
         let mut secret = secret.into();
 
@@ -143,10 +143,10 @@ impl Discord {
     /// A nul byte will be appended to `activity_secret` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret)
-    pub fn connect_lobby_with_activity_secret<'b>(
-        &self,
+    pub fn connect_lobby_with_activity_secret<'d, 'b>(
+        &'d self,
         activity_secret: impl Into<Cow<'b, str>>,
-        callback: impl 'static + FnOnce(&Self, Result<&Lobby>),
+        callback: impl 'd + FnOnce(&Self, Result<&Lobby>),
     ) {
         let mut activity_secret = activity_secret.into();
 
@@ -170,10 +170,10 @@ impl Discord {
     /// Disconnects the current user from a lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectlobby)
-    pub fn disconnect_lobby(
-        &self,
+    pub fn disconnect_lobby<'d>(
+        &'d self,
         lobby_id: LobbyID,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -310,12 +310,12 @@ impl Discord {
     /// Updates lobby member info for a given member of the lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#updatemember)
-    pub fn update_member(
-        &self,
+    pub fn update_member<'d>(
+        &'d self,
         lobby_id: LobbyID,
         user_id: UserID,
         transaction: &LobbyMemberTransaction,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -489,11 +489,11 @@ impl Discord {
     /// If you are, you should use SendNetworkMessage instead.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#sendlobbymessage)
-    pub fn send_lobby_message(
-        &self,
+    pub fn send_lobby_message<'d>(
+        &'d self,
         lobby_id: LobbyID,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         let buffer = buffer.as_ref();
 
@@ -519,10 +519,10 @@ impl Discord {
     /// You do not necessarily need to access the filtered lobbies within the context of the result callback.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#search)
-    pub fn lobby_search(
-        &self,
+    pub fn lobby_search<'d>(
+        &'d self,
         search: &SearchQuery,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         let mut ptr = std::ptr::null_mut();
 
@@ -588,10 +588,10 @@ impl Discord {
     /// allowing them to mute/deafen themselves as well as mute/adjust the volume of other members.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectvoice)
-    pub fn connect_lobby_voice(
-        &self,
+    pub fn connect_lobby_voice<'d>(
+        &'d self,
         lobby_id: LobbyID,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self
@@ -604,10 +604,10 @@ impl Discord {
     /// Disconnects from the voice channel of a given lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectvoice)
-    pub fn disconnect_lobby_voice(
-        &self,
+    pub fn disconnect_lobby_voice<'d>(
+        &'d self,
         lobby_id: LobbyID,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         unsafe {
             ffi!(self

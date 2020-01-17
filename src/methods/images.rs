@@ -28,11 +28,11 @@ impl Discord {
     /// Prepares an image.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#fetch)
-    pub fn fetch_image(
-        &self,
+    pub fn fetch_image<'d>(
+        &'d self,
         handle: ImageHandle,
         refresh: FetchKind,
-        callback: impl 'static + FnOnce(&Self, Result<ImageHandle>),
+        callback: impl 'd + FnOnce(&Self, Result<ImageHandle>),
     ) {
         unsafe {
             ffi!(self

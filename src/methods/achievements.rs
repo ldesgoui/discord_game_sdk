@@ -30,11 +30,11 @@ impl Discord {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn set_user_achievement(
-        &self,
+    pub fn set_user_achievement<'d>(
+        &'d self,
         achievement_id: Snowflake,
         percent_complete: u8,
-        callback: impl 'static + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
         debug_assert!((0..=100).contains(&percent_complete));
 
@@ -67,7 +67,7 @@ impl Discord {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn fetch_user_achievements(&self, callback: impl 'static + FnOnce(&Self, Result<()>)) {
+    pub fn fetch_user_achievements<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
         unsafe {
             ffi!(self
                 .get_achievement_manager()
