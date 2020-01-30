@@ -21,7 +21,7 @@ jobs:
           - stable
           - 1.37.0
 
-    runs-on: ${{ (contains(matrix.target, "linux") && "ubuntu-latest") || (contains(matrix.target, "apple") && "macos-latest") || "windows-latest" }}
+    runs-on: ${{ (contains(matrix.target, 'linux') && 'ubuntu-latest') || (contains(matrix.target, 'apple') && 'macos-latest') || 'windows-latest' }}
 
     steps:
       - name: Checkout
