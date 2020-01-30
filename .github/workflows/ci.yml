@@ -9,16 +9,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-apple-darwin
+          - i686-pc-windows-msvc
+          - x86_64-pc-windows-msvc
+        # - i686-pc-windows-gnu #65
+        # - x86_64-pc-windows-gnu #65
         rust:
-          - stable
           - nightly
+          - stable
           - 1.37.0
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ (contains(matrix.target, 'linux') && 'ubuntu-latest') || (contains(matrix.target, 'apple') && 'macos-latest') || 'windows-latest'}}
 
     steps:
       - name: Checkout
@@ -36,52 +39,35 @@ jobs:
 
       - name: Set DYLD_LIBRARY_PATH
         working-directory: ${{ runner.temp }}
-        if: startsWith(matrix.os, 'macos')
+        if: startsWith(runner.os, 'macos')
         run: |
           echo "::set-env name=DYLD_LIBRARY_PATH::$DYLD_LIBRARY_PATH:$PWD/lib/x86_64"
 
       - name: Cache libclang
         id: cache-libclang
-        if: startsWith(matrix.os, 'windows')
+        if: startsWith(runner.os, 'windows')
         uses: actions/cache@v1
         with:
           path: 'C:\just-libclang'
           key: windows-libclang
 
       - name: Install LLVM
-        if: startsWith(matrix.os, 'windows') && steps.cache-libclang.outputs.cache-hit != 'true'
+        if: startsWith(runner.os, 'windows') && steps.cache-libclang.outputs.cache-hit != 'true'
         run: |
           choco install llvm -r -y
           mkdir 'C:\just-libclang'
           cp 'C:\Program Files\LLVM\bin\libclang.dll' 'C:\just-libclang'
 
       - name: Set LIBCLANG_PATH
-        if: startsWith(matrix.os, 'windows')
+        if: startsWith(runner.os, 'windows')
         run: |
           echo '::set-env name=LIBCLANG_PATH::C:\just-libclang'
-
-      - name: Cache cargo registry
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-registry-${{ hashFiles('**/Cargo.toml') }}
-
-      - name: Cache cargo index
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-index-${{ hashFiles('**/Cargo.toml') }}
-
-      - name: Cache cargo build
-        uses: actions/cache@v1
-        with:
-          path: target
-          key: ${{ runner.os }}-${{ matrix.rust }}-cargo-build-target-${{ hashFiles('**/Cargo.toml') }}
 
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
+          target: ${{ matrix.target }}
           toolchain: ${{ matrix.rust }}
           override: true
           components: rustfmt, clippy
@@ -90,7 +76,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all --examples --tests
+          args: --all --all-targets --target=${{ matrix.target }}
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
@@ -98,6 +84,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --target=${{ matrix.target }}
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
