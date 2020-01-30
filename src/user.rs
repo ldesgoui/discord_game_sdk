@@ -35,11 +35,7 @@ impl User {
 
     /// Create an [Image Handle](struct.ImageHandle.html) targeting the user's avatar
     pub fn image_handle(&self, size: u32) -> ImageHandle {
-        ImageHandle(sys::DiscordImageHandle {
-            type_: sys::DiscordImageType_User,
-            id: self.0.id,
-            size,
-        })
+        ImageHandle::from_user_id(self.id(), size)
     }
 }
 

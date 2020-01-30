@@ -29,6 +29,7 @@ impl ImageHandle {
             type_: ImageKind::User.into(),
             id: user_id,
             size,
+            ..Default::default()
         })
     }
 }
