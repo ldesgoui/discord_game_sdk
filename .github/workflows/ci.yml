@@ -21,7 +21,11 @@ jobs:
           - stable
           - 1.37.0
 
-    runs-on: ${{ (contains(matrix.target, 'linux') && 'ubuntu-latest') || (contains(matrix.target, 'apple') && 'macos-latest') || 'windows-latest' }}
+    runs-on: >
+      ${{ (contains(matrix.target, 'linux') && 'ubuntu-latest')
+       || (contains(matrix.target, 'apple') && 'macos-latest')
+       || 'windows-latest'
+       }}
 
     steps:
       - name: Checkout
@@ -67,6 +71,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
+          target: ${{ matrix.target }}
           toolchain: ${{ matrix.rust }}
           override: true
           components: rustfmt, clippy
@@ -75,14 +80,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all --examples --tests
+          args: --all --examples --tests --target=${{ matrix.target }}
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
       - name: Test
         uses: actions-rs/cargo@v1
         with:
-          command: test
+          command: test --target=${{ matrix.target }}
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
