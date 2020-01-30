@@ -23,7 +23,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! discord_game_sdk = "1.0.0-rc.1"
+//! discord_game_sdk = "1.0.0-rc.2"
 //! ```
 //!
 //! Read up on potential [`bindgen` requirements].
@@ -111,7 +111,7 @@
 //! [official terms of the Discord Game SDK]: https://discordapp.com/developers/docs/legal
 //! [twitter]: https://twitter.com/ldesgoui
 
-#![doc(html_root_url = "https://docs.rs/discord_game_sdk/1.0.0-rc.1")]
+#![doc(html_root_url = "https://docs.rs/discord_game_sdk/1.0.0-rc.2")]
 
 #[macro_use]
 mod macros;
