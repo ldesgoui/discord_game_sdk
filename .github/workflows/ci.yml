@@ -76,14 +76,15 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all --examples --tests --target=${{ matrix.target }}
+          args: --all --all-targets --target=${{ matrix.target }}
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
       - name: Test
         uses: actions-rs/cargo@v1
         with:
-          command: test --target=${{ matrix.target }}
+          command: test
+          args: --target=${{ matrix.target }}
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
