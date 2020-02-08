@@ -40,6 +40,8 @@ impl Discord {
 
     /// Creates an instance of the main interface with the Discord Game SDK.
     ///
+    /// SDK log messages are forwarded to [`log`](https://docs.rs/log)
+    ///
     /// > [`Create` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#create)  
     /// > [`SetLogHook` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#setloghook)
     #[allow(clippy::cognitive_complexity)]
@@ -74,10 +76,8 @@ impl Discord {
         unsafe {
             ffi!(instance.set_log_hook(
                 sys::DiscordLogLevel_Debug,
-                ptr,
-                event_handler!(|level: sys::EDiscordLogLevel, message: *const u8| {
-                    EventHandler::on_log_message(level.into(), charptr_to_str(message))
-                })
+                std::ptr::null_mut(),
+                Some(log_hook),
             ));
 
             // Signal managers that we want events ASAP
@@ -188,6 +188,22 @@ fn create_params(
         voice_events: VOICE as *const _ as *mut _,
         voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
     }
+}
+
+unsafe extern "C" fn log_hook(
+    _: *mut std::ffi::c_void,
+    level: sys::EDiscordLogLevel,
+    message: *const u8,
+) {
+    let level = match level {
+        sys::DiscordLogLevel_Error => log::Level::Error,
+        sys::DiscordLogLevel_Warn => log::Level::Warn,
+        sys::DiscordLogLevel_Info => log::Level::Info,
+        sys::DiscordLogLevel_Debug => log::Level::Debug,
+        _ => log::Level::Debug,
+    };
+
+    log::log!(level, "SDK: {}", charptr_to_str(message));
 }
 
 const ACHIEVEMENT: &sys::IDiscordAchievementEvents = &sys::IDiscordAchievementEvents {

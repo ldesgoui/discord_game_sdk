@@ -30,10 +30,6 @@ fn main() {
 struct LogEvents;
 
 impl EventHandler for LogEvents {
-    fn on_log_message(&mut self, _: &Discord, level: LogLevel, message: &str) {
-        log::log!(level.into(), "on log message: {}", message)
-    }
-
     fn on_user_achievement_update(&mut self, _: &Discord, user_achievement: &UserAchievement) {
         log::info!("on user achievement update: {:#?}", user_achievement)
     }
