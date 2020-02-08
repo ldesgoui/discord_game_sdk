@@ -2,7 +2,7 @@ use crate::{
     discord::{Discord, DiscordInner},
     sys,
     to_result::ToResult,
-    utils::{charptr_to_str, VoidEvents},
+    utils::charptr_to_str,
     Activity, ClientID, CreateFlags, Entitlement, EventHandler, Relationship, Result, User,
     UserAchievement,
 };
@@ -47,7 +47,7 @@ impl Discord {
         let mut inner = Box::new(DiscordInner {
             core: std::ptr::null_mut(),
             client_id,
-            event_handler: Box::new(VoidEvents),
+            event_handler: None,
         });
 
         // SAFETY: This is the pointer we use in event handler code
@@ -108,6 +108,7 @@ impl Discord {
     ///
     /// [emptied]: #method.empty_event_buffers
     /// [`Error::NotRunning`]: enum.Error.html#variant.NotRunning
+    // We require &mut self to prevent calling during callbacks
     pub fn run_callbacks(&mut self) -> Result<()> {
         unsafe { ffi!(self.run_callbacks()) }.to_result()
     }
@@ -117,12 +118,23 @@ impl Discord {
         self.0.client_id
     }
 
-    /// Sets a new Event Handler, returning the previous one
-    pub fn set_event_handler<'a>(
-        &'a mut self,
+    /// Replaces the current event handler
+    pub fn replace_event_handler(
+        &mut self,
         event_handler: Box<dyn EventHandler>,
-    ) -> Box<dyn EventHandler> {
-        std::mem::replace(&mut self.0.event_handler, event_handler)
+    ) -> Option<Box<dyn EventHandler>> {
+        self.0.event_handler.replace(event_handler)
+    }
+
+    /// Takes the current event handler, leaving `None` in its place
+    pub fn take_event_handler(&mut self) -> Option<Box<dyn EventHandler>> {
+        self.0.event_handler.take()
+    }
+
+    /// Returns some mutable reference to the event handler if it is of type T, or None if it isn't.
+    // We require &mut self to prevent calling during callbacks
+    pub fn downcast_event_handler<T: std::any::Any>(&mut self) -> Option<&mut T> {
+        self.0.event_handler.as_mut().and_then(|e| e.downcast_mut())
     }
 }
 

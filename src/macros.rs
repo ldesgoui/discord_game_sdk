@@ -125,7 +125,7 @@ macro_rules! event_handler {
             inner: *mut std::ffi::c_void,
             $($param: $ty),*
         ) {
-            use crate::{discord::{Discord, DiscordInner}, utils::VoidEvents};
+            use crate::discord::{Discord, DiscordInner};
 
             prevent_unwind!();
 
@@ -140,17 +140,18 @@ macro_rules! event_handler {
 
             // We're sure that the event handler won't be used through discord,
             // we replace it with a blank value for now
-            // PERF: Heap-allocs a VTable
-            let mut event_handler = discord.set_event_handler(Box::new(VoidEvents));
+            let mut event_handler = discord.0.event_handler.take();
 
-            event_handler.$method(
-                &discord,
-                $($expr),*
-            );
+            if let Some(event_handler) = event_handler.as_mut() {
+                event_handler.$method(
+                    &discord,
+                    $($expr),*
+                );
+            }
 
             // We're sure this will go through, otherwise we're panicking
             // and therefore about to abort
-            discord.set_event_handler(event_handler);
+            discord.0.event_handler = event_handler;
 
             // SAFETY: We cannot drop Box<DiscordInner>
             std::mem::forget(discord);

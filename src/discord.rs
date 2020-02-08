@@ -36,7 +36,7 @@ impl Drop for Discord {
 pub(crate) struct DiscordInner {
     pub(crate) core: *mut sys::IDiscordCore,
     pub(crate) client_id: sys::DiscordClientId,
-    pub(crate) event_handler: Box<dyn EventHandler>,
+    pub(crate) event_handler: Option<Box<dyn EventHandler>>,
 }
 
 impl std::fmt::Debug for DiscordInner {

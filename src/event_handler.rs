@@ -1,12 +1,13 @@
 use crate::{
-    Action, Activity, Discord, Entitlement, LobbyID, LogLevel, NetworkChannelID, NetworkPeerID,
-    Relationship, User, UserAchievement, UserID,
+    as_any::AsAny, Action, Activity, Discord, Entitlement, LobbyID, LogLevel, NetworkChannelID,
+    NetworkPeerID, Relationship, User, UserAchievement, UserID,
 };
+use std::any::Any;
 
 /// Trait providing callbacks for the SDK.
 ///
 /// All methods have a default empty implementation, except for `on_log_message`.
-pub trait EventHandler {
+pub trait EventHandler: AsAny {
     /// Fired when the logging callback is called.
     ///
     /// The default implementation forwards to the [`log`](https://docs.rs/log) crate.
@@ -171,4 +172,35 @@ pub trait EventHandler {
 
     /// Fires when the current user has updated their voice settings.
     fn on_voice_settings_update(&mut self, _discord: &Discord) {}
+}
+
+/// Downcasting utilities
+impl dyn EventHandler {
+    /// Returns some reference to the event handler if it is of type T, or None if it isn't.
+    pub fn downcast_ref<T: Any>(&self) -> Option<&T> {
+        self.as_any().downcast_ref()
+    }
+
+    /// Returns some mutable reference to the event handler if it is of type T, or None if it isn't.
+    pub fn downcast_mut<T: Any>(&mut self) -> Option<&mut T> {
+        self.as_any_mut().downcast_mut()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_downcasting() {
+        struct A;
+        impl EventHandler for A {}
+
+        let mut handler = Box::new(A) as Box<dyn EventHandler>;
+
+        assert!(handler.downcast_ref::<A>().is_some());
+        assert!(handler.downcast_ref::<()>().is_none());
+        assert!(handler.downcast_mut::<A>().is_some());
+        assert!(handler.downcast_mut::<()>().is_none());
+    }
 }
