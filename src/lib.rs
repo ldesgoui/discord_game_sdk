@@ -142,7 +142,6 @@ mod lobby;
 mod lobby_kind;
 mod lobby_member_transaction;
 mod lobby_transaction;
-mod log_level;
 mod oauth2_token;
 mod premium_kind;
 mod presence;
@@ -205,7 +204,6 @@ pub use self::{
     lobby_kind::LobbyKind,
     lobby_member_transaction::LobbyMemberTransaction,
     lobby_transaction::LobbyTransaction,
-    log_level::LogLevel,
     oauth2_token::OAuth2Token,
     premium_kind::PremiumKind,
     presence::Presence,
