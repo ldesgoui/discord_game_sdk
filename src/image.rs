@@ -27,7 +27,7 @@ impl Image {
     /// Length is `width * height * 4`
     ///
     /// Pattern is: `RGBARGBARGBA...`
-    pub fn data(&'_ self) -> &'_ [u8] {
+    pub fn data(&self) -> &[u8] {
         &self.data
     }
 

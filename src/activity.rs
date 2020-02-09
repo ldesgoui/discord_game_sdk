@@ -143,7 +143,7 @@ impl Activity {
     /// The player's current party status
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_state(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_state(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.state, value);
         self
     }
@@ -151,19 +151,19 @@ impl Activity {
     /// What the player is currently doing
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_details(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_details(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.details, value);
         self
     }
 
     /// When the current activity has started, in UNIX time
-    pub fn with_start_time(&'_ mut self, value: UnixTimestamp) -> &'_ mut Self {
+    pub fn with_start_time(&mut self, value: UnixTimestamp) -> &mut Self {
         self.0.timestamps.start = value;
         self
     }
 
     /// When the current activity will end, in UNIX time
-    pub fn with_end_time(&'_ mut self, value: UnixTimestamp) -> &'_ mut Self {
+    pub fn with_end_time(&mut self, value: UnixTimestamp) -> &mut Self {
         self.0.timestamps.end = value;
         self
     }
@@ -171,7 +171,7 @@ impl Activity {
     /// The key of an asset to display
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_large_image_key(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_large_image_key(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.assets.large_image, value);
         self
     }
@@ -179,7 +179,7 @@ impl Activity {
     /// The tooltip displayed when hovering over the large image
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_large_image_tooltip(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_large_image_tooltip(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.assets.large_text, value);
         self
     }
@@ -187,7 +187,7 @@ impl Activity {
     /// The key of an asset to display
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_small_image_key(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_small_image_key(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.assets.small_image, value);
         self
     }
@@ -195,7 +195,7 @@ impl Activity {
     /// The tooltip displayed when hovering over the small image
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_small_image_tooltip(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_small_image_tooltip(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.assets.small_text, value);
         self
     }
@@ -203,27 +203,27 @@ impl Activity {
     /// The unique identifier for the party
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_party_id(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_party_id(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.party.id, value);
         self
     }
 
     /// The number of players currently in the party
-    pub fn with_party_amount(&'_ mut self, value: u32) -> &'_ mut Self {
+    pub fn with_party_amount(&mut self, value: u32) -> &mut Self {
         // XXX: i32 should be u32
         self.0.party.size.current_size = value as i32;
         self
     }
 
     /// The maximum capacity of the party
-    pub fn with_party_capacity(&'_ mut self, value: u32) -> &'_ mut Self {
+    pub fn with_party_capacity(&mut self, value: u32) -> &mut Self {
         // XXX: i32 should be u32
         self.0.party.size.max_size = value as i32;
         self
     }
 
     /// Whether this activity is an instanced context, like a match
-    pub fn with_instance(&'_ mut self, value: bool) -> &'_ mut Self {
+    pub fn with_instance(&mut self, value: bool) -> &mut Self {
         self.0.instance = value;
         self
     }
@@ -231,7 +231,7 @@ impl Activity {
     /// The unique hash for the given match context
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_match_secret(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_match_secret(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.secrets.match_, value);
         self
     }
@@ -239,7 +239,7 @@ impl Activity {
     /// The unique hash for chat invites and Ask to Join
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_join_secret(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_join_secret(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.secrets.join, value);
         self
     }
@@ -247,7 +247,7 @@ impl Activity {
     /// The unique hash for Spectate button
     ///
     /// Only the first 128 bytes will be written.
-    pub fn with_spectate_secret(&'_ mut self, value: &str) -> &'_ mut Self {
+    pub fn with_spectate_secret(&mut self, value: &str) -> &mut Self {
         write_charbuf(&mut self.0.secrets.spectate, value);
         self
     }
