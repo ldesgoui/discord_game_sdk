@@ -7,7 +7,7 @@ fn main() {
 
     let mut gsdk = Discord::new(client_id).unwrap();
 
-    gsdk.set_event_handler(Box::new(LogEvents));
+    gsdk.replace_event_handler(Box::new(LogEvents));
 
     gsdk.update_activity(
         &Activity::empty()

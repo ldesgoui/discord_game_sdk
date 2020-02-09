@@ -1,11 +1,4 @@
-use crate::{
-    discord::{Discord, DiscordInner},
-    EventHandler,
-};
-
-pub(crate) struct VoidEvents;
-
-impl EventHandler for VoidEvents {}
+use crate::discord::{Discord, DiscordInner};
 
 pub(crate) struct CallbackData<'d, T> {
     pub(crate) discord: *const DiscordInner,
