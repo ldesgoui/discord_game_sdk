@@ -5,6 +5,8 @@ on:
     - cron: '0 0 * * 0'
 
   push:
+    branches:
+      - master
     paths:
       - '**/Cargo.toml'
 

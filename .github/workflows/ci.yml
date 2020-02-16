@@ -1,6 +1,10 @@
 name: Continuous Integration
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   build-test:
@@ -120,7 +124,7 @@ jobs:
           args: --all -- --check
 
       - name: Check lints
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/clippy-check@v1
         with:
-          command: clippy
-          args: --features doc -- -D warnings
+          args: --features doc
+          token: ${{ secrets.GITHUB_TOKEN }}
