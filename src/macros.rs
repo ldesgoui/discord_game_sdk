@@ -1,16 +1,19 @@
+// Don't trust me
+
 macro_rules! ffi {
     // ffi!(self.destroy())
     ($self:ident.$method:ident($($arg:expr),* $(,)?)) => {{
-        debug_assert!(!$self.0.core.is_null());
+        let core = $self.inner().core;
+        debug_assert!(!core.is_null());
 
         log::trace!("FFI: {}", stringify!($method));
-        let function = (*$self.0.core).$method;
+        let function = (*core).$method;
 
         debug_assert!(function.is_some());
 
         let function = function.unwrap();
 
-        function($self.0.core, $($arg),*)
+        function(core, $($arg),*)
     }};
 
     // ffi!(self.get_application_manager().get_current_locale())
@@ -41,7 +44,6 @@ macro_rules! ffi {
         })
     ) => {{
         use crate::utils::CallbackData;
-        use std::ops::Deref;
 
         let manager = ffi!($self.$get_manager());
 
@@ -65,24 +67,17 @@ macro_rules! ffi {
             // SAFETY: Legal, we created the pointer just below
             let callback_data = Box::from_raw(callback_data as *mut CallbackData<$res>);
 
-            // SAFETY: Legal (Mutable aliasing)
-            // - We don't mutate the Box<DiscordInner> (no dropping either)
-            // - We only pass a &Discord
-            // - At this point in time, we are *always* in Discord::run_callbacks
-            // - Which means we're in posession of &mut Discord
-            // - And downgrading to a &Discord and passing it to another function is fine
-            let discord = Discord(Box::from_raw(callback_data.discord as *mut _));
+            // SAFETY: Legal, repr(transparent) means
+            // *const Discord == *const UnsafeCell<DiscordInner> == *const DiscordInner
+            let discord = &*(callback_data.discord as *const Discord);
 
-            (callback_data.callback)(&discord, $expr);
-
-            // SAFETY: We cannot drop Box<DiscordInner>
-            std::mem::forget(discord);
+            (callback_data.callback)(discord, $expr);
         }
 
         let callback = Box::new($callback);
 
         let callback_data = CallbackData {
-            discord: $self.0.deref() as *const _,
+            discord: $self.0.get(),
             callback,
         };
 
@@ -125,36 +120,32 @@ macro_rules! event_handler {
             inner: *mut std::ffi::c_void,
             $($param: $ty),*
         ) {
-            use crate::discord::{Discord, DiscordInner};
+            use crate::discord::Discord;
 
             prevent_unwind!();
 
             debug_assert!(!inner.is_null());
 
-            // SAFETY: Legal (Mutable aliasing)
-            // - We don't drop the Box<DiscordInner>
-            // - At this point in time, we are *always* in Discord::run_callbacks
-            // - Which means we're in posession of &mut Discord
-            // - We are absolutely sure that only one of the &mut are used at one time
-            let mut discord = Discord(Box::from_raw(inner as *mut DiscordInner));
+            // SAFETY: Legal, repr(transparent) means
+            // *const Discord == *const UnsafeCell<DiscordInner> == *const DiscordInner
+            let discord = &*(inner as *const Discord);
 
-            // We're sure that the event handler won't be used through discord,
-            // we replace it with a blank value for now
-            let mut event_handler = discord.0.event_handler.take();
+            // SAFETY: Legal, writing to `*mut DiscordInner` while `&mut DiscordInner` is in our callstack
+            // We're also sure that `DiscordInner::event_handler` cannot be used during the event
+            // handling method call, grabbing ownership and replacing it with None for the time
+            // being is fine
+            let mut event_handler = (*discord.0.get()).event_handler.take();
 
             if let Some(event_handler) = event_handler.as_mut() {
                 event_handler.$method(
-                    &discord,
+                    discord,
                     $($expr),*
                 );
             }
 
             // We're sure this will go through, otherwise we're panicking
             // and therefore about to abort
-            discord.0.event_handler = event_handler;
-
-            // SAFETY: We cannot drop Box<DiscordInner>
-            std::mem::forget(discord);
+            (*discord.0.get()).event_handler = event_handler;
         }
 
         Some($method)

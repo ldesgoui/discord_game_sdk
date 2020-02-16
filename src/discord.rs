@@ -1,4 +1,5 @@
 use crate::{sys, EventHandler};
+use std::cell::UnsafeCell;
 
 /// Main interface with SDK
 ///
@@ -25,7 +26,17 @@ use crate::{sys, EventHandler};
 /// - [Voice](#voice)
 #[derive(Debug)]
 #[repr(transparent)]
-pub struct Discord(pub(crate) Box<DiscordInner>);
+pub struct Discord(pub(crate) UnsafeCell<DiscordInner>);
+
+impl Discord {
+    pub(crate) fn inner(&self) -> &DiscordInner {
+        unsafe { &*self.0.get() }
+    }
+
+    pub(crate) fn inner_mut(&mut self) -> &mut DiscordInner {
+        unsafe { &mut *self.0.get() }
+    }
+}
 
 impl Drop for Discord {
     fn drop(&mut self) {
