@@ -5,13 +5,19 @@ pub(crate) struct CallbackData<'d, T> {
     pub(crate) callback: Box<dyn 'd + FnOnce(&Discord, T)>,
 }
 
+// Literal hack to be able to use `ffi!(...)` with `LobbyTransaction`, `LobbyMemberTransaction`,
+// and `SearchQuery`.
 pub(crate) struct MacroHelper<T> {
     pub(crate) core: *mut T,
 }
 
 impl<T> MacroHelper<T> {
-    pub(crate) fn new(core: *mut T) -> (Self,) {
-        (Self { core },)
+    pub(crate) fn new(core: *mut T) -> Self {
+        Self { core }
+    }
+
+    pub(crate) fn inner(&self) -> &Self {
+        self
     }
 }
 

@@ -6,7 +6,7 @@ use crate::{
     Activity, ClientID, CreateFlags, Entitlement, EventHandler, Relationship, Result, User,
     UserAchievement,
 };
-use std::{convert::TryFrom, ops::Deref};
+use std::{cell::UnsafeCell, convert::TryFrom};
 
 /// # Core
 ///
@@ -46,14 +46,18 @@ impl Discord {
     /// > [`SetLogHook` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#setloghook)
     #[allow(clippy::cognitive_complexity)]
     pub fn with_create_flags(client_id: ClientID, flags: CreateFlags) -> Result<Self> {
-        let mut inner = Box::new(DiscordInner {
+        let inner = UnsafeCell::new(DiscordInner {
+            // SAFETY: this is written to during `sys::DiscordCreate`
             core: std::ptr::null_mut(),
             client_id,
             event_handler: None,
         });
 
-        // SAFETY: This is the pointer we use in event handler code
-        let ptr = inner.deref() as *const DiscordInner as *mut std::ffi::c_void;
+        // SAFETY: This is the pointer we use in event handler code, repr(transparent) means
+        // *const Discord == *const Unsafecell<DiscordInner> == *const DiscordInner
+        let ptr = &inner as *const UnsafeCell<DiscordInner> as *mut std::ffi::c_void;
+
+        log::trace!("instantiating with client ID {}", client_id);
 
         let params = create_params(client_id, flags.into(), ptr);
 
@@ -63,19 +67,20 @@ impl Discord {
                 // XXX: *mut should be *const
                 &params as *const _ as *mut _,
                 // XXX: *mut *mut should be *mut *const
-                &mut inner.core,
+                &mut (*inner.get()).core,
             )
+            .to_result()?;
         }
-        .to_result()?;
-
-        log::trace!("received pointer to {:p}", inner.core);
 
         let instance = Discord(inner);
+
+        log::trace!("received pointer to {:p}", instance.inner().core);
 
         #[allow(unused_results)]
         unsafe {
             ffi!(instance.set_log_hook(
                 sys::DiscordLogLevel_Debug,
+                // SAFETY: this is never used
                 std::ptr::null_mut(),
                 Some(log_hook),
             ));
@@ -115,7 +120,7 @@ impl Discord {
 
     /// The Client ID that was supplied during creation
     pub fn client_id(&self) -> ClientID {
-        self.0.client_id
+        self.inner().client_id
     }
 
     /// Replaces the current event handler
@@ -123,18 +128,21 @@ impl Discord {
         &mut self,
         event_handler: Box<dyn EventHandler>,
     ) -> Option<Box<dyn EventHandler>> {
-        self.0.event_handler.replace(event_handler)
+        self.inner_mut().event_handler.replace(event_handler)
     }
 
     /// Takes the current event handler, leaving `None` in its place
     pub fn take_event_handler(&mut self) -> Option<Box<dyn EventHandler>> {
-        self.0.event_handler.take()
+        self.inner_mut().event_handler.take()
     }
 
     /// Returns some mutable reference to the event handler if it is of type T, or None if it isn't.
     // We require &mut self to prevent calling during callbacks
     pub fn downcast_event_handler<T: std::any::Any>(&mut self) -> Option<&mut T> {
-        self.0.event_handler.as_mut().and_then(|e| e.downcast_mut())
+        self.inner_mut()
+            .event_handler
+            .as_mut()
+            .and_then(|e| e.downcast_mut())
     }
 }
 
