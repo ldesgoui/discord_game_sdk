@@ -1,6 +1,6 @@
 use crate::{
-    as_any::AsAny, Action, Activity, Discord, Entitlement, LobbyID, NetworkChannelID,
-    NetworkPeerID, Relationship, User, UserAchievement, UserID,
+    utils::AsAny, Action, Activity, Discord, Entitlement, LobbyID, NetworkChannelID, NetworkPeerID,
+    Relationship, User, UserAchievement, UserID,
 };
 use std::any::Any;
 

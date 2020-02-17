@@ -1,12 +1,30 @@
 use crate::discord::{Discord, DiscordInner};
+use std::any::Any;
+
+// Thanks to Globi for the help
+// This is referred to as "upcasting"
+pub trait AsAny {
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+}
+
+impl<T: Any> AsAny for T {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+}
 
 pub(crate) struct CallbackData<'d, T> {
-    pub(crate) discord: *const DiscordInner,
+    pub(crate) discord: *mut DiscordInner,
     pub(crate) callback: Box<dyn 'd + FnOnce(&Discord, T)>,
 }
 
-// Literal hack to be able to use `ffi!(...)` with `LobbyTransaction`, `LobbyMemberTransaction`,
-// and `SearchQuery`.
+// Literal hack to be able to use `ffi!(...)` with
+// `LobbyTransaction`, `LobbyMemberTransaction`, and `SearchQuery`.
 pub(crate) struct MacroHelper<T> {
     pub(crate) core: *mut T,
 }
