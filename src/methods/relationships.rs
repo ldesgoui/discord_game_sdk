@@ -1,4 +1,5 @@
 use crate::{sys, to_result::ToResult, Collection, Discord, Relationship, Result, UserID};
+use std::convert::TryInto;
 
 /// # Relationships
 ///
@@ -21,8 +22,8 @@ impl Discord {
             ffi!(self
                 .get_relationship_manager()
                 .get(user_id, &mut relationship.0))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(relationship)
     }
@@ -70,12 +71,15 @@ impl Discord {
     /// Prefer using [`iter_relationships`](#method.iter_relationships).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#count)
-    pub fn relationship_count(&self) -> Result<usize> {
+    pub fn relationship_count(&self) -> Result<u32> {
         let mut count = 0;
 
-        unsafe { ffi!(self.get_relationship_manager().count(&mut count)) }.to_result()?;
+        unsafe {
+            ffi!(self.get_relationship_manager().count(&mut count)).to_result()?;
+        }
 
-        Ok(count as usize)
+        // XXX: i32 should be u32
+        Ok(count.try_into().unwrap())
     }
 
     /// Returns the relationship matching the filter at a given index.
@@ -86,15 +90,15 @@ impl Discord {
     /// Prefer using [`iter_relationships`](#method.iter_relationships).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#getat)  
-    pub fn relationship_at(&self, index: usize) -> Result<Relationship> {
+    pub fn relationship_at(&self, index: u32) -> Result<Relationship> {
         let mut relationship = Relationship(sys::DiscordRelationship::default());
 
         unsafe {
             ffi!(self
                 .get_relationship_manager()
-                .get_at(index as u32, &mut relationship.0))
+                .get_at(index, &mut relationship.0))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(relationship)
     }

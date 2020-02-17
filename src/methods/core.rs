@@ -65,7 +65,7 @@ impl Discord {
             sys::DiscordCreate(
                 sys::DISCORD_VERSION,
                 // XXX: *mut should be *const
-                &params as *const _ as *mut _,
+                &params as *const sys::DiscordCreateParams as *mut sys::DiscordCreateParams,
                 // XXX: *mut *mut should be *mut *const
                 &mut (*inner.get()).core,
             )

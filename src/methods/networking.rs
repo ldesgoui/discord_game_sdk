@@ -1,5 +1,8 @@
 use crate::{to_result::ToResult, Discord, NetworkChannelID, NetworkPeerID, Reliability, Result};
-use std::{borrow::Cow, convert::TryFrom};
+use std::{
+    borrow::Cow,
+    convert::{TryFrom, TryInto},
+};
 
 /// # Networking
 ///
@@ -23,7 +26,7 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#flush)
     pub fn flush_network(&self) -> Result<()> {
-        unsafe { ffi!(self.get_network_manager().flush()) }.to_result()
+        unsafe { ffi!(self.get_network_manager().flush()).to_result() }
     }
 
     /// Opens a network connection to another Discord user.
@@ -48,8 +51,8 @@ impl Discord {
             ffi!(self
                 .get_network_manager()
                 .open_peer(peer_id, route.as_ptr()))
+            .to_result()
         }
-        .to_result()
     }
 
     /// Updates the network connection to another Discord user.
@@ -77,15 +80,15 @@ impl Discord {
             ffi!(self
                 .get_network_manager()
                 .update_peer(peer_id, route.as_ptr()))
+            .to_result()
         }
-        .to_result()
     }
 
     /// Disconnects the network session to another Discord user.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#closepeer)
     pub fn close_peer(&self, peer_id: NetworkPeerID) -> Result<()> {
-        unsafe { ffi!(self.get_network_manager().close_peer(peer_id)) }.to_result()
+        unsafe { ffi!(self.get_network_manager().close_peer(peer_id)).to_result() }
     }
 
     /// Opens a network connection to another Discord user.
@@ -101,8 +104,8 @@ impl Discord {
             ffi!(self
                 .get_network_manager()
                 .open_channel(peer_id, channel_id, reliable.into()))
+            .to_result()
         }
-        .to_result()
     }
 
     /// Close the connection to a given user by peer ID on the given channel.
@@ -117,8 +120,8 @@ impl Discord {
             ffi!(self
                 .get_network_manager()
                 .close_channel(peer_id, channel_id))
+            .to_result()
         }
-        .to_result()
     }
 
     /// Sends data to a given peer ID through the given channel.
@@ -139,10 +142,11 @@ impl Discord {
                 peer_id,
                 channel_id,
                 // XXX: *mut should be *const
-                buffer.as_ptr() as *mut _,
-                buffer.len() as u32
+                buffer.as_ptr() as *mut u8,
+                // XXX: u32 should be u64/usize
+                buffer.len().try_into().unwrap_or(u32::max_value())
             ))
+            .to_result()
         }
-        .to_result()
     }
 }

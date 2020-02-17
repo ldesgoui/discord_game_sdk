@@ -1,4 +1,5 @@
 use crate::{sys, utils::charbuf_to_str, UnixTimestamp};
+use std::convert::TryInto;
 
 /// File Metadata
 ///
@@ -14,15 +15,14 @@ impl FileStat {
     }
 
     /// The total size in bytes
-    pub fn size(&self) -> usize {
-        // XXX: u64 should be usize
-        self.0.size as usize
+    pub fn size(&self) -> u64 {
+        self.0.size
     }
 
     /// When the file was last modified, in UNIX Time
     pub fn last_modified(&self) -> UnixTimestamp {
         // XXX: u64 should be UnixTimestamp
-        self.0.last_modified as UnixTimestamp
+        self.0.last_modified.try_into().unwrap()
     }
 }
 

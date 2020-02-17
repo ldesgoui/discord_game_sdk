@@ -1,4 +1,5 @@
 use crate::{sys, to_result::ToResult, Collection, Discord, Result, Snowflake, UserAchievement};
+use std::convert::TryInto;
 
 /// # Achievements
 ///
@@ -42,7 +43,7 @@ impl Discord {
             ffi!(self
                 .get_achievement_manager()
                 .set_user_achievement(achievement_id, percent_complete)
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())));
         }
     }
 
@@ -72,7 +73,7 @@ impl Discord {
             ffi!(self
                 .get_achievement_manager()
                 .fetch_user_achievements()
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
+                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())));
         }
     }
 
@@ -107,8 +108,8 @@ impl Discord {
             ffi!(self
                 .get_achievement_manager()
                 .get_user_achievement(achievement_id, &mut achievement.0))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(achievement)
     }
@@ -120,17 +121,17 @@ impl Discord {
     /// [`fetch_user_achievements`](#method.fetch_user_achievements) must have completed first.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#countuserachievements)  
-    pub fn user_achievement_count(&self) -> usize {
+    pub fn user_achievement_count(&self) -> u32 {
         let mut count = 0;
 
         unsafe {
             ffi!(self
                 .get_achievement_manager()
-                .count_user_achievements(&mut count))
+                .count_user_achievements(&mut count));
         }
 
-        // XXX: i32 should be usize
-        count as usize
+        // XXX: i32 should be u32
+        count.try_into().unwrap()
     }
 
     /// Gets a user achievement by index.
@@ -140,17 +141,17 @@ impl Discord {
     /// [`fetch_user_achievements`](#method.fetch_user_achievements) must have completed first.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/achievements#getuserachievementat)
-    pub fn user_achievement_at(&self, index: usize) -> Result<UserAchievement> {
+    pub fn user_achievement_at(&self, index: u32) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
         unsafe {
             ffi!(self.get_achievement_manager().get_user_achievement_at(
-                // XXX: i32 should be usize
-                index as i32,
+                // XXX: i32 should be u32
+                index.try_into().unwrap(),
                 &mut achievement.0
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(achievement)
     }

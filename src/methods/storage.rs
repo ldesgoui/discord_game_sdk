@@ -1,7 +1,11 @@
 use crate::{
     sys, to_result::ToResult, utils::charbuf_to_str, Collection, Discord, FileStat, Result,
 };
-use std::{borrow::Cow, convert::TryFrom, mem::size_of};
+use std::{
+    borrow::Cow,
+    convert::{TryFrom, TryInto},
+    mem::size_of,
+};
 
 /// # Storage
 ///
@@ -31,7 +35,7 @@ impl Discord {
         &self,
         filename: impl Into<Cow<'s, str>>,
         mut buffer: impl AsMut<[u8]>,
-    ) -> Result<usize> {
+    ) -> Result<u64> {
         let mut filename = filename.into();
 
         if !filename.ends_with('\0') {
@@ -48,15 +52,15 @@ impl Discord {
             ffi!(self.get_storage_manager().read(
                 filename.as_ptr(),
                 buffer.as_mut_ptr(),
-                // u32 should be usize
-                buffer.len() as u32,
+                // u32 should be u64
+                buffer.len().try_into().unwrap_or(u32::max_value()),
                 &mut read
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
-        // XXX: u32 should be usize
-        Ok(read as usize)
+        // XXX: u32 should be u64
+        Ok(read.try_into().unwrap())
     }
 
     /// Reads data asynchronously from the game's allocated save file into a buffer.
@@ -123,8 +127,8 @@ impl Discord {
     pub fn read_file_async_partial<'d, 's>(
         &'d self,
         filename: impl Into<Cow<'s, str>>,
-        offset: usize,
-        length: usize,
+        offset: u64,
+        length: u64,
         callback: impl 'd + FnOnce(&Self, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
@@ -136,13 +140,7 @@ impl Discord {
         unsafe {
             ffi!(self
                 .get_storage_manager()
-                .read_async_partial(
-                    filename.as_ptr(),
-                    // XXX: u64 should be usize
-                    offset as u64,
-                    // XXX: u64 should be usize
-                    length as u64
-                )
+                .read_async_partial(filename.as_ptr(), offset, length)
                 .and_then(|res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
                     callback::<Result<&[u8]>>(
                         res.to_result()
@@ -188,12 +186,12 @@ impl Discord {
             ffi!(self.get_storage_manager().write(
                 filename.as_ptr(),
                 // XXX: *mut should be *const
-                buffer.as_ptr() as *mut _,
-                // XXX: u32 should be usize
-                buffer.len() as u32,
+                buffer.as_ptr() as *mut u8,
+                // XXX: u32 should be u64
+                buffer.len().try_into().unwrap_or(u32::max_value()),
             ))
+            .to_result()
         }
-        .to_result()
     }
 
     /// Writes data asynchronously to disk under the given key.
@@ -239,9 +237,9 @@ impl Discord {
                 .write_async(
                     filename.as_ptr(),
                     // XXX: *mut should be *const
-                    buffer.as_ptr() as *mut _,
-                    // XXX: u32 should be usize
-                    buffer.len() as u32
+                    buffer.as_ptr() as *mut u8,
+                    // XXX: u32 should be u64
+                    buffer.len().try_into().unwrap_or(u32::max_value())
                 )
                 .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
@@ -267,7 +265,7 @@ impl Discord {
             filename.to_mut().push('\0')
         };
 
-        unsafe { ffi!(self.get_storage_manager().delete_(filename.as_ptr())) }.to_result()
+        unsafe { ffi!(self.get_storage_manager().delete_(filename.as_ptr())).to_result() }
     }
 
     /// Checks if data exists for a given key.
@@ -298,8 +296,8 @@ impl Discord {
             ffi!(self
                 .get_storage_manager()
                 .exists(filename.as_ptr(), &mut exists))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(exists)
     }
@@ -330,8 +328,8 @@ impl Discord {
             ffi!(self
                 .get_storage_manager()
                 .stat(filename.as_ptr(), &mut stat.0))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(stat)
     }
@@ -341,13 +339,13 @@ impl Discord {
     /// Prefer using [`iter_file_stats`](#method.iter_file_stats).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#count)
-    pub fn file_stat_count(&self) -> usize {
+    pub fn file_stat_count(&self) -> u32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_storage_manager().count(&mut count)) }
 
-        // XXX: i32 should be usize
-        count as usize
+        // XXX: i32 should be u32
+        count.try_into().unwrap()
     }
 
     /// Returns the file stat at a given index.
@@ -355,17 +353,17 @@ impl Discord {
     /// Prefer using [`iter_file_stats`](#method.iter_file_stats).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/storage#statat)  
-    pub fn file_stat_at(&self, index: usize) -> Result<FileStat> {
+    pub fn file_stat_at(&self, index: u32) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
         unsafe {
             ffi!(self.get_storage_manager().stat_at(
-                // XXX: i32 should be usize
-                index as i32,
+                // XXX: i32 should be u32
+                index.try_into().unwrap(),
                 &mut stat.0
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(stat)
     }
@@ -397,7 +395,9 @@ impl Discord {
     pub fn folder_path(&self) -> Result<String> {
         let mut path: sys::DiscordPath = [0; size_of::<sys::DiscordPath>()];
 
-        unsafe { ffi!(self.get_storage_manager().get_path(&mut path)) }.to_result()?;
+        unsafe {
+            ffi!(self.get_storage_manager().get_path(&mut path)).to_result()?;
+        }
 
         Ok(charbuf_to_str(&path).to_string())
     }

@@ -25,7 +25,9 @@ impl Discord {
     pub fn current_user(&self) -> Result<User> {
         let mut user = User(sys::DiscordUser::default());
 
-        unsafe { ffi!(self.get_user_manager().get_current_user(&mut user.0)) }.to_result()?;
+        unsafe {
+            ffi!(self.get_user_manager().get_current_user(&mut user.0)).to_result()?;
+        }
 
         Ok(user)
     }
@@ -75,8 +77,8 @@ impl Discord {
             ffi!(self
                 .get_user_manager()
                 .get_current_user_premium_type(&mut premium_type))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(PremiumKind::from(premium_type))
     }
@@ -107,8 +109,8 @@ impl Discord {
                 ffi!(self
                     .get_user_manager()
                     .current_user_has_flag(flag.bits(), &mut contains))
+                .to_result()?;
             }
-            .to_result()?;
 
             flags.set(*flag, contains);
         }

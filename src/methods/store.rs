@@ -1,4 +1,5 @@
 use crate::{sys, to_result::ToResult, Collection, Discord, Entitlement, Result, Sku, Snowflake};
+use std::convert::TryInto;
 
 /// # Store
 ///
@@ -64,7 +65,9 @@ impl Discord {
     pub fn sku(&self, id: Snowflake) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
-        unsafe { ffi!(self.get_store_manager().get_sku(id, &mut sku.0)) }.to_result()?;
+        unsafe {
+            ffi!(self.get_store_manager().get_sku(id, &mut sku.0)).to_result()?;
+        }
 
         Ok(sku)
     }
@@ -76,12 +79,13 @@ impl Discord {
     /// Prefer using [`iter_skus`](#method.iter_skus).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countskus)
-    pub fn sku_count(&self) -> usize {
+    pub fn sku_count(&self) -> u32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
 
-        count as usize
+        // XXX: i32 should be u32
+        count.try_into().unwrap()
     }
 
     /// Returns the SKU at a given index.
@@ -91,15 +95,17 @@ impl Discord {
     /// Prefer using [`iter_skus`](#method.iter_skus).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getskuat)  
-    pub fn sku_at(&self, index: usize) -> Result<Sku> {
+    pub fn sku_at(&self, index: u32) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
         unsafe {
-            ffi!(self
-                .get_store_manager()
-                .get_sku_at(index as i32, &mut sku.0))
+            ffi!(self.get_store_manager().get_sku_at(
+                // XXX: i32 should be u32
+                index.try_into().unwrap(),
+                &mut sku.0
+            ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(sku)
     }
@@ -187,8 +193,8 @@ impl Discord {
             ffi!(self
                 .get_store_manager()
                 .get_entitlement(id, &mut entitlement.0))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(entitlement)
     }
@@ -200,12 +206,13 @@ impl Discord {
     /// Prefer using [`iter_entitlements`](#method.iter_entitlements).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#countentitlements)
-    pub fn entitlement_count(&self) -> usize {
+    pub fn entitlement_count(&self) -> u32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }
 
-        count as usize
+        // XXX: i32 should be u32
+        count.try_into().unwrap()
     }
 
     /// Returns Entitlement at a given index.
@@ -215,15 +222,17 @@ impl Discord {
     /// Prefer using [`iter_entitlements`](#method.iter_entitlements).
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/store#getentitlementat)  
-    pub fn entitlement_at(&self, index: usize) -> Result<Entitlement> {
+    pub fn entitlement_at(&self, index: u32) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
         unsafe {
-            ffi!(self
-                .get_store_manager()
-                .get_entitlement_at(index as i32, &mut entitlement.0))
+            ffi!(self.get_store_manager().get_entitlement_at(
+                // XXX: i32 should be u32
+                index.try_into().unwrap(),
+                &mut entitlement.0
+            ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(entitlement)
     }
@@ -276,8 +285,8 @@ impl Discord {
             ffi!(self
                 .get_store_manager()
                 .has_sku_entitlement(sku_id, &mut has_entitlement))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(has_entitlement)
     }

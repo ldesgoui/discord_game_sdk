@@ -39,8 +39,8 @@ impl Discord {
             ffi!(self
                 .get_activity_manager()
                 .register_command(command.as_ptr()))
+            .to_result()
         }
-        .to_result()
     }
 
     /// Used if you are distributing this SDK on Steam.
@@ -61,7 +61,7 @@ impl Discord {
     /// # Ok(()) }
     /// ```
     pub fn register_steam(&self, steam_game_id: u32) -> Result<()> {
-        unsafe { ffi!(self.get_activity_manager().register_steam(steam_game_id)) }.to_result()
+        unsafe { ffi!(self.get_activity_manager().register_steam(steam_game_id)).to_result() }
     }
 
     /// Sets a user's presence in Discord to a new Activity.
@@ -99,7 +99,7 @@ impl Discord {
                 .get_activity_manager()
                 .update_activity(
                     // XXX: *mut should be *const
-                    &activity.0 as *const _ as *mut _
+                    &activity.0 as *const sys::DiscordActivity as *mut sys::DiscordActivity
                 )
                 .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }

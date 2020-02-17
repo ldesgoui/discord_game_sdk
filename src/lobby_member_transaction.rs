@@ -65,16 +65,16 @@ impl LobbyMemberTransaction {
                 Some(value) => {
                     ffi!(tx.set_metadata(
                         // XXX: *mut should be *const
-                        key.as_ptr() as *mut _,
+                        key.as_ptr() as *mut u8,
                         // XXX: *mut should be *const
-                        value.as_ptr() as *mut _
+                        value.as_ptr() as *mut u8
                     ))
                     .to_result()?;
                 }
                 None => {
                     ffi!(tx.delete_metadata(
                         // XXX: *mut should be *const
-                        key.as_ptr() as *mut _
+                        key.as_ptr() as *mut u8
                     ))
                     .to_result()?;
                 }

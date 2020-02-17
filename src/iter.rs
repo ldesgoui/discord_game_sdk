@@ -5,17 +5,17 @@ use crate::Discord;
 /// An Iterator to acquire collections.
 pub struct Collection<'d, T> {
     discord: &'d Discord,
-    getter: Box<dyn FnMut(&Discord, usize) -> T>,
-    count: usize,
-    index: usize,
-    back_index: usize,
+    getter: Box<dyn FnMut(&Discord, u32) -> T>,
+    count: u32,
+    index: u32,
+    back_index: u32,
 }
 
 impl<'d, T> Collection<'d, T> {
     pub(crate) fn new(
         discord: &'d Discord,
-        getter: Box<dyn FnMut(&Discord, usize) -> T>,
-        count: usize,
+        getter: Box<dyn FnMut(&Discord, u32) -> T>,
+        count: u32,
     ) -> Self {
         Self {
             discord,
@@ -40,7 +40,7 @@ impl<T> Iterator for Collection<'_, T> {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.count, Some(self.count))
+        (self.count as usize, Some(self.count as usize))
     }
 }
 
