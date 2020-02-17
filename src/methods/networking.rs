@@ -143,7 +143,7 @@ impl Discord {
                 channel_id,
                 // XXX: *mut should be *const
                 buffer.as_ptr() as *mut u8,
-                // XXX: u32 should be u64/usize
+                // XXX: u32 should be u64
                 buffer.len().try_into().unwrap_or(u32::max_value())
             ))
             .to_result()
