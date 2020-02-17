@@ -34,14 +34,14 @@ use std::convert::TryInto;
 /// );
 /// # Ok(()) }
 /// ```
-#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Eq, PartialEq)]
 #[repr(transparent)]
 pub struct Activity(pub(crate) sys::DiscordActivity);
 
 impl Activity {
     /// Create a new Activity with empty fields
     pub fn empty() -> Self {
-        Self::from(sys::DiscordActivity::default())
+        Self(sys::DiscordActivity::default())
     }
 
     /// Check if an Activity is completely blank

@@ -3,7 +3,7 @@ use crate::{sys, utils::charbuf_to_str, UnixTimestamp};
 /// OAuth 2.0 Token
 ///
 /// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/applications#data-models-oauth2token-struct)
-#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Eq, PartialEq)]
 #[repr(transparent)]
 pub struct OAuth2Token(pub(crate) sys::DiscordOAuth2Token);
 

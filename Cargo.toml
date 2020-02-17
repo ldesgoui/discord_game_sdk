@@ -15,17 +15,15 @@ features = ["discord_game_sdk_sys/doc"]
 no-default-features = true
 
 [dependencies]
-bitflags = "1.2.1"
-derive_more = "0.99.2"
+bitflags = "1.2"
 discord_game_sdk_sys = { path = "./sys", version = "1.0.0-rc.1" }
-thiserror = "1.0"
 log = "0.4"
-memchr = "2.2.1"
-scopeguard = "1.0.0"
-image = { version = "0.23.0", default-features = false, optional = true }
+memchr = "2.2"
+scopeguard = "1.0"
+image = { version = "0.23", default-features = false, optional = true }
 
 [dev-dependencies]
-pretty_env_logger = "0.4.0"
+pretty_env_logger = "0.4"
 
 [features]
 default = ["link"]
