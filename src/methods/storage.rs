@@ -52,7 +52,7 @@ impl Discord {
             ffi!(self.get_storage_manager().read(
                 filename.as_ptr(),
                 buffer.as_mut_ptr(),
-                // u32 should be u64
+                // XXX: u32 should be u64
                 buffer.len().try_into().unwrap_or(u32::max_value()),
                 &mut read
             ))
