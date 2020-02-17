@@ -44,61 +44,76 @@ impl Discord {
     ///
     /// > [`Create` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#create)  
     /// > [`SetLogHook` in official docs](https://discordapp.com/developers/docs/game-sdk/discord#setloghook)
-    #[allow(clippy::cognitive_complexity)]
     pub fn with_create_flags(client_id: ClientID, flags: CreateFlags) -> Result<Self> {
-        let inner = UnsafeCell::new(DiscordInner {
-            // SAFETY: this is written to during `sys::DiscordCreate`
+        // This is a mess
+        //
+        // - We want to call `sys::DiscordCreate`, it gives us a `*mut sys::IDiscordCore`
+        // - We provide `&mut EventHandler` and `&Discord` during event handlers
+        // - That means we need to mutate `DiscordInner::event_handler`, which is fine via `UnsafeCell`
+        // - That also means we need to pass the `Box` as raw pointer to duplicate it
+        // - `sys::DiscordCreate` wants `sys::DiscordCreateParams` + `*mut *mut sys::IDiscordCore`
+        // - `sys::DiscordCreateParams` wants our `event_data: *mut c_void`
+        // - Our `event_data` is the raw `Box` pointer
+        // - We need to build the `Box<DiscordInner>` first to pass a valid pointer
+
+        log::debug!("instantiating with client ID {}", client_id);
+
+        let mut instance = Discord(Box::new(DiscordInner {
+            // SAFETY: overwritten by `sys::DiscordCreate`, not deref'd until then
             core: std::ptr::null_mut(),
             client_id,
-            event_handler: None,
-        });
+            event_handler: UnsafeCell::new(None),
+        }));
 
-        // SAFETY: This is the pointer we use in event handler code, repr(transparent) means
-        // *const Discord == *const Unsafecell<DiscordInner> == *const DiscordInner
-        let ptr = &inner as *const UnsafeCell<DiscordInner> as *mut std::ffi::c_void;
-
-        log::trace!("instantiating with client ID {}", client_id);
-
-        let params = create_params(client_id, flags.into(), ptr);
+        // SAFETY: As described above, we're passing the Box as raw pointer
+        // It'll be used to duplicate the `Box` but won't mutate or drop it
+        let ptr = &mut *instance.0 as *mut DiscordInner as *mut std::ffi::c_void;
+        let mut params = create_params(client_id, flags.into(), ptr);
 
         unsafe {
             sys::DiscordCreate(
                 sys::DISCORD_VERSION,
                 // XXX: *mut should be *const
-                &params as *const _ as *mut _,
-                // XXX: *mut *mut should be *mut *const
-                &mut (*inner.get()).core,
+                &mut params,
+                &mut instance.0.core,
             )
             .to_result()?;
         }
 
-        let instance = Discord(inner);
+        log::trace!("received pointer to {:p}", instance.0.core);
 
-        log::trace!("received pointer to {:p}", instance.inner().core);
+        instance.set_log_hook();
+        instance.kickstart_managers();
 
-        #[allow(unused_results)]
+        Ok(instance)
+    }
+
+    fn set_log_hook(&self) {
         unsafe {
-            ffi!(instance.set_log_hook(
+            ffi!(self.set_log_hook(
                 sys::DiscordLogLevel_Debug,
                 // SAFETY: this is never used
                 std::ptr::null_mut(),
                 Some(log_hook),
             ));
-
-            // Signal managers that we want events ASAP
-            ffi!(instance.get_network_manager());
-            ffi!(instance.get_overlay_manager());
-            ffi!(instance.get_relationship_manager());
-            ffi!(instance.get_user_manager());
-
-            ffi!(instance.get_achievement_manager());
-            ffi!(instance.get_activity_manager());
-            ffi!(instance.get_lobby_manager());
-            ffi!(instance.get_store_manager());
-            ffi!(instance.get_voice_manager());
         }
+    }
 
-        Ok(instance)
+    #[allow(clippy::cognitive_complexity)]
+    fn kickstart_managers(&self) {
+        unsafe {
+            // Signal managers that we want events ASAP
+            ffi!(self.get_network_manager());
+            ffi!(self.get_overlay_manager());
+            ffi!(self.get_relationship_manager());
+            ffi!(self.get_user_manager());
+
+            ffi!(self.get_achievement_manager());
+            ffi!(self.get_activity_manager());
+            ffi!(self.get_lobby_manager());
+            ffi!(self.get_store_manager());
+            ffi!(self.get_voice_manager());
+        }
     }
 
     /// Runs all pending SDK callbacks.
@@ -115,12 +130,12 @@ impl Discord {
     /// [`Error::NotRunning`]: enum.Error.html#variant.NotRunning
     // We require &mut self to prevent calling during callbacks
     pub fn run_callbacks(&mut self) -> Result<()> {
-        unsafe { ffi!(self.run_callbacks()) }.to_result()
+        unsafe { ffi!(self.run_callbacks()).to_result() }
     }
 
     /// The Client ID that was supplied during creation
     pub fn client_id(&self) -> ClientID {
-        self.inner().client_id
+        self.0.client_id
     }
 
     /// Replaces the current event handler
@@ -128,19 +143,19 @@ impl Discord {
         &mut self,
         event_handler: Box<dyn EventHandler>,
     ) -> Option<Box<dyn EventHandler>> {
-        self.inner_mut().event_handler.replace(event_handler)
+        self.0.event_handler_mut().replace(event_handler)
     }
 
     /// Takes the current event handler, leaving `None` in its place
     pub fn take_event_handler(&mut self) -> Option<Box<dyn EventHandler>> {
-        self.inner_mut().event_handler.take()
+        self.0.event_handler_mut().take()
     }
 
     /// Returns some mutable reference to the event handler if it is of type T, or None if it isn't.
     // We require &mut self to prevent calling during callbacks
     pub fn downcast_event_handler<T: std::any::Any>(&mut self) -> Option<&mut T> {
-        self.inner_mut()
-            .event_handler
+        self.0
+            .event_handler_mut()
             .as_mut()
             .and_then(|e| e.downcast_mut())
     }
@@ -229,7 +244,10 @@ unsafe extern "C" fn log_hook(
 const ACHIEVEMENT: &sys::IDiscordAchievementEvents = &sys::IDiscordAchievementEvents {
     on_user_achievement_update: event_handler!(
         |user_achievement: *mut sys::DiscordUserAchievement| {
-            EventHandler::on_user_achievement_update(&*(user_achievement as *mut UserAchievement))
+            EventHandler::on_user_achievement_update(
+                // SAFETY: repr(transparent) allows this
+                &*(user_achievement as *mut UserAchievement),
+            )
         }
     ),
 };
@@ -244,7 +262,10 @@ const ACTIVITY: &sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
     }),
 
     on_activity_join_request: event_handler!(|user: *mut sys::DiscordUser| {
-        EventHandler::on_activity_join_request(&*(user as *mut User))
+        EventHandler::on_activity_join_request(
+            // SAFETY: repr(transparent) allows this
+            &*(user as *mut User),
+        )
     }),
 
     on_activity_invite: event_handler!(
@@ -253,7 +274,9 @@ const ACTIVITY: &sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
          activity: *mut sys::DiscordActivity| {
             EventHandler::on_activity_invite(
                 kind.into(),
+                // SAFETY: repr(transparent) allows this
                 &*(user as *mut User),
+                // SAFETY: repr(transparent) allows this
                 &*(activity as *mut Activity),
             )
         }
@@ -343,17 +366,26 @@ const RELATIONSHIP: &sys::IDiscordRelationshipEvents = &sys::IDiscordRelationshi
     on_refresh: event_handler!(|| EventHandler::on_relationships_refresh()),
 
     on_relationship_update: event_handler!(|relationship: *mut sys::DiscordRelationship| {
-        EventHandler::on_relationship_update(&*(relationship as *mut Relationship))
+        EventHandler::on_relationship_update(
+            // SAFETY: repr(transparent) allows this
+            &*(relationship as *mut Relationship),
+        )
     }),
 };
 
 const STORE: &sys::IDiscordStoreEvents = &sys::IDiscordStoreEvents {
     on_entitlement_create: event_handler!(|entitlement: *mut sys::DiscordEntitlement| {
-        EventHandler::on_entitlement_create(&*(entitlement as *mut Entitlement))
+        EventHandler::on_entitlement_create(
+            // SAFETY: repr(transparent) allows this
+            &*(entitlement as *mut Entitlement),
+        )
     }),
 
     on_entitlement_delete: event_handler!(|entitlement: *mut sys::DiscordEntitlement| {
-        EventHandler::on_entitlement_delete(&*(entitlement as *mut Entitlement))
+        EventHandler::on_entitlement_delete(
+            // SAFETY: repr(transparent) allows this
+            &*(entitlement as *mut Entitlement),
+        )
     }),
 };
 
