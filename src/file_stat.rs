@@ -4,7 +4,7 @@ use std::convert::TryInto;
 /// File Metadata
 ///
 /// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/storage#data-models-filestat-struct)
-#[derive(Clone,  Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 #[repr(transparent)]
 pub struct FileStat(pub(crate) sys::DiscordFileStat);
 
