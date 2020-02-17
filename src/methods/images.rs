@@ -7,16 +7,14 @@ use std::convert::{TryFrom, TryInto};
 ///
 /// ```rust
 /// # use discord_game_sdk::*;
-/// # fn example(discord: Discord) -> Result<()> {
-/// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
+/// # fn example(discord: Discord, user: User) -> Result<()> {
 /// discord.fetch_image(
 ///     ImageHandle::from_user_id(user.id(), 128),
 ///     FetchKind::UseCached,
 ///     |discord, handle| {
-///         match handle {
-///             Ok(handle) => {
-///                 println!("image dimensions: {:?}", discord.image_dimensions(handle));
-///                 let image = discord.image(handle);
+///         match handle.and_then(|handle| discord.image(handle))  {
+///             Ok(image) => {
+///                 println!("image dimensions: {:?}", image.dimensions());
 ///                 // ...
 ///             },
 ///             Err(error) => eprintln!("failed to fetch image: {}", error),
@@ -37,11 +35,11 @@ impl Discord {
         unsafe {
             ffi!(self
                 .get_image_manager()
-                .fetch(handle.into(), refresh.into())
+                .fetch(handle.0, refresh.into())
                 .and_then(
                     |res: sys::EDiscordResult, image_handle: sys::DiscordImageHandle| {
                         callback::<Result<ImageHandle>>(
-                            res.to_result().map(|()| image_handle.into()),
+                            res.to_result().map(|()| ImageHandle(image_handle)),
                         )
                     }
                 ))
@@ -57,7 +55,7 @@ impl Discord {
         unsafe {
             ffi!(self
                 .get_image_manager()
-                .get_dimensions(handle.into(), &mut dimensions,))
+                .get_dimensions(handle.0, &mut dimensions,))
             .to_result()?;
         }
 
@@ -70,14 +68,14 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#getdata)
     pub fn image(&self, handle: ImageHandle) -> Result<Image> {
-        let (width, height) = self.image_dimensions(handle)?;
+        let (width, height) = self.image_dimensions(handle.clone())?;
         let mut data = vec![0; 4 * width as usize * height as usize];
 
         debug_assert!(u32::try_from(data.len()).is_ok());
 
         unsafe {
             ffi!(self.get_image_manager().get_data(
-                handle.into(),
+                handle.0,
                 data.as_mut_ptr(),
                 data.len().try_into().unwrap_or(u32::max_value())
             ))

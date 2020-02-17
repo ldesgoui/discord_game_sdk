@@ -31,12 +31,13 @@ impl Discord {
     ) {
         let mut ptr = std::ptr::null_mut();
 
-        if let Err(e) = unsafe {
+        let create = unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .get_lobby_create_transaction(&mut ptr))
             .to_result()
-        } {
+        };
+        if let Err(e) = create {
             return callback(self, Err(e));
         }
 
@@ -64,12 +65,13 @@ impl Discord {
     ) {
         let mut ptr = std::ptr::null_mut();
 
-        if let Err(e) = unsafe {
+        let create = unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .get_lobby_update_transaction(lobby_id, &mut ptr))
             .to_result()
-        } {
+        };
+        if let Err(e) = create {
             return callback(self, Err(e));
         }
 
@@ -189,13 +191,13 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobby)
     pub fn lobby(&self, lobby_id: LobbyID) -> Result<Lobby> {
-        let mut lobby = sys::DiscordLobby::default();
+        let mut lobby = Lobby(sys::DiscordLobby::default());
 
         unsafe {
-            ffi!(self.get_lobby_manager().get_lobby(lobby_id, &mut lobby)).to_result()?;
+            ffi!(self.get_lobby_manager().get_lobby(lobby_id, &mut lobby.0)).to_result()?;
         }
 
-        Ok(Lobby::from(lobby))
+        Ok(lobby)
     }
 
     /// Gets the activity secret for a given lobby.
@@ -325,12 +327,13 @@ impl Discord {
     ) {
         let mut ptr = std::ptr::null_mut();
 
-        if let Err(e) = unsafe {
+        let create = unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .get_member_update_transaction(lobby_id, user_id, &mut ptr))
             .to_result()
-        } {
+        };
+        if let Err(e) = create {
             return callback(self, Err(e));
         }
 
@@ -544,9 +547,9 @@ impl Discord {
     ) {
         let mut ptr = std::ptr::null_mut();
 
-        if let Err(e) =
-            unsafe { ffi!(self.get_lobby_manager().get_search_query(&mut ptr)).to_result() }
-        {
+        let create =
+            unsafe { ffi!(self.get_lobby_manager().get_search_query(&mut ptr)).to_result() };
+        if let Err(e) = create {
             return callback(self, Err(e));
         }
 

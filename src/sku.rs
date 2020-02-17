@@ -3,7 +3,7 @@ use crate::{sys, utils::charbuf_to_str, SkuKind, Snowflake};
 /// SKU (stock keeping unit)
 ///
 /// > [Struct in official docs](https://discordapp.com/developers/docs/game-sdk/store#data-models-sku-struct)
-#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Eq, PartialEq)]
 #[repr(transparent)]
 pub struct Sku(pub(crate) sys::DiscordSku);
 

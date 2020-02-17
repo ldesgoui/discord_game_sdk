@@ -3,7 +3,7 @@ use crate::{sys, Activity, Status};
 /// User Presence
 ///
 /// > [Enum in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#data-models-presence-struct)
-#[derive(Clone, Copy, Eq, PartialEq, derive_more::From, derive_more::Into)]
+#[derive(Clone, Eq, PartialEq)]
 #[repr(transparent)]
 pub struct Presence(pub(crate) sys::DiscordPresence);
 
