@@ -7,16 +7,14 @@ use std::convert::{TryFrom, TryInto};
 ///
 /// ```rust
 /// # use discord_game_sdk::*;
-/// # fn example(discord: Discord) -> Result<()> {
-/// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
+/// # fn example(discord: Discord, user: User) -> Result<()> {
 /// discord.fetch_image(
 ///     ImageHandle::from_user_id(user.id(), 128),
 ///     FetchKind::UseCached,
 ///     |discord, handle| {
-///         match handle {
-///             Ok(handle) => {
-///                 println!("image dimensions: {:?}", discord.image_dimensions(handle));
-///                 let image = discord.image(handle);
+///         match handle.and_then(|handle| discord.image(handle))  {
+///             Ok(image) => {
+///                 println!("image dimensions: {:?}", image.dimensions());
 ///                 // ...
 ///             },
 ///             Err(error) => eprintln!("failed to fetch image: {}", error),

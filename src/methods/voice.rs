@@ -126,8 +126,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
+    /// # fn example(discord: Discord, user: User) -> Result<()> {
     /// if discord.local_muted(user.id())? {
     ///     // ...
     /// }
@@ -148,8 +147,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
+    /// # fn example(discord: Discord, user: User) -> Result<()> {
     /// discord.set_local_volume(user.id(), discord.local_volume(user.id())? + 10)?;
     /// # Ok(()) }
     pub fn local_volume(&self, user_id: UserID) -> Result<u8> {
@@ -173,8 +171,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
+    /// # fn example(discord: Discord, user: User) -> Result<()> {
     /// discord.set_local_mute(user.id(), true)?;
     /// # Ok(()) }
     pub fn set_local_mute(&self, user_id: UserID, muted: bool) -> Result<()> {
@@ -189,8 +186,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
+    /// # fn example(discord: Discord, user: User) -> Result<()> {
     /// discord.set_local_volume(user.id(), discord.local_volume(user.id())? + 10)?;
     /// # Ok(()) }
     pub fn set_local_volume(&self, user_id: UserID, volume: u8) -> Result<()> {

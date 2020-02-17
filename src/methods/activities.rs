@@ -183,8 +183,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// # let friend = User::from(discord_game_sdk_sys::DiscordUser::default());
+    /// # fn example(discord: Discord, friend: User) -> Result<()> {
     /// discord.send_invite(
     ///     friend.id(),
     ///     Action::Join,

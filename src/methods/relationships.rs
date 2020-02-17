@@ -11,8 +11,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
-    /// # let user = User::from(discord_game_sdk_sys::DiscordUser::default());
+    /// # fn example(discord: Discord, user: User) -> Result<()> {
     /// let relationship = discord.relationship_with(user.id())?;
     /// # Ok(()) }
     pub fn relationship_with(&self, user_id: UserID) -> Result<Relationship> {
