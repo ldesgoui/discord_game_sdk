@@ -299,7 +299,7 @@ impl Discord {
     pub fn iter_lobby_metadata(
         &self,
         lobby_id: LobbyID,
-    ) -> Result<Collection<Result<(String, String)>>> {
+    ) -> Result<Collection<'_, Result<(String, String)>>> {
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_metadata_at(lobby_id, i)),
@@ -370,7 +370,10 @@ impl Discord {
     }
 
     /// Returns an `Iterator` over the user IDs of the members of a lobby.
-    pub fn iter_lobby_member_ids(&self, lobby_id: LobbyID) -> Result<Collection<Result<UserID>>> {
+    pub fn iter_lobby_member_ids(
+        &self,
+        lobby_id: LobbyID,
+    ) -> Result<Collection<'_, Result<UserID>>> {
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_id_at(lobby_id, i)),
@@ -474,7 +477,7 @@ impl Discord {
         &self,
         lobby_id: LobbyID,
         user_id: UserID,
-    ) -> Result<Collection<Result<(String, String)>>> {
+    ) -> Result<Collection<'_, Result<(String, String)>>> {
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i)),
@@ -483,10 +486,12 @@ impl Discord {
     }
 
     /// Sends a message to the lobby on behalf of the current user.
+    ///
     /// You must be connected to the lobby you are messaging.
     /// You should use this function for message sending if you are not using
     /// the built in networking layer for the lobby.
-    /// If you are, you should use SendNetworkMessage instead.
+    /// If you are, you should use
+    /// [`send_lobby_network_message`](#method.send_lobby_network_message) instead.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#sendlobbymessage)
     pub fn send_lobby_message<'d>(
@@ -578,7 +583,7 @@ impl Discord {
     /// Returns an `Iterator` over the IDs of lobbies found via the lobby search.
     ///
     /// [`lobby_search`](#method.lobby_search) must have completed first.
-    pub fn iter_lobbies(&self) -> Collection<Result<LobbyID>> {
+    pub fn iter_lobbies(&self) -> Collection<'_, Result<LobbyID>> {
         Collection::new(self, Box::new(Self::lobby_id_at), self.lobby_count())
     }
 

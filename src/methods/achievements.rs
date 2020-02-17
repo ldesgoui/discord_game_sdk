@@ -175,7 +175,7 @@ impl Discord {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn iter_user_achievements(&self) -> Collection<Result<UserAchievement>> {
+    pub fn iter_user_achievements(&self) -> Collection<'_, Result<UserAchievement>> {
         Collection::new(
             self,
             Box::new(Self::user_achievement_at),

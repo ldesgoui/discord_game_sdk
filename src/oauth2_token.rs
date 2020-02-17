@@ -14,7 +14,7 @@ impl OAuth2Token {
     }
 
     /// The list of `OAuth2` scopes
-    pub fn scopes(&self) -> std::str::Split<char> {
+    pub fn scopes(&self) -> std::str::Split<'_, char> {
         charbuf_to_str(&self.0.scopes).split(' ')
     }
 

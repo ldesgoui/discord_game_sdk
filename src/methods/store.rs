@@ -122,7 +122,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_skus(&self) -> Collection<Result<Sku>> {
+    pub fn iter_skus(&self) -> Collection<'_, Result<Sku>> {
         Collection::new(self, Box::new(Self::sku_at), self.sku_count())
     }
 
@@ -246,7 +246,7 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_entitlements(&self) -> Collection<Result<Entitlement>> {
+    pub fn iter_entitlements(&self) -> Collection<'_, Result<Entitlement>> {
         Collection::new(
             self,
             Box::new(Self::entitlement_at),

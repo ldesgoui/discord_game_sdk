@@ -31,7 +31,7 @@ impl InputMode {
     pub fn voice_activity() -> Self {
         Self(sys::DiscordInputMode {
             type_: sys::DiscordInputModeType_VoiceActivity,
-            ..Default::default()
+            ..sys::DiscordInputMode::default()
         })
     }
 
@@ -43,7 +43,7 @@ impl InputMode {
     pub fn push_to_talk(shortcut: &str) -> Self {
         let mut mode = sys::DiscordInputMode {
             type_: sys::DiscordInputModeType_PushToTalk,
-            ..Default::default()
+            ..sys::DiscordInputMode::default()
         };
 
         write_charbuf(&mut mode.shortcut, shortcut);

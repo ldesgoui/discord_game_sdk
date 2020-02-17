@@ -380,7 +380,7 @@ impl Discord {
     ///     // ...
     /// }
     /// # Ok(()) }
-    pub fn iter_file_stats(&self) -> Collection<Result<FileStat>> {
+    pub fn iter_file_stats(&self) -> Collection<'_, Result<FileStat>> {
         Collection::new(self, Box::new(Self::file_stat_at), self.file_stat_count())
     }
 

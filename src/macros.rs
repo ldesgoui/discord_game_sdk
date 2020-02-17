@@ -65,7 +65,7 @@ macro_rules! ffi {
             debug_assert!(!callback_data.is_null());
 
             // SAFETY: Legal, we created the pointer just below
-            let callback_data = Box::from_raw(callback_data as *mut CallbackData<$res>);
+            let callback_data = Box::from_raw(callback_data as *mut CallbackData<'_, $res>);
 
             // SAFETY: Legal, repr(transparent) means
             // *const Discord == *const UnsafeCell<DiscordInner> == *const DiscordInner

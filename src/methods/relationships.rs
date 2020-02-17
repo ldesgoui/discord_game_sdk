@@ -112,7 +112,7 @@ impl Discord {
     ///     // ..
     /// }
     /// # Ok(()) }
-    pub fn iter_relationships(&self) -> Result<Collection<Result<Relationship>>> {
+    pub fn iter_relationships(&self) -> Result<Collection<'_, Result<Relationship>>> {
         Ok(Collection::new(
             self,
             Box::new(Self::relationship_at),
