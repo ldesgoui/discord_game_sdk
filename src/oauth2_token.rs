@@ -13,9 +13,17 @@ impl OAuth2Token {
         charbuf_to_str(&self.0.access_token)
     }
 
-    /// The list of `OAuth2` scopes
-    pub fn scopes(&self) -> std::str::Split<char> {
-        charbuf_to_str(&self.0.scopes).split(' ')
+    /// The list of `OAuth2` scopes separated by spaces
+    ///
+    /// ```rust
+    /// # use discord_game_sdk::*;
+    /// # fn example(token: OAuth2Token) -> Result<()> {
+    /// for scope in token.scopes().split(' ') {
+    ///     println!("we have access to: {}", scope);
+    /// }
+    /// # Ok(()) }
+    pub fn scopes(&self) -> &str {
+        charbuf_to_str(&self.0.scopes)
     }
 
     /// When the token exires, in UNIX Time
@@ -28,7 +36,7 @@ impl std::fmt::Debug for OAuth2Token {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("OAuth2Token")
             .field("access_token", &self.access_token())
-            .field("scopes", &self.scopes().collect::<Vec<_>>())
+            .field("scopes", &self.scopes())
             .field("expires", &self.expires())
             .finish()
     }

@@ -3,6 +3,7 @@ use crate::{
     utils::{charbuf_to_str, write_charbuf},
     ActivityKind, ClientID, UnixTimestamp,
 };
+use std::convert::TryInto;
 
 /// Activity (also known as Rich Presence)
 ///
@@ -111,13 +112,13 @@ impl Activity {
     /// The number of players currently in the party
     pub fn party_amount(&self) -> u32 {
         // XXX: i32 should be u32
-        self.0.party.size.current_size as u32
+        self.0.party.size.current_size.try_into().unwrap()
     }
 
     /// The maximum capacity of the party
     pub fn party_capacity(&self) -> u32 {
         // XXX: i32 should be u32
-        self.0.party.size.max_size as u32
+        self.0.party.size.max_size.try_into().unwrap()
     }
 
     /// Whether this activity is an instanced context, like a match
@@ -211,14 +212,14 @@ impl Activity {
     /// The number of players currently in the party
     pub fn with_party_amount(&mut self, value: u32) -> &mut Self {
         // XXX: i32 should be u32
-        self.0.party.size.current_size = value as i32;
+        self.0.party.size.current_size = value.try_into().unwrap();
         self
     }
 
     /// The maximum capacity of the party
     pub fn with_party_capacity(&mut self, value: u32) -> &mut Self {
         // XXX: i32 should be u32
-        self.0.party.size.max_size = value as i32;
+        self.0.party.size.max_size = value.try_into().unwrap();
         self
     }
 

@@ -127,7 +127,7 @@ impl Discord {
                 .connect_lobby(
                     lobby_id,
                     // XXX: *mut should be *const
-                    secret.as_ptr() as *mut _
+                    secret.as_ptr() as *mut u8
                 )
                 .and_then(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
                     callback::<Result<&Lobby>>(res.to_result().map(|()| &*(lobby as *mut Lobby)))
@@ -159,7 +159,7 @@ impl Discord {
                 .get_lobby_manager()
                 .connect_lobby_with_activity_secret(
                     // XXX: *mut should be *const
-                    activity_secret.as_ptr() as *mut _
+                    activity_secret.as_ptr() as *mut u8
                 )
                 .and_then(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
                     callback::<Result<&Lobby>>(res.to_result().map(|()| &*(lobby as *mut Lobby)))
@@ -191,7 +191,9 @@ impl Discord {
     pub fn lobby(&self, lobby_id: LobbyID) -> Result<Lobby> {
         let mut lobby = sys::DiscordLobby::default();
 
-        unsafe { ffi!(self.get_lobby_manager().get_lobby(lobby_id, &mut lobby)) }.to_result()?;
+        unsafe {
+            ffi!(self.get_lobby_manager().get_lobby(lobby_id, &mut lobby)).to_result()?;
+        }
 
         Ok(Lobby::from(lobby))
     }
@@ -209,8 +211,8 @@ impl Discord {
             ffi!(self
                 .get_lobby_manager()
                 .get_lobby_activity_secret(lobby_id, &mut secret))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(charbuf_to_str(&secret).to_string())
     }
@@ -239,11 +241,11 @@ impl Discord {
             ffi!(self.get_lobby_manager().get_lobby_metadata_value(
                 lobby_id,
                 // XXX: *mut should be *const
-                key.as_ptr() as *mut _,
+                key.as_ptr() as *mut u8,
                 &mut value
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(charbuf_to_str(&value).to_string())
     }
@@ -251,43 +253,47 @@ impl Discord {
     /// Returns the number of metadata key-value pairs available for a given lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbymetadatacount)  
-    pub fn lobby_metadata_count(&self, lobby_id: LobbyID) -> Result<usize> {
+    pub fn lobby_metadata_count(&self, lobby_id: LobbyID) -> Result<u32> {
         let mut count = 0;
 
         unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .lobby_metadata_count(lobby_id, &mut count))
+            .to_result()?;
         }
-        .to_result()?;
 
-        Ok(count as usize)
+        // XXX: i32 should be u32
+        Ok(count.try_into().unwrap())
     }
 
     /// Returns metadata key-value pair at a certain index for a given lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey)  
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue)
-    pub fn lobby_metadata_at(&self, lobby_id: LobbyID, index: usize) -> Result<(String, String)> {
+    pub fn lobby_metadata_at(&self, lobby_id: LobbyID, index: u32) -> Result<(String, String)> {
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
         unsafe {
-            ffi!(self
-                .get_lobby_manager()
-                .get_lobby_metadata_key(lobby_id, index as i32, &mut key))
+            ffi!(self.get_lobby_manager().get_lobby_metadata_key(
+                lobby_id,
+                // XXX: i32 should be u32
+                index.try_into().unwrap(),
+                &mut key
+            ))
+            .to_result()?;
         }
-        .to_result()?;
 
         unsafe {
             ffi!(self.get_lobby_manager().get_lobby_metadata_value(
                 lobby_id,
                 // XXX: *mut should be *const
-                key.as_ptr() as *mut _,
+                key.as_ptr() as *mut u8,
                 &mut value
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok((
             charbuf_to_str(&key).to_string(),
@@ -299,7 +305,7 @@ impl Discord {
     pub fn iter_lobby_metadata(
         &self,
         lobby_id: LobbyID,
-    ) -> Result<Collection<Result<(String, String)>>> {
+    ) -> Result<Collection<'_, Result<(String, String)>>> {
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_metadata_at(lobby_id, i)),
@@ -343,34 +349,41 @@ impl Discord {
     /// Returns the number of members connected to a lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#membercount)  
-    pub fn lobby_member_count(&self, lobby_id: LobbyID) -> Result<usize> {
+    pub fn lobby_member_count(&self, lobby_id: LobbyID) -> Result<u32> {
         let mut count = 0;
 
-        unsafe { ffi!(self.get_lobby_manager().member_count(lobby_id, &mut count)) }.to_result()?;
+        unsafe {
+            ffi!(self.get_lobby_manager().member_count(lobby_id, &mut count)).to_result()?;
+        }
 
+        // XXX: i32 should be u32
         Ok(count.try_into().unwrap())
     }
 
     /// Returns the user ID of the lobby member at a certain index.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getmemberuserid)
-    pub fn lobby_member_id_at(&self, lobby_id: LobbyID, index: usize) -> Result<UserID> {
+    pub fn lobby_member_id_at(&self, lobby_id: LobbyID, index: u32) -> Result<UserID> {
         let mut user_id = 0;
 
         unsafe {
             ffi!(self.get_lobby_manager().get_member_user_id(
                 lobby_id,
+                // XXX: i32 should be u32
                 index.try_into().unwrap(),
                 &mut user_id
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(user_id)
     }
 
     /// Returns an `Iterator` over the user IDs of the members of a lobby.
-    pub fn iter_lobby_member_ids(&self, lobby_id: LobbyID) -> Result<Collection<Result<UserID>>> {
+    pub fn iter_lobby_member_ids(
+        &self,
+        lobby_id: LobbyID,
+    ) -> Result<Collection<'_, Result<UserID>>> {
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_id_at(lobby_id, i)),
@@ -404,11 +417,11 @@ impl Discord {
                 lobby_id,
                 user_id,
                 // XXX: *mut should be *const
-                key.as_ptr() as *mut _,
+                key.as_ptr() as *mut u8,
                 &mut value
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(charbuf_to_str(&value).to_string())
     }
@@ -416,17 +429,18 @@ impl Discord {
     /// Returns the number of metadata key-value pairs for a given lobby member.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#membermetadatacount)  
-    pub fn lobby_member_metadata_count(&self, lobby_id: LobbyID, user_id: UserID) -> Result<usize> {
+    pub fn lobby_member_metadata_count(&self, lobby_id: LobbyID, user_id: UserID) -> Result<u32> {
         let mut count = 0;
 
         unsafe {
             ffi!(self
                 .get_lobby_manager()
                 .member_metadata_count(lobby_id, user_id, &mut count))
+            .to_result()?;
         }
-        .to_result()?;
 
-        Ok(count as usize)
+        // XXX: i32 should be u32
+        Ok(count.try_into().unwrap())
     }
 
     /// Returns the metadata key-value pair at a certain index for a given lobby member.
@@ -437,7 +451,7 @@ impl Discord {
         &self,
         lobby_id: LobbyID,
         user_id: UserID,
-        index: usize,
+        index: u32,
     ) -> Result<(String, String)> {
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
@@ -446,22 +460,23 @@ impl Discord {
             ffi!(self.get_lobby_manager().get_member_metadata_key(
                 lobby_id,
                 user_id,
-                index as i32,
+                // XXX: i32 should be u32
+                index.try_into().unwrap(),
                 &mut key
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         unsafe {
             ffi!(self.get_lobby_manager().get_member_metadata_value(
                 lobby_id,
                 user_id,
                 // XXX: *mut should be *const
-                key.as_ptr() as *mut _,
+                key.as_ptr() as *mut u8,
                 &mut value
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok((
             charbuf_to_str(&key).to_string(),
@@ -474,7 +489,7 @@ impl Discord {
         &self,
         lobby_id: LobbyID,
         user_id: UserID,
-    ) -> Result<Collection<Result<(String, String)>>> {
+    ) -> Result<Collection<'_, Result<(String, String)>>> {
         Ok(Collection::new(
             self,
             Box::new(move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i)),
@@ -483,10 +498,12 @@ impl Discord {
     }
 
     /// Sends a message to the lobby on behalf of the current user.
+    ///
     /// You must be connected to the lobby you are messaging.
     /// You should use this function for message sending if you are not using
     /// the built in networking layer for the lobby.
-    /// If you are, you should use SendNetworkMessage instead.
+    /// If you are, you should use
+    /// [`send_lobby_network_message`](#method.send_lobby_network_message) instead.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#sendlobbymessage)
     pub fn send_lobby_message<'d>(
@@ -505,8 +522,9 @@ impl Discord {
                 .send_lobby_message(
                     lobby_id,
                     // XXX: *mut should be *const
-                    buffer.as_ptr() as *mut _,
-                    buffer.len() as u32
+                    buffer.as_ptr() as *mut u8,
+                    // XXX: u32 should be u64
+                    buffer.len().try_into().unwrap_or(u32::max_value())
                 )
                 .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
         }
@@ -549,12 +567,13 @@ impl Discord {
     /// [`lobby_search`](#method.lobby_search) must have completed first.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#lobbycount)
-    pub fn lobby_count(&self) -> usize {
+    pub fn lobby_count(&self) -> u32 {
         let mut count = 0;
 
         unsafe { ffi!(self.get_lobby_manager().lobby_count(&mut count)) }
 
-        count as usize
+        // XXX: i32 should be u32
+        count.try_into().unwrap()
     }
 
     /// Returns the lobby ID at a given index.
@@ -562,15 +581,17 @@ impl Discord {
     /// [`lobby_search`](#method.lobby_search) must have completed first.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyid)
-    pub fn lobby_id_at(&self, index: usize) -> Result<LobbyID> {
+    pub fn lobby_id_at(&self, index: u32) -> Result<LobbyID> {
         let mut lobby_id = 0;
 
         unsafe {
-            ffi!(self
-                .get_lobby_manager()
-                .get_lobby_id(index as i32, &mut lobby_id))
+            ffi!(self.get_lobby_manager().get_lobby_id(
+                // XXX: i32 should be u32
+                index.try_into().unwrap(),
+                &mut lobby_id
+            ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(lobby_id)
     }
@@ -578,7 +599,7 @@ impl Discord {
     /// Returns an `Iterator` over the IDs of lobbies found via the lobby search.
     ///
     /// [`lobby_search`](#method.lobby_search) must have completed first.
-    pub fn iter_lobbies(&self) -> Collection<Result<LobbyID>> {
+    pub fn iter_lobbies(&self) -> Collection<'_, Result<LobbyID>> {
         Collection::new(self, Box::new(Self::lobby_id_at), self.lobby_count())
     }
 
@@ -623,14 +644,14 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectnetwork)
     pub fn connect_lobby_network(&self, lobby_id: LobbyID) -> Result<()> {
-        unsafe { ffi!(self.get_lobby_manager().connect_network(lobby_id,)) }.to_result()
+        unsafe { ffi!(self.get_lobby_manager().connect_network(lobby_id,)).to_result() }
     }
 
     /// Disconnects from the networking layer for the given lobby ID.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectnetwork)
     pub fn disconnect_lobby_network(&self, lobby_id: LobbyID) -> Result<()> {
-        unsafe { ffi!(self.get_lobby_manager().disconnect_network(lobby_id,)) }.to_result()
+        unsafe { ffi!(self.get_lobby_manager().disconnect_network(lobby_id,)).to_result() }
     }
 
     /// Flushes the network. Call this when you're done sending messages.
@@ -639,7 +660,7 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork)
     pub fn flush_lobby_network(&self) -> Result<()> {
-        unsafe { ffi!(self.get_lobby_manager().flush_network()) }.to_result()
+        unsafe { ffi!(self.get_lobby_manager().flush_network()).to_result() }
     }
 
     /// Opens a network channel to all users in a lobby on the given channel number.
@@ -657,8 +678,8 @@ impl Discord {
                 channel_id,
                 reliable.into()
             ))
+            .to_result()
         }
-        .to_result()
     }
 
     /// Sends a network message.
@@ -679,10 +700,11 @@ impl Discord {
                 user_id,
                 channel_id,
                 // XXX: *mut should be *const
-                buffer.as_ptr() as *mut _,
-                buffer.len() as u32
+                buffer.as_ptr() as *mut u8,
+                // XXX: u32 should be u64
+                buffer.len().try_into().unwrap_or(u32::max_value()),
             ))
+            .to_result()
         }
-        .to_result()
     }
 }

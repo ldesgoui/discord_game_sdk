@@ -87,11 +87,11 @@ impl SearchQuery {
         if let Some((key, value, comparison, cast)) = self.filter.as_ref() {
             ffi!(tx.filter(
                 // XXX: *mut should be *const
-                key.as_ptr() as *mut _,
+                key.as_ptr() as *mut u8,
                 (*comparison).into(),
                 (*cast).into(),
                 // XXX: *mut should be *const
-                value.as_ptr() as *mut _,
+                value.as_ptr() as *mut u8,
             ))
             .to_result()?;
         }
@@ -99,10 +99,10 @@ impl SearchQuery {
         if let Some((key, value, cast)) = self.sort.as_ref() {
             ffi!(tx.sort(
                 // XXX: *mut should be *const
-                key.as_ptr() as *mut _,
+                key.as_ptr() as *mut u8,
                 (*cast).into(),
                 // XXX: *mut should be *const
-                value.as_ptr() as *mut _,
+                value.as_ptr() as *mut u8,
             ))
             .to_result()?;
         }

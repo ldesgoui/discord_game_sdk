@@ -24,7 +24,7 @@ pub enum Error {
 
     /// Internal error
     #[error("internal error")]
-    InternalError,
+    Internal,
 
     /// Invalid payload
     #[error("invalid payload")]
@@ -148,7 +148,7 @@ pub enum Error {
 
     /// `OAuth2` error
     #[error("OAuth 2.0 error")]
-    OAuth2Error,
+    OAuth2,
 
     /// Select channel timeout
     #[error("select channel timeout")]
@@ -174,9 +174,9 @@ pub enum Error {
     #[error("invalid gift code")]
     InvalidGiftCode,
 
-    /// Purchase Error
+    /// Purchase error
     #[error("purchase error")]
-    PurchaseError,
+    Purchase,
 
     /// Transaction aborted
     #[error("transaction aborted")]

@@ -235,7 +235,7 @@ unsafe extern "C" fn log_hook(
         sys::DiscordLogLevel_Warn => log::Level::Warn,
         sys::DiscordLogLevel_Info => log::Level::Info,
         sys::DiscordLogLevel_Debug => log::Level::Debug,
-        _ => log::Level::Debug,
+        _ => log::Level::Trace,
     };
 
     log::log!(level, "SDK: {}", charptr_to_str(message));

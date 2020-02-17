@@ -1,5 +1,5 @@
 use crate::{sys, to_result::ToResult, Discord, FetchKind, Image, ImageHandle, Result};
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 
 /// # Images
 ///
@@ -58,8 +58,8 @@ impl Discord {
             ffi!(self
                 .get_image_manager()
                 .get_dimensions(handle.into(), &mut dimensions,))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok((dimensions.width, dimensions.height))
     }
@@ -71,7 +71,7 @@ impl Discord {
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#getdata)
     pub fn image(&self, handle: ImageHandle) -> Result<Image> {
         let (width, height) = self.image_dimensions(handle)?;
-        let mut data = vec![0u8; 4 * width as usize * height as usize];
+        let mut data = vec![0; 4 * width as usize * height as usize];
 
         debug_assert!(u32::try_from(data.len()).is_ok());
 
@@ -79,10 +79,10 @@ impl Discord {
             ffi!(self.get_image_manager().get_data(
                 handle.into(),
                 data.as_mut_ptr(),
-                data.len() as u32
+                data.len().try_into().unwrap_or(u32::max_value())
             ))
+            .to_result()?;
         }
-        .to_result()?;
 
         Ok(Image {
             width,
