@@ -6,6 +6,7 @@ use crate::{
     Activity, ClientID, CreateFlags, Entitlement, EventHandler, Relationship, Result, User,
     UserAchievement,
 };
+use std::ffi::c_void;
 use std::{cell::UnsafeCell, convert::TryFrom};
 
 /// # Core
@@ -241,52 +242,113 @@ unsafe extern "C" fn log_hook(
     log::log!(level, "SDK: {}", charptr_to_str(message));
 }
 
+fn with_event_handler(inner: *mut c_void, callback: impl FnOnce(&mut dyn EventHandler, &Discord)) {
+    use std::ops::DerefMut as _;
+
+    prevent_unwind!();
+
+    debug_assert!(!inner.is_null());
+
+    // SAFETY:
+    // We're duplicating the `Box<DiscordInner>`, this is safe:
+    // - We're not mutating it, we're not dropping it
+    // - No other part of the code will mutate it as `&mut Discord` is in the callstack
+    let discord = unsafe { Discord(Box::from_raw(inner as *mut DiscordInner)) };
+
+    // SAFETY: Mutation through immutable reference
+    // - `discord.0.event_handler` is an `UnsafeCell`, inner mutation is legal
+    // - No other part of the code can safely mutate it as they require `&mut DiscordInner`
+    // - `EventHandler` can mutate itself during method but not `&Discord`
+    let mut event_handler = unsafe { (*discord.0.event_handler.get()).take() };
+
+    if let Some(event_handler) = event_handler.as_mut() {
+        callback(event_handler.deref_mut(), &discord);
+    }
+
+    unsafe {
+        (*discord.0.event_handler.get()) = event_handler;
+    }
+
+    // SAFETY: Not dropping our duplicated `Box<DiscordInner>`
+    std::mem::forget(discord);
+}
+
 const ACHIEVEMENT: &sys::IDiscordAchievementEvents = &sys::IDiscordAchievementEvents {
-    on_user_achievement_update: event_handler!(
-        |user_achievement: *mut sys::DiscordUserAchievement| {
-            EventHandler::on_user_achievement_update(
-                // SAFETY: repr(transparent) allows this
-                &*(user_achievement as *mut UserAchievement),
-            )
+    on_user_achievement_update: {
+        extern "C" fn on_user_achievement_update(
+            inner: *mut c_void,
+            user_achievement: *mut sys::DiscordUserAchievement,
+        ) {
+            with_event_handler(inner, |eh, discord| {
+                eh.on_user_achievement_update(discord, unsafe {
+                    &*(user_achievement as *mut UserAchievement)
+                })
+            })
         }
-    ),
+
+        Some(on_user_achievement_update)
+    },
 };
 
 const ACTIVITY: &sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
-    on_activity_join: event_handler!(|secret: *const u8| {
-        EventHandler::on_activity_join(charptr_to_str(secret))
-    }),
-
-    on_activity_spectate: event_handler!(|secret: *const u8| {
-        EventHandler::on_activity_spectate(charptr_to_str(secret))
-    }),
-
-    on_activity_join_request: event_handler!(|user: *mut sys::DiscordUser| {
-        EventHandler::on_activity_join_request(
-            // SAFETY: repr(transparent) allows this
-            &*(user as *mut User),
-        )
-    }),
-
-    on_activity_invite: event_handler!(
-        |kind: sys::EDiscordActivityActionType,
-         user: *mut sys::DiscordUser,
-         activity: *mut sys::DiscordActivity| {
-            EventHandler::on_activity_invite(
-                kind.into(),
-                // SAFETY: repr(transparent) allows this
-                &*(user as *mut User),
-                // SAFETY: repr(transparent) allows this
-                &*(activity as *mut Activity),
-            )
+    on_activity_join: {
+        extern "C" fn on_activity_join(inner: *mut c_void, secret: *const u8) {
+            with_event_handler(inner, |eh, discord| {
+                eh.on_activity_join(discord, charptr_to_str(secret))
+            })
         }
-    ),
+
+        Some(on_activity_join)
+    },
+
+    on_activity_spectate: {
+        extern "C" fn on_activity_spectate(inner: *mut c_void, secret: *const u8) {
+            with_event_handler(inner, |eh, discord| {
+                eh.on_activity_spectate(discord, charptr_to_str(secret))
+            })
+        }
+
+        Some(on_activity_spectate)
+    },
+
+    on_activity_join_request: {
+        extern "C" fn on_activity_join_request(inner: *mut c_void, user: *mut sys::DiscordUser) {
+            with_event_handler(inner, |eh, discord| {
+                eh.on_activity_join_request(discord, unsafe { &*(user as *mut User) })
+            })
+        }
+
+        Some(on_activity_join_request)
+    },
+    on_activity_invite: {
+        extern "C" fn on_activity_invite(
+            inner: *mut c_void,
+            kind: sys::EDiscordActivityActionType,
+            user: *mut sys::DiscordUser,
+            activity: *mut sys::DiscordActivity,
+        ) {
+            with_event_handler(inner, |eh, discord| {
+                eh.on_activity_invite(
+                    discord,
+                    kind.into(),
+                    unsafe { &*(user as *mut User) },
+                    unsafe { &*(activity as *mut Activity) },
+                )
+            })
+        }
+
+        Some(on_activity_invite)
+    },
 };
 
 const LOBBY: &sys::IDiscordLobbyEvents = &sys::IDiscordLobbyEvents {
-    on_lobby_update: event_handler!(|lobby_id: sys::DiscordLobbyId| {
-        EventHandler::on_lobby_update(lobby_id)
-    }),
+    on_lobby_update: {
+        unsafe extern "C" fn on_lobby_update(inner: *mut c_void, lobby_id: sys::DiscordLobbyId) {
+            with_event_handler(inner, |eh, discord| eh.on_lobby_update(discord, lobby_id))
+        }
+
+        Some(on_lobby_update)
+    },
 
     on_lobby_delete: event_handler!(|lobby_id: sys::DiscordLobbyId, reason: u32| {
         EventHandler::on_lobby_delete(lobby_id, reason)
