@@ -118,7 +118,7 @@ jobs:
           components: rustfmt, clippy
 
       - name: Check formatting
-        if: ${{ matrix.rust }} == "stable"
+        if: matrix.rust == "stable"
         uses: actions-rs/cargo@v1
         with:
           command: fmt
