@@ -1,5 +1,5 @@
 use crate::{
-    callback, sys, to_result::ToResult, Collection, Discord, Result, Snowflake, UserAchievement,
+    callback, iter, sys, to_result::ToResult, Discord, Result, Snowflake, UserAchievement,
 };
 use std::convert::TryInto;
 
@@ -177,10 +177,17 @@ impl Discord {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn iter_user_achievements(&self) -> Collection<'_, Result<UserAchievement>> {
-        Collection::new(
+    pub fn iter_user_achievements<'d>(
+        &'d self,
+    ) -> impl 'd
+           + Iterator<Item = Result<UserAchievement>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator
+           + std::fmt::Debug {
+        iter::Collection::new(
             self,
-            Box::new(Self::user_achievement_at),
+            Self::user_achievement_at,
             self.user_achievement_count(),
         )
     }

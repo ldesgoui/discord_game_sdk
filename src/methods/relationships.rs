@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, Collection, Discord, Relationship, Result, UserID};
+use crate::{iter, sys, to_result::ToResult, Discord, Relationship, Result, UserID};
 use std::convert::TryInto;
 
 /// # Relationships
@@ -111,10 +111,19 @@ impl Discord {
     ///     // ..
     /// }
     /// # Ok(()) }
-    pub fn iter_relationships(&self) -> Result<Collection<'_, Result<Relationship>>> {
-        Ok(Collection::new(
+    pub fn iter_relationships<'d>(
+        &'d self,
+    ) -> Result<
+        impl 'd
+            + Iterator<Item = Result<Relationship>>
+            + DoubleEndedIterator
+            + ExactSizeIterator
+            + std::iter::FusedIterator
+            + std::fmt::Debug,
+    > {
+        Ok(iter::Collection::new(
             self,
-            Box::new(Self::relationship_at),
+            Self::relationship_at,
             self.relationship_count()?,
         ))
     }

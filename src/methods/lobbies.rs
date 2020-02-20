@@ -1,5 +1,5 @@
 use crate::{
-    callback, sys, to_result::ToResult, utils, Collection, Discord, Lobby, LobbyID,
+    callback, iter, sys, to_result::ToResult, utils, Discord, Lobby, LobbyID,
     LobbyMemberTransaction, LobbyTransaction, NetworkChannelID, Reliability, Result, SearchQuery,
     UserID,
 };
@@ -322,13 +322,20 @@ impl Discord {
     }
 
     /// Returns an `Iterator` over the metadata key-value pairs for a given lobby.
-    pub fn iter_lobby_metadata(
-        &self,
+    pub fn iter_lobby_metadata<'d>(
+        &'d self,
         lobby_id: LobbyID,
-    ) -> Result<Collection<'_, Result<(String, String)>>> {
-        Ok(Collection::new(
+    ) -> Result<
+        impl 'd
+            + Iterator<Item = Result<(String, String)>>
+            + DoubleEndedIterator
+            + ExactSizeIterator
+            + std::iter::FusedIterator
+            + std::fmt::Debug,
+    > {
+        Ok(iter::Collection::new(
             self,
-            Box::new(move |d, i| d.lobby_metadata_at(lobby_id, i)),
+            move |d, i| d.lobby_metadata_at(lobby_id, i),
             self.lobby_metadata_count(lobby_id)?,
         ))
     }
@@ -402,13 +409,20 @@ impl Discord {
     }
 
     /// Returns an `Iterator` over the user IDs of the members of a lobby.
-    pub fn iter_lobby_member_ids(
-        &self,
+    pub fn iter_lobby_member_ids<'d>(
+        &'d self,
         lobby_id: LobbyID,
-    ) -> Result<Collection<'_, Result<UserID>>> {
-        Ok(Collection::new(
+    ) -> Result<
+        impl 'd
+            + Iterator<Item = Result<UserID>>
+            + DoubleEndedIterator
+            + ExactSizeIterator
+            + std::iter::FusedIterator
+            + std::fmt::Debug,
+    > {
+        Ok(iter::Collection::new(
             self,
-            Box::new(move |d, i| d.lobby_member_id_at(lobby_id, i)),
+            move |d, i| d.lobby_member_id_at(lobby_id, i),
             self.lobby_member_count(lobby_id)?,
         ))
     }
@@ -508,14 +522,21 @@ impl Discord {
     }
 
     /// Returns an `Iterator` over the metadata key-value pairs of a given lobby member.
-    pub fn iter_lobby_member_metadata(
-        &self,
+    pub fn iter_lobby_member_metadata<'d>(
+        &'d self,
         lobby_id: LobbyID,
         user_id: UserID,
-    ) -> Result<Collection<'_, Result<(String, String)>>> {
-        Ok(Collection::new(
+    ) -> Result<
+        impl 'd
+            + Iterator<Item = Result<(String, String)>>
+            + DoubleEndedIterator
+            + ExactSizeIterator
+            + std::iter::FusedIterator
+            + std::fmt::Debug,
+    > {
+        Ok(iter::Collection::new(
             self,
-            Box::new(move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i)),
+            move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i),
             self.lobby_member_metadata_count(lobby_id, user_id)?,
         ))
     }
@@ -629,8 +650,15 @@ impl Discord {
     /// Returns an `Iterator` over the IDs of lobbies found via the lobby search.
     ///
     /// [`lobby_search`](#method.lobby_search) must have completed first.
-    pub fn iter_lobbies(&self) -> Collection<'_, Result<LobbyID>> {
-        Collection::new(self, Box::new(Self::lobby_id_at), self.lobby_count())
+    pub fn iter_lobbies<'d>(
+        &'d self,
+    ) -> impl 'd
+           + Iterator<Item = Result<LobbyID>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator
+           + std::fmt::Debug {
+        iter::Collection::new(self, Self::lobby_id_at, self.lobby_count())
     }
 
     /// Connects to the voice channel of the current lobby.

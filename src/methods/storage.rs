@@ -1,4 +1,4 @@
-use crate::{callback, sys, to_result::ToResult, utils, Collection, Discord, FileStat, Result};
+use crate::{callback, iter, sys, to_result::ToResult, utils, Discord, FileStat, Result};
 use std::{
     borrow::Cow,
     convert::{TryFrom, TryInto},
@@ -387,8 +387,15 @@ impl Discord {
     ///     // ...
     /// }
     /// # Ok(()) }
-    pub fn iter_file_stats(&self) -> Collection<'_, Result<FileStat>> {
-        Collection::new(self, Box::new(Self::file_stat_at), self.file_stat_count())
+    pub fn iter_file_stats<'d>(
+        &'d self,
+    ) -> impl 'd
+           + Iterator<Item = Result<FileStat>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator
+           + std::fmt::Debug {
+        iter::Collection::new(self, Self::file_stat_at, self.file_stat_count())
     }
 
     /// Returns the path to the folder where files are stored.
