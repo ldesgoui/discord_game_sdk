@@ -11,7 +11,7 @@ use std::convert::TryInto;
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/achievements#the-api-way).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/achievements)
-impl Discord {
+impl<E> Discord<E> {
     /// Updates the current user's completion for a given achievement.
     ///
     /// `percent_complete` must be in the range `0..=100`.
@@ -21,7 +21,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # #[derive(Default)] struct GameAchievement { id: Snowflake, progress: u32, completion: u32 }
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// # let achievement = GameAchievement::default();
     /// discord.set_user_achievement(
     ///     achievement.id,
@@ -59,7 +59,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_user_achievements(
     ///     |result| {
     ///         if let Err(error) = result {
@@ -90,7 +90,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const ACHIEVEMENT_ID: Snowflake = 0;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_user_achievements(
     ///     |result| {
     ///         if let Err(error) = result {
@@ -164,7 +164,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_user_achievements(
     ///     |result| {
     ///         if let Err(error) = result {

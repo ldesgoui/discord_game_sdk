@@ -12,7 +12,7 @@ use std::borrow::Cow;
 /// | Overlay is hidden                        | locked   | closed             |
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/overlay)
-impl Discord {
+impl<E> Discord<E> {
     /// Check whether the user has the overlay enabled or disabled.
     ///
     /// If the overlay is disabled, all the functionality in this manager will still work.
@@ -22,7 +22,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// if discord.overlay_enabled() {
     ///     // ...
     /// }
@@ -42,7 +42,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// if discord.overlay_opened() {
     ///     // ...
     /// }
@@ -62,7 +62,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.set_overlay_opened(false, |result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to set overlay open: {}", error);
@@ -86,7 +86,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.open_invite_overlay(Action::Join, |result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open invite overlay: {}", error);
@@ -120,7 +120,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.open_guild_invite_overlay("discord-gamesdk\0", |result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open guild invite overlay: {}", error);
@@ -155,7 +155,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.open_voice_settings(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open voice settings overlay: {}", error);

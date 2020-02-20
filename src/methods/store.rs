@@ -9,7 +9,7 @@ use std::convert::TryInto;
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/store#http-apis).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/store)
-impl Discord {
+impl<E> Discord<E> {
     /// Fetches the list of SKUs for the current application.
     ///
     /// Only SKUs that have a price set will be fetched.
@@ -19,7 +19,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_skus(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
@@ -49,7 +49,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const SKU_ID: Snowflake = 0;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_skus(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
@@ -118,7 +118,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_skus(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
@@ -150,7 +150,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_entitlements(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
@@ -180,7 +180,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const ENTITLEMENT_ID: Snowflake = 0;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_entitlements(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
@@ -251,7 +251,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.fetch_entitlements(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
@@ -283,7 +283,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const SKU_ID: Snowflake = 0;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// if discord.has_entitlement(SKU_ID)? {
     ///     // ..
     /// }
@@ -309,7 +309,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const SKU_ID: Snowflake = 0;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.start_purchase(SKU_ID, |result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to start purchase: {}", error);

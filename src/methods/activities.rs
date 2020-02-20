@@ -8,7 +8,7 @@ use std::borrow::Cow;
 /// Also known as Rich Presence.
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/activities)
-impl Discord {
+impl<E> Discord<E> {
     /// Registers a command by which Discord can launch your game.
     ///
     /// This might be a custom protocol, like `my-awesome-game://`, or a path to an executable.
@@ -26,7 +26,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.register_launch_command("my-awesome-game://run --full-screen")?;
     /// # Ok(()) }
     /// ```
@@ -51,7 +51,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// # let now = 0;
     /// discord.clear_activity(|result| {
     ///     if let Err(error) = result {
@@ -76,7 +76,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// # let now = 0;
     /// discord.update_activity(
     ///     &Activity::empty()
@@ -117,7 +117,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// # let now = 0;
     /// discord.clear_activity(|result| {
     ///     if let Err(error) = result {
@@ -144,7 +144,7 @@ impl Discord {
     /// struct MyEventHandler;
     ///
     /// impl EventHandler for MyEventHandler {
-    ///     fn on_activity_join_request(&mut self, discord: &Discord, user: &User) {
+    ///     fn on_activity_join_request(&mut self, discord: &Discord<Self>, user: &User) {
     ///         println!(
     ///             "received join request from {}#{}",
     ///             user.username(),
@@ -189,7 +189,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord, friend: User) -> Result<()> {
+    /// # fn example(discord: Discord<()>, friend: User) -> Result<()> {
     /// discord.send_invite(
     ///     friend.id(),
     ///     Action::Join,
@@ -236,7 +236,7 @@ impl Discord {
     /// impl EventHandler for MyEventHandler {
     ///     fn on_activity_invite(
     ///         &mut self,
-    ///         discord: &Discord,
+    ///         discord: &Discord<Self>,
     ///         action: Action,
     ///         user: &User,
     ///         activity: &Activity,

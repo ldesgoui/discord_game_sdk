@@ -18,7 +18,7 @@ use std::{
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/lobbies#the-api-way).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies)
-impl Discord {
+impl<E> Discord<E> {
     /// Create a new lobby. The current user will automatically join and become the owner.
     ///
     /// [`LobbyTransaction::owner`](struct.LobbyTransaction.html#method.owner) *MUST NOT* be called.
