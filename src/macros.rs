@@ -98,73 +98,10 @@ macro_rules! ffi {
     };
 }
 
-macro_rules! event_handler {
-    // on_activity_invite: event_handler!(
-    //     |kind: sys::EDiscordActivityActionType,
-    //      user: *mut sys::DiscordUser,
-    //      activity: *mut sys::DiscordActivity| {
-    //         EventHandler::on_activity_invite(
-    //             kind.into(),
-    //             &*(user as *mut User),
-    //             &*(activity as *mut Activity),
-    //         )
-    //     }
-    // ),
-    (|$($param:ident: $ty:ty),* $(,)?| {
-        EventHandler::$method:ident(
-            $( $expr:expr ),* $(,)?
-        )
-    }) => {{
-        unsafe extern "C" fn $method(
-            inner: *mut std::ffi::c_void,
-            $($param: $ty),*
-        ) {
-            use crate::discord::{Discord, DiscordInner};
-
-            prevent_unwind!();
-
-            debug_assert!(!inner.is_null());
-
-            // SAFETY:
-            // We're duplicating the `Box<DiscordInner>`, this is safe:
-            // - We're not mutating it, we're not dropping it
-            // - No other part of the code will mutate it as `&mut Discord` is in the callstack
-            let discord = Discord(Box::from_raw(inner as *mut DiscordInner));
-
-            // SAFETY: Mutation through immutable reference
-            // - `discord.0.event_handler` is an `UnsafeCell`, inner mutation is legal
-            // - No other part of the code can safely mutate it as they require `&mut DiscordInner`
-            // - `EventHandler` can mutate itself during method but not `&Discord`
-            let mut event_handler = (*discord.0.event_handler.get()).take();
-
-            if let Some(event_handler) = event_handler.as_mut() {
-                event_handler.$method(
-                    &discord,
-                    $($expr),*
-                );
-            }
-
-            (*discord.0.event_handler.get()) = event_handler;
-
-            // SAFETY: Not dropping our duplicated `Box<DiscordInner>`
-            std::mem::forget(discord);
-        }
-
-        Some($method)
-    }};
-
-    (|$($param:ident: $ty:ty),* $(,)?| EventHandler::$method:ident($($expr:expr),* $(,)?)) => {
-        event_handler!(|$($param: $ty),*| {
-            EventHandler::$method($($expr),*)
-        })
-    };
-
-    (|| EventHandler::$method:ident()) => {
-        event_handler!(| | { EventHandler::$method() })
-    };
-}
-
-// TODO: https://github.com/rust-lang/project-ffi-unwind
+// TRACK:
+// https://github.com/rust-lang/rust/issues/52652
+// https://github.com/rust-lang/rust/issues/58760
+// https://github.com/rust-lang/project-ffi-unwind
 macro_rules! prevent_unwind {
     () => {
         const ACROSS_FFI: &str = "[discord_game_sdk]
