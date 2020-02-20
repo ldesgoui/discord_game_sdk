@@ -317,8 +317,7 @@ impl<E> Discord<E> {
             + Iterator<Item = Result<(String, String)>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator
-            + std::fmt::Debug,
+            + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
             self,
@@ -404,8 +403,7 @@ impl<E> Discord<E> {
             + Iterator<Item = Result<UserID>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator
-            + std::fmt::Debug,
+            + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
             self,
@@ -518,8 +516,7 @@ impl<E> Discord<E> {
             + Iterator<Item = Result<(String, String)>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator
-            + std::fmt::Debug,
+            + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
             self,
@@ -643,8 +640,7 @@ impl<E> Discord<E> {
            + Iterator<Item = Result<LobbyID>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator
-           + std::fmt::Debug {
+           + std::iter::FusedIterator {
         iter::Collection::new(self, Self::lobby_id_at, self.lobby_count())
     }
 

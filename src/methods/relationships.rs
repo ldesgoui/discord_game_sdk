@@ -118,8 +118,7 @@ impl<E> Discord<E> {
             + Iterator<Item = Result<Relationship>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator
-            + std::fmt::Debug,
+            + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
             self,

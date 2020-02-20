@@ -183,8 +183,7 @@ impl<E> Discord<E> {
            + Iterator<Item = Result<UserAchievement>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator
-           + std::fmt::Debug {
+           + std::iter::FusedIterator {
         iter::Collection::new(
             self,
             Self::user_achievement_at,

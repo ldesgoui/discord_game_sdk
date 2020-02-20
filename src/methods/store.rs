@@ -136,8 +136,7 @@ impl<E> Discord<E> {
            + Iterator<Item = Result<Sku>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator
-           + std::fmt::Debug {
+           + std::iter::FusedIterator {
         iter::Collection::new(self, Self::sku_at, self.sku_count())
     }
 
@@ -269,8 +268,7 @@ impl<E> Discord<E> {
            + Iterator<Item = Result<Entitlement>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator
-           + std::fmt::Debug {
+           + std::iter::FusedIterator {
         iter::Collection::new(self, Self::entitlement_at, self.entitlement_count())
     }
 

@@ -391,8 +391,7 @@ impl<E> Discord<E> {
            + Iterator<Item = Result<FileStat>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator
-           + std::fmt::Debug {
+           + std::iter::FusedIterator {
         iter::Collection::new(self, Self::file_stat_at, self.file_stat_count())
     }
 
