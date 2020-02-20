@@ -98,7 +98,10 @@ macro_rules! ffi {
     };
 }
 
-// TODO: https://github.com/rust-lang/project-ffi-unwind
+// TRACK:
+// https://github.com/rust-lang/rust/issues/52652
+// https://github.com/rust-lang/rust/issues/58760
+// https://github.com/rust-lang/project-ffi-unwind
 macro_rules! prevent_unwind {
     () => {
         const ACROSS_FFI: &str = "[discord_game_sdk]

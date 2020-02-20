@@ -6,8 +6,7 @@ use crate::{
     Activity, ClientID, CreateFlags, Entitlement, EventHandler, Relationship, Result, User,
     UserAchievement,
 };
-use std::ffi::c_void;
-use std::{cell::UnsafeCell, convert::TryFrom};
+use std::{cell::UnsafeCell, convert::TryFrom, ffi::c_void, ops::DerefMut};
 
 /// # Core
 ///
@@ -226,21 +225,7 @@ fn create_params(
     }
 }
 
-extern "C" fn log_hook(_: *mut std::ffi::c_void, level: sys::EDiscordLogLevel, message: *const u8) {
-    let level = match level {
-        sys::DiscordLogLevel_Error => log::Level::Error,
-        sys::DiscordLogLevel_Warn => log::Level::Warn,
-        sys::DiscordLogLevel_Info => log::Level::Info,
-        sys::DiscordLogLevel_Debug => log::Level::Debug,
-        _ => log::Level::Trace,
-    };
-
-    log::log!(level, "SDK: {}", charptr_to_str(message));
-}
-
 fn with_event_handler(inner: *mut c_void, callback: impl FnOnce(&mut dyn EventHandler, &Discord)) {
-    use std::ops::DerefMut as _;
-
     prevent_unwind!();
 
     debug_assert!(!inner.is_null());
@@ -569,3 +554,17 @@ const VOICE: &sys::IDiscordVoiceEvents = &sys::IDiscordVoiceEvents {
         Some(on_settings_update)
     },
 };
+
+extern "C" fn log_hook(_: *mut std::ffi::c_void, level: sys::EDiscordLogLevel, message: *const u8) {
+    prevent_unwind!();
+
+    let level = match level {
+        sys::DiscordLogLevel_Error => log::Level::Error,
+        sys::DiscordLogLevel_Warn => log::Level::Warn,
+        sys::DiscordLogLevel_Info => log::Level::Info,
+        sys::DiscordLogLevel_Debug => log::Level::Debug,
+        _ => log::Level::Trace,
+    };
+
+    log::log!(level, "SDK: {}", charptr_to_str(message));
+}
