@@ -63,12 +63,12 @@ impl<E, Item, Getter: FnMut(&Discord<E>, u32) -> Item> std::iter::FusedIterator
 {
 }
 
-impl<E, Item, Getter: FnMut(&Discord<E>, u32) -> Item> std::fmt::Debug
+impl<E: std::fmt::Debug, Item, Getter: FnMut(&Discord<E>, u32) -> Item> std::fmt::Debug
     for Collection<'_, E, Item, Getter>
 {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("Collection")
-            // .field("discord", &self.discord)
+            .field("discord", &self.discord)
             .field("getter", &(..))
             .field("count", &self.count)
             .field("index", &self.index)
