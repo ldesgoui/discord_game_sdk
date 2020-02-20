@@ -3,14 +3,14 @@ use crate::{callback, sys, to_result::ToResult, Discord, InputMode, Result, User
 /// # Voice
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice)
-impl Discord {
+impl<E> Discord<E> {
     /// Get the voice input mode for the current user.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#getinputmode)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let input_mode = discord.input_mode()?;
     /// # Ok(()) }
     pub fn input_mode(&self) -> Result<InputMode> {
@@ -30,7 +30,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.set_input_mode(
     ///     InputMode::push_to_talk("caps lock"),
     ///     |result| {
@@ -58,7 +58,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// if discord.self_muted()? {
     ///     // ...
     /// }
@@ -78,7 +78,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// if discord.self_deafened()? {
     ///     // ...
     /// }
@@ -98,7 +98,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.set_self_mute(false)?;
     /// # Ok(()) }
     pub fn set_self_mute(&self, muted: bool) -> Result<()> {
@@ -112,7 +112,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.set_self_deaf(false)?;
     /// # Ok(()) }
     pub fn set_self_deaf(&self, deafened: bool) -> Result<()> {
@@ -126,7 +126,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
     /// if discord.local_muted(user.id())? {
     ///     // ...
     /// }
@@ -148,7 +148,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
     /// discord.set_local_volume(user.id(), discord.local_volume(user.id())? + 10)?;
     /// # Ok(()) }
     pub fn local_volume(&self, user_id: UserID) -> Result<u8> {
@@ -170,7 +170,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
     /// discord.set_local_mute(user.id(), true)?;
     /// # Ok(()) }
     pub fn set_local_mute(&self, user_id: UserID, muted: bool) -> Result<()> {
@@ -186,7 +186,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
     /// discord.set_local_volume(user.id(), discord.local_volume(user.id())? + 10)?;
     /// # Ok(()) }
     pub fn set_local_volume(&self, user_id: UserID, volume: u8) -> Result<()> {

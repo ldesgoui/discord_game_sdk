@@ -5,7 +5,7 @@ use crate::{
 /// # Users
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/users)
-impl Discord {
+impl<E> Discord<E> {
     /// Get the current user.
     ///
     /// More information can be found through the HTTP API.
@@ -20,7 +20,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let current_user = discord.current_user()?;
     /// # Ok(()) }
     /// ```
@@ -39,7 +39,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// # let id_to_lookup = 0;
     /// discord.user(id_to_lookup, |result| {
     ///     match result {
@@ -68,7 +68,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let premium = discord.current_user_premium_kind()?;
     /// # Ok(()) }
     /// ```
@@ -89,7 +89,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let flags = discord.current_user_flags()?;
     /// # Ok(()) }
     /// ```

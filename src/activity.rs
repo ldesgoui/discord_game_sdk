@@ -20,7 +20,7 @@ use std::convert::TryInto;
 ///
 /// ```rust
 /// # use discord_game_sdk::*;
-/// # fn example(discord: Discord) -> Result<()> {
+/// # fn example(discord: Discord<()>) -> Result<()> {
 /// # let now = 0;
 /// discord.update_activity(
 ///     &Activity::empty()

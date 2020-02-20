@@ -8,7 +8,7 @@ use std::{
 /// # Storage
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/storage)
-impl Discord {
+impl<E> Discord<E> {
     /// Reads data synchronously from the game's allocated save file into a buffer.
     ///
     /// The file is mapped by key-value pair, and this function will read data that exists
@@ -24,7 +24,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let mut contents = vec![0_u8; 2048];
     ///
     /// discord.read_file("profile_1.save\0", &mut contents);
@@ -72,7 +72,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.read_file_async("profile_1.save\0", |contents| {
     ///     match contents {
     ///         Ok(contents) => println!("read {} bytes", contents.len()),
@@ -116,7 +116,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.read_file_async_partial("profile_1.save\0", 30, 10, |contents| {
     ///     match contents {
     ///         Ok(contents) => println!("read {} bytes", contents.len()),
@@ -165,7 +165,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let contents = "important save data".as_bytes();
     ///
     /// discord.write_file("profile_1.save\0", contents)?;
@@ -210,7 +210,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let contents = "important save data".as_bytes();
     ///
     /// discord.write_file_async("profile_1.save\0", contents, |res| {
@@ -264,7 +264,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.delete_file("profile_1.save\0")?;
     /// # Ok(()) }
     pub fn delete_file<'s>(&self, filename: impl Into<Cow<'s, str>>) -> Result<()> {
@@ -288,7 +288,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// if discord.file_exists("profile_1.save\0")? {
     ///     // ...
     /// }
@@ -320,7 +320,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let file_stat = discord.file_stat("profile_1.save\0")?;
     /// # Ok(()) }
     pub fn file_stat<'s>(&self, filename: impl Into<Cow<'s, str>>) -> Result<FileStat> {
@@ -379,7 +379,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// for file_stat in discord.iter_file_stats() {
     ///     let file_stat = file_stat?;
     ///     // ...
@@ -391,8 +391,7 @@ impl Discord {
            + Iterator<Item = Result<FileStat>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator
-           + std::fmt::Debug {
+           + std::iter::FusedIterator {
         iter::Collection::new(self, Self::file_stat_at, self.file_stat_count())
     }
 
@@ -403,7 +402,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// let folder_path = discord.folder_path()?;
     /// # Ok(()) }
     pub fn folder_path(&self) -> Result<String> {

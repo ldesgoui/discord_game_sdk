@@ -4,14 +4,14 @@ use std::convert::TryInto;
 /// # Relationships
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/relationships)
-impl Discord {
+impl<E> Discord<E> {
     /// Get the relationship between the current user and a given user by ID.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#get)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
     /// let relationship = discord.relationship_with(user.id())?;
     /// # Ok(()) }
     pub fn relationship_with(&self, user_id: UserID) -> Result<Relationship> {
@@ -35,7 +35,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const DISCORD_CLIENT_ID: ClientID = 0;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.filter_relationships(|relationship| {
     ///     relationship.presence().activity().application_id() == DISCORD_CLIENT_ID
     /// });
@@ -105,7 +105,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// for relationship in discord.iter_relationships()? {
     ///     let relationship = relationship?;
     ///     // ..
@@ -118,8 +118,7 @@ impl Discord {
             + Iterator<Item = Result<Relationship>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator
-            + std::fmt::Debug,
+            + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
             self,

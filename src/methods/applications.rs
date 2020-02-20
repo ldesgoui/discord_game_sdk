@@ -6,14 +6,14 @@ use std::mem::size_of;
 /// Authentication and various helper functions
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/applications)
-impl Discord {
+impl<E> Discord<E> {
     /// The locale that was set by the current user in their Discord settings.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/applications#getcurrentlocale)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// println!("current locale is {}", discord.current_locale());
     /// # Ok(()) }
     pub fn current_locale(&self) -> String {
@@ -35,7 +35,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// println!("current branch is {}", discord.current_branch());
     /// # Ok(()) }
     pub fn current_branch(&self) -> String {
@@ -54,7 +54,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.validate_or_exit(|result| {
     ///     // ...
     /// });
@@ -79,7 +79,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.oauth2_token(|token| {
     ///     match token {
     ///         Ok(token) => {
@@ -110,7 +110,7 @@ impl Discord {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord) -> Result<()> {
+    /// # fn example(discord: Discord<()>) -> Result<()> {
     /// discord.app_ticket(|ticket| {
     ///     match ticket {
     ///         Ok(ticket) => {

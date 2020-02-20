@@ -18,7 +18,7 @@ use std::{
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/lobbies#the-api-way).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies)
-impl Discord {
+impl<E> Discord<E> {
     /// Create a new lobby. The current user will automatically join and become the owner.
     ///
     /// [`LobbyTransaction::owner`](struct.LobbyTransaction.html#method.owner) *MUST NOT* be called.
@@ -317,8 +317,7 @@ impl Discord {
             + Iterator<Item = Result<(String, String)>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator
-            + std::fmt::Debug,
+            + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
             self,
@@ -404,8 +403,7 @@ impl Discord {
             + Iterator<Item = Result<UserID>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator
-            + std::fmt::Debug,
+            + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
             self,
@@ -518,8 +516,7 @@ impl Discord {
             + Iterator<Item = Result<(String, String)>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator
-            + std::fmt::Debug,
+            + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
             self,
@@ -643,8 +640,7 @@ impl Discord {
            + Iterator<Item = Result<LobbyID>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator
-           + std::fmt::Debug {
+           + std::iter::FusedIterator {
         iter::Collection::new(self, Self::lobby_id_at, self.lobby_count())
     }
 

@@ -1,16 +1,16 @@
 use crate::Discord;
 
 // An Iterator to acquire collections.
-pub(crate) struct Collection<'d, Item, Getter: FnMut(&Discord, u32) -> Item> {
-    discord: &'d Discord,
+pub(crate) struct Collection<'d, E, Item, Getter: FnMut(&Discord<E>, u32) -> Item> {
+    discord: &'d Discord<E>,
     getter: Getter,
     count: u32,
     index: u32,
     back_index: u32,
 }
 
-impl<'d, Item, Getter: FnMut(&Discord, u32) -> Item> Collection<'d, Item, Getter> {
-    pub(crate) fn new(discord: &'d Discord, getter: Getter, count: u32) -> Self {
+impl<'d, E, Item, Getter: FnMut(&Discord<E>, u32) -> Item> Collection<'d, E, Item, Getter> {
+    pub(crate) fn new(discord: &'d Discord<E>, getter: Getter, count: u32) -> Self {
         Self {
             discord,
             getter,
@@ -21,7 +21,9 @@ impl<'d, Item, Getter: FnMut(&Discord, u32) -> Item> Collection<'d, Item, Getter
     }
 }
 
-impl<Item, Getter: FnMut(&Discord, u32) -> Item> Iterator for Collection<'_, Item, Getter> {
+impl<E, Item, Getter: FnMut(&Discord<E>, u32) -> Item> Iterator
+    for Collection<'_, E, Item, Getter>
+{
     type Item = Item;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -38,8 +40,8 @@ impl<Item, Getter: FnMut(&Discord, u32) -> Item> Iterator for Collection<'_, Ite
     }
 }
 
-impl<Item, Getter: FnMut(&Discord, u32) -> Item> DoubleEndedIterator
-    for Collection<'_, Item, Getter>
+impl<E, Item, Getter: FnMut(&Discord<E>, u32) -> Item> DoubleEndedIterator
+    for Collection<'_, E, Item, Getter>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index + self.back_index < self.count {
@@ -51,17 +53,19 @@ impl<Item, Getter: FnMut(&Discord, u32) -> Item> DoubleEndedIterator
     }
 }
 
-impl<Item, Getter: FnMut(&Discord, u32) -> Item> ExactSizeIterator
-    for Collection<'_, Item, Getter>
+impl<E, Item, Getter: FnMut(&Discord<E>, u32) -> Item> ExactSizeIterator
+    for Collection<'_, E, Item, Getter>
 {
 }
 
-impl<Item, Getter: FnMut(&Discord, u32) -> Item> std::iter::FusedIterator
-    for Collection<'_, Item, Getter>
+impl<E, Item, Getter: FnMut(&Discord<E>, u32) -> Item> std::iter::FusedIterator
+    for Collection<'_, E, Item, Getter>
 {
 }
 
-impl<Item, Getter: FnMut(&Discord, u32) -> Item> std::fmt::Debug for Collection<'_, Item, Getter> {
+impl<E: std::fmt::Debug, Item, Getter: FnMut(&Discord<E>, u32) -> Item> std::fmt::Debug
+    for Collection<'_, E, Item, Getter>
+{
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("Collection")
             .field("discord", &self.discord)

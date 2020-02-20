@@ -7,7 +7,7 @@ use std::convert::{TryFrom, TryInto};
 ///
 /// ```rust
 /// # use discord_game_sdk::*;
-/// # fn example(discord: Discord, user: User) -> Result<()> {
+/// # fn example(discord: Discord<()>, user: User) -> Result<()> {
 /// discord.fetch_image(
 ///     ImageHandle::from_user_id(user.id(), 128),
 ///     FetchKind::UseCached,
@@ -22,7 +22,7 @@ use std::convert::{TryFrom, TryInto};
 ///     },
 /// );
 /// # Ok(()) }
-impl Discord {
+impl<E> Discord<E> {
     /// Prepares an image.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#fetch)

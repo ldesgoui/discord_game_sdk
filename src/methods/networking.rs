@@ -9,7 +9,7 @@ use std::{
 /// Lower level networking functionality.
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/networking)
-impl Discord {
+impl<E> Discord<E> {
     /// Get the networking peer ID for the current user, allowing other users to send packets to them.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#getpeerid)

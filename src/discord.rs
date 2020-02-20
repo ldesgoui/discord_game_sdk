@@ -1,4 +1,4 @@
-use crate::{sys, EventHandler};
+use crate::sys;
 use std::cell::UnsafeCell;
 
 /// Main interface with SDK
@@ -27,32 +27,46 @@ use std::cell::UnsafeCell;
 /// - [Users](#users)
 /// - [Voice](#voice)
 #[derive(Debug)]
-pub struct Discord(pub(crate) Box<DiscordInner>);
+pub struct Discord<E>(pub(crate) Box<DiscordInner<E>>);
 
-pub(crate) struct DiscordInner {
+pub(crate) struct DiscordInner<E> {
     pub(crate) core: *mut sys::IDiscordCore,
     pub(crate) client_id: sys::DiscordClientId,
-    pub(crate) event_handler: UnsafeCell<Option<Box<dyn EventHandler>>>,
+    pub(crate) event_handler: UnsafeCell<Option<E>>,
+
+    pub(crate) achievement_events: sys::IDiscordAchievementEvents,
+    pub(crate) activity_events: sys::IDiscordActivityEvents,
+    pub(crate) lobby_events: sys::IDiscordLobbyEvents,
+    pub(crate) network_events: sys::IDiscordNetworkEvents,
+    pub(crate) overlay_events: sys::IDiscordOverlayEvents,
+    pub(crate) relationship_events: sys::IDiscordRelationshipEvents,
+    pub(crate) store_events: sys::IDiscordStoreEvents,
+    pub(crate) user_events: sys::IDiscordUserEvents,
+    pub(crate) voice_events: sys::IDiscordVoiceEvents,
 }
 
-impl DiscordInner {
-    pub(crate) fn event_handler_mut(&mut self) -> &mut Option<Box<dyn EventHandler>> {
+impl<E> DiscordInner<E> {
+    pub(crate) fn event_handler(&self) -> &Option<E> {
+        unsafe { &*self.event_handler.get() }
+    }
+
+    pub(crate) fn event_handler_mut(&mut self) -> &mut Option<E> {
         unsafe { &mut *self.event_handler.get() }
     }
 }
 
-impl Drop for DiscordInner {
+impl<E> Drop for DiscordInner<E> {
     fn drop(&mut self) {
         unsafe { (*self.core).destroy.unwrap()(self.core) }
     }
 }
 
-impl std::fmt::Debug for DiscordInner {
+impl<E: std::fmt::Debug> std::fmt::Debug for DiscordInner<E> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("DiscordInner")
             .field("ffi_ptr", &self.core)
             .field("client_id", &self.client_id)
-            .field("event_handler", &(..))
+            .field("event_handler", self.event_handler())
             .finish()
     }
 }
