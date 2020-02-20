@@ -1,4 +1,6 @@
-use crate::{sys, to_result::ToResult, Discord, PremiumKind, Result, User, UserFlags, UserID};
+use crate::{
+    callback, sys, to_result::ToResult, Discord, PremiumKind, Result, User, UserFlags, UserID,
+};
 
 /// # Users
 ///
@@ -25,9 +27,8 @@ impl Discord {
     pub fn current_user(&self) -> Result<User> {
         let mut user = User(sys::DiscordUser::default());
 
-        unsafe {
-            ffi!(self.get_user_manager().get_current_user(&mut user.0)).to_result()?;
-        }
+        self.with_user_manager(|mgr| unsafe { mgr.get_current_user.unwrap()(mgr, &mut user.0) })
+            .to_result()?;
 
         Ok(user)
     }
@@ -50,14 +51,18 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn user<'d>(&'d self, user_id: UserID, callback: impl 'd + FnOnce(&Self, Result<User>)) {
-        unsafe {
-            ffi!(self.get_user_manager().get_user(user_id).and_then(
-                |res: sys::EDiscordResult, user: *mut sys::DiscordUser| {
-                    callback::<Result<&User>>(res.to_result().map(|()| &*(user as *mut User)))
-                }
-            ))
-        }
+    pub fn user<'d>(&'d self, user_id: UserID, callback: impl 'd + FnOnce(&Self, Result<&User>)) {
+        self.with_user_manager(|mgr| {
+            let (ptr, fun) =
+                callback::two_params(|res: sys::EDiscordResult, user: *mut sys::DiscordUser| {
+                    callback(
+                        self,
+                        res.to_result().map(|()| unsafe { &*(user as *mut User) }),
+                    )
+                });
+
+            unsafe { mgr.get_user.unwrap()(mgr, user_id, ptr, fun) }
+        })
     }
 
     /// Get the Premium type for the currently connected user.
@@ -73,12 +78,10 @@ impl Discord {
     pub fn current_user_premium_kind(&self) -> Result<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
-        unsafe {
-            ffi!(self
-                .get_user_manager()
-                .get_current_user_premium_type(&mut premium_type))
-            .to_result()?;
-        }
+        self.with_user_manager(|mgr| unsafe {
+            mgr.get_current_user_premium_type.unwrap()(mgr, &mut premium_type)
+        })
+        .to_result()?;
 
         Ok(PremiumKind::from(premium_type))
     }
@@ -105,12 +108,10 @@ impl Discord {
         ] {
             let mut contains = false;
 
-            unsafe {
-                ffi!(self
-                    .get_user_manager()
-                    .current_user_has_flag(flag.bits(), &mut contains))
-                .to_result()?;
-            }
+            self.with_user_manager(|mgr| unsafe {
+                mgr.current_user_has_flag.unwrap()(mgr, flag.bits(), &mut contains)
+            })
+            .to_result()?;
 
             flags.set(*flag, contains);
         }

@@ -2,11 +2,9 @@ use crate::{
     discord::{Discord, DiscordInner},
     sys,
     to_result::ToResult,
-    utils::charptr_to_str,
-    Activity, ClientID, CreateFlags, Entitlement, EventHandler, Relationship, Result, User,
-    UserAchievement,
+    utils, ClientID, CreateFlags, EventHandler, Result,
 };
-use std::{cell::UnsafeCell, convert::TryFrom, ffi::c_void, ops::DerefMut};
+use std::{cell::UnsafeCell, convert::TryFrom};
 
 /// # Core
 ///
@@ -89,31 +87,47 @@ impl Discord {
     }
 
     fn set_log_hook(&self) {
-        unsafe {
-            ffi!(self.set_log_hook(
+        extern "C" fn log_hook(
+            _: *mut std::ffi::c_void,
+            level: sys::EDiscordLogLevel,
+            message: *const u8,
+        ) {
+            prevent_unwind!();
+
+            let level = match level {
+                sys::DiscordLogLevel_Error => log::Level::Error,
+                sys::DiscordLogLevel_Warn => log::Level::Warn,
+                sys::DiscordLogLevel_Info => log::Level::Info,
+                sys::DiscordLogLevel_Debug => log::Level::Debug,
+                _ => log::Level::Trace,
+            };
+
+            log::log!(level, "SDK: {}", unsafe { utils::charptr_to_str(message) });
+        }
+
+        self.with_core(|core| unsafe {
+            core.set_log_hook.unwrap()(
+                core,
                 sys::DiscordLogLevel_Debug,
                 // SAFETY: this is never used
                 std::ptr::null_mut(),
                 Some(log_hook),
-            ));
-        }
+            )
+        });
     }
 
-    #[allow(clippy::cognitive_complexity)]
+    // To start producing events, the SDK must initialize the related manager
+    // We initialize all managers that produce events to kickstart event passing
     fn kickstart_managers(&self) {
-        unsafe {
-            // Signal managers that we want events ASAP
-            ffi!(self.get_network_manager());
-            ffi!(self.get_overlay_manager());
-            ffi!(self.get_relationship_manager());
-            ffi!(self.get_user_manager());
-
-            ffi!(self.get_achievement_manager());
-            ffi!(self.get_activity_manager());
-            ffi!(self.get_lobby_manager());
-            ffi!(self.get_store_manager());
-            ffi!(self.get_voice_manager());
-        }
+        self.with_achievement_manager(|_| {});
+        self.with_activity_manager(|_| {});
+        self.with_lobby_manager(|_| {});
+        self.with_network_manager(|_| {});
+        self.with_overlay_manager(|_| {});
+        self.with_relationship_manager(|_| {});
+        self.with_store_manager(|_| {});
+        self.with_user_manager(|_| {});
+        self.with_voice_manager(|_| {});
     }
 
     /// Runs all pending SDK callbacks.
@@ -130,7 +144,8 @@ impl Discord {
     /// [`Error::NotRunning`]: enum.Error.html#variant.NotRunning
     // We require &mut self to prevent calling during callbacks
     pub fn run_callbacks(&mut self) -> Result<()> {
-        unsafe { ffi!(self.run_callbacks()).to_result() }
+        self.with_core(|core| unsafe { core.run_callbacks.unwrap()(core) })
+            .to_result()
     }
 
     /// The Client ID that was supplied during creation
@@ -161,11 +176,33 @@ impl Discord {
     }
 }
 
+#[rustfmt::skip]
+impl Discord {
+    pub(crate) fn with_core<T>(&self, callback: impl FnOnce(&mut sys::IDiscordCore) -> T) -> T {
+        utils::with_tx(self.0.core, callback)
+    }
+
+    with_manager!(with_achievement_manager, get_achievement_manager, sys::IDiscordAchievementManager);
+    with_manager!(with_activity_manager, get_activity_manager, sys::IDiscordActivityManager);
+    with_manager!(with_application_manager, get_application_manager, sys::IDiscordApplicationManager);
+    with_manager!(with_image_manager, get_image_manager, sys::IDiscordImageManager);
+    with_manager!(with_lobby_manager, get_lobby_manager, sys::IDiscordLobbyManager);
+    with_manager!(with_network_manager, get_network_manager, sys::IDiscordNetworkManager);
+    with_manager!(with_overlay_manager, get_overlay_manager, sys::IDiscordOverlayManager);
+    with_manager!(with_relationship_manager, get_relationship_manager, sys::IDiscordRelationshipManager);
+    with_manager!(with_storage_manager, get_storage_manager, sys::IDiscordStorageManager);
+    with_manager!(with_store_manager, get_store_manager, sys::IDiscordStoreManager);
+    with_manager!(with_user_manager, get_user_manager, sys::IDiscordUserManager);
+    with_manager!(with_voice_manager, get_voice_manager, sys::IDiscordVoiceManager);
+}
+
 fn create_params(
     client_id: sys::DiscordClientId,
     flags: sys::EDiscordCreateFlags,
     event_data: *mut std::ffi::c_void,
 ) -> sys::DiscordCreateParams {
+    use crate::events::*;
+
     sys::DiscordCreateParams {
         client_id,
         // XXX: u64 should be sys::EDiscordCreateFlags
@@ -223,348 +260,4 @@ fn create_params(
         voice_events: VOICE as *const _ as *mut _,
         voice_version: sys::DISCORD_VOICE_MANAGER_VERSION,
     }
-}
-
-fn with_event_handler(inner: *mut c_void, callback: impl FnOnce(&mut dyn EventHandler, &Discord)) {
-    prevent_unwind!();
-
-    debug_assert!(!inner.is_null());
-
-    // SAFETY:
-    // We're duplicating the `Box<DiscordInner>`, this is safe:
-    // - We're not mutating it, we're not dropping it
-    // - No other part of the code will mutate it as `&mut Discord` is in the callstack
-    let discord = unsafe { Discord(Box::from_raw(inner as *mut DiscordInner)) };
-
-    // SAFETY: Mutation through immutable reference
-    // - `discord.0.event_handler` is an `UnsafeCell`, inner mutation is legal
-    // - No other part of the code can safely mutate it as they require `&mut DiscordInner`
-    // - `EventHandler` can mutate itself during method but not `&Discord`
-    let mut event_handler = unsafe { (*discord.0.event_handler.get()).take() };
-
-    if let Some(event_handler) = event_handler.as_mut() {
-        callback(event_handler.deref_mut(), &discord);
-    }
-
-    // SAFETY: See previous
-    unsafe {
-        (*discord.0.event_handler.get()) = event_handler;
-    }
-
-    // SAFETY: Not dropping our duplicated `Box<DiscordInner>`
-    std::mem::forget(discord);
-}
-
-const ACHIEVEMENT: &sys::IDiscordAchievementEvents = &sys::IDiscordAchievementEvents {
-    on_user_achievement_update: {
-        extern "C" fn on_user_achievement_update(
-            inner: *mut c_void,
-            user_achievement: *mut sys::DiscordUserAchievement,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_user_achievement_update(discord, unsafe {
-                    &*(user_achievement as *const UserAchievement)
-                })
-            })
-        }
-
-        Some(on_user_achievement_update)
-    },
-};
-
-const ACTIVITY: &sys::IDiscordActivityEvents = &sys::IDiscordActivityEvents {
-    on_activity_join: {
-        extern "C" fn on_activity_join(inner: *mut c_void, secret: *const u8) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_activity_join(discord, charptr_to_str(secret))
-            })
-        }
-
-        Some(on_activity_join)
-    },
-
-    on_activity_spectate: {
-        extern "C" fn on_activity_spectate(inner: *mut c_void, secret: *const u8) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_activity_spectate(discord, charptr_to_str(secret))
-            })
-        }
-
-        Some(on_activity_spectate)
-    },
-
-    on_activity_join_request: {
-        extern "C" fn on_activity_join_request(inner: *mut c_void, user: *mut sys::DiscordUser) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_activity_join_request(discord, unsafe { &*(user as *const User) })
-            })
-        }
-
-        Some(on_activity_join_request)
-    },
-
-    on_activity_invite: {
-        extern "C" fn on_activity_invite(
-            inner: *mut c_void,
-            kind: sys::EDiscordActivityActionType,
-            user: *mut sys::DiscordUser,
-            activity: *mut sys::DiscordActivity,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_activity_invite(
-                    discord,
-                    kind.into(),
-                    unsafe { &*(user as *const User) },
-                    unsafe { &*(activity as *const Activity) },
-                )
-            })
-        }
-
-        Some(on_activity_invite)
-    },
-};
-
-const LOBBY: &sys::IDiscordLobbyEvents = &sys::IDiscordLobbyEvents {
-    on_lobby_update: {
-        extern "C" fn on_lobby_update(inner: *mut c_void, lobby_id: sys::DiscordLobbyId) {
-            with_event_handler(inner, |eh, discord| eh.on_lobby_update(discord, lobby_id))
-        }
-
-        Some(on_lobby_update)
-    },
-
-    on_lobby_delete: {
-        extern "C" fn on_lobby_delete(
-            inner: *mut c_void,
-            lobby_id: sys::DiscordLobbyId,
-            reason: u32,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_lobby_delete(discord, lobby_id, reason)
-            })
-        }
-
-        Some(on_lobby_delete)
-    },
-
-    on_member_connect: {
-        extern "C" fn on_member_connect(
-            inner: *mut c_void,
-            lobby_id: sys::DiscordLobbyId,
-            member_id: sys::DiscordUserId,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_member_connect(discord, lobby_id, member_id)
-            })
-        }
-
-        Some(on_member_connect)
-    },
-
-    on_member_update: {
-        extern "C" fn on_member_update(
-            inner: *mut c_void,
-            lobby_id: sys::DiscordLobbyId,
-            member_id: sys::DiscordUserId,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_member_update(discord, lobby_id, member_id)
-            })
-        }
-
-        Some(on_member_update)
-    },
-
-    on_member_disconnect: {
-        extern "C" fn on_member_disconnect(
-            inner: *mut c_void,
-            lobby_id: sys::DiscordLobbyId,
-            member_id: sys::DiscordUserId,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_member_disconnect(discord, lobby_id, member_id)
-            })
-        }
-
-        Some(on_member_disconnect)
-    },
-
-    on_lobby_message: {
-        extern "C" fn on_lobby_message(
-            inner: *mut c_void,
-            lobby_id: sys::DiscordLobbyId,
-            member_id: sys::DiscordUserId,
-            data: *mut u8,
-            data_len: u32,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_lobby_message(discord, lobby_id, member_id, unsafe {
-                    std::slice::from_raw_parts(data, data_len as usize)
-                })
-            })
-        }
-
-        Some(on_lobby_message)
-    },
-
-    on_speaking: {
-        extern "C" fn on_speaking(
-            inner: *mut c_void,
-            lobby_id: sys::DiscordLobbyId,
-            member_id: sys::DiscordUserId,
-            speaking: bool,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_speaking(discord, lobby_id, member_id, speaking)
-            })
-        }
-
-        Some(on_speaking)
-    },
-
-    on_network_message: {
-        extern "C" fn on_network_message(
-            inner: *mut c_void,
-            lobby_id: sys::DiscordLobbyId,
-            member_id: sys::DiscordUserId,
-            channel_id: sys::DiscordNetworkChannelId,
-            data: *mut u8,
-            data_len: u32,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_lobby_network_message(discord, lobby_id, member_id, channel_id, unsafe {
-                    std::slice::from_raw_parts(data, data_len as usize)
-                })
-            })
-        }
-
-        Some(on_network_message)
-    },
-};
-
-const NETWORK: &sys::IDiscordNetworkEvents = &sys::IDiscordNetworkEvents {
-    on_message: {
-        extern "C" fn on_message(
-            inner: *mut c_void,
-            peer_id: sys::DiscordNetworkPeerId,
-            channel_id: sys::DiscordNetworkChannelId,
-            data: *mut u8,
-            data_len: u32,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_network_message(discord, peer_id, channel_id, unsafe {
-                    std::slice::from_raw_parts(data, data_len as usize)
-                })
-            })
-        }
-
-        Some(on_message)
-    },
-
-    on_route_update: {
-        extern "C" fn on_route_update(inner: *mut c_void, route: *const u8) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_network_route_update(discord, charptr_to_str(route))
-            })
-        }
-
-        Some(on_route_update)
-    },
-};
-
-const OVERLAY: &sys::IDiscordOverlayEvents = &sys::IDiscordOverlayEvents {
-    on_toggle: {
-        extern "C" fn on_toggle(inner: *mut c_void, locked: bool) {
-            with_event_handler(inner, |eh, discord| eh.on_overlay_toggle(discord, !locked))
-        }
-
-        Some(on_toggle)
-    },
-};
-
-const RELATIONSHIP: &sys::IDiscordRelationshipEvents = &sys::IDiscordRelationshipEvents {
-    on_refresh: {
-        extern "C" fn on_refresh(inner: *mut c_void) {
-            with_event_handler(inner, |eh, discord| eh.on_relationships_refresh(discord))
-        }
-
-        Some(on_refresh)
-    },
-
-    on_relationship_update: {
-        extern "C" fn on_relationship_update(
-            inner: *mut c_void,
-            relationship: *mut sys::DiscordRelationship,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_relationship_update(discord, unsafe {
-                    &*(relationship as *const Relationship)
-                })
-            })
-        }
-
-        Some(on_relationship_update)
-    },
-};
-
-const STORE: &sys::IDiscordStoreEvents = &sys::IDiscordStoreEvents {
-    on_entitlement_create: {
-        extern "C" fn on_entitlement_create(
-            inner: *mut c_void,
-            entitlement: *mut sys::DiscordEntitlement,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_entitlement_create(discord, unsafe { &*(entitlement as *const Entitlement) })
-            })
-        }
-
-        Some(on_entitlement_create)
-    },
-
-    on_entitlement_delete: {
-        extern "C" fn on_entitlement_delete(
-            inner: *mut c_void,
-            entitlement: *mut sys::DiscordEntitlement,
-        ) {
-            with_event_handler(inner, |eh, discord| {
-                eh.on_entitlement_delete(discord, unsafe { &*(entitlement as *const Entitlement) })
-            })
-        }
-
-        Some(on_entitlement_delete)
-    },
-};
-
-const USER: &sys::IDiscordUserEvents = &sys::IDiscordUserEvents {
-    on_current_user_update: {
-        extern "C" fn on_current_user_update(inner: *mut c_void) {
-            with_event_handler(inner, |eh, discord| eh.on_current_user_update(discord))
-        }
-
-        Some(on_current_user_update)
-    },
-};
-
-const VOICE: &sys::IDiscordVoiceEvents = &sys::IDiscordVoiceEvents {
-    on_settings_update: {
-        extern "C" fn on_settings_update(inner: *mut c_void) {
-            with_event_handler(inner, |eh, discord| eh.on_voice_settings_update(discord))
-        }
-
-        Some(on_settings_update)
-    },
-};
-
-extern "C" fn log_hook(_: *mut std::ffi::c_void, level: sys::EDiscordLogLevel, message: *const u8) {
-    prevent_unwind!();
-
-    let level = match level {
-        sys::DiscordLogLevel_Error => log::Level::Error,
-        sys::DiscordLogLevel_Warn => log::Level::Warn,
-        sys::DiscordLogLevel_Info => log::Level::Info,
-        sys::DiscordLogLevel_Debug => log::Level::Debug,
-        _ => log::Level::Trace,
-    };
-
-    log::log!(level, "SDK: {}", charptr_to_str(message));
 }

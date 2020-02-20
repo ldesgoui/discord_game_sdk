@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, utils::MacroHelper, Cast, Comparison, Distance, Result};
+use crate::{sys, to_result::ToResult, utils, Cast, Comparison, Distance, Result};
 
 /// Lobby Search
 ///
@@ -81,38 +81,45 @@ impl SearchQuery {
         self
     }
 
-    pub(crate) unsafe fn process(&self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
-        let tx = MacroHelper::new(ptr);
-
+    pub(crate) fn process(&self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
         if let Some((key, value, comparison, cast)) = self.filter.as_ref() {
-            ffi!(tx.filter(
-                // XXX: *mut should be *const
-                key.as_ptr() as *mut u8,
-                (*comparison).into(),
-                (*cast).into(),
-                // XXX: *mut should be *const
-                value.as_ptr() as *mut u8,
-            ))
+            utils::with_tx(ptr, |tx| unsafe {
+                tx.filter.unwrap()(
+                    tx,
+                    // XXX: *mut should be *const
+                    key.as_ptr() as *mut u8,
+                    (*comparison).into(),
+                    (*cast).into(),
+                    // XXX: *mut should be *const
+                    value.as_ptr() as *mut u8,
+                )
+            })
             .to_result()?;
         }
 
         if let Some((key, value, cast)) = self.sort.as_ref() {
-            ffi!(tx.sort(
-                // XXX: *mut should be *const
-                key.as_ptr() as *mut u8,
-                (*cast).into(),
-                // XXX: *mut should be *const
-                value.as_ptr() as *mut u8,
-            ))
+            utils::with_tx(ptr, |tx| unsafe {
+                tx.sort.unwrap()(
+                    tx,
+                    // XXX: *mut should be *const
+                    key.as_ptr() as *mut u8,
+                    (*cast).into(),
+                    // XXX: *mut should be *const
+                    value.as_ptr() as *mut u8,
+                )
+            })
             .to_result()?;
         }
 
         if let Some(limit) = self.limit {
-            ffi!(tx.limit(limit)).to_result()?;
+            utils::with_tx(ptr, |tx| unsafe { tx.limit.unwrap()(tx, limit) }).to_result()?;
         }
 
         if let Some(distance) = self.distance {
-            ffi!(tx.distance(distance.into())).to_result()?;
+            utils::with_tx(ptr, |tx| unsafe {
+                tx.distance.unwrap()(tx, distance.into())
+            })
+            .to_result()?;
         }
 
         Ok(())

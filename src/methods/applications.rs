@@ -1,9 +1,4 @@
-use crate::{
-    sys,
-    to_result::ToResult,
-    utils::{charbuf_to_str, charptr_to_str},
-    Discord, OAuth2Token, Result,
-};
+use crate::{callback, sys, to_result::ToResult, utils, Discord, OAuth2Token, Result};
 use std::mem::size_of;
 
 /// # Applications
@@ -24,13 +19,11 @@ impl Discord {
     pub fn current_locale(&self) -> String {
         let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
 
-        unsafe {
-            ffi!(self
-                .get_application_manager()
-                .get_current_locale(&mut locale))
-        }
+        self.with_application_manager(|mgr| unsafe {
+            mgr.get_current_locale.unwrap()(mgr, &mut locale)
+        });
 
-        charbuf_to_str(&locale).to_string()
+        utils::charbuf_to_str(&locale).to_string()
     }
 
     /// Get the name of pushed branch on which the game is running.
@@ -48,13 +41,11 @@ impl Discord {
     pub fn current_branch(&self) -> String {
         let mut branch: sys::DiscordBranch = [0; size_of::<sys::DiscordBranch>()];
 
-        unsafe {
-            ffi!(self
-                .get_application_manager()
-                .get_current_branch(&mut branch))
-        }
+        self.with_application_manager(|mgr| unsafe {
+            mgr.get_current_branch.unwrap()(mgr, &mut branch);
+        });
 
-        charbuf_to_str(&branch).to_string()
+        utils::charbuf_to_str(&branch).to_string()
     }
 
     /// Checks if the current user has the entitlement to run this game.
@@ -69,12 +60,12 @@ impl Discord {
     /// });
     /// # Ok(()) }
     pub fn validate_or_exit<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
-        unsafe {
-            ffi!(self
-                .get_application_manager()
-                .validate_or_exit()
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_application_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.validate_or_exit.unwrap()(mgr, ptr, fun) };
+        });
     }
 
     /// Retrieve an OAuth 2.0 Bearer token for the current user.
@@ -99,15 +90,19 @@ impl Discord {
     /// });
     /// # Ok(()) }
     pub fn oauth2_token<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<&OAuth2Token>)) {
-        unsafe {
-            ffi!(self.get_application_manager().get_oauth2_token().and_then(
+        self.with_application_manager(|mgr| {
+            let (ptr, fun) = callback::two_params(
                 |res: sys::EDiscordResult, token: *mut sys::DiscordOAuth2Token| {
-                    callback::<Result<&OAuth2Token>>(
-                        res.to_result().map(|()| &*(token as *mut OAuth2Token)),
+                    callback(
+                        self,
+                        res.to_result()
+                            .map(|()| unsafe { &*(token as *mut OAuth2Token) }),
                     )
-                }
-            ))
-        }
+                },
+            );
+
+            unsafe { mgr.get_oauth2_token.unwrap()(mgr, ptr, fun) };
+        });
     }
 
     /// Get the signed app ticket for the current user.
@@ -127,12 +122,16 @@ impl Discord {
     /// });
     /// # Ok(()) }
     pub fn app_ticket<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<&str>)) {
-        unsafe {
-            ffi!(self.get_application_manager().get_ticket().and_then(
-                |res: sys::EDiscordResult, string: *const u8| {
-                    callback::<Result<&str>>(res.to_result().map(|()| charptr_to_str(string)))
-                }
-            ))
-        }
+        self.with_application_manager(|mgr| {
+            let (ptr, fun) = callback::two_params(|res: sys::EDiscordResult, string: *const u8| {
+                callback(
+                    self,
+                    res.to_result()
+                        .map(|()| unsafe { utils::charptr_to_str(string) }),
+                )
+            });
+
+            unsafe { mgr.get_ticket.unwrap()(mgr, ptr, fun) };
+        });
     }
 }

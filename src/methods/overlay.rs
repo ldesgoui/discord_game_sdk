@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, Action, Discord, Result};
+use crate::{callback, sys, to_result::ToResult, Action, Discord, Result};
 use std::borrow::Cow;
 
 /// # Overlay
@@ -31,7 +31,7 @@ impl Discord {
     pub fn overlay_enabled(&self) -> bool {
         let mut enabled = false;
 
-        unsafe { ffi!(self.get_overlay_manager().is_enabled(&mut enabled)) }
+        self.with_overlay_manager(|mgr| unsafe { mgr.is_enabled.unwrap()(mgr, &mut enabled) });
 
         enabled
     }
@@ -51,7 +51,7 @@ impl Discord {
     pub fn overlay_opened(&self) -> bool {
         let mut locked = false;
 
-        unsafe { ffi!(self.get_overlay_manager().is_locked(&mut locked)) }
+        self.with_overlay_manager(|mgr| unsafe { mgr.is_locked.unwrap()(mgr, &mut locked) });
 
         !locked
     }
@@ -75,12 +75,12 @@ impl Discord {
         opened: bool,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
-        unsafe {
-            ffi!(self
-                .get_overlay_manager()
-                .set_locked(!opened)
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_overlay_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.set_locked.unwrap()(mgr, !opened, ptr, fun) }
+        })
     }
 
     /// Opens the overlay modal for sending game invitations to users, channels, and servers.
@@ -103,12 +103,12 @@ impl Discord {
         action: Action,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
-        unsafe {
-            ffi!(self
-                .get_overlay_manager()
-                .open_activity_invite(action.into())
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_overlay_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.open_activity_invite.unwrap()(mgr, action.into(), ptr, fun) }
+        })
     }
 
     /// Opens the overlay modal for joining a Discord guild, given its invite code
@@ -143,12 +143,12 @@ impl Discord {
             code.to_mut().push('\0')
         };
 
-        unsafe {
-            ffi!(self
-                .get_overlay_manager()
-                .open_guild_invite(code.as_ptr())
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_overlay_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.open_guild_invite.unwrap()(mgr, code.as_ptr(), ptr, fun) }
+        })
     }
 
     /// Opens the overlay widget for voice settings for the currently connected application.
@@ -168,11 +168,11 @@ impl Discord {
     /// # Ok(()) }
     /// ```
     pub fn open_voice_settings<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
-        unsafe {
-            ffi!(self
-                .get_overlay_manager()
-                .open_voice_settings()
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_overlay_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.open_voice_settings.unwrap()(mgr, ptr, fun) }
+        })
     }
 }

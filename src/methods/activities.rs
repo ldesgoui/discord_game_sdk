@@ -1,4 +1,6 @@
-use crate::{sys, to_result::ToResult, Action, Activity, Discord, RequestReply, Result, UserID};
+use crate::{
+    callback, sys, to_result::ToResult, Action, Activity, Discord, RequestReply, Result, UserID,
+};
 use std::borrow::Cow;
 
 /// # Activities
@@ -35,12 +37,10 @@ impl Discord {
             command.to_mut().push('\0')
         };
 
-        unsafe {
-            ffi!(self
-                .get_activity_manager()
-                .register_command(command.as_ptr()))
-            .to_result()
-        }
+        self.with_activity_manager(|mgr| unsafe {
+            mgr.register_command.unwrap()(mgr, command.as_ptr())
+        })
+        .to_result()
     }
 
     /// Used if you are distributing this SDK on Steam.
@@ -61,7 +61,8 @@ impl Discord {
     /// # Ok(()) }
     /// ```
     pub fn register_steam(&self, steam_game_id: u32) -> Result<()> {
-        unsafe { ffi!(self.get_activity_manager().register_steam(steam_game_id)).to_result() }
+        self.with_activity_manager(|mgr| unsafe { mgr.register_steam.unwrap()(mgr, steam_game_id) })
+            .to_result()
     }
 
     /// Sets a user's presence in Discord to a new Activity.
@@ -94,15 +95,20 @@ impl Discord {
         activity: &Activity,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
-        unsafe {
-            ffi!(self
-                .get_activity_manager()
-                .update_activity(
+        self.with_activity_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe {
+                mgr.update_activity.unwrap()(
+                    mgr,
                     // XXX: *mut should be *const
-                    &activity.0 as *const sys::DiscordActivity as *mut sys::DiscordActivity
+                    &activity.0 as *const sys::DiscordActivity as *mut sys::DiscordActivity,
+                    ptr,
+                    fun,
                 )
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+            }
+        })
     }
 
     /// Clears a user's presence in Discord to make it show nothing.
@@ -121,12 +127,12 @@ impl Discord {
     /// # Ok(()) }
     /// ```
     pub fn clear_activity<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
-        unsafe {
-            ffi!(self
-                .get_activity_manager()
-                .clear_activity()
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_activity_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.clear_activity.unwrap()(mgr, ptr, fun) }
+        })
     }
 
     /// Sends a reply to an Ask to Join request.
@@ -159,12 +165,12 @@ impl Discord {
         reply: RequestReply,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
-        unsafe {
-            ffi!(self
-                .get_activity_manager()
-                .send_request_reply(user_id, reply.into())
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_activity_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.send_request_reply.unwrap()(mgr, user_id, reply.into(), ptr, fun) }
+        })
     }
 
     /// Sends a game invite to a given user.
@@ -209,12 +215,14 @@ impl Discord {
             content.to_mut().push('\0')
         };
 
-        unsafe {
-            ffi!(self
-                .get_activity_manager()
-                .send_invite(user_id, action.into(), content.as_ptr())
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_activity_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe {
+                mgr.send_invite.unwrap()(mgr, user_id, action.into(), content.as_ptr(), ptr, fun)
+            }
+        })
     }
 
     /// Accepts a user's game invitation.
@@ -257,11 +265,11 @@ impl Discord {
         user_id: UserID,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
-        unsafe {
-            ffi!(self
-                .get_activity_manager()
-                .accept_invite(user_id)
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_activity_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.accept_invite.unwrap()(mgr, user_id, ptr, fun) }
+        })
     }
 }

@@ -1,4 +1,4 @@
-use crate::{sys, utils::MacroHelper, EventHandler};
+use crate::{sys, EventHandler};
 use std::cell::UnsafeCell;
 
 /// Main interface with SDK
@@ -27,12 +27,6 @@ use std::cell::UnsafeCell;
 #[derive(Debug)]
 pub struct Discord(pub(crate) Box<DiscordInner>);
 
-impl Discord {
-    pub(crate) fn inner(&self) -> &DiscordInner {
-        &*self.0
-    }
-}
-
 pub(crate) struct DiscordInner {
     pub(crate) core: *mut sys::IDiscordCore,
     pub(crate) client_id: sys::DiscordClientId,
@@ -47,9 +41,7 @@ impl DiscordInner {
 
 impl Drop for DiscordInner {
     fn drop(&mut self) {
-        let core = MacroHelper::new(self.core);
-
-        unsafe { ffi!(core.destroy()) }
+        unsafe { (*self.core).destroy.unwrap()(self.core) }
     }
 }
 

@@ -1,4 +1,6 @@
-use crate::{sys, to_result::ToResult, Collection, Discord, Result, Snowflake, UserAchievement};
+use crate::{
+    callback, sys, to_result::ToResult, Collection, Discord, Result, Snowflake, UserAchievement,
+};
 use std::convert::TryInto;
 
 /// # Achievements
@@ -39,12 +41,14 @@ impl Discord {
     ) {
         debug_assert!((0..=100).contains(&percent_complete));
 
-        unsafe {
-            ffi!(self
-                .get_achievement_manager()
-                .set_user_achievement(achievement_id, percent_complete)
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())));
-        }
+        self.with_achievement_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe {
+                mgr.set_user_achievement.unwrap()(mgr, achievement_id, percent_complete, ptr, fun)
+            }
+        });
     }
 
     /// Loads the current user's achievements.
@@ -69,12 +73,12 @@ impl Discord {
     /// );
     /// # Ok(()) }
     pub fn fetch_user_achievements<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
-        unsafe {
-            ffi!(self
-                .get_achievement_manager()
-                .fetch_user_achievements()
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())));
-        }
+        self.with_achievement_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.fetch_user_achievements.unwrap()(mgr, ptr, fun) }
+        });
     }
 
     /// Gets the user achievement for the given achievement ID.
@@ -104,12 +108,10 @@ impl Discord {
     pub fn user_achievement(&self, achievement_id: Snowflake) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
-        unsafe {
-            ffi!(self
-                .get_achievement_manager()
-                .get_user_achievement(achievement_id, &mut achievement.0))
-            .to_result()?;
-        }
+        self.with_achievement_manager(|mgr| unsafe {
+            mgr.get_user_achievement.unwrap()(mgr, achievement_id, &mut achievement.0)
+        })
+        .to_result()?;
 
         Ok(achievement)
     }
@@ -124,11 +126,9 @@ impl Discord {
     pub fn user_achievement_count(&self) -> u32 {
         let mut count = 0;
 
-        unsafe {
-            ffi!(self
-                .get_achievement_manager()
-                .count_user_achievements(&mut count));
-        }
+        self.with_achievement_manager(|mgr| unsafe {
+            mgr.count_user_achievements.unwrap()(mgr, &mut count)
+        });
 
         // XXX: i32 should be u32
         count.try_into().unwrap()
@@ -144,14 +144,15 @@ impl Discord {
     pub fn user_achievement_at(&self, index: u32) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
-        unsafe {
-            ffi!(self.get_achievement_manager().get_user_achievement_at(
+        self.with_achievement_manager(|mgr| unsafe {
+            mgr.get_user_achievement_at.unwrap()(
+                mgr,
                 // XXX: i32 should be u32
                 index.try_into().unwrap(),
-                &mut achievement.0
-            ))
-            .to_result()?;
-        }
+                &mut achievement.0,
+            )
+        })
+        .to_result()?;
 
         Ok(achievement)
     }
