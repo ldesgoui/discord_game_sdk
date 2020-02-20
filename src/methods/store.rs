@@ -1,5 +1,5 @@
 use crate::{
-    callback, sys, to_result::ToResult, Collection, Discord, Entitlement, Result, Sku, Snowflake,
+    callback, iter, sys, to_result::ToResult, Discord, Entitlement, Result, Sku, Snowflake,
 };
 use std::convert::TryInto;
 
@@ -130,8 +130,15 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_skus(&self) -> Collection<'_, Result<Sku>> {
-        Collection::new(self, Box::new(Self::sku_at), self.sku_count())
+    pub fn iter_skus<'d>(
+        &'d self,
+    ) -> impl 'd
+           + Iterator<Item = Result<Sku>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator
+           + std::fmt::Debug {
+        iter::Collection::new(self, Self::sku_at, self.sku_count())
     }
 
     /// Fetches a list of entitlements to which the user is entitled.
@@ -256,12 +263,15 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_entitlements(&self) -> Collection<'_, Result<Entitlement>> {
-        Collection::new(
-            self,
-            Box::new(Self::entitlement_at),
-            self.entitlement_count(),
-        )
+    pub fn iter_entitlements<'d>(
+        &'d self,
+    ) -> impl 'd
+           + Iterator<Item = Result<Entitlement>>
+           + DoubleEndedIterator
+           + ExactSizeIterator
+           + std::iter::FusedIterator
+           + std::fmt::Debug {
+        iter::Collection::new(self, Self::entitlement_at, self.entitlement_count())
     }
 
     /// Whether the user is entitled to the given SKU.

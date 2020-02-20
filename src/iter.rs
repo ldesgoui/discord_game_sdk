@@ -1,22 +1,16 @@
-//! Iterator facilities
-
 use crate::Discord;
 
-/// An Iterator to acquire collections.
-pub struct Collection<'d, T> {
+// An Iterator to acquire collections.
+pub(crate) struct Collection<'d, Item, Getter: FnMut(&Discord, u32) -> Item> {
     discord: &'d Discord,
-    getter: Box<dyn FnMut(&Discord, u32) -> T>,
+    getter: Getter,
     count: u32,
     index: u32,
     back_index: u32,
 }
 
-impl<'d, T> Collection<'d, T> {
-    pub(crate) fn new(
-        discord: &'d Discord,
-        getter: Box<dyn FnMut(&Discord, u32) -> T>,
-        count: u32,
-    ) -> Self {
+impl<'d, Item, Getter: FnMut(&Discord, u32) -> Item> Collection<'d, Item, Getter> {
+    pub(crate) fn new(discord: &'d Discord, getter: Getter, count: u32) -> Self {
         Self {
             discord,
             getter,
@@ -27,8 +21,8 @@ impl<'d, T> Collection<'d, T> {
     }
 }
 
-impl<T> Iterator for Collection<'_, T> {
-    type Item = T;
+impl<Item, Getter: FnMut(&Discord, u32) -> Item> Iterator for Collection<'_, Item, Getter> {
+    type Item = Item;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.index + self.back_index < self.count {
@@ -44,7 +38,9 @@ impl<T> Iterator for Collection<'_, T> {
     }
 }
 
-impl<T> DoubleEndedIterator for Collection<'_, T> {
+impl<Item, Getter: FnMut(&Discord, u32) -> Item> DoubleEndedIterator
+    for Collection<'_, Item, Getter>
+{
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.index + self.back_index < self.count {
             self.back_index += 1;
@@ -55,11 +51,17 @@ impl<T> DoubleEndedIterator for Collection<'_, T> {
     }
 }
 
-impl<T> ExactSizeIterator for Collection<'_, T> {}
+impl<Item, Getter: FnMut(&Discord, u32) -> Item> ExactSizeIterator
+    for Collection<'_, Item, Getter>
+{
+}
 
-impl<T> std::iter::FusedIterator for Collection<'_, T> {}
+impl<Item, Getter: FnMut(&Discord, u32) -> Item> std::iter::FusedIterator
+    for Collection<'_, Item, Getter>
+{
+}
 
-impl<T> std::fmt::Debug for Collection<'_, T> {
+impl<Item, Getter: FnMut(&Discord, u32) -> Item> std::fmt::Debug for Collection<'_, Item, Getter> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_struct("Collection")
             .field("discord", &self.discord)
