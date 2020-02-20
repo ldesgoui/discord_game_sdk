@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, utils::MacroHelper, Result};
+use crate::{sys, to_result::ToResult, utils, Result};
 use std::collections::HashMap;
 
 /// Lobby Member Transaction
@@ -54,28 +54,29 @@ impl LobbyMemberTransaction {
         self
     }
 
-    pub(crate) unsafe fn process(
-        &self,
-        ptr: *mut sys::IDiscordLobbyMemberTransaction,
-    ) -> Result<()> {
-        let tx = MacroHelper::new(ptr);
-
+    pub(crate) fn process(&self, ptr: *mut sys::IDiscordLobbyMemberTransaction) -> Result<()> {
         for (key, value) in &self.metadata {
             match value {
                 Some(value) => {
-                    ffi!(tx.set_metadata(
-                        // XXX: *mut should be *const
-                        key.as_ptr() as *mut u8,
-                        // XXX: *mut should be *const
-                        value.as_ptr() as *mut u8
-                    ))
+                    utils::with_tx(ptr, |tx| unsafe {
+                        tx.set_metadata.unwrap()(
+                            tx,
+                            // XXX: *mut should be *const
+                            key.as_ptr() as *mut u8,
+                            // XXX: *mut should be *const
+                            value.as_ptr() as *mut u8,
+                        )
+                    })
                     .to_result()?;
                 }
                 None => {
-                    ffi!(tx.delete_metadata(
-                        // XXX: *mut should be *const
-                        key.as_ptr() as *mut u8
-                    ))
+                    utils::with_tx(ptr, |tx| unsafe {
+                        tx.delete_metadata.unwrap()(
+                            tx,
+                            // XXX: *mut should be *const
+                            key.as_ptr() as *mut u8,
+                        )
+                    })
                     .to_result()?;
                 }
             }

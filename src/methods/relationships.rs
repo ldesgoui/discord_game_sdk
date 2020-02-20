@@ -17,12 +17,10 @@ impl Discord {
     pub fn relationship_with(&self, user_id: UserID) -> Result<Relationship> {
         let mut relationship = Relationship(sys::DiscordRelationship::default());
 
-        unsafe {
-            ffi!(self
-                .get_relationship_manager()
-                .get(user_id, &mut relationship.0))
-            .to_result()?;
-        }
+        self.with_relationship_manager(|mgr| unsafe {
+            mgr.get.unwrap()(mgr, user_id, &mut relationship.0)
+        })
+        .to_result()?;
 
         Ok(relationship)
     }
@@ -54,12 +52,13 @@ impl Discord {
             (*(callback_ptr as *mut F))(&*(relationship_ptr as *const Relationship))
         }
 
-        unsafe {
-            ffi!(self.get_relationship_manager().filter(
-                &mut filter as *mut _ as *mut std::ffi::c_void,
-                Some(filter_relationship::<F>)
-            ))
-        }
+        self.with_relationship_manager(|mgr| unsafe {
+            mgr.filter.unwrap()(
+                mgr,
+                &mut filter as *mut F as *mut std::ffi::c_void,
+                Some(filter_relationship::<F>),
+            )
+        })
     }
 
     /// Returns the number of relationships matching the filter.
@@ -73,9 +72,8 @@ impl Discord {
     pub fn relationship_count(&self) -> Result<u32> {
         let mut count = 0;
 
-        unsafe {
-            ffi!(self.get_relationship_manager().count(&mut count)).to_result()?;
-        }
+        self.with_relationship_manager(|mgr| unsafe { mgr.count.unwrap()(mgr, &mut count) })
+            .to_result()?;
 
         // XXX: i32 should be u32
         Ok(count.try_into().unwrap())
@@ -92,12 +90,10 @@ impl Discord {
     pub fn relationship_at(&self, index: u32) -> Result<Relationship> {
         let mut relationship = Relationship(sys::DiscordRelationship::default());
 
-        unsafe {
-            ffi!(self
-                .get_relationship_manager()
-                .get_at(index, &mut relationship.0))
-            .to_result()?;
-        }
+        self.with_relationship_manager(|mgr| unsafe {
+            mgr.get_at.unwrap()(mgr, index, &mut relationship.0)
+        })
+        .to_result()?;
 
         Ok(relationship)
     }

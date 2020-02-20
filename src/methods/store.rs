@@ -1,4 +1,6 @@
-use crate::{sys, to_result::ToResult, Collection, Discord, Entitlement, Result, Sku, Snowflake};
+use crate::{
+    callback, sys, to_result::ToResult, Collection, Discord, Entitlement, Result, Sku, Snowflake,
+};
 use std::convert::TryInto;
 
 /// # Store
@@ -30,12 +32,12 @@ impl Discord {
     /// # Ok(()) }
     /// ```
     pub fn fetch_skus<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
-        unsafe {
-            ffi!(self
-                .get_store_manager()
-                .fetch_skus()
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_store_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.fetch_skus.unwrap()(mgr, ptr, fun) }
+        })
     }
 
     /// Gets a SKU by its ID.
@@ -65,9 +67,8 @@ impl Discord {
     pub fn sku(&self, id: Snowflake) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
-        unsafe {
-            ffi!(self.get_store_manager().get_sku(id, &mut sku.0)).to_result()?;
-        }
+        self.with_store_manager(|mgr| unsafe { mgr.get_sku.unwrap()(mgr, id, &mut sku.0) })
+            .to_result()?;
 
         Ok(sku)
     }
@@ -82,7 +83,7 @@ impl Discord {
     pub fn sku_count(&self) -> u32 {
         let mut count = 0;
 
-        unsafe { ffi!(self.get_store_manager().count_skus(&mut count)) }
+        self.with_store_manager(|mgr| unsafe { mgr.count_skus.unwrap()(mgr, &mut count) });
 
         // XXX: i32 should be u32
         count.try_into().unwrap()
@@ -98,14 +99,15 @@ impl Discord {
     pub fn sku_at(&self, index: u32) -> Result<Sku> {
         let mut sku = Sku(sys::DiscordSku::default());
 
-        unsafe {
-            ffi!(self.get_store_manager().get_sku_at(
+        self.with_store_manager(|mgr| unsafe {
+            mgr.get_sku_at.unwrap()(
+                mgr,
                 // XXX: i32 should be u32
                 index.try_into().unwrap(),
-                &mut sku.0
-            ))
-            .to_result()?;
-        }
+                &mut sku.0,
+            )
+        })
+        .to_result()?;
 
         Ok(sku)
     }
@@ -154,12 +156,12 @@ impl Discord {
     /// # Ok(()) }
     /// ```
     pub fn fetch_entitlements<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
-        unsafe {
-            ffi!(self
-                .get_store_manager()
-                .fetch_entitlements()
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_store_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.fetch_entitlements.unwrap()(mgr, ptr, fun) }
+        })
     }
 
     /// Gets an entitlement by its ID.
@@ -189,12 +191,10 @@ impl Discord {
     pub fn entitlement(&self, id: Snowflake) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
-        unsafe {
-            ffi!(self
-                .get_store_manager()
-                .get_entitlement(id, &mut entitlement.0))
-            .to_result()?;
-        }
+        self.with_store_manager(|mgr| unsafe {
+            mgr.get_entitlement.unwrap()(mgr, id, &mut entitlement.0)
+        })
+        .to_result()?;
 
         Ok(entitlement)
     }
@@ -209,7 +209,7 @@ impl Discord {
     pub fn entitlement_count(&self) -> u32 {
         let mut count = 0;
 
-        unsafe { ffi!(self.get_store_manager().count_entitlements(&mut count)) }
+        self.with_store_manager(|mgr| unsafe { mgr.count_entitlements.unwrap()(mgr, &mut count) });
 
         // XXX: i32 should be u32
         count.try_into().unwrap()
@@ -225,14 +225,15 @@ impl Discord {
     pub fn entitlement_at(&self, index: u32) -> Result<Entitlement> {
         let mut entitlement = Entitlement(sys::DiscordEntitlement::default());
 
-        unsafe {
-            ffi!(self.get_store_manager().get_entitlement_at(
+        self.with_store_manager(|mgr| unsafe {
+            mgr.get_entitlement_at.unwrap()(
+                mgr,
                 // XXX: i32 should be u32
                 index.try_into().unwrap(),
-                &mut entitlement.0
-            ))
-            .to_result()?;
-        }
+                &mut entitlement.0,
+            )
+        })
+        .to_result()?;
 
         Ok(entitlement)
     }
@@ -281,12 +282,10 @@ impl Discord {
     pub fn has_entitlement(&self, sku_id: Snowflake) -> Result<bool> {
         let mut has_entitlement = false;
 
-        unsafe {
-            ffi!(self
-                .get_store_manager()
-                .has_sku_entitlement(sku_id, &mut has_entitlement))
-            .to_result()?;
-        }
+        self.with_store_manager(|mgr| unsafe {
+            mgr.has_sku_entitlement.unwrap()(mgr, sku_id, &mut has_entitlement)
+        })
+        .to_result()?;
 
         Ok(has_entitlement)
     }
@@ -313,11 +312,11 @@ impl Discord {
         sku_id: Snowflake,
         callback: impl 'd + FnOnce(&Self, Result<()>),
     ) {
-        unsafe {
-            ffi!(self
-                .get_store_manager()
-                .start_purchase(sku_id)
-                .and_then(|res: sys::EDiscordResult| callback::<Result<()>>(res.to_result())))
-        }
+        self.with_store_manager(|mgr| {
+            let (ptr, fun) =
+                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+
+            unsafe { mgr.start_purchase.unwrap()(mgr, sku_id, ptr, fun) }
+        })
     }
 }

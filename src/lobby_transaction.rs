@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, utils::MacroHelper, LobbyKind, Result, UserID};
+use crate::{sys, to_result::ToResult, utils, LobbyKind, Result, UserID};
 use std::collections::HashMap;
 
 /// Lobby Transaction
@@ -16,8 +16,8 @@ pub struct LobbyTransaction {
 impl LobbyTransaction {
     /// Gets a Lobby transaction used for creating or updating a new lobby.
     ///
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbycreatetransaction)  
-    /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyupdatetransaction)
+    /// > [`GetLobbyCreateTransaction` in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbycreatetransaction)  
+    /// > [`GetLobbyUpdateTransaction` in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbyupdatetransaction)
     pub fn new() -> Self {
         Self::default()
     }
@@ -90,43 +90,48 @@ impl LobbyTransaction {
         self
     }
 
-    #[allow(clippy::cognitive_complexity)]
-    pub(crate) unsafe fn process(&self, ptr: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
-        let tx = MacroHelper::new(ptr);
-
+    pub(crate) fn process(&self, ptr: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
         if let Some(kind) = self.kind {
-            ffi!(tx.set_type(kind.into())).to_result()?;
+            utils::with_tx(ptr, |tx| unsafe { tx.set_type.unwrap()(tx, kind.into()) })
+                .to_result()?;
         }
 
         if let Some(user_id) = self.owner {
-            ffi!(tx.set_owner(user_id)).to_result()?;
+            utils::with_tx(ptr, |tx| unsafe { tx.set_owner.unwrap()(tx, user_id) }).to_result()?;
         }
 
         if let Some(capacity) = self.capacity {
-            ffi!(tx.set_capacity(capacity)).to_result()?;
+            utils::with_tx(ptr, |tx| unsafe { tx.set_capacity.unwrap()(tx, capacity) })
+                .to_result()?;
         }
 
         if let Some(locked) = self.locked {
-            ffi!(tx.set_locked(locked)).to_result()?;
+            utils::with_tx(ptr, |tx| unsafe { tx.set_locked.unwrap()(tx, locked) }).to_result()?;
         }
 
         for (key, value) in &self.metadata {
             match value {
                 Some(value) => {
-                    ffi!(tx.set_metadata(
-                        // XXX: *mut should be *const
-                        key.as_ptr() as *mut u8,
-                        // XXX: *mut should be *const
-                        value.as_ptr() as *mut u8,
-                    ))
+                    utils::with_tx(ptr, |tx| unsafe {
+                        tx.set_metadata.unwrap()(
+                            tx,
+                            // XXX: *mut should be *const
+                            key.as_ptr() as *mut u8,
+                            // XXX: *mut should be *const
+                            value.as_ptr() as *mut u8,
+                        )
+                    })
                     .to_result()?;
                 }
 
                 None => {
-                    ffi!(tx.delete_metadata(
-                        // XXX: *mut should be *const
-                        key.as_ptr() as *mut u8,
-                    ))
+                    utils::with_tx(ptr, |tx| unsafe {
+                        tx.delete_metadata.unwrap()(
+                            tx,
+                            // XXX: *mut should be *const
+                            key.as_ptr() as *mut u8,
+                        )
+                    })
                     .to_result()?;
                 }
             }

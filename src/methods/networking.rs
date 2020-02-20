@@ -16,7 +16,7 @@ impl Discord {
     pub fn peer_id(&self) -> NetworkPeerID {
         let mut peer_id = 0;
 
-        unsafe { ffi!(self.get_network_manager().get_peer_id(&mut peer_id)) }
+        self.with_network_manager(|mgr| unsafe { mgr.get_peer_id.unwrap()(mgr, &mut peer_id) });
 
         peer_id
     }
@@ -26,7 +26,8 @@ impl Discord {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#flush)
     pub fn flush_network(&self) -> Result<()> {
-        unsafe { ffi!(self.get_network_manager().flush()).to_result() }
+        self.with_network_manager(|mgr| unsafe { mgr.flush.unwrap()(mgr) })
+            .to_result()
     }
 
     /// Opens a network connection to another Discord user.
@@ -47,12 +48,10 @@ impl Discord {
             route.to_mut().push('\0')
         };
 
-        unsafe {
-            ffi!(self
-                .get_network_manager()
-                .open_peer(peer_id, route.as_ptr()))
-            .to_result()
-        }
+        self.with_network_manager(|mgr| unsafe {
+            mgr.open_peer.unwrap()(mgr, peer_id, route.as_ptr())
+        })
+        .to_result()
     }
 
     /// Updates the network connection to another Discord user.
@@ -76,19 +75,18 @@ impl Discord {
             route.to_mut().push('\0')
         };
 
-        unsafe {
-            ffi!(self
-                .get_network_manager()
-                .update_peer(peer_id, route.as_ptr()))
-            .to_result()
-        }
+        self.with_network_manager(|mgr| unsafe {
+            mgr.update_peer.unwrap()(mgr, peer_id, route.as_ptr())
+        })
+        .to_result()
     }
 
     /// Disconnects the network session to another Discord user.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#closepeer)
     pub fn close_peer(&self, peer_id: NetworkPeerID) -> Result<()> {
-        unsafe { ffi!(self.get_network_manager().close_peer(peer_id)).to_result() }
+        self.with_network_manager(|mgr| unsafe { mgr.close_peer.unwrap()(mgr, peer_id) })
+            .to_result()
     }
 
     /// Opens a network connection to another Discord user.
@@ -100,12 +98,10 @@ impl Discord {
         channel_id: NetworkChannelID,
         reliable: Reliability,
     ) -> Result<()> {
-        unsafe {
-            ffi!(self
-                .get_network_manager()
-                .open_channel(peer_id, channel_id, reliable.into()))
-            .to_result()
-        }
+        self.with_network_manager(|mgr| unsafe {
+            mgr.open_channel.unwrap()(mgr, peer_id, channel_id, reliable.into())
+        })
+        .to_result()
     }
 
     /// Close the connection to a given user by peer ID on the given channel.
@@ -116,12 +112,10 @@ impl Discord {
         peer_id: NetworkPeerID,
         channel_id: NetworkChannelID,
     ) -> Result<()> {
-        unsafe {
-            ffi!(self
-                .get_network_manager()
-                .close_channel(peer_id, channel_id))
-            .to_result()
-        }
+        self.with_network_manager(|mgr| unsafe {
+            mgr.close_channel.unwrap()(mgr, peer_id, channel_id)
+        })
+        .to_result()
     }
 
     /// Sends data to a given peer ID through the given channel.
@@ -137,16 +131,17 @@ impl Discord {
 
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
-        unsafe {
-            ffi!(self.get_network_manager().send_message(
+        self.with_network_manager(|mgr| unsafe {
+            mgr.send_message.unwrap()(
+                mgr,
                 peer_id,
                 channel_id,
                 // XXX: *mut should be *const
                 buffer.as_ptr() as *mut u8,
                 // XXX: u32 should be u64
-                buffer.len().try_into().unwrap_or(u32::max_value())
-            ))
-            .to_result()
-        }
+                buffer.len().try_into().unwrap_or(u32::max_value()),
+            )
+        })
+        .to_result()
     }
 }
