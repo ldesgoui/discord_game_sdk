@@ -33,7 +33,7 @@ impl Discord {
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.set_input_mode(
     ///     InputMode::push_to_talk("caps lock"),
-    ///     |discord, result| {
+    ///     |result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed to set voice input mode: {}", error);
     ///         }
@@ -43,11 +43,11 @@ impl Discord {
     pub fn set_input_mode<'d>(
         &'d self,
         input_mode: InputMode,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         self.with_voice_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
             unsafe { mgr.set_input_mode.unwrap()(mgr, input_mode.0, ptr, fun) }
         })
     }

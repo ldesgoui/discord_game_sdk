@@ -26,7 +26,7 @@ use std::convert::TryInto;
 ///     &Activity::empty()
 ///         .with_state("On Main Menu")
 ///         .with_start_time(now),
-///     |discord, result| {
+///     |result| {
 ///         if let Err(error) = result {
 ///             eprintln!("failed to update activity: {}", error);
 ///         }

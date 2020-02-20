@@ -53,7 +53,7 @@ impl Discord {
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
     /// # let now = 0;
-    /// discord.clear_activity(|discord, result| {
+    /// discord.clear_activity(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to clear activity: {}", error);
     ///     }
@@ -82,7 +82,7 @@ impl Discord {
     ///     &Activity::empty()
     ///         .with_state("On Main Menu")
     ///         .with_start_time(now),
-    ///     |discord, result| {
+    ///     |result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed to update activity: {}", error);
     ///         }
@@ -93,11 +93,11 @@ impl Discord {
     pub fn update_activity<'d>(
         &'d self,
         activity: &Activity,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         self.with_activity_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe {
                 mgr.update_activity.unwrap()(
@@ -119,17 +119,17 @@ impl Discord {
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
     /// # let now = 0;
-    /// discord.clear_activity(|discord, result| {
+    /// discord.clear_activity(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to clear activity: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn clear_activity<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
+    pub fn clear_activity<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_activity_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.clear_activity.unwrap()(mgr, ptr, fun) }
         })
@@ -151,7 +151,7 @@ impl Discord {
     ///             user.discriminator()
     ///         );
     ///
-    ///         discord.send_request_reply(user.id(), RequestReply::Yes, |discord, result| {
+    ///         discord.send_request_reply(user.id(), RequestReply::Yes, |result| {
     ///             if let Err(error) = result {
     ///                 return eprintln!("failed to reply: {}", error);
     ///             }
@@ -163,11 +163,11 @@ impl Discord {
         &'d self,
         user_id: UserID,
         reply: RequestReply,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         self.with_activity_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.send_request_reply.unwrap()(mgr, user_id, reply.into(), ptr, fun) }
         })
@@ -194,7 +194,7 @@ impl Discord {
     ///     friend.id(),
     ///     Action::Join,
     ///     "Let's play some Survival!\0",
-    ///     |discord, result| {
+    ///     |result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed to invite: {}", error);
     ///         }
@@ -207,7 +207,7 @@ impl Discord {
         user_id: UserID,
         action: Action,
         content: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         let mut content = content.into();
 
@@ -217,7 +217,7 @@ impl Discord {
 
         self.with_activity_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe {
                 mgr.send_invite.unwrap()(mgr, user_id, action.into(), content.as_ptr(), ptr, fun)
@@ -252,7 +252,7 @@ impl Discord {
     ///             user.discriminator()
     ///         );
     ///
-    ///         discord.accept_invite(user.id(), |discord, result| {
+    ///         discord.accept_invite(user.id(), |result| {
     ///             if let Err(error) = result {
     ///                 return eprintln!("failed to accept invite: {}", error);
     ///             }
@@ -260,14 +260,10 @@ impl Discord {
     ///     }
     /// }
     /// ```
-    pub fn accept_invite<'d>(
-        &'d self,
-        user_id: UserID,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
-    ) {
+    pub fn accept_invite<'d>(&'d self, user_id: UserID, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_activity_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.accept_invite.unwrap()(mgr, user_id, ptr, fun) }
         })

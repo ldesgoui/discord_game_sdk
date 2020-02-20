@@ -41,7 +41,7 @@ impl Discord {
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
     /// # let id_to_lookup = 0;
-    /// discord.user(id_to_lookup, |discord, result| {
+    /// discord.user(id_to_lookup, |result| {
     ///     match result {
     ///         Ok(user) => {
     ///             // ...
@@ -51,14 +51,11 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn user<'d>(&'d self, user_id: UserID, callback: impl 'd + FnOnce(&Self, Result<&User>)) {
+    pub fn user<'d>(&'d self, user_id: UserID, callback: impl 'd + FnOnce(Result<&User>)) {
         self.with_user_manager(|mgr| {
             let (ptr, fun) =
                 callback::two_params(|res: sys::EDiscordResult, user: *mut sys::DiscordUser| {
-                    callback(
-                        self,
-                        res.to_result().map(|()| unsafe { &*(user as *mut User) }),
-                    )
+                    callback(res.to_result().map(|()| unsafe { &*(user as *mut User) }))
                 });
 
             unsafe { mgr.get_user.unwrap()(mgr, user_id, ptr, fun) }
