@@ -9,6 +9,8 @@ use std::cell::UnsafeCell;
 /// As opposed to the general structure of the Discord Game SDK, and to help with memory and thread
 /// safety, the methods of the Manager "classes" are part of this struct.
 ///
+/// > All `callback`s will be called with `Err(TransactionAborted)` when the instance is dropped
+///
 /// ## Table of Contents
 ///
 /// - [Core](#core)

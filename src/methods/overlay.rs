@@ -63,21 +63,17 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.set_overlay_opened(false, |discord, result| {
+    /// discord.set_overlay_opened(false, |result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to set overlay open: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn set_overlay_opened<'d>(
-        &'d self,
-        opened: bool,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
-    ) {
+    pub fn set_overlay_opened<'d>(&'d self, opened: bool, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_overlay_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.set_locked.unwrap()(mgr, !opened, ptr, fun) }
         })
@@ -91,7 +87,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.open_invite_overlay(Action::Join, |discord, result| {
+    /// discord.open_invite_overlay(Action::Join, |result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open invite overlay: {}", error);
     ///     }
@@ -101,11 +97,11 @@ impl Discord {
     pub fn open_invite_overlay<'d>(
         &'d self,
         action: Action,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         self.with_overlay_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.open_activity_invite.unwrap()(mgr, action.into(), ptr, fun) }
         })
@@ -125,7 +121,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.open_guild_invite_overlay("discord-gamesdk\0", |discord, result| {
+    /// discord.open_guild_invite_overlay("discord-gamesdk\0", |result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open guild invite overlay: {}", error);
     ///     }
@@ -135,7 +131,7 @@ impl Discord {
     pub fn open_guild_invite_overlay<'d, 's>(
         &'d self,
         code: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         let mut code = code.into();
 
@@ -145,7 +141,7 @@ impl Discord {
 
         self.with_overlay_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.open_guild_invite.unwrap()(mgr, code.as_ptr(), ptr, fun) }
         })
@@ -160,17 +156,17 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.open_voice_settings(|discord, result| {
+    /// discord.open_voice_settings(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open voice settings overlay: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_voice_settings<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
+    pub fn open_voice_settings<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_overlay_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.open_voice_settings.unwrap()(mgr, ptr, fun) }
         })

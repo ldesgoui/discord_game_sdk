@@ -27,7 +27,7 @@ impl Discord {
     pub fn create_lobby<'d>(
         &'d self,
         transaction: &LobbyTransaction,
-        callback: impl 'd + FnOnce(&Self, Result<&Lobby>),
+        callback: impl 'd + FnOnce(Result<&Lobby>),
     ) {
         let mut tx = std::ptr::null_mut();
 
@@ -37,20 +37,17 @@ impl Discord {
             })
             .to_result();
         if let Err(e) = create {
-            return callback(self, Err(e));
+            return callback(Err(e));
         }
 
         if let Err(e) = transaction.process(tx) {
-            return callback(self, Err(e));
+            return callback(Err(e));
         }
 
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
                 callback::two_params(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(
-                        self,
-                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
-                    )
+                    callback(res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }))
                 });
 
             unsafe { mgr.create_lobby.unwrap()(mgr, tx, ptr, fun) }
@@ -64,7 +61,7 @@ impl Discord {
         &'d self,
         lobby_id: LobbyID,
         transaction: &LobbyTransaction,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         let mut tx = std::ptr::null_mut();
 
@@ -74,16 +71,16 @@ impl Discord {
             })
             .to_result();
         if let Err(e) = create {
-            return callback(self, Err(e));
+            return callback(Err(e));
         }
 
         if let Err(e) = transaction.process(tx) {
-            return callback(self, Err(e));
+            return callback(Err(e));
         }
 
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.update_lobby.unwrap()(mgr, lobby_id, tx, ptr, fun) }
         })
@@ -92,14 +89,10 @@ impl Discord {
     /// Deletes a given lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#deletelobby)
-    pub fn delete_lobby<'d>(
-        &'d self,
-        lobby_id: LobbyID,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
-    ) {
+    pub fn delete_lobby<'d>(&'d self, lobby_id: LobbyID, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.delete_lobby.unwrap()(mgr, lobby_id, ptr, fun) }
         })
@@ -117,7 +110,7 @@ impl Discord {
         &'d self,
         lobby_id: LobbyID,
         secret: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(&Self, Result<&Lobby>),
+        callback: impl 'd + FnOnce(Result<&Lobby>),
     ) {
         let mut secret = secret.into();
 
@@ -128,10 +121,7 @@ impl Discord {
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
                 callback::two_params(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(
-                        self,
-                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
-                    )
+                    callback(res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }))
                 });
 
             unsafe {
@@ -158,7 +148,7 @@ impl Discord {
     pub fn connect_lobby_with_activity_secret<'d, 's>(
         &'d self,
         activity_secret: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(&Self, Result<&Lobby>),
+        callback: impl 'd + FnOnce(Result<&Lobby>),
     ) {
         let mut activity_secret = activity_secret.into();
 
@@ -169,10 +159,7 @@ impl Discord {
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
                 callback::two_params(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(
-                        self,
-                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
-                    )
+                    callback(res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }))
                 });
 
             unsafe {
@@ -193,11 +180,11 @@ impl Discord {
     pub fn disconnect_lobby<'d>(
         &'d self,
         lobby_id: LobbyID,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.disconnect_lobby.unwrap()(mgr, lobby_id, ptr, fun) }
         })
@@ -341,7 +328,7 @@ impl Discord {
         lobby_id: LobbyID,
         user_id: UserID,
         transaction: &LobbyMemberTransaction,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         let mut tx = std::ptr::null_mut();
 
@@ -351,16 +338,16 @@ impl Discord {
             })
             .to_result();
         if let Err(e) = create {
-            return callback(self, Err(e));
+            return callback(Err(e));
         }
 
         if let Err(e) = transaction.process(tx) {
-            return callback(self, Err(e));
+            return callback(Err(e));
         }
 
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.update_member.unwrap()(mgr, lobby_id, user_id, tx, ptr, fun) }
         })
@@ -533,7 +520,7 @@ impl Discord {
         &'d self,
         lobby_id: LobbyID,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         let buffer = buffer.as_ref();
 
@@ -541,7 +528,7 @@ impl Discord {
 
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe {
                 mgr.send_lobby_message.unwrap()(
@@ -568,7 +555,7 @@ impl Discord {
     pub fn lobby_search<'d>(
         &'d self,
         search: &SearchQuery,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         let mut tx = std::ptr::null_mut();
 
@@ -576,16 +563,16 @@ impl Discord {
             .with_lobby_manager(|mgr| unsafe { mgr.get_search_query.unwrap()(mgr, &mut tx) })
             .to_result();
         if let Err(e) = create {
-            return callback(self, Err(e));
+            return callback(Err(e));
         }
 
         if let Err(e) = search.process(tx) {
-            return callback(self, Err(e));
+            return callback(Err(e));
         }
 
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.search.unwrap()(mgr, tx, ptr, fun) }
         })
@@ -642,11 +629,11 @@ impl Discord {
     pub fn connect_lobby_voice<'d>(
         &'d self,
         lobby_id: LobbyID,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.connect_voice.unwrap()(mgr, lobby_id, ptr, fun) }
         })
@@ -658,11 +645,11 @@ impl Discord {
     pub fn disconnect_lobby_voice<'d>(
         &'d self,
         lobby_id: LobbyID,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         self.with_lobby_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.disconnect_voice.unwrap()(mgr, lobby_id, ptr, fun) }
         })

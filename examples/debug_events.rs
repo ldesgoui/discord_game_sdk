@@ -13,7 +13,7 @@ fn main() {
         &Activity::empty()
             .with_details("Trying stuff out")
             .with_state("using discord_game_sdk"),
-        |_, res| log::info!("update_activity: {:?}", res),
+        |res| log::info!("update_activity: {:?}", res),
     );
 
     // Game loop

@@ -55,14 +55,14 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.validate_or_exit(|discord, result| {
+    /// discord.validate_or_exit(|result| {
     ///     // ...
     /// });
     /// # Ok(()) }
-    pub fn validate_or_exit<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
+    pub fn validate_or_exit<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_application_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.validate_or_exit.unwrap()(mgr, ptr, fun) };
         });
@@ -80,7 +80,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.oauth2_token(|discord, token| {
+    /// discord.oauth2_token(|token| {
     ///     match token {
     ///         Ok(token) => {
     ///             //...
@@ -89,12 +89,11 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn oauth2_token<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<&OAuth2Token>)) {
+    pub fn oauth2_token<'d>(&'d self, callback: impl 'd + FnOnce(Result<&OAuth2Token>)) {
         self.with_application_manager(|mgr| {
             let (ptr, fun) = callback::two_params(
                 |res: sys::EDiscordResult, token: *mut sys::DiscordOAuth2Token| {
                     callback(
-                        self,
                         res.to_result()
                             .map(|()| unsafe { &*(token as *mut OAuth2Token) }),
                     )
@@ -112,7 +111,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.app_ticket(|discord, ticket| {
+    /// discord.app_ticket(|ticket| {
     ///     match ticket {
     ///         Ok(ticket) => {
     ///             //...
@@ -121,11 +120,10 @@ impl Discord {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn app_ticket<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<&str>)) {
+    pub fn app_ticket<'d>(&'d self, callback: impl 'd + FnOnce(Result<&str>)) {
         self.with_application_manager(|mgr| {
             let (ptr, fun) = callback::two_params(|res: sys::EDiscordResult, string: *const u8| {
                 callback(
-                    self,
                     res.to_result()
                         .map(|()| unsafe { utils::charptr_to_str(string) }),
                 )

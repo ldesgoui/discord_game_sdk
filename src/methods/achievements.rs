@@ -26,7 +26,7 @@ impl Discord {
     /// discord.set_user_achievement(
     ///     achievement.id,
     ///     (achievement.progress * 100 / achievement.completion) as u8,
-    ///     |discord, result| {
+    ///     |result| {
     ///         if let Err(error) = result {
     ///             eprintln!("failed setting user achievement: {}", error);
     ///         }
@@ -37,13 +37,13 @@ impl Discord {
         &'d self,
         achievement_id: Snowflake,
         percent_complete: u8,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         debug_assert!((0..=100).contains(&percent_complete));
 
         self.with_achievement_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe {
                 mgr.set_user_achievement.unwrap()(mgr, achievement_id, percent_complete, ptr, fun)
@@ -61,7 +61,7 @@ impl Discord {
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.fetch_user_achievements(
-    ///     |discord, result| {
+    ///     |result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed fetching user achievements: {}", error);
     ///         }
@@ -72,10 +72,10 @@ impl Discord {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn fetch_user_achievements<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
+    pub fn fetch_user_achievements<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_achievement_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.fetch_user_achievements.unwrap()(mgr, ptr, fun) }
         });
@@ -92,7 +92,7 @@ impl Discord {
     /// # const ACHIEVEMENT_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.fetch_user_achievements(
-    ///     |discord, result| {
+    ///     |result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed fetching user achievements: {}", error);
     ///         }
@@ -166,7 +166,7 @@ impl Discord {
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
     /// discord.fetch_user_achievements(
-    ///     |discord, result| {
+    ///     |result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed fetching user achievements: {}", error);
     ///         }

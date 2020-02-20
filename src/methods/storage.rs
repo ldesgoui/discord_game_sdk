@@ -73,7 +73,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.read_file_async("profile_1.save\0", |discord, contents| {
+    /// discord.read_file_async("profile_1.save\0", |contents| {
     ///     match contents {
     ///         Ok(contents) => println!("read {} bytes", contents.len()),
     ///         Err(error) => eprintln!("failed to read file: {}", error),
@@ -83,7 +83,7 @@ impl Discord {
     pub fn read_file_async<'d, 's>(
         &'d self,
         filename: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(&Self, Result<&[u8]>),
+        callback: impl 'd + FnOnce(Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -95,7 +95,6 @@ impl Discord {
             let (ptr, fun) =
                 callback::three_params(|res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
                     callback(
-                        self,
                         res.to_result().map(|()| unsafe {
                             std::slice::from_raw_parts(data, data_len as usize)
                         }),
@@ -118,7 +117,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.read_file_async_partial("profile_1.save\0", 30, 10, |discord, contents| {
+    /// discord.read_file_async_partial("profile_1.save\0", 30, 10, |contents| {
     ///     match contents {
     ///         Ok(contents) => println!("read {} bytes", contents.len()),
     ///         Err(error) => eprintln!("failed to partially read file: {}", error),
@@ -130,7 +129,7 @@ impl Discord {
         filename: impl Into<Cow<'s, str>>,
         offset: u64,
         length: u64,
-        callback: impl 'd + FnOnce(&Self, Result<&[u8]>),
+        callback: impl 'd + FnOnce(Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -142,7 +141,6 @@ impl Discord {
             let (ptr, fun) =
                 callback::three_params(|res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
                     callback(
-                        self,
                         res.to_result().map(|()| unsafe {
                             std::slice::from_raw_parts(data, data_len as usize)
                         }),
@@ -215,7 +213,7 @@ impl Discord {
     /// # fn example(discord: Discord) -> Result<()> {
     /// let contents = "important save data".as_bytes();
     ///
-    /// discord.write_file_async("profile_1.save\0", contents, |discord, res| {
+    /// discord.write_file_async("profile_1.save\0", contents, |res| {
     ///     if let Err(error) = res {
     ///         eprintln!("failed to write to file: {}", error);
     ///     }
@@ -225,7 +223,7 @@ impl Discord {
         &'d self,
         filename: impl Into<Cow<'s, str>>,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
+        callback: impl 'd + FnOnce(Result<()>),
     ) {
         let mut filename = filename.into();
 
@@ -239,7 +237,7 @@ impl Discord {
 
         self.with_storage_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe {
                 mgr.write_async.unwrap()(

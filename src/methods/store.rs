@@ -20,7 +20,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.fetch_skus(|discord, result| {
+    /// discord.fetch_skus(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
     ///     }
@@ -31,10 +31,10 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_skus<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
+    pub fn fetch_skus<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_store_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.fetch_skus.unwrap()(mgr, ptr, fun) }
         })
@@ -50,7 +50,7 @@ impl Discord {
     /// # use discord_game_sdk::*;
     /// # const SKU_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.fetch_skus(|discord, result| {
+    /// discord.fetch_skus(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
     ///     }
@@ -119,7 +119,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.fetch_skus(|discord, result| {
+    /// discord.fetch_skus(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
     ///     }
@@ -144,7 +144,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.fetch_entitlements(|discord, result| {
+    /// discord.fetch_entitlements(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
     ///     }
@@ -155,10 +155,10 @@ impl Discord {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_entitlements<'d>(&'d self, callback: impl 'd + FnOnce(&Self, Result<()>)) {
+    pub fn fetch_entitlements<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_store_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.fetch_entitlements.unwrap()(mgr, ptr, fun) }
         })
@@ -174,7 +174,7 @@ impl Discord {
     /// # use discord_game_sdk::*;
     /// # const ENTITLEMENT_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.fetch_entitlements(|discord, result| {
+    /// discord.fetch_entitlements(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
     ///     }
@@ -245,7 +245,7 @@ impl Discord {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.fetch_entitlements(|discord, result| {
+    /// discord.fetch_entitlements(|result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
     ///     }
@@ -300,21 +300,17 @@ impl Discord {
     /// # use discord_game_sdk::*;
     /// # const SKU_ID: Snowflake = 0;
     /// # fn example(discord: Discord) -> Result<()> {
-    /// discord.start_purchase(SKU_ID, |discord, result| {
+    /// discord.start_purchase(SKU_ID, |result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to start purchase: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn start_purchase<'d>(
-        &'d self,
-        sku_id: Snowflake,
-        callback: impl 'd + FnOnce(&Self, Result<()>),
-    ) {
+    pub fn start_purchase<'d>(&'d self, sku_id: Snowflake, callback: impl 'd + FnOnce(Result<()>)) {
         self.with_store_manager(|mgr| {
             let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(self, res.to_result()));
+                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
 
             unsafe { mgr.start_purchase.unwrap()(mgr, sku_id, ptr, fun) }
         })

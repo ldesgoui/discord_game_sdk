@@ -11,7 +11,7 @@ use std::convert::{TryFrom, TryInto};
 /// discord.fetch_image(
 ///     ImageHandle::from_user_id(user.id(), 128),
 ///     FetchKind::UseCached,
-///     |discord, handle| {
+///     |handle| {
 ///         match handle.and_then(|handle| discord.image(handle))  {
 ///             Ok(image) => {
 ///                 println!("image dimensions: {:?}", image.dimensions());
@@ -30,12 +30,12 @@ impl Discord {
         &'d self,
         handle: ImageHandle,
         refresh: FetchKind,
-        callback: impl 'd + FnOnce(&Self, Result<ImageHandle>),
+        callback: impl 'd + FnOnce(Result<ImageHandle>),
     ) {
         self.with_image_manager(|mgr| {
             let (ptr, fun) = callback::two_params(
                 |res: sys::EDiscordResult, image_handle: sys::DiscordImageHandle| {
-                    callback(self, res.to_result().map(|()| ImageHandle(image_handle)))
+                    callback(res.to_result().map(|()| ImageHandle(image_handle)))
                 },
             );
 
