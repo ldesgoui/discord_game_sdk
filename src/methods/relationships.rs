@@ -1,4 +1,4 @@
-use crate::{iter, sys, to_result::ToResult, Discord, Relationship, Result, UserID};
+use crate::{iter, sys, to_result::ToResult, utils, Discord, Relationship, Result, UserID};
 use std::convert::TryInto;
 
 /// # Relationships
@@ -48,7 +48,8 @@ impl<E> Discord<E> {
         where
             F: FnMut(&Relationship) -> bool,
         {
-            prevent_unwind!();
+            let _guard = utils::prevent_unwind();
+
             (*(callback_ptr as *mut F))(&*(relationship_ptr as *const Relationship))
         }
 

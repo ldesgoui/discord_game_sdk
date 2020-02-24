@@ -150,7 +150,7 @@ impl<E: EventHandler> Discord<E> {
             level: sys::EDiscordLogLevel,
             message: *const u8,
         ) {
-            prevent_unwind!();
+            let _guard = utils::prevent_unwind();
 
             let level = match level {
                 sys::DiscordLogLevel_Error => log::Level::Error,

@@ -5,7 +5,7 @@ use crate::{
 use std::ffi::c_void;
 
 fn with_event_handler<E>(inner: *mut c_void, callback: impl FnOnce(&mut E, &Discord<E>)) {
-    prevent_unwind!();
+    let _guard = utils::prevent_unwind();
 
     debug_assert!(!inner.is_null());
 

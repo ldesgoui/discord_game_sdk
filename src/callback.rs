@@ -1,3 +1,4 @@
+use crate::utils;
 use std::ffi::c_void;
 
 pub(crate) fn one_param<F: FnOnce(A), A>(
@@ -7,7 +8,7 @@ pub(crate) fn one_param<F: FnOnce(A), A>(
     Option<unsafe extern "C" fn(*mut c_void, A)>,
 ) {
     extern "C" fn one_param<F: FnOnce(A), A>(ptr: *mut c_void, a: A) {
-        prevent_unwind!();
+        let _guard = utils::prevent_unwind();
 
         // SAFETY:
         // lifetime of F was ellided when it was turned into a raw pointer
@@ -31,7 +32,7 @@ pub(crate) fn two_params<F: FnOnce(A, B), A, B>(
     Option<unsafe extern "C" fn(*mut c_void, A, B)>,
 ) {
     extern "C" fn two_params<F: FnOnce(A, B), A, B>(ptr: *mut c_void, a: A, b: B) {
-        prevent_unwind!();
+        let _guard = utils::prevent_unwind();
 
         // SAFETY: see `one_param`
         let callback = unsafe { Box::from_raw(ptr as *mut F) };
@@ -51,7 +52,7 @@ pub(crate) fn three_params<F: FnOnce(A, B, C), A, B, C>(
     Option<unsafe extern "C" fn(*mut c_void, A, B, C)>,
 ) {
     extern "C" fn three_params<F: FnOnce(A, B, C), A, B, C>(ptr: *mut c_void, a: A, b: B, c: C) {
-        prevent_unwind!();
+        let _guard = utils::prevent_unwind();
 
         // SAFETY: see `one_param`
         let callback = unsafe { Box::from_raw(ptr as *mut F) };
