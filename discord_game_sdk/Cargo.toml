@@ -1,0 +1,31 @@
+[package]
+name = "discord_game_sdk"
+version = "1.0.0-rc.3" # check src/lib.rs
+authors = ["ldesgoui <ldesgoui@gmail.com>"]
+edition = "2018"
+description = "Safe wrapper for the Discord Game SDK"
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/ldesgoui/discord_game_sdk"
+keywords = ["discord", "sdk", "gamedev"]
+categories = ["api-bindings", "game-engines"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+features = ["discord_game_sdk_sys/doc"]
+no-default-features = true
+
+[dependencies]
+bitflags = "1.2"
+discord_game_sdk_sys = { path = "../discord_game_sdk_sys", version = "1.0.0-rc.1" }
+log = "0.4"
+memchr = "2.2"
+scopeguard = "1.0"
+image = { version = "0.23", default-features = false, optional = true }
+
+[dev-dependencies]
+pretty_env_logger = "0.4"
+
+[features]
+default = ["link"]
+link = ["discord_game_sdk_sys/link"]
+doc = ["discord_game_sdk_sys/doc"] # DO NOT RELY ON THIS
