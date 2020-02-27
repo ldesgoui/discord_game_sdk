@@ -13,7 +13,7 @@ use std::{cell::UnsafeCell, marker::PhantomData, mem::ManuallyDrop};
 ///
 /// All `callback`s will be called with `Err(TransactionAborted)` when the instance is dropped
 ///
-/// ```rust
+/// ```rust,compile_fail
 /// // Static test to verify callbacks exhibit proper ownership
 /// # use discord_game_sdk::*;
 /// # fn example(discord: Discord<'_, ()>) -> Result<()>
@@ -29,7 +29,7 @@ use std::{cell::UnsafeCell, marker::PhantomData, mem::ManuallyDrop};
 ///
 /// ### Iterators
 ///
-/// ```rust
+/// ```rust,compile_fail
 /// // Static test to verify `Iterator`s depend on `Discord`'s lifetime
 /// # use discord_game_sdk::*;
 /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
