@@ -1,20 +1,17 @@
 use scopeguard::{OnSuccess, ScopeGuard};
-use std::panic::PanicInfo;
 
 pub(crate) fn with_tx<Tx, T>(ptr: *mut Tx, callback: impl FnOnce(&mut Tx) -> T) -> T {
     let tx = unsafe { &mut *ptr };
     callback(tx)
 }
 
+type PanicHook = Box<dyn Fn(&std::panic::PanicInfo<'_>) + Sync + Send + 'static>;
+
 // TRACK:
 // https://github.com/rust-lang/rust/issues/52652
 // https://github.com/rust-lang/rust/issues/58760
 // https://github.com/rust-lang/project-ffi-unwind
-pub(crate) fn prevent_unwind() -> ScopeGuard<
-    Box<dyn Fn(&PanicInfo) + Sync + Send + 'static>,
-    fn(Box<dyn Fn(&PanicInfo) + Sync + Send + 'static>),
-    OnSuccess,
-> {
+pub(crate) fn prevent_unwind() -> ScopeGuard<PanicHook, fn(PanicHook), OnSuccess> {
     const ACROSS_FFI: &str = "[discord_game_sdk]
             The program has encountered a `panic` across FFI bounds, unwinding at this
             point would be undefined behavior, we will abort the process instead.

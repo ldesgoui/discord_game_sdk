@@ -18,16 +18,16 @@ use std::{
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/lobbies#the-api-way).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// Create a new lobby. The current user will automatically join and become the owner.
     ///
     /// [`LobbyTransaction::owner`](struct.LobbyTransaction.html#method.owner) *MUST NOT* be called.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#createlobby)
-    pub fn create_lobby<'d>(
-        &'d self,
+    pub fn create_lobby(
+        &self,
         transaction: &LobbyTransaction,
-        callback: impl 'd + FnOnce(Result<&Lobby>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&Lobby>),
     ) {
         let mut tx = std::ptr::null_mut();
 
@@ -37,18 +37,22 @@ impl<E> Discord<E> {
             })
             .to_result();
         if let Err(e) = create {
-            return callback(Err(e));
+            return callback(&*self.ref_copy(), Err(e));
         }
 
         if let Err(e) = transaction.process(tx) {
-            return callback(Err(e));
+            return callback(&*self.ref_copy(), Err(e));
         }
 
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::two_params(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }))
-                });
+            let (ptr, fun) = callback::two_params(
+                move |res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                    callback(
+                        &*self.ref_copy(),
+                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
+                    )
+                },
+            );
 
             unsafe { mgr.create_lobby.unwrap()(mgr, tx, ptr, fun) }
         })
@@ -57,11 +61,11 @@ impl<E> Discord<E> {
     /// Updates a lobby with data from the given transaction.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#updatelobby)
-    pub fn update_lobby<'d>(
-        &'d self,
+    pub fn update_lobby(
+        &self,
         lobby_id: LobbyID,
         transaction: &LobbyTransaction,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         let mut tx = std::ptr::null_mut();
 
@@ -71,16 +75,17 @@ impl<E> Discord<E> {
             })
             .to_result();
         if let Err(e) = create {
-            return callback(Err(e));
+            return callback(&*self.ref_copy(), Err(e));
         }
 
         if let Err(e) = transaction.process(tx) {
-            return callback(Err(e));
+            return callback(&*self.ref_copy(), Err(e));
         }
 
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.update_lobby.unwrap()(mgr, lobby_id, tx, ptr, fun) }
         })
@@ -89,10 +94,15 @@ impl<E> Discord<E> {
     /// Deletes a given lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#deletelobby)
-    pub fn delete_lobby<'d>(&'d self, lobby_id: LobbyID, callback: impl 'd + FnOnce(Result<()>)) {
+    pub fn delete_lobby(
+        &self,
+        lobby_id: LobbyID,
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
+    ) {
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.delete_lobby.unwrap()(mgr, lobby_id, ptr, fun) }
         })
@@ -106,11 +116,11 @@ impl<E> Discord<E> {
     /// A nul byte will be appended to `secret` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobby)
-    pub fn connect_lobby<'d, 's>(
-        &'d self,
+    pub fn connect_lobby<'s>(
+        &self,
         lobby_id: LobbyID,
         secret: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(Result<&Lobby>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&Lobby>),
     ) {
         let mut secret = secret.into();
 
@@ -119,10 +129,14 @@ impl<E> Discord<E> {
         };
 
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::two_params(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }))
-                });
+            let (ptr, fun) = callback::two_params(
+                move |res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                    callback(
+                        &*self.ref_copy(),
+                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
+                    )
+                },
+            );
 
             unsafe {
                 mgr.connect_lobby.unwrap()(
@@ -145,10 +159,10 @@ impl<E> Discord<E> {
     /// A nul byte will be appended to `activity_secret` if one is not present.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectlobbywithactivitysecret)
-    pub fn connect_lobby_with_activity_secret<'d, 's>(
-        &'d self,
+    pub fn connect_lobby_with_activity_secret<'s>(
+        &self,
         activity_secret: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(Result<&Lobby>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&Lobby>),
     ) {
         let mut activity_secret = activity_secret.into();
 
@@ -157,10 +171,14 @@ impl<E> Discord<E> {
         };
 
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::two_params(|res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }))
-                });
+            let (ptr, fun) = callback::two_params(
+                move |res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                    callback(
+                        &*self.ref_copy(),
+                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
+                    )
+                },
+            );
 
             unsafe {
                 mgr.connect_lobby_with_activity_secret.unwrap()(
@@ -177,14 +195,15 @@ impl<E> Discord<E> {
     /// Disconnects the current user from a lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectlobby)
-    pub fn disconnect_lobby<'d>(
-        &'d self,
+    pub fn disconnect_lobby(
+        &self,
         lobby_id: LobbyID,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.disconnect_lobby.unwrap()(mgr, lobby_id, ptr, fun) }
         })
@@ -309,19 +328,18 @@ impl<E> Discord<E> {
     }
 
     /// Returns an `Iterator` over the metadata key-value pairs for a given lobby.
-    pub fn iter_lobby_metadata<'d>(
-        &'d self,
+    pub fn iter_lobby_metadata(
+        &self,
         lobby_id: LobbyID,
     ) -> Result<
-        impl 'd
+        impl '_
             + Iterator<Item = Result<(String, String)>>
             + DoubleEndedIterator
             + ExactSizeIterator
             + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
-            self,
-            move |d, i| d.lobby_metadata_at(lobby_id, i),
+            Box::new(move |i| self.ref_copy().lobby_metadata_at(lobby_id, i)),
             self.lobby_metadata_count(lobby_id)?,
         ))
     }
@@ -329,12 +347,12 @@ impl<E> Discord<E> {
     /// Updates lobby member info for a given member of the lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#updatemember)
-    pub fn update_member<'d>(
-        &'d self,
+    pub fn update_member(
+        &self,
         lobby_id: LobbyID,
         user_id: UserID,
         transaction: &LobbyMemberTransaction,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         let mut tx = std::ptr::null_mut();
 
@@ -344,16 +362,17 @@ impl<E> Discord<E> {
             })
             .to_result();
         if let Err(e) = create {
-            return callback(Err(e));
+            return callback(&*self.ref_copy(), Err(e));
         }
 
         if let Err(e) = transaction.process(tx) {
-            return callback(Err(e));
+            return callback(&*self.ref_copy(), Err(e));
         }
 
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.update_member.unwrap()(mgr, lobby_id, user_id, tx, ptr, fun) }
         })
@@ -395,19 +414,18 @@ impl<E> Discord<E> {
     }
 
     /// Returns an `Iterator` over the user IDs of the members of a lobby.
-    pub fn iter_lobby_member_ids<'d>(
-        &'d self,
+    pub fn iter_lobby_member_ids(
+        &self,
         lobby_id: LobbyID,
     ) -> Result<
-        impl 'd
+        impl '_
             + Iterator<Item = Result<UserID>>
             + DoubleEndedIterator
             + ExactSizeIterator
             + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
-            self,
-            move |d, i| d.lobby_member_id_at(lobby_id, i),
+            Box::new(move |i| self.ref_copy().lobby_member_id_at(lobby_id, i)),
             self.lobby_member_count(lobby_id)?,
         ))
     }
@@ -507,20 +525,22 @@ impl<E> Discord<E> {
     }
 
     /// Returns an `Iterator` over the metadata key-value pairs of a given lobby member.
-    pub fn iter_lobby_member_metadata<'d>(
-        &'d self,
+    pub fn iter_lobby_member_metadata(
+        &self,
         lobby_id: LobbyID,
         user_id: UserID,
     ) -> Result<
-        impl 'd
+        impl '_
             + Iterator<Item = Result<(String, String)>>
             + DoubleEndedIterator
             + ExactSizeIterator
             + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
-            self,
-            move |d, i| d.lobby_member_metadata_at(lobby_id, user_id, i),
+            Box::new(move |i| {
+                self.ref_copy()
+                    .lobby_member_metadata_at(lobby_id, user_id, i)
+            }),
             self.lobby_member_metadata_count(lobby_id, user_id)?,
         ))
     }
@@ -534,19 +554,20 @@ impl<E> Discord<E> {
     /// [`send_lobby_network_message`](#method.send_lobby_network_message) instead.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#sendlobbymessage)
-    pub fn send_lobby_message<'d>(
-        &'d self,
+    pub fn send_lobby_message(
+        &self,
         lobby_id: LobbyID,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         let buffer = buffer.as_ref();
 
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe {
                 mgr.send_lobby_message.unwrap()(
@@ -570,10 +591,10 @@ impl<E> Discord<E> {
     /// You do not necessarily need to access the filtered lobbies within the context of the result callback.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#search)
-    pub fn lobby_search<'d>(
-        &'d self,
+    pub fn lobby_search(
+        &self,
         search: &SearchQuery,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         let mut tx = std::ptr::null_mut();
 
@@ -581,16 +602,17 @@ impl<E> Discord<E> {
             .with_lobby_manager(|mgr| unsafe { mgr.get_search_query.unwrap()(mgr, &mut tx) })
             .to_result();
         if let Err(e) = create {
-            return callback(Err(e));
+            return callback(&*self.ref_copy(), Err(e));
         }
 
         if let Err(e) = search.process(tx) {
-            return callback(Err(e));
+            return callback(&*self.ref_copy(), Err(e));
         }
 
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.search.unwrap()(mgr, tx, ptr, fun) }
         })
@@ -634,14 +656,17 @@ impl<E> Discord<E> {
     /// Returns an `Iterator` over the IDs of lobbies found via the lobby search.
     ///
     /// [`lobby_search`](#method.lobby_search) must have completed first.
-    pub fn iter_lobbies<'d>(
-        &'d self,
-    ) -> impl 'd
+    pub fn iter_lobbies(
+        &self,
+    ) -> impl '_
            + Iterator<Item = Result<LobbyID>>
            + DoubleEndedIterator
            + ExactSizeIterator
            + std::iter::FusedIterator {
-        iter::Collection::new(self, Self::lobby_id_at, self.lobby_count())
+        iter::Collection::new(
+            Box::new(move |i| self.ref_copy().lobby_id_at(i)),
+            self.lobby_count(),
+        )
     }
 
     /// Connects to the voice channel of the current lobby.
@@ -650,14 +675,15 @@ impl<E> Discord<E> {
     /// allowing them to mute/deafen themselves as well as mute/adjust the volume of other members.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectvoice)
-    pub fn connect_lobby_voice<'d>(
-        &'d self,
+    pub fn connect_lobby_voice(
+        &self,
         lobby_id: LobbyID,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.connect_voice.unwrap()(mgr, lobby_id, ptr, fun) }
         })
@@ -666,14 +692,15 @@ impl<E> Discord<E> {
     /// Disconnects from the voice channel of a given lobby.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectvoice)
-    pub fn disconnect_lobby_voice<'d>(
-        &'d self,
+    pub fn disconnect_lobby_voice(
+        &self,
         lobby_id: LobbyID,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         self.with_lobby_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.disconnect_voice.unwrap()(mgr, lobby_id, ptr, fun) }
         })

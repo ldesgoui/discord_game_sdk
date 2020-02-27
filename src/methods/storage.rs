@@ -8,7 +8,7 @@ use std::{
 /// # Storage
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/storage)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// Reads data synchronously from the game's allocated save file into a buffer.
     ///
     /// The file is mapped by key-value pair, and this function will read data that exists
@@ -24,11 +24,13 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let mut contents = vec![0_u8; 2048];
     ///
-    /// discord.read_file("profile_1.save\0", &mut contents);
+    /// let end = discord.read_file("profile_1.save\0", &mut contents)?;
+    /// let contents = &contents[0..end as usize];
     /// # Ok(()) }
+    /// ```
     pub fn read_file<'s>(
         &self,
         filename: impl Into<Cow<'s, str>>,
@@ -72,18 +74,19 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.read_file_async("profile_1.save\0", |contents| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.read_file_async("profile_1.save\0", |discord, contents| {
     ///     match contents {
     ///         Ok(contents) => println!("read {} bytes", contents.len()),
     ///         Err(error) => eprintln!("failed to read file: {}", error),
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn read_file_async<'d, 's>(
-        &'d self,
+    /// ```
+    pub fn read_file_async<'s>(
+        &self,
         filename: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(Result<&[u8]>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -92,14 +95,16 @@ impl<E> Discord<E> {
         };
 
         self.with_storage_manager(|mgr| {
-            let (ptr, fun) =
-                callback::three_params(|res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
+            let (ptr, fun) = callback::three_params(
+                move |res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
                     callback(
+                        &*self.ref_copy(),
                         res.to_result().map(|()| unsafe {
                             std::slice::from_raw_parts(data, data_len as usize)
                         }),
                     )
-                });
+                },
+            );
 
             unsafe { mgr.read_async.unwrap()(mgr, filename.as_ptr(), ptr, fun) }
         })
@@ -116,20 +121,21 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.read_file_async_partial("profile_1.save\0", 30, 10, |contents| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.read_file_async_partial("profile_1.save\0", 30, 10, |discord, contents| {
     ///     match contents {
     ///         Ok(contents) => println!("read {} bytes", contents.len()),
     ///         Err(error) => eprintln!("failed to partially read file: {}", error),
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn read_file_async_partial<'d, 's>(
-        &'d self,
+    /// ```
+    pub fn read_file_async_partial<'s>(
+        &self,
         filename: impl Into<Cow<'s, str>>,
         offset: u64,
         length: u64,
-        callback: impl 'd + FnOnce(Result<&[u8]>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&[u8]>),
     ) {
         let mut filename = filename.into();
 
@@ -138,14 +144,16 @@ impl<E> Discord<E> {
         };
 
         self.with_storage_manager(|mgr| {
-            let (ptr, fun) =
-                callback::three_params(|res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
+            let (ptr, fun) = callback::three_params(
+                move |res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
                     callback(
+                        &*self.ref_copy(),
                         res.to_result().map(|()| unsafe {
                             std::slice::from_raw_parts(data, data_len as usize)
                         }),
                     )
-                });
+                },
+            );
 
             unsafe {
                 mgr.read_async_partial.unwrap()(mgr, filename.as_ptr(), offset, length, ptr, fun)
@@ -165,11 +173,12 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let contents = "important save data".as_bytes();
     ///
     /// discord.write_file("profile_1.save\0", contents)?;
     /// # Ok(()) }
+    /// ```
     pub fn write_file<'s>(
         &self,
         filename: impl Into<Cow<'s, str>>,
@@ -210,20 +219,21 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let contents = "important save data".as_bytes();
     ///
-    /// discord.write_file_async("profile_1.save\0", contents, |res| {
-    ///     if let Err(error) = res {
+    /// discord.write_file_async("profile_1.save\0", contents, |discord, result| {
+    ///     if let Err(error) = result {
     ///         eprintln!("failed to write to file: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn write_file_async<'d, 's>(
-        &'d self,
+    /// ```
+    pub fn write_file_async<'s>(
+        &self,
         filename: impl Into<Cow<'s, str>>,
         buffer: impl AsRef<[u8]>,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         let mut filename = filename.into();
 
@@ -236,8 +246,9 @@ impl<E> Discord<E> {
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
         self.with_storage_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe {
                 mgr.write_async.unwrap()(
@@ -264,9 +275,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.delete_file("profile_1.save\0")?;
     /// # Ok(()) }
+    /// ```
     pub fn delete_file<'s>(&self, filename: impl Into<Cow<'s, str>>) -> Result<()> {
         let mut filename = filename.into();
 
@@ -288,11 +300,12 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// if discord.file_exists("profile_1.save\0")? {
     ///     // ...
     /// }
     /// # Ok(()) }
+    /// ```
     pub fn file_exists<'s>(&self, filename: impl Into<Cow<'s, str>>) -> Result<bool> {
         let mut filename = filename.into();
 
@@ -320,9 +333,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let file_stat = discord.file_stat("profile_1.save\0")?;
     /// # Ok(()) }
+    /// ```
     pub fn file_stat<'s>(&self, filename: impl Into<Cow<'s, str>>) -> Result<FileStat> {
         let mut filename = filename.into();
 
@@ -379,20 +393,24 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// for file_stat in discord.iter_file_stats() {
     ///     let file_stat = file_stat?;
     ///     // ...
     /// }
     /// # Ok(()) }
-    pub fn iter_file_stats<'d>(
-        &'d self,
-    ) -> impl 'd
+    /// ```
+    pub fn iter_file_stats(
+        &self,
+    ) -> impl '_
            + Iterator<Item = Result<FileStat>>
            + DoubleEndedIterator
            + ExactSizeIterator
            + std::iter::FusedIterator {
-        iter::Collection::new(self, Self::file_stat_at, self.file_stat_count())
+        iter::Collection::new(
+            Box::new(move |i| self.ref_copy().file_stat_at(i)),
+            self.file_stat_count(),
+        )
     }
 
     /// Returns the path to the folder where files are stored.
@@ -402,9 +420,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let folder_path = discord.folder_path()?;
     /// # Ok(()) }
+    /// ```
     pub fn folder_path(&self) -> Result<String> {
         let mut path: sys::DiscordPath = [0; size_of::<sys::DiscordPath>()];
 

@@ -3,16 +3,17 @@ use crate::{callback, sys, to_result::ToResult, Discord, InputMode, Result, User
 /// # Voice
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// Get the voice input mode for the current user.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord-voice#getinputmode)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let input_mode = discord.input_mode()?;
     /// # Ok(()) }
+    /// ```
     pub fn input_mode(&self) -> Result<InputMode> {
         let mut input_mode = InputMode(sys::DiscordInputMode::default());
 
@@ -30,24 +31,26 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.set_input_mode(
     ///     InputMode::push_to_talk("caps lock"),
-    ///     |result| {
+    ///     |discord, result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed to set voice input mode: {}", error);
     ///         }
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn set_input_mode<'d>(
-        &'d self,
+    /// ```
+    pub fn set_input_mode(
+        &self,
         input_mode: InputMode,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
-        self.with_voice_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+        self.with_voice_manager(move |mgr| {
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
             unsafe { mgr.set_input_mode.unwrap()(mgr, input_mode.0, ptr, fun) }
         })
     }
@@ -58,11 +61,12 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// if discord.self_muted()? {
     ///     // ...
     /// }
     /// # Ok(()) }
+    /// ```
     pub fn self_muted(&self) -> Result<bool> {
         let mut muted = false;
 
@@ -78,11 +82,12 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// if discord.self_deafened()? {
     ///     // ...
     /// }
     /// # Ok(()) }
+    /// ```
     pub fn self_deafened(&self) -> Result<bool> {
         let mut deafened = false;
 
@@ -98,9 +103,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.set_self_mute(false)?;
     /// # Ok(()) }
+    /// ```
     pub fn set_self_mute(&self, muted: bool) -> Result<()> {
         self.with_voice_manager(|mgr| unsafe { mgr.set_self_mute.unwrap()(mgr, muted) })
             .to_result()
@@ -112,9 +118,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.set_self_deaf(false)?;
     /// # Ok(()) }
+    /// ```
     pub fn set_self_deaf(&self, deafened: bool) -> Result<()> {
         self.with_voice_manager(|mgr| unsafe { mgr.set_self_deaf.unwrap()(mgr, deafened) })
             .to_result()
@@ -126,11 +133,12 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>, user: User) -> Result<()> {
     /// if discord.local_muted(user.id())? {
     ///     // ...
     /// }
     /// # Ok(()) }
+    /// ```
     pub fn local_muted(&self, user_id: UserID) -> Result<bool> {
         let mut muted = false;
 
@@ -148,9 +156,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>, user: User) -> Result<()> {
     /// discord.set_local_volume(user.id(), discord.local_volume(user.id())? + 10)?;
     /// # Ok(()) }
+    /// ```
     pub fn local_volume(&self, user_id: UserID) -> Result<u8> {
         let mut volume = 0;
 
@@ -170,9 +179,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>, user: User) -> Result<()> {
     /// discord.set_local_mute(user.id(), true)?;
     /// # Ok(()) }
+    /// ```
     pub fn set_local_mute(&self, user_id: UserID, muted: bool) -> Result<()> {
         self.with_voice_manager(|mgr| unsafe { mgr.set_local_mute.unwrap()(mgr, user_id, muted) })
             .to_result()
@@ -186,9 +196,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>, user: User) -> Result<()> {
     /// discord.set_local_volume(user.id(), discord.local_volume(user.id())? + 10)?;
     /// # Ok(()) }
+    /// ```
     pub fn set_local_volume(&self, user_id: UserID, volume: u8) -> Result<()> {
         debug_assert!((0..=200).contains(&volume));
 

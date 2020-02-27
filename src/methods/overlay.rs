@@ -12,7 +12,7 @@ use std::borrow::Cow;
 /// | Overlay is hidden                        | locked   | closed             |
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/overlay)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// Check whether the user has the overlay enabled or disabled.
     ///
     /// If the overlay is disabled, all the functionality in this manager will still work.
@@ -22,7 +22,7 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// if discord.overlay_enabled() {
     ///     // ...
     /// }
@@ -42,7 +42,7 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// if discord.overlay_opened() {
     ///     // ...
     /// }
@@ -62,18 +62,23 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.set_overlay_opened(false, |result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.set_overlay_opened(false, |discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to set overlay open: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn set_overlay_opened<'d>(&'d self, opened: bool, callback: impl 'd + FnOnce(Result<()>)) {
+    pub fn set_overlay_opened(
+        &self,
+        opened: bool,
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
+    ) {
         self.with_overlay_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.set_locked.unwrap()(mgr, !opened, ptr, fun) }
         })
@@ -86,22 +91,23 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.open_invite_overlay(Action::Join, |result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.open_invite_overlay(Action::Join, |discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open invite overlay: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_invite_overlay<'d>(
-        &'d self,
+    pub fn open_invite_overlay(
+        &self,
         action: Action,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         self.with_overlay_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.open_activity_invite.unwrap()(mgr, action.into(), ptr, fun) }
         })
@@ -120,18 +126,18 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.open_guild_invite_overlay("discord-gamesdk\0", |result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.open_guild_invite_overlay("discord-gamesdk\0", |discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open guild invite overlay: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_guild_invite_overlay<'d, 's>(
-        &'d self,
+    pub fn open_guild_invite_overlay<'s>(
+        &self,
         code: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         let mut code = code.into();
 
@@ -140,8 +146,9 @@ impl<E> Discord<E> {
         };
 
         self.with_overlay_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.open_guild_invite.unwrap()(mgr, code.as_ptr(), ptr, fun) }
         })
@@ -155,18 +162,19 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.open_voice_settings(|result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.open_voice_settings(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed open voice settings overlay: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn open_voice_settings<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
+    pub fn open_voice_settings(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
         self.with_overlay_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.open_voice_settings.unwrap()(mgr, ptr, fun) }
         })

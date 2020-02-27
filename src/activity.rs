@@ -20,13 +20,13 @@ use std::convert::TryInto;
 ///
 /// ```rust
 /// # use discord_game_sdk::*;
-/// # fn example(discord: Discord<()>) -> Result<()> {
+/// # fn example(discord: Discord<'_, ()>) -> Result<()> {
 /// # let now = 0;
 /// discord.update_activity(
 ///     &Activity::empty()
 ///         .with_state("On Main Menu")
 ///         .with_start_time(now),
-///     |result| {
+///     |discord, result| {
 ///         if let Err(error) = result {
 ///             eprintln!("failed to update activity: {}", error);
 ///         }

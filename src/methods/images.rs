@@ -7,11 +7,11 @@ use std::convert::{TryFrom, TryInto};
 ///
 /// ```rust
 /// # use discord_game_sdk::*;
-/// # fn example(discord: Discord<()>, user: User) -> Result<()> {
+/// # fn example(discord: Discord<'_, ()>, user: User) -> Result<()> {
 /// discord.fetch_image(
 ///     ImageHandle::from_user_id(user.id(), 128),
 ///     FetchKind::UseCached,
-///     |handle| {
+///     |discord, handle| {
 ///         match handle.and_then(|handle| discord.image(handle))  {
 ///             Ok(image) => {
 ///                 println!("image dimensions: {:?}", image.dimensions());
@@ -22,20 +22,24 @@ use std::convert::{TryFrom, TryInto};
 ///     },
 /// );
 /// # Ok(()) }
-impl<E> Discord<E> {
+/// ```
+impl<'d, E> Discord<'d, E> {
     /// Prepares an image.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/images#fetch)
-    pub fn fetch_image<'d>(
-        &'d self,
+    pub fn fetch_image(
+        &self,
         handle: ImageHandle,
         refresh: FetchKind,
-        callback: impl 'd + FnOnce(Result<ImageHandle>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<ImageHandle>),
     ) {
-        self.with_image_manager(|mgr| {
+        self.with_image_manager(move |mgr| {
             let (ptr, fun) = callback::two_params(
-                |res: sys::EDiscordResult, image_handle: sys::DiscordImageHandle| {
-                    callback(res.to_result().map(|()| ImageHandle(image_handle)))
+                move |res: sys::EDiscordResult, image_handle: sys::DiscordImageHandle| {
+                    callback(
+                        &*self.ref_copy(),
+                        res.to_result().map(|()| ImageHandle(image_handle)),
+                    )
                 },
             );
 
@@ -49,7 +53,7 @@ impl<E> Discord<E> {
     pub fn image_dimensions(&self, handle: ImageHandle) -> Result<(u32, u32)> {
         let mut dimensions = sys::DiscordImageDimensions::default();
 
-        self.with_image_manager(|mgr| unsafe {
+        self.with_image_manager(move |mgr| unsafe {
             mgr.get_dimensions.unwrap()(mgr, handle.0, &mut dimensions)
         })
         .to_result()?;
@@ -69,6 +73,8 @@ impl<E> Discord<E> {
         debug_assert!(u32::try_from(data.len()).is_ok());
 
         self.with_image_manager(|mgr| unsafe {
+            let handle = handle;
+
             mgr.get_data.unwrap()(
                 mgr,
                 handle.0,
