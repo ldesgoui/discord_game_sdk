@@ -9,7 +9,7 @@ use std::convert::TryInto;
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/store#http-apis).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/store)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// Fetches the list of SKUs for the current application.
     ///
     /// Only SKUs that have a price set will be fetched.
@@ -19,8 +19,8 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.fetch_skus(|result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.fetch_skus(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
     ///     }
@@ -31,10 +31,11 @@ impl<E> Discord<E> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_skus<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
+    pub fn fetch_skus(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
         self.with_store_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.fetch_skus.unwrap()(mgr, ptr, fun) }
         })
@@ -49,8 +50,8 @@ impl<E> Discord<E> {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const SKU_ID: Snowflake = 0;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.fetch_skus(|result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.fetch_skus(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
     ///     }
@@ -118,8 +119,8 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.fetch_skus(|result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.fetch_skus(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch skus: {}", error);
     ///     }
@@ -130,14 +131,17 @@ impl<E> Discord<E> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_skus<'d>(
-        &'d self,
-    ) -> impl 'd
+    pub fn iter_skus(
+        &self,
+    ) -> impl '_
            + Iterator<Item = Result<Sku>>
            + DoubleEndedIterator
            + ExactSizeIterator
            + std::iter::FusedIterator {
-        iter::Collection::new(self, Self::sku_at, self.sku_count())
+        iter::Collection::new(
+            Box::new(move |i| self.ref_copy().sku_at(i)),
+            self.sku_count(),
+        )
     }
 
     /// Fetches a list of entitlements to which the user is entitled.
@@ -149,8 +153,8 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.fetch_entitlements(|result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.fetch_entitlements(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
     ///     }
@@ -161,10 +165,11 @@ impl<E> Discord<E> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn fetch_entitlements<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
+    pub fn fetch_entitlements(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
         self.with_store_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.fetch_entitlements.unwrap()(mgr, ptr, fun) }
         })
@@ -179,8 +184,8 @@ impl<E> Discord<E> {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const ENTITLEMENT_ID: Snowflake = 0;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.fetch_entitlements(|result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.fetch_entitlements(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
     ///     }
@@ -250,8 +255,8 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.fetch_entitlements(|result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.fetch_entitlements(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to fetch entitlements: {}", error);
     ///     }
@@ -262,14 +267,17 @@ impl<E> Discord<E> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn iter_entitlements<'d>(
-        &'d self,
-    ) -> impl 'd
+    pub fn iter_entitlements(
+        &self,
+    ) -> impl '_
            + Iterator<Item = Result<Entitlement>>
            + DoubleEndedIterator
            + ExactSizeIterator
            + std::iter::FusedIterator {
-        iter::Collection::new(self, Self::entitlement_at, self.entitlement_count())
+        iter::Collection::new(
+            Box::new(move |i| self.ref_copy().entitlement_at(i)),
+            self.entitlement_count(),
+        )
     }
 
     /// Whether the user is entitled to the given SKU.
@@ -281,7 +289,7 @@ impl<E> Discord<E> {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const SKU_ID: Snowflake = 0;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// if discord.has_entitlement(SKU_ID)? {
     ///     // ..
     /// }
@@ -307,18 +315,23 @@ impl<E> Discord<E> {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const SKU_ID: Snowflake = 0;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.start_purchase(SKU_ID, |result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.start_purchase(SKU_ID, |discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to start purchase: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn start_purchase<'d>(&'d self, sku_id: Snowflake, callback: impl 'd + FnOnce(Result<()>)) {
+    pub fn start_purchase(
+        &self,
+        sku_id: Snowflake,
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
+    ) {
         self.with_store_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.start_purchase.unwrap()(mgr, sku_id, ptr, fun) }
         })

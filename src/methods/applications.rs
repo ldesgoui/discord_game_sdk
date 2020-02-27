@@ -6,16 +6,17 @@ use std::mem::size_of;
 /// Authentication and various helper functions
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/applications)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// The locale that was set by the current user in their Discord settings.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/applications#getcurrentlocale)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// println!("current locale is {}", discord.current_locale());
     /// # Ok(()) }
+    /// ```
     pub fn current_locale(&self) -> String {
         let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
 
@@ -35,9 +36,10 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// println!("current branch is {}", discord.current_branch());
     /// # Ok(()) }
+    /// ```
     pub fn current_branch(&self) -> String {
         let mut branch: sys::DiscordBranch = [0; size_of::<sys::DiscordBranch>()];
 
@@ -54,15 +56,17 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.validate_or_exit(|result| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.validate_or_exit(|discord, result| {
     ///     // ...
     /// });
     /// # Ok(()) }
-    pub fn validate_or_exit<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
+    /// ```
+    pub fn validate_or_exit(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
         self.with_application_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.validate_or_exit.unwrap()(mgr, ptr, fun) };
         });
@@ -79,8 +83,8 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.oauth2_token(|token| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.oauth2_token(|discord, token| {
     ///     match token {
     ///         Ok(token) => {
     ///             //...
@@ -89,11 +93,13 @@ impl<E> Discord<E> {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn oauth2_token<'d>(&'d self, callback: impl 'd + FnOnce(Result<&OAuth2Token>)) {
+    /// ```
+    pub fn oauth2_token(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&OAuth2Token>)) {
         self.with_application_manager(|mgr| {
             let (ptr, fun) = callback::two_params(
-                |res: sys::EDiscordResult, token: *mut sys::DiscordOAuth2Token| {
+                move |res: sys::EDiscordResult, token: *mut sys::DiscordOAuth2Token| {
                     callback(
+                        &*self.ref_copy(),
                         res.to_result()
                             .map(|()| unsafe { &*(token as *mut OAuth2Token) }),
                     )
@@ -110,8 +116,8 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
-    /// discord.app_ticket(|ticket| {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
+    /// discord.app_ticket(|discord, ticket| {
     ///     match ticket {
     ///         Ok(ticket) => {
     ///             //...
@@ -120,14 +126,17 @@ impl<E> Discord<E> {
     ///     }
     /// });
     /// # Ok(()) }
-    pub fn app_ticket<'d>(&'d self, callback: impl 'd + FnOnce(Result<&str>)) {
+    /// ```
+    pub fn app_ticket(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&str>)) {
         self.with_application_manager(|mgr| {
-            let (ptr, fun) = callback::two_params(|res: sys::EDiscordResult, string: *const u8| {
-                callback(
-                    res.to_result()
-                        .map(|()| unsafe { utils::charptr_to_str(string) }),
-                )
-            });
+            let (ptr, fun) =
+                callback::two_params(move |res: sys::EDiscordResult, string: *const u8| {
+                    callback(
+                        &*self.ref_copy(),
+                        res.to_result()
+                            .map(|()| unsafe { utils::charptr_to_str(string) }),
+                    )
+                });
 
             unsafe { mgr.get_ticket.unwrap()(mgr, ptr, fun) };
         });

@@ -5,7 +5,7 @@ use crate::{
 /// # Users
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/users)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// Get the current user.
     ///
     /// More information can be found through the HTTP API.
@@ -20,7 +20,7 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let current_user = discord.current_user()?;
     /// # Ok(()) }
     /// ```
@@ -39,9 +39,9 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// # let id_to_lookup = 0;
-    /// discord.user(id_to_lookup, |result| {
+    /// discord.user(id_to_lookup, |discord, result| {
     ///     match result {
     ///         Ok(user) => {
     ///             // ...
@@ -51,12 +51,20 @@ impl<E> Discord<E> {
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn user<'d>(&'d self, user_id: UserID, callback: impl 'd + FnOnce(Result<&User>)) {
+    pub fn user(
+        &self,
+        user_id: UserID,
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&User>),
+    ) {
         self.with_user_manager(|mgr| {
-            let (ptr, fun) =
-                callback::two_params(|res: sys::EDiscordResult, user: *mut sys::DiscordUser| {
-                    callback(res.to_result().map(|()| unsafe { &*(user as *mut User) }))
-                });
+            let (ptr, fun) = callback::two_params(
+                move |res: sys::EDiscordResult, user: *mut sys::DiscordUser| {
+                    callback(
+                        &*self.ref_copy(),
+                        res.to_result().map(|()| unsafe { &*(user as *mut User) }),
+                    )
+                },
+            );
 
             unsafe { mgr.get_user.unwrap()(mgr, user_id, ptr, fun) }
         })
@@ -68,7 +76,7 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let premium = discord.current_user_premium_kind()?;
     /// # Ok(()) }
     /// ```
@@ -89,7 +97,7 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// let flags = discord.current_user_flags()?;
     /// # Ok(()) }
     /// ```

@@ -22,6 +22,7 @@ impl OAuth2Token {
     ///     println!("we have access to: {}", scope);
     /// }
     /// # Ok(()) }
+    /// ```
     pub fn scopes(&self) -> &str {
         charbuf_to_str(&self.0.scopes)
     }

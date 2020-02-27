@@ -11,7 +11,7 @@ use std::convert::TryInto;
 /// [Reference](https://discordapp.com/developers/docs/game-sdk/achievements#the-api-way).
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/achievements)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// Updates the current user's completion for a given achievement.
     ///
     /// `percent_complete` must be in the range `0..=100`.
@@ -21,29 +21,31 @@ impl<E> Discord<E> {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # #[derive(Default)] struct GameAchievement { id: Snowflake, progress: u32, completion: u32 }
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// # let achievement = GameAchievement::default();
     /// discord.set_user_achievement(
     ///     achievement.id,
     ///     (achievement.progress * 100 / achievement.completion) as u8,
-    ///     |result| {
+    ///     |discord, result| {
     ///         if let Err(error) = result {
     ///             eprintln!("failed setting user achievement: {}", error);
     ///         }
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn set_user_achievement<'d>(
-        &'d self,
+    /// ```
+    pub fn set_user_achievement(
+        &self,
         achievement_id: Snowflake,
         percent_complete: u8,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         debug_assert!((0..=100).contains(&percent_complete));
 
         self.with_achievement_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe {
                 mgr.set_user_achievement.unwrap()(mgr, achievement_id, percent_complete, ptr, fun)
@@ -59,9 +61,9 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.fetch_user_achievements(
-    ///     |result| {
+    ///     |discord, result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed fetching user achievements: {}", error);
     ///         }
@@ -72,10 +74,12 @@ impl<E> Discord<E> {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn fetch_user_achievements<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
+    /// ```
+    pub fn fetch_user_achievements(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
         self.with_achievement_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.fetch_user_achievements.unwrap()(mgr, ptr, fun) }
         });
@@ -90,9 +94,9 @@ impl<E> Discord<E> {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const ACHIEVEMENT_ID: Snowflake = 0;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.fetch_user_achievements(
-    ///     |result| {
+    ///     |discord, result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed fetching user achievements: {}", error);
     ///         }
@@ -105,6 +109,7 @@ impl<E> Discord<E> {
     ///     },
     /// );
     /// # Ok(()) }
+    /// ```
     pub fn user_achievement(&self, achievement_id: Snowflake) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
@@ -164,9 +169,9 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.fetch_user_achievements(
-    ///     |result| {
+    ///     |discord, result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed fetching user achievements: {}", error);
     ///         }
@@ -177,16 +182,16 @@ impl<E> Discord<E> {
     ///     },
     /// );
     /// # Ok(()) }
-    pub fn iter_user_achievements<'d>(
-        &'d self,
-    ) -> impl 'd
+    /// ```
+    pub fn iter_user_achievements(
+        &self,
+    ) -> impl '_
            + Iterator<Item = Result<UserAchievement>>
            + DoubleEndedIterator
            + ExactSizeIterator
            + std::iter::FusedIterator {
         iter::Collection::new(
-            self,
-            Self::user_achievement_at,
+            Box::new(move |i| self.ref_copy().user_achievement_at(i)),
             self.user_achievement_count(),
         )
     }

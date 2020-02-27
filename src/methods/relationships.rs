@@ -4,16 +4,17 @@ use std::convert::TryInto;
 /// # Relationships
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/relationships)
-impl<E> Discord<E> {
+impl<E> Discord<'_, E> {
     /// Get the relationship between the current user and a given user by ID.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/relationships#get)
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>, user: User) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>, user: User) -> Result<()> {
     /// let relationship = discord.relationship_with(user.id())?;
     /// # Ok(()) }
+    /// ```
     pub fn relationship_with(&self, user_id: UserID) -> Result<Relationship> {
         let mut relationship = Relationship(sys::DiscordRelationship::default());
 
@@ -35,11 +36,12 @@ impl<E> Discord<E> {
     /// ```rust
     /// # use discord_game_sdk::*;
     /// # const DISCORD_CLIENT_ID: ClientID = 0;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.filter_relationships(|relationship| {
     ///     relationship.presence().activity().application_id() == DISCORD_CLIENT_ID
     /// });
     /// # Ok(()) }
+    /// ```
     pub fn filter_relationships<F: FnMut(&Relationship) -> bool>(&self, mut filter: F) {
         pub(crate) unsafe extern "C" fn filter_relationship<F>(
             callback_ptr: *mut std::ffi::c_void,
@@ -106,24 +108,24 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// for relationship in discord.iter_relationships()? {
     ///     let relationship = relationship?;
     ///     // ..
     /// }
     /// # Ok(()) }
-    pub fn iter_relationships<'d>(
-        &'d self,
+    /// ```
+    pub fn iter_relationships(
+        &self,
     ) -> Result<
-        impl 'd
+        impl '_
             + Iterator<Item = Result<Relationship>>
             + DoubleEndedIterator
             + ExactSizeIterator
             + std::iter::FusedIterator,
     > {
         Ok(iter::Collection::new(
-            self,
-            Self::relationship_at,
+            Box::new(move |i| self.ref_copy().relationship_at(i)),
             self.relationship_count()?,
         ))
     }

@@ -2,36 +2,29 @@ use crate::{
     discord::{Discord, DiscordInner},
     sys, utils, Activity, Entitlement, EventHandler, Relationship, User, UserAchievement,
 };
-use std::ffi::c_void;
+use std::{ffi::c_void, mem::ManuallyDrop};
 
-fn with_event_handler<E>(inner: *mut c_void, callback: impl FnOnce(&mut E, &Discord<E>)) {
+fn with_event_handler<E>(inner: *mut c_void, callback: impl FnOnce(&mut E, &Discord<'_, E>)) {
     let _guard = utils::prevent_unwind();
 
     debug_assert!(!inner.is_null());
 
-    // SAFETY: Duplicating the `Box<DiscordInner>`
-    // - We're not mutating it, we're not dropping it
-    // - No other part of the code will mutate it as `&mut Discord` is in the callstack
-    let owned_discord = unsafe { Discord(Box::from_raw(inner as *mut DiscordInner<E>)) };
-    let discord = &owned_discord;
+    let discord = &ManuallyDrop::new(Discord(inner as *mut DiscordInner<'_, E>));
 
     // SAFETY: Mutating through an immutable reference
     // - `discord.0.event_handler` is an `UnsafeCell`, inner mutation is legal
     // - No other part of the code can safely mutate it as they require `&mut DiscordInner`
     // - `EventHandler` can mutate itself during method but not `&Discord`
-    let mut event_handler = unsafe { (*discord.0.event_handler.get()).take() };
+    let mut event_handler = unsafe { (*discord.inner().event_handler.get()).take() };
 
     if let Some(event_handler) = event_handler.as_mut() {
-        callback(event_handler, &discord);
+        callback(event_handler, discord);
     }
 
     // SAFETY: See previous
     unsafe {
-        (*discord.0.event_handler.get()) = event_handler;
+        (*discord.inner().event_handler.get()) = event_handler;
     }
-
-    // SAFETY: Not dropping our duplicated `Box<DiscordInner>`
-    std::mem::forget(owned_discord);
 }
 
 pub(crate) fn achievement<E: EventHandler>() -> sys::IDiscordAchievementEvents {

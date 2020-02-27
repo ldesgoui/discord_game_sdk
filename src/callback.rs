@@ -3,10 +3,7 @@ use std::ffi::c_void;
 
 pub(crate) fn one_param<F: FnOnce(A), A>(
     callback: F,
-) -> (
-    *mut std::ffi::c_void,
-    Option<unsafe extern "C" fn(*mut c_void, A)>,
-) {
+) -> (*mut c_void, Option<unsafe extern "C" fn(*mut c_void, A)>) {
     extern "C" fn one_param<F: FnOnce(A), A>(ptr: *mut c_void, a: A) {
         let _guard = utils::prevent_unwind();
 
@@ -27,10 +24,7 @@ pub(crate) fn one_param<F: FnOnce(A), A>(
 
 pub(crate) fn two_params<F: FnOnce(A, B), A, B>(
     callback: F,
-) -> (
-    *mut std::ffi::c_void,
-    Option<unsafe extern "C" fn(*mut c_void, A, B)>,
-) {
+) -> (*mut c_void, Option<unsafe extern "C" fn(*mut c_void, A, B)>) {
     extern "C" fn two_params<F: FnOnce(A, B), A, B>(ptr: *mut c_void, a: A, b: B) {
         let _guard = utils::prevent_unwind();
 
@@ -48,7 +42,7 @@ pub(crate) fn two_params<F: FnOnce(A, B), A, B>(
 pub(crate) fn three_params<F: FnOnce(A, B, C), A, B, C>(
     callback: F,
 ) -> (
-    *mut std::ffi::c_void,
+    *mut c_void,
     Option<unsafe extern "C" fn(*mut c_void, A, B, C)>,
 ) {
     extern "C" fn three_params<F: FnOnce(A, B, C), A, B, C>(ptr: *mut c_void, a: A, b: B, c: C) {

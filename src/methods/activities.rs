@@ -8,7 +8,7 @@ use std::borrow::Cow;
 /// Also known as Rich Presence.
 ///
 /// > [Chapter in official docs](https://discordapp.com/developers/docs/game-sdk/activities)
-impl<E> Discord<E> {
+impl<'d, E> Discord<'d, E> {
     /// Registers a command by which Discord can launch your game.
     ///
     /// This might be a custom protocol, like `my-awesome-game://`, or a path to an executable.
@@ -26,7 +26,7 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// discord.register_launch_command("my-awesome-game://run --full-screen")?;
     /// # Ok(()) }
     /// ```
@@ -51,9 +51,9 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// # let now = 0;
-    /// discord.clear_activity(|result| {
+    /// discord.clear_activity(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to clear activity: {}", error);
     ///     }
@@ -76,13 +76,13 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// # let now = 0;
     /// discord.update_activity(
     ///     &Activity::empty()
     ///         .with_state("On Main Menu")
     ///         .with_start_time(now),
-    ///     |result| {
+    ///     |discord, result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed to update activity: {}", error);
     ///         }
@@ -90,14 +90,15 @@ impl<E> Discord<E> {
     /// );
     /// # Ok(()) }
     /// ```
-    pub fn update_activity<'d>(
-        &'d self,
+    pub fn update_activity(
+        &self,
         activity: &Activity,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         self.with_activity_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe {
                 mgr.update_activity.unwrap()(
@@ -117,19 +118,20 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>) -> Result<()> {
     /// # let now = 0;
-    /// discord.clear_activity(|result| {
+    /// discord.clear_activity(|discord, result| {
     ///     if let Err(error) = result {
     ///         return eprintln!("failed to clear activity: {}", error);
     ///     }
     /// });
     /// # Ok(()) }
     /// ```
-    pub fn clear_activity<'d>(&'d self, callback: impl 'd + FnOnce(Result<()>)) {
+    pub fn clear_activity(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
         self.with_activity_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.clear_activity.unwrap()(mgr, ptr, fun) }
         })
@@ -144,14 +146,14 @@ impl<E> Discord<E> {
     /// struct MyEventHandler;
     ///
     /// impl EventHandler for MyEventHandler {
-    ///     fn on_activity_join_request(&mut self, discord: &Discord<Self>, user: &User) {
+    ///     fn on_activity_join_request(&mut self, discord: &Discord<'_, Self>, user: &User) {
     ///         println!(
     ///             "received join request from {}#{}",
     ///             user.username(),
     ///             user.discriminator()
     ///         );
     ///
-    ///         discord.send_request_reply(user.id(), RequestReply::Yes, |result| {
+    ///         discord.send_request_reply(user.id(), RequestReply::Yes, |discord, result| {
     ///             if let Err(error) = result {
     ///                 return eprintln!("failed to reply: {}", error);
     ///             }
@@ -159,15 +161,16 @@ impl<E> Discord<E> {
     ///     }
     /// }
     /// ```
-    pub fn send_request_reply<'d>(
-        &'d self,
+    pub fn send_request_reply(
+        &self,
         user_id: UserID,
         reply: RequestReply,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         self.with_activity_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.send_request_reply.unwrap()(mgr, user_id, reply.into(), ptr, fun) }
         })
@@ -189,12 +192,12 @@ impl<E> Discord<E> {
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
-    /// # fn example(discord: Discord<()>, friend: User) -> Result<()> {
+    /// # fn example(discord: Discord<'_, ()>, friend: User) -> Result<()> {
     /// discord.send_invite(
     ///     friend.id(),
     ///     Action::Join,
     ///     "Let's play some Survival!\0",
-    ///     |result| {
+    ///     |discord, result| {
     ///         if let Err(error) = result {
     ///             return eprintln!("failed to invite: {}", error);
     ///         }
@@ -202,12 +205,12 @@ impl<E> Discord<E> {
     /// );
     /// # Ok(()) }
     /// ```
-    pub fn send_invite<'d, 's>(
-        &'d self,
+    pub fn send_invite<'s>(
+        &self,
         user_id: UserID,
         action: Action,
         content: impl Into<Cow<'s, str>>,
-        callback: impl 'd + FnOnce(Result<()>),
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
         let mut content = content.into();
 
@@ -216,8 +219,9 @@ impl<E> Discord<E> {
         };
 
         self.with_activity_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe {
                 mgr.send_invite.unwrap()(mgr, user_id, action.into(), content.as_ptr(), ptr, fun)
@@ -236,7 +240,7 @@ impl<E> Discord<E> {
     /// impl EventHandler for MyEventHandler {
     ///     fn on_activity_invite(
     ///         &mut self,
-    ///         discord: &Discord<Self>,
+    ///         discord: &Discord<'_, Self>,
     ///         action: Action,
     ///         user: &User,
     ///         activity: &Activity,
@@ -252,7 +256,7 @@ impl<E> Discord<E> {
     ///             user.discriminator()
     ///         );
     ///
-    ///         discord.accept_invite(user.id(), |result| {
+    ///         discord.accept_invite(user.id(), |discord, result| {
     ///             if let Err(error) = result {
     ///                 return eprintln!("failed to accept invite: {}", error);
     ///             }
@@ -260,10 +264,15 @@ impl<E> Discord<E> {
     ///     }
     /// }
     /// ```
-    pub fn accept_invite<'d>(&'d self, user_id: UserID, callback: impl 'd + FnOnce(Result<()>)) {
+    pub fn accept_invite(
+        &self,
+        user_id: UserID,
+        callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
+    ) {
         self.with_activity_manager(|mgr| {
-            let (ptr, fun) =
-                callback::one_param(|res: sys::EDiscordResult| callback(res.to_result()));
+            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
+                callback(&*self.ref_copy(), res.to_result())
+            });
 
             unsafe { mgr.accept_invite.unwrap()(mgr, user_id, ptr, fun) }
         })
