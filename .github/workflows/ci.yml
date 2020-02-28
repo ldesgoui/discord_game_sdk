@@ -41,11 +41,17 @@ jobs:
           cp lib/x86_64/discord_game_sdk.dll.lib    lib/x86_64/discord_game_sdk.lib
           cp lib/x86/discord_game_sdk.dll.lib       lib/x86/discord_game_sdk.lib
 
+      - name: Set LD_LIBRARY_PATH
+        working-directory: ${{ runner.temp }}
+        if: startsWith(runner.os, 'ubuntu')
+        run: |
+          echo "::set-env name=LD_LIBRARY_PATH::${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}$PWD/lib/x86_64"
+
       - name: Set DYLD_LIBRARY_PATH
         working-directory: ${{ runner.temp }}
         if: startsWith(runner.os, 'macos')
         run: |
-          echo "::set-env name=DYLD_LIBRARY_PATH::$DYLD_LIBRARY_PATH:$PWD/lib/x86_64"
+          echo "::set-env name=DYLD_LIBRARY_PATH::${DYLD_LIBRARY_PATH:+${D:LD_LIBRARY_PATH}:}$PWD/lib/x86_64"
 
       - name: Cache libclang
         id: cache-libclang
@@ -127,5 +133,5 @@ jobs:
       - name: Check lints
         uses: actions-rs/clippy-check@v1
         with:
-          args: --features doc
+          args: --all-features
           token: ${{ secrets.GITHUB_TOKEN }}

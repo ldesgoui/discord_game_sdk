@@ -41,12 +41,13 @@ Provides functional linking with the caveat that libraries are renamed and some 
 set-up is required:
 
 ```sh
-# Linux: prepend with `lib`
+# Linux: prepend with `lib` and add to library search path
 cp $DISCORD_GAME_SDK_PATH/lib/x86_64/{,lib}discord_game_sdk.so
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}$DISCORD_GAME_SDK_PATH/lib/x86_64
 
 # Mac OS: prepend with `lib` and add to library search path
 cp $DISCORD_GAME_SDK_PATH/lib/x86_64/{,lib}discord_game_sdk.dylib
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DISCORD_GAME_SDK_PATH/lib/x86_64
+export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH:+${DYLD_LIBRARY_PATH}:}$DISCORD_GAME_SDK_PATH/lib/x86_64
 
 # Windows: change `dll.lib` to `lib` (won't affect library search)
 cp $DISCORD_GAME_SDK_PATH/lib/x86_64/discord_game_sdk.{dll.lib,lib}
