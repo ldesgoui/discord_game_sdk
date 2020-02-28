@@ -43,7 +43,7 @@ jobs:
 
       - name: Set LD_LIBRARY_PATH
         working-directory: ${{ runner.temp }}
-        if: startsWith(runner.os, 'ubuntu')
+        if: contains(matrix.target, 'linux')
         run: |
           echo "::set-env name=LD_LIBRARY_PATH::${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}$PWD/lib/x86_64"
 
