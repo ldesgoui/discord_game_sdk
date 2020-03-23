@@ -94,7 +94,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --target=${{ matrix.target }}
+          args: --target=${{ matrix.target }} -- --test-threads=1
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
