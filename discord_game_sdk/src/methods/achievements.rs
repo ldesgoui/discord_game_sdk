@@ -195,10 +195,8 @@ impl<'d, E> Discord<'d, E> {
            + ExactSizeIterator
            + std::iter::FusedIterator
            + std::fmt::Debug {
-        let dref = self.ref_copy();
-
         iter::Collection::new(
-            Box::new(move |i| dref.user_achievement_at(i)),
+            Box::new(move |i| self.ref_copy().user_achievement_at(i)),
             self.user_achievement_count(),
         )
     }
