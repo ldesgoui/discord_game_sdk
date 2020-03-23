@@ -98,8 +98,36 @@ jobs:
         env:
           DISCORD_GAME_SDK_PATH: ${{ runner.temp }}
 
-  miri-fmt-lint:
-    name: Test with MIRI, check format and lints
+  miri-test:
+    name: Test with MIRI
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: miri
+
+      - name: Set up MIRI
+        uses: actions-rs/cargo@v1
+        with:
+          command: miri
+          args: setup
+
+      - name: Test with MIRI
+        run: |
+          cd discord_game_sdk
+          cargo miri test --features doc
+
+  fmt-lint:
+    name: Check format and lints
 
     runs-on: ubuntu-latest
 
@@ -121,18 +149,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.rust }}
           override: true
-          components: miri, rustfmt, clippy
-
-      - name: Set up MIRI
-        uses: actions-rs/cargo@v1
-        with:
-          command: miri
-          args: setup
-
-      - name: Test with MIRI
-        run: |
-          cd discord_game_sdk
-          cargo miri test
+          components: rustfmt, clippy
 
       - name: Check formatting
         if: matrix.rust == 'stable'
