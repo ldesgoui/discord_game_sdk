@@ -16,7 +16,11 @@ impl<E> Discord<'_, E> {
     pub fn peer_id(&self) -> NetworkPeerID {
         let mut peer_id = 0;
 
-        self.with_network_manager(|mgr| unsafe { mgr.get_peer_id.unwrap()(mgr, &mut peer_id) });
+        unsafe {
+            let mgr = self.network_manager();
+
+            (*mgr).get_peer_id.unwrap()(mgr, &mut peer_id)
+        }
 
         peer_id
     }
@@ -26,8 +30,11 @@ impl<E> Discord<'_, E> {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#flush)
     pub fn flush_network(&self) -> Result<()> {
-        self.with_network_manager(|mgr| unsafe { mgr.flush.unwrap()(mgr) })
-            .to_result()
+        unsafe {
+            let mgr = self.network_manager();
+
+            (*mgr).flush.unwrap()(mgr).to_result()
+        }
     }
 
     /// Opens a network connection to another Discord user.
@@ -46,12 +53,13 @@ impl<E> Discord<'_, E> {
 
         if !route.ends_with('\0') {
             route.to_mut().push('\0')
-        };
+        }
 
-        self.with_network_manager(|mgr| unsafe {
-            mgr.open_peer.unwrap()(mgr, peer_id, route.as_ptr())
-        })
-        .to_result()
+        unsafe {
+            let mgr = self.network_manager();
+
+            (*mgr).open_peer.unwrap()(mgr, peer_id, route.as_ptr()).to_result()
+        }
     }
 
     /// Updates the network connection to another Discord user.
@@ -73,20 +81,24 @@ impl<E> Discord<'_, E> {
 
         if !route.ends_with('\0') {
             route.to_mut().push('\0')
-        };
+        }
 
-        self.with_network_manager(|mgr| unsafe {
-            mgr.update_peer.unwrap()(mgr, peer_id, route.as_ptr())
-        })
-        .to_result()
+        unsafe {
+            let mgr = self.network_manager();
+
+            (*mgr).update_peer.unwrap()(mgr, peer_id, route.as_ptr()).to_result()
+        }
     }
 
     /// Disconnects the network session to another Discord user.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/networking#closepeer)
     pub fn close_peer(&self, peer_id: NetworkPeerID) -> Result<()> {
-        self.with_network_manager(|mgr| unsafe { mgr.close_peer.unwrap()(mgr, peer_id) })
-            .to_result()
+        unsafe {
+            let mgr = self.network_manager();
+
+            (*mgr).close_peer.unwrap()(mgr, peer_id).to_result()
+        }
     }
 
     /// Opens a network connection to another Discord user.
@@ -98,10 +110,11 @@ impl<E> Discord<'_, E> {
         channel_id: NetworkChannelID,
         reliable: Reliability,
     ) -> Result<()> {
-        self.with_network_manager(|mgr| unsafe {
-            mgr.open_channel.unwrap()(mgr, peer_id, channel_id, reliable.into())
-        })
-        .to_result()
+        unsafe {
+            let mgr = self.network_manager();
+
+            (*mgr).open_channel.unwrap()(mgr, peer_id, channel_id, reliable.into()).to_result()
+        }
     }
 
     /// Close the connection to a given user by peer ID on the given channel.
@@ -112,10 +125,11 @@ impl<E> Discord<'_, E> {
         peer_id: NetworkPeerID,
         channel_id: NetworkChannelID,
     ) -> Result<()> {
-        self.with_network_manager(|mgr| unsafe {
-            mgr.close_channel.unwrap()(mgr, peer_id, channel_id)
-        })
-        .to_result()
+        unsafe {
+            let mgr = self.network_manager();
+
+            (*mgr).close_channel.unwrap()(mgr, peer_id, channel_id).to_result()
+        }
     }
 
     /// Sends data to a given peer ID through the given channel.
@@ -131,8 +145,10 @@ impl<E> Discord<'_, E> {
 
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
-        self.with_network_manager(|mgr| unsafe {
-            mgr.send_message.unwrap()(
+        unsafe {
+            let mgr = self.network_manager();
+
+            (*mgr).send_message.unwrap()(
                 mgr,
                 peer_id,
                 channel_id,
@@ -141,7 +157,7 @@ impl<E> Discord<'_, E> {
                 // XXX: u32 should be u64
                 buffer.len().try_into().unwrap_or(u32::max_value()),
             )
-        })
-        .to_result()
+            .to_result()
+        }
     }
 }

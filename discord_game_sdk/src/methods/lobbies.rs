@@ -1,7 +1,6 @@
 use crate::{
-    callback, iter, sys, to_result::ToResult, utils, Discord, Lobby, LobbyID,
-    LobbyMemberTransaction, LobbyTransaction, NetworkChannelID, Reliability, Result, SearchQuery,
-    UserID,
+    iter, sys, to_result::ToResult, utils, Discord, Lobby, LobbyID, LobbyMemberTransaction,
+    LobbyTransaction, NetworkChannelID, Reliability, Result, SearchQuery, UserID,
 };
 use std::{
     borrow::Cow,
@@ -29,33 +28,30 @@ impl<'d, E> Discord<'d, E> {
         transaction: &LobbyTransaction,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&Lobby>),
     ) {
+        let mgr = unsafe { self.lobby_manager() };
         let mut tx = std::ptr::null_mut();
 
-        let create = self
-            .with_lobby_manager(|mgr| unsafe {
-                mgr.get_lobby_create_transaction.unwrap()(mgr, &mut tx)
-            })
-            .to_result();
+        let create =
+            unsafe { (*mgr).get_lobby_create_transaction.unwrap()(mgr, &mut tx).to_result() };
+
         if let Err(e) = create {
-            return callback(&*self.ref_copy(), Err(e));
+            return callback(self, Err(e));
         }
 
-        if let Err(e) = transaction.process(tx) {
-            return callback(&*self.ref_copy(), Err(e));
+        if let Err(e) = unsafe { transaction.process(tx) } {
+            return callback(self, Err(e));
         }
 
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::two_params(
-                move |res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
-                    )
-                },
-            );
+        let (ptr, fun) = self.two_params(
+            move |discord, res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                callback(
+                    discord,
+                    res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
+                )
+            },
+        );
 
-            unsafe { mgr.create_lobby.unwrap()(mgr, tx, ptr, fun) }
-        })
+        unsafe { (*mgr).create_lobby.unwrap()(mgr, tx, ptr, fun) }
     }
 
     /// Updates a lobby with data from the given transaction.
@@ -67,28 +63,25 @@ impl<'d, E> Discord<'d, E> {
         transaction: &LobbyTransaction,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
+        let mgr = unsafe { self.lobby_manager() };
         let mut tx = std::ptr::null_mut();
 
-        let create = self
-            .with_lobby_manager(|mgr| unsafe {
-                mgr.get_lobby_update_transaction.unwrap()(mgr, lobby_id, &mut tx)
-            })
-            .to_result();
+        let create = unsafe {
+            (*mgr).get_lobby_update_transaction.unwrap()(mgr, lobby_id, &mut tx).to_result()
+        };
+
         if let Err(e) = create {
-            return callback(&*self.ref_copy(), Err(e));
+            return callback(self, Err(e));
         }
 
-        if let Err(e) = transaction.process(tx) {
-            return callback(&*self.ref_copy(), Err(e));
+        if let Err(e) = unsafe { transaction.process(tx) } {
+            return callback(self, Err(e));
         }
 
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.update_lobby.unwrap()(mgr, lobby_id, tx, ptr, fun) }
-        })
+        unsafe { (*mgr).update_lobby.unwrap()(mgr, lobby_id, tx, ptr, fun) }
     }
 
     /// Deletes a given lobby.
@@ -99,13 +92,14 @@ impl<'d, E> Discord<'d, E> {
         lobby_id: LobbyID,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.delete_lobby.unwrap()(mgr, lobby_id, ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).delete_lobby.unwrap()(mgr, lobby_id, ptr, fun)
+        }
     }
 
     /// Connects the current user to a given lobby.
@@ -126,29 +120,29 @@ impl<'d, E> Discord<'d, E> {
 
         if !secret.ends_with('\0') {
             secret.to_mut().push('\0')
-        };
+        }
 
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::two_params(
-                move |res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
-                    )
-                },
-            );
-
-            unsafe {
-                mgr.connect_lobby.unwrap()(
-                    mgr,
-                    lobby_id,
-                    // XXX: *mut should be *const
-                    secret.as_ptr() as *mut u8,
-                    ptr,
-                    fun,
+        let (ptr, fun) = self.two_params(
+            move |discord, res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                callback(
+                    discord,
+                    res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
                 )
-            }
-        })
+            },
+        );
+
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).connect_lobby.unwrap()(
+                mgr,
+                lobby_id,
+                // XXX: *mut should be *const
+                secret.as_ptr() as *mut u8,
+                ptr,
+                fun,
+            )
+        }
     }
 
     /// Connects the current user to a lobby using the special activity secret from the lobby
@@ -168,28 +162,28 @@ impl<'d, E> Discord<'d, E> {
 
         if !activity_secret.ends_with('\0') {
             activity_secret.to_mut().push('\0')
-        };
+        }
 
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::two_params(
-                move |res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
-                    )
-                },
-            );
-
-            unsafe {
-                mgr.connect_lobby_with_activity_secret.unwrap()(
-                    mgr,
-                    // XXX: *mut should be *const
-                    activity_secret.as_ptr() as *mut u8,
-                    ptr,
-                    fun,
+        let (ptr, fun) = self.two_params(
+            move |discord, res: sys::EDiscordResult, lobby: *mut sys::DiscordLobby| {
+                callback(
+                    discord,
+                    res.to_result().map(|()| unsafe { &*(lobby as *mut Lobby) }),
                 )
-            }
-        })
+            },
+        );
+
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).connect_lobby_with_activity_secret.unwrap()(
+                mgr,
+                // XXX: *mut should be *const
+                activity_secret.as_ptr() as *mut u8,
+                ptr,
+                fun,
+            )
+        }
     }
 
     /// Disconnects the current user from a lobby.
@@ -200,13 +194,13 @@ impl<'d, E> Discord<'d, E> {
         lobby_id: LobbyID,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.disconnect_lobby.unwrap()(mgr, lobby_id, ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.lobby_manager();
+            (*mgr).disconnect_lobby.unwrap()(mgr, lobby_id, ptr, fun)
+        }
     }
 
     /// Gets the lobby object for a given ID.
@@ -217,10 +211,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn lobby(&self, lobby_id: LobbyID) -> Result<Lobby> {
         let mut lobby = Lobby(sys::DiscordLobby::default());
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_lobby.unwrap()(mgr, lobby_id, &mut lobby.0)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).get_lobby.unwrap()(mgr, lobby_id, &mut lobby.0).to_result()?;
+        }
 
         Ok(lobby)
     }
@@ -234,10 +229,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn lobby_activity_secret(&self, lobby_id: LobbyID) -> Result<String> {
         let mut secret: sys::DiscordLobbySecret = [0; size_of::<sys::DiscordLobbySecret>()];
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_lobby_activity_secret.unwrap()(mgr, lobby_id, &mut secret)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).get_lobby_activity_secret.unwrap()(mgr, lobby_id, &mut secret).to_result()?;
+        }
 
         Ok(utils::charbuf_to_str(&secret).to_string())
     }
@@ -260,18 +256,20 @@ impl<'d, E> Discord<'d, E> {
 
         if !key.ends_with('\0') {
             key.to_mut().push('\0')
-        };
+        }
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_lobby_metadata_value.unwrap()(
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).get_lobby_metadata_value.unwrap()(
                 mgr,
                 lobby_id,
                 // XXX: *mut should be *const
                 key.as_ptr() as *mut u8,
                 &mut value,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok(utils::charbuf_to_str(&value).to_string())
     }
@@ -282,10 +280,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn lobby_metadata_count(&self, lobby_id: LobbyID) -> Result<u32> {
         let mut count = 0;
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.lobby_metadata_count.unwrap()(mgr, lobby_id, &mut count)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).lobby_metadata_count.unwrap()(mgr, lobby_id, &mut count).to_result()?
+        }
 
         // XXX: i32 should be u32
         Ok(count.try_into().unwrap())
@@ -296,30 +295,29 @@ impl<'d, E> Discord<'d, E> {
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatakey)  
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#getlobbymetadatavalue)
     pub fn lobby_metadata_at(&self, lobby_id: LobbyID, index: u32) -> Result<(String, String)> {
+        let mgr = unsafe { self.lobby_manager() };
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_lobby_metadata_key.unwrap()(
+        unsafe {
+            (*mgr).get_lobby_metadata_key.unwrap()(
                 mgr,
                 lobby_id,
                 // XXX: i32 should be u32
                 index.try_into().unwrap(),
                 &mut key,
             )
-        })
-        .to_result()?;
+            .to_result()?;
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_lobby_metadata_value.unwrap()(
+            (*mgr).get_lobby_metadata_value.unwrap()(
                 mgr,
                 lobby_id,
                 // XXX: *mut should be *const
                 key.as_ptr() as *mut u8,
                 &mut value,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok((
             utils::charbuf_to_str(&key).to_string(),
@@ -336,7 +334,8 @@ impl<'d, E> Discord<'d, E> {
             + Iterator<Item = Result<(String, String)>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator,
+            + std::iter::FusedIterator
+            + std::fmt::Debug,
     > {
         Ok(iter::Collection::new(
             Box::new(move |i| self.ref_copy().lobby_metadata_at(lobby_id, i)),
@@ -354,28 +353,26 @@ impl<'d, E> Discord<'d, E> {
         transaction: &LobbyMemberTransaction,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
+        let mgr = unsafe { self.lobby_manager() };
         let mut tx = std::ptr::null_mut();
 
-        let create = self
-            .with_lobby_manager(|mgr| unsafe {
-                mgr.get_member_update_transaction.unwrap()(mgr, lobby_id, user_id, &mut tx)
-            })
-            .to_result();
+        let create = unsafe {
+            (*mgr).get_member_update_transaction.unwrap()(mgr, lobby_id, user_id, &mut tx)
+                .to_result()
+        };
+
         if let Err(e) = create {
-            return callback(&*self.ref_copy(), Err(e));
+            return callback(self, Err(e));
         }
 
-        if let Err(e) = transaction.process(tx) {
-            return callback(&*self.ref_copy(), Err(e));
+        if let Err(e) = unsafe { transaction.process(tx) } {
+            return callback(self, Err(e));
         }
 
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.update_member.unwrap()(mgr, lobby_id, user_id, tx, ptr, fun) }
-        })
+        unsafe { (*mgr).update_member.unwrap()(mgr, lobby_id, user_id, tx, ptr, fun) }
     }
 
     /// Returns the number of members connected to a lobby.
@@ -384,10 +381,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn lobby_member_count(&self, lobby_id: LobbyID) -> Result<u32> {
         let mut count = 0;
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.member_count.unwrap()(mgr, lobby_id, &mut count)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).member_count.unwrap()(mgr, lobby_id, &mut count).to_result()?;
+        }
 
         // XXX: i32 should be u32
         Ok(count.try_into().unwrap())
@@ -399,16 +397,18 @@ impl<'d, E> Discord<'d, E> {
     pub fn lobby_member_id_at(&self, lobby_id: LobbyID, index: u32) -> Result<UserID> {
         let mut user_id = 0;
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_member_user_id.unwrap()(
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).get_member_user_id.unwrap()(
                 mgr,
                 lobby_id,
                 // XXX: i32 should be u32
                 index.try_into().unwrap(),
                 &mut user_id,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok(user_id)
     }
@@ -422,7 +422,8 @@ impl<'d, E> Discord<'d, E> {
             + Iterator<Item = Result<UserID>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator,
+            + std::iter::FusedIterator
+            + std::fmt::Debug,
     > {
         Ok(iter::Collection::new(
             Box::new(move |i| self.ref_copy().lobby_member_id_at(lobby_id, i)),
@@ -449,10 +450,12 @@ impl<'d, E> Discord<'d, E> {
 
         if !key.ends_with('\0') {
             key.to_mut().push('\0')
-        };
+        }
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_member_metadata_value.unwrap()(
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).get_member_metadata_value.unwrap()(
                 mgr,
                 lobby_id,
                 user_id,
@@ -460,8 +463,8 @@ impl<'d, E> Discord<'d, E> {
                 key.as_ptr() as *mut u8,
                 &mut value,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok(utils::charbuf_to_str(&value).to_string())
     }
@@ -472,10 +475,12 @@ impl<'d, E> Discord<'d, E> {
     pub fn lobby_member_metadata_count(&self, lobby_id: LobbyID, user_id: UserID) -> Result<u32> {
         let mut count = 0;
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.member_metadata_count.unwrap()(mgr, lobby_id, user_id, &mut count)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).member_metadata_count.unwrap()(mgr, lobby_id, user_id, &mut count)
+                .to_result()?;
+        }
 
         // XXX: i32 should be u32
         Ok(count.try_into().unwrap())
@@ -491,11 +496,12 @@ impl<'d, E> Discord<'d, E> {
         user_id: UserID,
         index: u32,
     ) -> Result<(String, String)> {
+        let mgr = unsafe { self.lobby_manager() };
         let mut key: sys::DiscordMetadataKey = [0; size_of::<sys::DiscordMetadataKey>()];
         let mut value: sys::DiscordMetadataValue = [0; size_of::<sys::DiscordMetadataValue>()];
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_member_metadata_key.unwrap()(
+        unsafe {
+            (*mgr).get_member_metadata_key.unwrap()(
                 mgr,
                 lobby_id,
                 user_id,
@@ -503,11 +509,11 @@ impl<'d, E> Discord<'d, E> {
                 index.try_into().unwrap(),
                 &mut key,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_member_metadata_value.unwrap()(
+        unsafe {
+            (*mgr).get_member_metadata_value.unwrap()(
                 mgr,
                 lobby_id,
                 user_id,
@@ -515,8 +521,8 @@ impl<'d, E> Discord<'d, E> {
                 key.as_ptr() as *mut u8,
                 &mut value,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok((
             utils::charbuf_to_str(&key).to_string(),
@@ -534,7 +540,8 @@ impl<'d, E> Discord<'d, E> {
             + Iterator<Item = Result<(String, String)>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator,
+            + std::iter::FusedIterator
+            + std::fmt::Debug,
     > {
         Ok(iter::Collection::new(
             Box::new(move |i| {
@@ -564,24 +571,23 @@ impl<'d, E> Discord<'d, E> {
 
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe {
-                mgr.send_lobby_message.unwrap()(
-                    mgr,
-                    lobby_id,
-                    // XXX: *mut should be *const
-                    buffer.as_ptr() as *mut u8,
-                    // XXX: u32 should be u64
-                    buffer.len().try_into().unwrap_or(u32::max_value()),
-                    ptr,
-                    fun,
-                )
-            }
-        })
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).send_lobby_message.unwrap()(
+                mgr,
+                lobby_id,
+                // XXX: *mut should be *const
+                buffer.as_ptr() as *mut u8,
+                // XXX: u32 should be u64
+                buffer.len().try_into().unwrap_or(u32::max_value()),
+                ptr,
+                fun,
+            )
+        }
     }
 
     /// Searches available lobbies based on the search criteria.
@@ -596,26 +602,23 @@ impl<'d, E> Discord<'d, E> {
         search: &SearchQuery,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
+        let mgr = unsafe { self.lobby_manager() };
         let mut tx = std::ptr::null_mut();
 
-        let create = self
-            .with_lobby_manager(|mgr| unsafe { mgr.get_search_query.unwrap()(mgr, &mut tx) })
-            .to_result();
+        let create = unsafe { (*mgr).get_search_query.unwrap()(mgr, &mut tx).to_result() };
+
         if let Err(e) = create {
-            return callback(&*self.ref_copy(), Err(e));
+            return callback(self, Err(e));
         }
 
-        if let Err(e) = search.process(tx) {
-            return callback(&*self.ref_copy(), Err(e));
+        if let Err(e) = unsafe { search.process(tx) } {
+            return callback(self, Err(e));
         }
 
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.search.unwrap()(mgr, tx, ptr, fun) }
-        })
+        unsafe { (*mgr).search.unwrap()(mgr, tx, ptr, fun) }
     }
 
     /// Returns the number of lobbies found via the search query.
@@ -626,7 +629,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn lobby_count(&self) -> u32 {
         let mut count = 0;
 
-        self.with_lobby_manager(|mgr| unsafe { mgr.lobby_count.unwrap()(mgr, &mut count) });
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).lobby_count.unwrap()(mgr, &mut count)
+        }
 
         // XXX: i32 should be u32
         count.try_into().unwrap()
@@ -640,15 +647,17 @@ impl<'d, E> Discord<'d, E> {
     pub fn lobby_id_at(&self, index: u32) -> Result<LobbyID> {
         let mut lobby_id = 0;
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.get_lobby_id.unwrap()(
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).get_lobby_id.unwrap()(
                 mgr,
                 // XXX: i32 should be u32
                 index.try_into().unwrap(),
                 &mut lobby_id,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok(lobby_id)
     }
@@ -662,7 +671,8 @@ impl<'d, E> Discord<'d, E> {
            + Iterator<Item = Result<LobbyID>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator {
+           + std::iter::FusedIterator
+           + std::fmt::Debug {
         iter::Collection::new(
             Box::new(move |i| self.ref_copy().lobby_id_at(i)),
             self.lobby_count(),
@@ -680,13 +690,14 @@ impl<'d, E> Discord<'d, E> {
         lobby_id: LobbyID,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.connect_voice.unwrap()(mgr, lobby_id, ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).connect_voice.unwrap()(mgr, lobby_id, ptr, fun)
+        }
     }
 
     /// Disconnects from the voice channel of a given lobby.
@@ -697,13 +708,14 @@ impl<'d, E> Discord<'d, E> {
         lobby_id: LobbyID,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
-        self.with_lobby_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.disconnect_voice.unwrap()(mgr, lobby_id, ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).disconnect_voice.unwrap()(mgr, lobby_id, ptr, fun)
+        }
     }
 
     /// Connects to the networking layer for the given lobby ID.
@@ -712,16 +724,22 @@ impl<'d, E> Discord<'d, E> {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#connectnetwork)
     pub fn connect_lobby_network(&self, lobby_id: LobbyID) -> Result<()> {
-        self.with_lobby_manager(|mgr| unsafe { mgr.connect_network.unwrap()(mgr, lobby_id) })
-            .to_result()
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).connect_network.unwrap()(mgr, lobby_id).to_result()
+        }
     }
 
     /// Disconnects from the networking layer for the given lobby ID.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#disconnectnetwork)
     pub fn disconnect_lobby_network(&self, lobby_id: LobbyID) -> Result<()> {
-        self.with_lobby_manager(|mgr| unsafe { mgr.disconnect_network.unwrap()(mgr, lobby_id) })
-            .to_result()
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).disconnect_network.unwrap()(mgr, lobby_id).to_result()
+        }
     }
 
     /// Flushes the network. Call this when you're done sending messages.
@@ -730,8 +748,11 @@ impl<'d, E> Discord<'d, E> {
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/lobbies#flushnetwork)
     pub fn flush_lobby_network(&self) -> Result<()> {
-        self.with_lobby_manager(|mgr| unsafe { mgr.flush_network.unwrap()(mgr) })
-            .to_result()
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).flush_network.unwrap()(mgr).to_result()
+        }
     }
 
     /// Opens a network channel to all users in a lobby on the given channel number.
@@ -743,10 +764,12 @@ impl<'d, E> Discord<'d, E> {
         channel_id: NetworkChannelID,
         reliable: Reliability,
     ) -> Result<()> {
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.open_network_channel.unwrap()(mgr, lobby_id, channel_id, reliable.into())
-        })
-        .to_result()
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).open_network_channel.unwrap()(mgr, lobby_id, channel_id, reliable.into())
+                .to_result()
+        }
     }
 
     /// Sends a network message.
@@ -761,8 +784,10 @@ impl<'d, E> Discord<'d, E> {
     ) -> Result<()> {
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
-        self.with_lobby_manager(|mgr| unsafe {
-            mgr.send_network_message.unwrap()(
+        unsafe {
+            let mgr = self.lobby_manager();
+
+            (*mgr).send_network_message.unwrap()(
                 mgr,
                 lobby_id,
                 user_id,
@@ -772,7 +797,7 @@ impl<'d, E> Discord<'d, E> {
                 // XXX: u32 should be u64
                 buffer.len().try_into().unwrap_or(u32::max_value()),
             )
-        })
-        .to_result()
+            .to_result()
+        }
     }
 }

@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, utils, Cast, Comparison, Distance, Result};
+use crate::{sys, to_result::ToResult, Cast, Comparison, Distance, Result};
 
 /// Lobby Search
 ///
@@ -35,11 +35,11 @@ impl SearchQuery {
     ) -> &mut Self {
         if !key.ends_with('\0') {
             key.push('\0')
-        };
+        }
 
         if !value.ends_with('\0') {
             value.push('\0')
-        };
+        }
 
         self.filter = Some((key, value, comparison, cast));
         self
@@ -55,11 +55,11 @@ impl SearchQuery {
     pub fn sort(&mut self, mut key: String, mut value: String, cast: Cast) -> &mut Self {
         if !key.ends_with('\0') {
             key.push('\0')
-        };
+        }
 
         if !value.ends_with('\0') {
             value.push('\0')
-        };
+        }
 
         self.sort = Some((key, value, cast));
         self
@@ -81,45 +81,38 @@ impl SearchQuery {
         self
     }
 
-    pub(crate) fn process(&self, ptr: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
+    pub(crate) unsafe fn process(&self, tx: *mut sys::IDiscordLobbySearchQuery) -> Result<()> {
         if let Some((key, value, comparison, cast)) = self.filter.as_ref() {
-            utils::with_tx(ptr, |tx| unsafe {
-                tx.filter.unwrap()(
-                    tx,
-                    // XXX: *mut should be *const
-                    key.as_ptr() as *mut u8,
-                    (*comparison).into(),
-                    (*cast).into(),
-                    // XXX: *mut should be *const
-                    value.as_ptr() as *mut u8,
-                )
-            })
+            (*tx).filter.unwrap()(
+                tx,
+                // XXX: *mut should be *const
+                key.as_ptr() as *mut u8,
+                (*comparison).into(),
+                (*cast).into(),
+                // XXX: *mut should be *const
+                value.as_ptr() as *mut u8,
+            )
             .to_result()?;
         }
 
         if let Some((key, value, cast)) = self.sort.as_ref() {
-            utils::with_tx(ptr, |tx| unsafe {
-                tx.sort.unwrap()(
-                    tx,
-                    // XXX: *mut should be *const
-                    key.as_ptr() as *mut u8,
-                    (*cast).into(),
-                    // XXX: *mut should be *const
-                    value.as_ptr() as *mut u8,
-                )
-            })
+            (*tx).sort.unwrap()(
+                tx,
+                // XXX: *mut should be *const
+                key.as_ptr() as *mut u8,
+                (*cast).into(),
+                // XXX: *mut should be *const
+                value.as_ptr() as *mut u8,
+            )
             .to_result()?;
         }
 
         if let Some(limit) = self.limit {
-            utils::with_tx(ptr, |tx| unsafe { tx.limit.unwrap()(tx, limit) }).to_result()?;
+            (*tx).limit.unwrap()(tx, limit).to_result()?;
         }
 
         if let Some(distance) = self.distance {
-            utils::with_tx(ptr, |tx| unsafe {
-                tx.distance.unwrap()(tx, distance.into())
-            })
-            .to_result()?;
+            (*tx).distance.unwrap()(tx, distance.into()).to_result()?;
         }
 
         Ok(())

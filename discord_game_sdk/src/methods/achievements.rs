@@ -1,6 +1,4 @@
-use crate::{
-    callback, iter, sys, to_result::ToResult, Discord, Result, Snowflake, UserAchievement,
-};
+use crate::{iter, sys, to_result::ToResult, Discord, Result, Snowflake, UserAchievement};
 use std::convert::TryInto;
 
 /// # Achievements
@@ -42,15 +40,14 @@ impl<'d, E> Discord<'d, E> {
     ) {
         debug_assert!((0..=100).contains(&percent_complete));
 
-        self.with_achievement_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe {
-                mgr.set_user_achievement.unwrap()(mgr, achievement_id, percent_complete, ptr, fun)
-            }
-        });
+        unsafe {
+            let mgr = self.achievement_manager();
+
+            (*mgr).set_user_achievement.unwrap()(mgr, achievement_id, percent_complete, ptr, fun);
+        }
     }
 
     /// Loads the current user's achievements.
@@ -76,13 +73,14 @@ impl<'d, E> Discord<'d, E> {
     /// # Ok(()) }
     /// ```
     pub fn fetch_user_achievements(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
-        self.with_achievement_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.fetch_user_achievements.unwrap()(mgr, ptr, fun) }
-        });
+        unsafe {
+            let mgr = self.achievement_manager();
+
+            (*mgr).fetch_user_achievements.unwrap()(mgr, ptr, fun);
+        }
     }
 
     /// Gets the user achievement for the given achievement ID.
@@ -113,10 +111,12 @@ impl<'d, E> Discord<'d, E> {
     pub fn user_achievement(&self, achievement_id: Snowflake) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
-        self.with_achievement_manager(|mgr| unsafe {
-            mgr.get_user_achievement.unwrap()(mgr, achievement_id, &mut achievement.0)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.achievement_manager();
+
+            (*mgr).get_user_achievement.unwrap()(mgr, achievement_id, &mut achievement.0)
+                .to_result()?;
+        }
 
         Ok(achievement)
     }
@@ -131,9 +131,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn user_achievement_count(&self) -> u32 {
         let mut count = 0;
 
-        self.with_achievement_manager(|mgr| unsafe {
-            mgr.count_user_achievements.unwrap()(mgr, &mut count)
-        });
+        unsafe {
+            let mgr = self.achievement_manager();
+
+            (*mgr).count_user_achievements.unwrap()(mgr, &mut count);
+        }
 
         // XXX: i32 should be u32
         count.try_into().unwrap()
@@ -149,15 +151,17 @@ impl<'d, E> Discord<'d, E> {
     pub fn user_achievement_at(&self, index: u32) -> Result<UserAchievement> {
         let mut achievement = UserAchievement(sys::DiscordUserAchievement::default());
 
-        self.with_achievement_manager(|mgr| unsafe {
-            mgr.get_user_achievement_at.unwrap()(
+        unsafe {
+            let mgr = self.achievement_manager();
+
+            (*mgr).get_user_achievement_at.unwrap()(
                 mgr,
                 // XXX: i32 should be u32
                 index.try_into().unwrap(),
                 &mut achievement.0,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok(achievement)
     }
@@ -189,9 +193,12 @@ impl<'d, E> Discord<'d, E> {
            + Iterator<Item = Result<UserAchievement>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator {
+           + std::iter::FusedIterator
+           + std::fmt::Debug {
+        let dref = self.ref_copy();
+
         iter::Collection::new(
-            Box::new(move |i| self.ref_copy().user_achievement_at(i)),
+            Box::new(move |i| dref.user_achievement_at(i)),
             self.user_achievement_count(),
         )
     }

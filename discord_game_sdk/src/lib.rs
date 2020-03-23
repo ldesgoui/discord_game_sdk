@@ -121,7 +121,6 @@ mod action;
 mod activity;
 mod activity_kind;
 mod aliases;
-pub(crate) mod callback;
 mod cast;
 mod comparison;
 mod create_flags;
@@ -176,7 +175,12 @@ mod methods {
     mod store;
     mod users;
     mod voice;
+
+    mod callback;
 }
+
+#[cfg(test)]
+mod mock;
 
 pub(crate) use discord_game_sdk_sys as sys;
 

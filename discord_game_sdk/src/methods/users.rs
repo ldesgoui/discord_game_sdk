@@ -1,6 +1,4 @@
-use crate::{
-    callback, sys, to_result::ToResult, Discord, PremiumKind, Result, User, UserFlags, UserID,
-};
+use crate::{sys, to_result::ToResult, Discord, PremiumKind, Result, User, UserFlags, UserID};
 
 /// # Users
 ///
@@ -27,8 +25,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn current_user(&self) -> Result<User> {
         let mut user = User(sys::DiscordUser::default());
 
-        self.with_user_manager(|mgr| unsafe { mgr.get_current_user.unwrap()(mgr, &mut user.0) })
-            .to_result()?;
+        unsafe {
+            let mgr = self.user_manager();
+
+            (*mgr).get_current_user.unwrap()(mgr, &mut user.0).to_result()?;
+        }
 
         Ok(user)
     }
@@ -56,18 +57,20 @@ impl<'d, E> Discord<'d, E> {
         user_id: UserID,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&User>),
     ) {
-        self.with_user_manager(|mgr| {
-            let (ptr, fun) = callback::two_params(
-                move |res: sys::EDiscordResult, user: *mut sys::DiscordUser| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result().map(|()| unsafe { &*(user as *mut User) }),
-                    )
-                },
-            );
+        let (ptr, fun) = self.two_params(
+            move |discord, res: sys::EDiscordResult, user: *mut sys::DiscordUser| {
+                callback(
+                    discord,
+                    res.to_result().map(|()| unsafe { &*(user as *mut User) }),
+                )
+            },
+        );
 
-            unsafe { mgr.get_user.unwrap()(mgr, user_id, ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.user_manager();
+
+            (*mgr).get_user.unwrap()(mgr, user_id, ptr, fun)
+        }
     }
 
     /// Get the Premium type for the currently connected user.
@@ -83,10 +86,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn current_user_premium_kind(&self) -> Result<PremiumKind> {
         let mut premium_type = sys::EDiscordPremiumType::default();
 
-        self.with_user_manager(|mgr| unsafe {
-            mgr.get_current_user_premium_type.unwrap()(mgr, &mut premium_type)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.user_manager();
+
+            (*mgr).get_current_user_premium_type.unwrap()(mgr, &mut premium_type).to_result()?;
+        }
 
         Ok(PremiumKind::from(premium_type))
     }
@@ -113,10 +117,12 @@ impl<'d, E> Discord<'d, E> {
         ] {
             let mut contains = false;
 
-            self.with_user_manager(|mgr| unsafe {
-                mgr.current_user_has_flag.unwrap()(mgr, flag.bits(), &mut contains)
-            })
-            .to_result()?;
+            unsafe {
+                let mgr = self.user_manager();
+
+                (*mgr).current_user_has_flag.unwrap()(mgr, flag.bits(), &mut contains)
+                    .to_result()?;
+            }
 
             flags.set(*flag, contains);
         }

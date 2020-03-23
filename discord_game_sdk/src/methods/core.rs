@@ -103,7 +103,10 @@ impl<E> Discord<'_, E> {
         Ok(instance)
     }
 
-    fn create_params(&self, flags: sys::EDiscordCreateFlags) -> sys::DiscordCreateParams {
+    pub(crate) fn create_params(
+        &self,
+        flags: sys::EDiscordCreateFlags,
+    ) -> sys::DiscordCreateParams {
         sys::DiscordCreateParams {
             client_id: self.client_id(),
             flags: u64::try_from(flags).unwrap(),
@@ -171,29 +174,31 @@ impl<E> Discord<'_, E> {
             log::log!(level, "SDK: {}", unsafe { utils::charptr_to_str(message) });
         }
 
-        self.with_core(|core| unsafe {
-            core.set_log_hook.unwrap()(
-                core,
+        unsafe {
+            (*self.inner().core).set_log_hook.unwrap()(
+                self.inner().core,
                 sys::DiscordLogLevel_Debug,
                 // SAFETY: this is never used
                 std::ptr::null_mut(),
                 Some(log_hook),
-            )
-        });
+            );
+        }
     }
 
     // To start producing events, the SDK must initialize the related manager
     // We initialize all managers that produce events to kickstart event passing
     fn kickstart_managers(&self) {
-        self.with_achievement_manager(|_| {});
-        self.with_activity_manager(|_| {});
-        self.with_lobby_manager(|_| {});
-        self.with_network_manager(|_| {});
-        self.with_overlay_manager(|_| {});
-        self.with_relationship_manager(|_| {});
-        self.with_store_manager(|_| {});
-        self.with_user_manager(|_| {});
-        self.with_voice_manager(|_| {});
+        unsafe {
+            self.achievement_manager();
+            self.activity_manager();
+            self.lobby_manager();
+            self.network_manager();
+            self.overlay_manager();
+            self.relationship_manager();
+            self.store_manager();
+            self.user_manager();
+            self.voice_manager();
+        }
     }
 
     /// Runs all pending SDK callbacks.
@@ -211,42 +216,54 @@ impl<E> Discord<'_, E> {
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/discord#runcallbacks)
     // We require &mut self to prevent calling during callbacks
     pub fn run_callbacks(&mut self) -> Result<()> {
-        self.with_core(|core| unsafe { core.run_callbacks.unwrap()(core) })
-            .to_result()
+        unsafe { (*self.inner().core).run_callbacks.unwrap()(self.inner().core).to_result() }
     }
 
-    /// The Client ID that was supplied during creation
-    pub fn client_id(&self) -> ClientID {
-        self.inner().client_id
+    pub(crate) unsafe fn achievement_manager(&self) -> *mut sys::IDiscordAchievementManager {
+        (*self.inner().core).get_achievement_manager.unwrap()(self.inner().core)
     }
 
-    /// The [`EventHandler`](trait.EventHandler.html)
-    pub fn event_handler(&self) -> &Option<E> {
-        self.inner().event_handler()
+    pub(crate) unsafe fn activity_manager(&self) -> *mut sys::IDiscordActivityManager {
+        (*self.inner().core).get_activity_manager.unwrap()(self.inner().core)
     }
 
-    /// The [`EventHandler`](trait.EventHandler.html)
-    pub fn event_handler_mut(&mut self) -> &mut Option<E> {
-        self.inner_mut().event_handler_mut()
-    }
-}
-
-#[rustfmt::skip]
-impl<E> Discord<'_, E> {
-    pub(crate) fn with_core<T>(&self, callback: impl FnOnce(&mut sys::IDiscordCore) -> T) -> T {
-        utils::with_tx(self.inner().core, callback)
+    pub(crate) unsafe fn application_manager(&self) -> *mut sys::IDiscordApplicationManager {
+        (*self.inner().core).get_application_manager.unwrap()(self.inner().core)
     }
 
-    with_manager!(with_achievement_manager,  get_achievement_manager,  sys::IDiscordAchievementManager);
-    with_manager!(with_activity_manager,     get_activity_manager,     sys::IDiscordActivityManager);
-    with_manager!(with_application_manager,  get_application_manager,  sys::IDiscordApplicationManager);
-    with_manager!(with_image_manager,        get_image_manager,        sys::IDiscordImageManager);
-    with_manager!(with_lobby_manager,        get_lobby_manager,        sys::IDiscordLobbyManager);
-    with_manager!(with_network_manager,      get_network_manager,      sys::IDiscordNetworkManager);
-    with_manager!(with_overlay_manager,      get_overlay_manager,      sys::IDiscordOverlayManager);
-    with_manager!(with_relationship_manager, get_relationship_manager, sys::IDiscordRelationshipManager);
-    with_manager!(with_storage_manager,      get_storage_manager,      sys::IDiscordStorageManager);
-    with_manager!(with_store_manager,        get_store_manager,        sys::IDiscordStoreManager);
-    with_manager!(with_user_manager,         get_user_manager,         sys::IDiscordUserManager);
-    with_manager!(with_voice_manager,        get_voice_manager,        sys::IDiscordVoiceManager);
+    pub(crate) unsafe fn image_manager(&self) -> *mut sys::IDiscordImageManager {
+        (*self.inner().core).get_image_manager.unwrap()(self.inner().core)
+    }
+
+    pub(crate) unsafe fn lobby_manager(&self) -> *mut sys::IDiscordLobbyManager {
+        (*self.inner().core).get_lobby_manager.unwrap()(self.inner().core)
+    }
+
+    pub(crate) unsafe fn network_manager(&self) -> *mut sys::IDiscordNetworkManager {
+        (*self.inner().core).get_network_manager.unwrap()(self.inner().core)
+    }
+
+    pub(crate) unsafe fn overlay_manager(&self) -> *mut sys::IDiscordOverlayManager {
+        (*self.inner().core).get_overlay_manager.unwrap()(self.inner().core)
+    }
+
+    pub(crate) unsafe fn relationship_manager(&self) -> *mut sys::IDiscordRelationshipManager {
+        (*self.inner().core).get_relationship_manager.unwrap()(self.inner().core)
+    }
+
+    pub(crate) unsafe fn storage_manager(&self) -> *mut sys::IDiscordStorageManager {
+        (*self.inner().core).get_storage_manager.unwrap()(self.inner().core)
+    }
+
+    pub(crate) unsafe fn store_manager(&self) -> *mut sys::IDiscordStoreManager {
+        (*self.inner().core).get_store_manager.unwrap()(self.inner().core)
+    }
+
+    pub(crate) unsafe fn user_manager(&self) -> *mut sys::IDiscordUserManager {
+        (*self.inner().core).get_user_manager.unwrap()(self.inner().core)
+    }
+
+    pub(crate) unsafe fn voice_manager(&self) -> *mut sys::IDiscordVoiceManager {
+        (*self.inner().core).get_voice_manager.unwrap()(self.inner().core)
+    }
 }

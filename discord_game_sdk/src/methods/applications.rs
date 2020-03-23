@@ -1,4 +1,4 @@
-use crate::{callback, sys, to_result::ToResult, utils, Discord, OAuth2Token, Result};
+use crate::{sys, to_result::ToResult, utils, Discord, OAuth2Token, Result};
 use std::mem::size_of;
 
 /// # Applications
@@ -20,9 +20,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn current_locale(&self) -> String {
         let mut locale: sys::DiscordLocale = [0; size_of::<sys::DiscordLocale>()];
 
-        self.with_application_manager(|mgr| unsafe {
-            mgr.get_current_locale.unwrap()(mgr, &mut locale)
-        });
+        unsafe {
+            let mgr = self.application_manager();
+
+            (*mgr).get_current_locale.unwrap()(mgr, &mut locale)
+        }
 
         utils::charbuf_to_str(&locale).to_string()
     }
@@ -43,9 +45,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn current_branch(&self) -> String {
         let mut branch: sys::DiscordBranch = [0; size_of::<sys::DiscordBranch>()];
 
-        self.with_application_manager(|mgr| unsafe {
-            mgr.get_current_branch.unwrap()(mgr, &mut branch);
-        });
+        unsafe {
+            let mgr = self.application_manager();
+
+            (*mgr).get_current_branch.unwrap()(mgr, &mut branch);
+        }
 
         utils::charbuf_to_str(&branch).to_string()
     }
@@ -63,13 +67,14 @@ impl<'d, E> Discord<'d, E> {
     /// # Ok(()) }
     /// ```
     pub fn validate_or_exit(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
-        self.with_application_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.validate_or_exit.unwrap()(mgr, ptr, fun) };
-        });
+        unsafe {
+            let mgr = self.application_manager();
+
+            (*mgr).validate_or_exit.unwrap()(mgr, ptr, fun)
+        }
     }
 
     /// Retrieve an OAuth 2.0 Bearer token for the current user.
@@ -95,19 +100,21 @@ impl<'d, E> Discord<'d, E> {
     /// # Ok(()) }
     /// ```
     pub fn oauth2_token(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&OAuth2Token>)) {
-        self.with_application_manager(|mgr| {
-            let (ptr, fun) = callback::two_params(
-                move |res: sys::EDiscordResult, token: *mut sys::DiscordOAuth2Token| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result()
-                            .map(|()| unsafe { &*(token as *mut OAuth2Token) }),
-                    )
-                },
-            );
+        let (ptr, fun) = self.two_params(
+            move |discord, res: sys::EDiscordResult, token: *mut sys::DiscordOAuth2Token| {
+                callback(
+                    discord,
+                    res.to_result()
+                        .map(|()| unsafe { &*(token as *mut OAuth2Token) }),
+                )
+            },
+        );
 
-            unsafe { mgr.get_oauth2_token.unwrap()(mgr, ptr, fun) };
-        });
+        unsafe {
+            let mgr = self.application_manager();
+
+            (*mgr).get_oauth2_token.unwrap()(mgr, ptr, fun)
+        }
     }
 
     /// Get the signed app ticket for the current user.
@@ -128,17 +135,20 @@ impl<'d, E> Discord<'d, E> {
     /// # Ok(()) }
     /// ```
     pub fn app_ticket(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<&str>)) {
-        self.with_application_manager(|mgr| {
-            let (ptr, fun) =
-                callback::two_params(move |res: sys::EDiscordResult, string: *const u8| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result()
-                            .map(|()| unsafe { utils::charptr_to_str(string) }),
-                    )
-                });
+        let (ptr, fun) = self.two_params(
+            move |discord, res: sys::EDiscordResult, string: *const u8| {
+                callback(
+                    discord,
+                    res.to_result()
+                        .map(|()| unsafe { utils::charptr_to_str(string) }),
+                )
+            },
+        );
 
-            unsafe { mgr.get_ticket.unwrap()(mgr, ptr, fun) };
-        });
+        unsafe {
+            let mgr = self.application_manager();
+
+            (*mgr).get_ticket.unwrap()(mgr, ptr, fun)
+        }
     }
 }
