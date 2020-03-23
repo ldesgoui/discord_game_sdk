@@ -82,7 +82,11 @@ fn miri_tests() {
         discord.set_user_achievement(0, 99, |discord, _res| {
             for a in discord.iter_user_achievements() {
                 let a = a.unwrap();
-                eprintln!("in fetch in set {}: {}%", a.achievement_id(), a.percent_complete());
+                eprintln!(
+                    "in fetch in set {}: {}%",
+                    a.achievement_id(),
+                    a.percent_complete()
+                );
             }
         });
     });

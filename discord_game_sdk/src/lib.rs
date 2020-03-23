@@ -114,9 +114,6 @@
 
 #![doc(html_root_url = "https://docs.rs/discord_game_sdk/1.0.0-rc.3")]
 
-#[macro_use]
-mod macros;
-
 mod action;
 mod activity;
 mod activity_kind;
