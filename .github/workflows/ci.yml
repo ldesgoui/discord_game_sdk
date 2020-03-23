@@ -126,7 +126,8 @@ jobs:
       - name: Set up MIRI
         uses: actions-rs/cargo@v1
         with:
-          command: miri setup
+          command: miri
+          args: setup
 
       - name: Test with MIRI
         run: |
