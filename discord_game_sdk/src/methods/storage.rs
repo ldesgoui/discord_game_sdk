@@ -1,4 +1,4 @@
-use crate::{callback, iter, sys, to_result::ToResult, utils, Discord, FileStat, Result};
+use crate::{iter, sys, to_result::ToResult, utils, Discord, FileStat, Result};
 use std::{
     borrow::Cow,
     convert::{TryFrom, TryInto},
@@ -40,7 +40,7 @@ impl<'d, E> Discord<'d, E> {
 
         if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
-        };
+        }
 
         let mut read = 0;
 
@@ -48,8 +48,10 @@ impl<'d, E> Discord<'d, E> {
 
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
-        self.with_storage_manager(|mgr| unsafe {
-            mgr.read.unwrap()(
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).read.unwrap()(
                 mgr,
                 filename.as_ptr(),
                 buffer.as_mut_ptr(),
@@ -57,8 +59,8 @@ impl<'d, E> Discord<'d, E> {
                 buffer.len().try_into().unwrap_or(u32::max_value()),
                 &mut read,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         // XXX: u32 should be u64
         Ok(read.try_into().unwrap())
@@ -92,22 +94,23 @@ impl<'d, E> Discord<'d, E> {
 
         if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
-        };
+        }
 
-        self.with_storage_manager(|mgr| {
-            let (ptr, fun) = callback::three_params(
-                move |res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result().map(|()| unsafe {
-                            std::slice::from_raw_parts(data, data_len as usize)
-                        }),
-                    )
-                },
-            );
+        let (ptr, fun) = self.three_params(
+            move |discord, res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
+                callback(
+                    discord,
+                    res.to_result()
+                        .map(|()| unsafe { std::slice::from_raw_parts(data, data_len as usize) }),
+                )
+            },
+        );
 
-            unsafe { mgr.read_async.unwrap()(mgr, filename.as_ptr(), ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).read_async.unwrap()(mgr, filename.as_ptr(), ptr, fun)
+        }
     }
 
     /// Reads data asynchronously from the game's allocated save file into a buffer,
@@ -141,24 +144,23 @@ impl<'d, E> Discord<'d, E> {
 
         if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
-        };
+        }
 
-        self.with_storage_manager(|mgr| {
-            let (ptr, fun) = callback::three_params(
-                move |res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result().map(|()| unsafe {
-                            std::slice::from_raw_parts(data, data_len as usize)
-                        }),
-                    )
-                },
-            );
+        let (ptr, fun) = self.three_params(
+            move |discord, res: sys::EDiscordResult, data: *mut u8, data_len: u32| {
+                callback(
+                    discord,
+                    res.to_result()
+                        .map(|()| unsafe { std::slice::from_raw_parts(data, data_len as usize) }),
+                )
+            },
+        );
 
-            unsafe {
-                mgr.read_async_partial.unwrap()(mgr, filename.as_ptr(), offset, length, ptr, fun)
-            }
-        })
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).read_async_partial.unwrap()(mgr, filename.as_ptr(), offset, length, ptr, fun)
+        }
     }
 
     /// Writes data synchronously to disk, under the given key name.
@@ -188,14 +190,16 @@ impl<'d, E> Discord<'d, E> {
 
         if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
-        };
+        }
 
         let buffer = buffer.as_ref();
 
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
-        self.with_storage_manager(|mgr| unsafe {
-            mgr.write.unwrap()(
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).write.unwrap()(
                 mgr,
                 filename.as_ptr(),
                 // XXX: *mut should be *const
@@ -203,8 +207,8 @@ impl<'d, E> Discord<'d, E> {
                 // XXX: u32 should be u64
                 buffer.len().try_into().unwrap_or(u32::max_value()),
             )
-        })
-        .to_result()
+            .to_result()
+        }
     }
 
     /// Writes data asynchronously to disk under the given key.
@@ -239,30 +243,29 @@ impl<'d, E> Discord<'d, E> {
 
         if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
-        };
+        }
 
         let buffer = buffer.as_ref();
 
         debug_assert!(u32::try_from(buffer.len()).is_ok());
 
-        self.with_storage_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe {
-                mgr.write_async.unwrap()(
-                    mgr,
-                    filename.as_ptr(),
-                    // XXX: *mut should be *const
-                    buffer.as_ptr() as *mut u8,
-                    // XXX: u32 should be u64
-                    buffer.len().try_into().unwrap_or(u32::max_value()),
-                    ptr,
-                    fun,
-                )
-            }
-        })
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).write_async.unwrap()(
+                mgr,
+                filename.as_ptr(),
+                // XXX: *mut should be *const
+                buffer.as_ptr() as *mut u8,
+                // XXX: u32 should be u64
+                buffer.len().try_into().unwrap_or(u32::max_value()),
+                ptr,
+                fun,
+            )
+        }
     }
 
     /// Deletes written data for the given key.
@@ -284,10 +287,13 @@ impl<'d, E> Discord<'d, E> {
 
         if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
-        };
+        }
 
-        self.with_storage_manager(|mgr| unsafe { mgr.delete_.unwrap()(mgr, filename.as_ptr()) })
-            .to_result()
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).delete_.unwrap()(mgr, filename.as_ptr()).to_result()
+        }
     }
 
     /// Checks if data exists for a given key.
@@ -311,14 +317,15 @@ impl<'d, E> Discord<'d, E> {
 
         if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
-        };
+        }
 
         let mut exists = false;
 
-        self.with_storage_manager(|mgr| unsafe {
-            mgr.exists.unwrap()(mgr, filename.as_ptr(), &mut exists)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).exists.unwrap()(mgr, filename.as_ptr(), &mut exists).to_result()?;
+        }
 
         Ok(exists)
     }
@@ -342,14 +349,15 @@ impl<'d, E> Discord<'d, E> {
 
         if !filename.ends_with('\0') {
             filename.to_mut().push('\0')
-        };
+        }
 
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
-        self.with_storage_manager(|mgr| unsafe {
-            mgr.stat.unwrap()(mgr, filename.as_ptr(), &mut stat.0)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).stat.unwrap()(mgr, filename.as_ptr(), &mut stat.0).to_result()?;
+        }
 
         Ok(stat)
     }
@@ -362,7 +370,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn file_stat_count(&self) -> u32 {
         let mut count = 0;
 
-        self.with_storage_manager(|mgr| unsafe { mgr.count.unwrap()(mgr, &mut count) });
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).count.unwrap()(mgr, &mut count)
+        }
 
         // XXX: i32 should be u32
         count.try_into().unwrap()
@@ -376,15 +388,17 @@ impl<'d, E> Discord<'d, E> {
     pub fn file_stat_at(&self, index: u32) -> Result<FileStat> {
         let mut stat = FileStat(sys::DiscordFileStat::default());
 
-        self.with_storage_manager(|mgr| unsafe {
-            mgr.stat_at.unwrap()(
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).stat_at.unwrap()(
                 mgr,
                 // XXX: i32 should be u32
                 index.try_into().unwrap(),
                 &mut stat.0,
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok(stat)
     }
@@ -406,7 +420,8 @@ impl<'d, E> Discord<'d, E> {
            + Iterator<Item = Result<FileStat>>
            + DoubleEndedIterator
            + ExactSizeIterator
-           + std::iter::FusedIterator {
+           + std::iter::FusedIterator
+           + std::fmt::Debug {
         iter::Collection::new(
             Box::new(move |i| self.ref_copy().file_stat_at(i)),
             self.file_stat_count(),
@@ -427,8 +442,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn folder_path(&self) -> Result<String> {
         let mut path: sys::DiscordPath = [0; size_of::<sys::DiscordPath>()];
 
-        self.with_storage_manager(|mgr| unsafe { mgr.get_path.unwrap()(mgr, &mut path) })
-            .to_result()?;
+        unsafe {
+            let mgr = self.storage_manager();
+
+            (*mgr).get_path.unwrap()(mgr, &mut path).to_result()?;
+        }
 
         Ok(utils::charbuf_to_str(&path).to_string())
     }

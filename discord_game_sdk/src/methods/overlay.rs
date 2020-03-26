@@ -1,4 +1,4 @@
-use crate::{callback, sys, to_result::ToResult, Action, Discord, Result};
+use crate::{sys, to_result::ToResult, Action, Discord, Result};
 use std::borrow::Cow;
 
 /// # Overlay
@@ -31,7 +31,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn overlay_enabled(&self) -> bool {
         let mut enabled = false;
 
-        self.with_overlay_manager(|mgr| unsafe { mgr.is_enabled.unwrap()(mgr, &mut enabled) });
+        unsafe {
+            let mgr = self.overlay_manager();
+
+            (*mgr).is_enabled.unwrap()(mgr, &mut enabled)
+        }
 
         enabled
     }
@@ -51,7 +55,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn overlay_opened(&self) -> bool {
         let mut locked = false;
 
-        self.with_overlay_manager(|mgr| unsafe { mgr.is_locked.unwrap()(mgr, &mut locked) });
+        unsafe {
+            let mgr = self.overlay_manager();
+
+            (*mgr).is_locked.unwrap()(mgr, &mut locked)
+        }
 
         !locked
     }
@@ -75,13 +83,14 @@ impl<'d, E> Discord<'d, E> {
         opened: bool,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
-        self.with_overlay_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.set_locked.unwrap()(mgr, !opened, ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.overlay_manager();
+
+            (*mgr).set_locked.unwrap()(mgr, !opened, ptr, fun)
+        }
     }
 
     /// Opens the overlay modal for sending game invitations to users, channels, and servers.
@@ -104,13 +113,14 @@ impl<'d, E> Discord<'d, E> {
         action: Action,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>),
     ) {
-        self.with_overlay_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.open_activity_invite.unwrap()(mgr, action.into(), ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.overlay_manager();
+
+            (*mgr).open_activity_invite.unwrap()(mgr, action.into(), ptr, fun)
+        }
     }
 
     /// Opens the overlay modal for joining a Discord guild, given its invite code
@@ -143,15 +153,16 @@ impl<'d, E> Discord<'d, E> {
 
         if !code.ends_with('\0') {
             code.to_mut().push('\0')
-        };
+        }
 
-        self.with_overlay_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.open_guild_invite.unwrap()(mgr, code.as_ptr(), ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.overlay_manager();
+
+            (*mgr).open_guild_invite.unwrap()(mgr, code.as_ptr(), ptr, fun)
+        }
     }
 
     /// Opens the overlay widget for voice settings for the currently connected application.
@@ -171,12 +182,13 @@ impl<'d, E> Discord<'d, E> {
     /// # Ok(()) }
     /// ```
     pub fn open_voice_settings(&self, callback: impl 'd + FnOnce(&Discord<'d, E>, Result<()>)) {
-        self.with_overlay_manager(|mgr| {
-            let (ptr, fun) = callback::one_param(move |res: sys::EDiscordResult| {
-                callback(&*self.ref_copy(), res.to_result())
-            });
+        let (ptr, fun) = self
+            .one_param(move |discord, res: sys::EDiscordResult| callback(discord, res.to_result()));
 
-            unsafe { mgr.open_voice_settings.unwrap()(mgr, ptr, fun) }
-        })
+        unsafe {
+            let mgr = self.overlay_manager();
+
+            (*mgr).open_voice_settings.unwrap()(mgr, ptr, fun)
+        }
     }
 }

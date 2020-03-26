@@ -18,10 +18,11 @@ impl<E> Discord<'_, E> {
     pub fn relationship_with(&self, user_id: UserID) -> Result<Relationship> {
         let mut relationship = Relationship(sys::DiscordRelationship::default());
 
-        self.with_relationship_manager(|mgr| unsafe {
-            mgr.get.unwrap()(mgr, user_id, &mut relationship.0)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.relationship_manager();
+
+            (*mgr).get.unwrap()(mgr, user_id, &mut relationship.0).to_result()?;
+        }
 
         Ok(relationship)
     }
@@ -43,7 +44,7 @@ impl<E> Discord<'_, E> {
     /// # Ok(()) }
     /// ```
     pub fn filter_relationships<F: FnMut(&Relationship) -> bool>(&self, mut filter: F) {
-        pub(crate) unsafe extern "C" fn filter_relationship<F>(
+        unsafe extern "C" fn filter_relationship<F>(
             callback_ptr: *mut std::ffi::c_void,
             relationship_ptr: *mut sys::DiscordRelationship,
         ) -> bool
@@ -55,13 +56,15 @@ impl<E> Discord<'_, E> {
             (*(callback_ptr as *mut F))(&*(relationship_ptr as *const Relationship))
         }
 
-        self.with_relationship_manager(|mgr| unsafe {
-            mgr.filter.unwrap()(
+        unsafe {
+            let mgr = self.relationship_manager();
+
+            (*mgr).filter.unwrap()(
                 mgr,
                 &mut filter as *mut F as *mut std::ffi::c_void,
                 Some(filter_relationship::<F>),
             )
-        })
+        }
     }
 
     /// Returns the number of relationships matching the filter.
@@ -75,8 +78,11 @@ impl<E> Discord<'_, E> {
     pub fn relationship_count(&self) -> Result<u32> {
         let mut count = 0;
 
-        self.with_relationship_manager(|mgr| unsafe { mgr.count.unwrap()(mgr, &mut count) })
-            .to_result()?;
+        unsafe {
+            let mgr = self.relationship_manager();
+
+            (*mgr).count.unwrap()(mgr, &mut count).to_result()?;
+        }
 
         // XXX: i32 should be u32
         Ok(count.try_into().unwrap())
@@ -93,10 +99,11 @@ impl<E> Discord<'_, E> {
     pub fn relationship_at(&self, index: u32) -> Result<Relationship> {
         let mut relationship = Relationship(sys::DiscordRelationship::default());
 
-        self.with_relationship_manager(|mgr| unsafe {
-            mgr.get_at.unwrap()(mgr, index, &mut relationship.0)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.relationship_manager();
+
+            (*mgr).get_at.unwrap()(mgr, index, &mut relationship.0).to_result()?;
+        }
 
         Ok(relationship)
     }
@@ -122,7 +129,8 @@ impl<E> Discord<'_, E> {
             + Iterator<Item = Result<Relationship>>
             + DoubleEndedIterator
             + ExactSizeIterator
-            + std::iter::FusedIterator,
+            + std::iter::FusedIterator
+            + std::fmt::Debug,
     > {
         Ok(iter::Collection::new(
             Box::new(move |i| self.ref_copy().relationship_at(i)),

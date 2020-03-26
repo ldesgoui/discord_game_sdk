@@ -1,4 +1,4 @@
-use crate::{callback, sys, to_result::ToResult, Discord, FetchKind, Image, ImageHandle, Result};
+use crate::{sys, to_result::ToResult, Discord, FetchKind, Image, ImageHandle, Result};
 use std::convert::{TryFrom, TryInto};
 
 /// # Images
@@ -33,18 +33,17 @@ impl<'d, E> Discord<'d, E> {
         refresh: FetchKind,
         callback: impl 'd + FnOnce(&Discord<'d, E>, Result<ImageHandle>),
     ) {
-        self.with_image_manager(move |mgr| {
-            let (ptr, fun) = callback::two_params(
-                move |res: sys::EDiscordResult, image_handle: sys::DiscordImageHandle| {
-                    callback(
-                        &*self.ref_copy(),
-                        res.to_result().map(|()| ImageHandle(image_handle)),
-                    )
-                },
-            );
+        let (ptr, fun) = self.two_params(
+            move |discord, res: sys::EDiscordResult, image_handle: sys::DiscordImageHandle| {
+                callback(discord, res.to_result().map(|()| ImageHandle(image_handle)))
+            },
+        );
 
-            unsafe { mgr.fetch.unwrap()(mgr, handle.0, refresh.into(), ptr, fun) }
-        });
+        unsafe {
+            let mgr = self.image_manager();
+
+            (*mgr).fetch.unwrap()(mgr, handle.0, refresh.into(), ptr, fun)
+        }
     }
 
     /// Get's the dimensions of the source image.
@@ -53,10 +52,11 @@ impl<'d, E> Discord<'d, E> {
     pub fn image_dimensions(&self, handle: ImageHandle) -> Result<(u32, u32)> {
         let mut dimensions = sys::DiscordImageDimensions::default();
 
-        self.with_image_manager(move |mgr| unsafe {
-            mgr.get_dimensions.unwrap()(mgr, handle.0, &mut dimensions)
-        })
-        .to_result()?;
+        unsafe {
+            let mgr = self.image_manager();
+
+            (*mgr).get_dimensions.unwrap()(mgr, handle.0, &mut dimensions).to_result()?;
+        }
 
         Ok((dimensions.width, dimensions.height))
     }
@@ -72,17 +72,17 @@ impl<'d, E> Discord<'d, E> {
 
         debug_assert!(u32::try_from(data.len()).is_ok());
 
-        self.with_image_manager(|mgr| unsafe {
-            let handle = handle;
+        unsafe {
+            let mgr = self.image_manager();
 
-            mgr.get_data.unwrap()(
+            (*mgr).get_data.unwrap()(
                 mgr,
                 handle.0,
                 data.as_mut_ptr(),
                 data.len().try_into().unwrap_or(u32::max_value()),
             )
-        })
-        .to_result()?;
+            .to_result()?;
+        }
 
         Ok(Image {
             width,

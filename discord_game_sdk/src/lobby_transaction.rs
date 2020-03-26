@@ -1,4 +1,4 @@
-use crate::{sys, to_result::ToResult, utils, LobbyKind, Result, UserID};
+use crate::{sys, to_result::ToResult, LobbyKind, Result, UserID};
 use std::collections::HashMap;
 
 /// Lobby Transaction
@@ -56,11 +56,11 @@ impl LobbyTransaction {
     pub fn add_metadata(&mut self, mut key: String, mut value: String) -> &mut Self {
         if !key.ends_with('\0') {
             key.push('\0')
-        };
+        }
 
         if !value.ends_with('\0') {
             value.push('\0')
-        };
+        }
 
         let _ = self.metadata.insert(key, Some(value));
         self
@@ -76,7 +76,7 @@ impl LobbyTransaction {
     pub fn delete_metadata<S>(&mut self, mut key: String) -> &mut Self {
         if !key.ends_with('\0') {
             key.push('\0')
-        };
+        }
 
         let _ = self.metadata.insert(key, None);
         self
@@ -90,48 +90,42 @@ impl LobbyTransaction {
         self
     }
 
-    pub(crate) fn process(&self, ptr: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
+    pub(crate) unsafe fn process(&self, tx: *mut sys::IDiscordLobbyTransaction) -> Result<()> {
         if let Some(kind) = self.kind {
-            utils::with_tx(ptr, |tx| unsafe { tx.set_type.unwrap()(tx, kind.into()) })
-                .to_result()?;
+            (*tx).set_type.unwrap()(tx, kind.into()).to_result()?;
         }
 
         if let Some(user_id) = self.owner {
-            utils::with_tx(ptr, |tx| unsafe { tx.set_owner.unwrap()(tx, user_id) }).to_result()?;
+            (*tx).set_owner.unwrap()(tx, user_id).to_result()?;
         }
 
         if let Some(capacity) = self.capacity {
-            utils::with_tx(ptr, |tx| unsafe { tx.set_capacity.unwrap()(tx, capacity) })
-                .to_result()?;
+            (*tx).set_capacity.unwrap()(tx, capacity).to_result()?;
         }
 
         if let Some(locked) = self.locked {
-            utils::with_tx(ptr, |tx| unsafe { tx.set_locked.unwrap()(tx, locked) }).to_result()?;
+            (*tx).set_locked.unwrap()(tx, locked).to_result()?;
         }
 
         for (key, value) in &self.metadata {
             match value {
                 Some(value) => {
-                    utils::with_tx(ptr, |tx| unsafe {
-                        tx.set_metadata.unwrap()(
-                            tx,
-                            // XXX: *mut should be *const
-                            key.as_ptr() as *mut u8,
-                            // XXX: *mut should be *const
-                            value.as_ptr() as *mut u8,
-                        )
-                    })
+                    (*tx).set_metadata.unwrap()(
+                        tx,
+                        // XXX: *mut should be *const
+                        key.as_ptr() as *mut u8,
+                        // XXX: *mut should be *const
+                        value.as_ptr() as *mut u8,
+                    )
                     .to_result()?;
                 }
 
                 None => {
-                    utils::with_tx(ptr, |tx| unsafe {
-                        tx.delete_metadata.unwrap()(
-                            tx,
-                            // XXX: *mut should be *const
-                            key.as_ptr() as *mut u8,
-                        )
-                    })
+                    (*tx).delete_metadata.unwrap()(
+                        tx,
+                        // XXX: *mut should be *const
+                        key.as_ptr() as *mut u8,
+                    )
                     .to_result()?;
                 }
             }

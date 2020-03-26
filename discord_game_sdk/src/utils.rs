@@ -1,10 +1,5 @@
 use scopeguard::{OnSuccess, ScopeGuard};
 
-pub(crate) fn with_tx<Tx, T>(ptr: *mut Tx, callback: impl FnOnce(&mut Tx) -> T) -> T {
-    let tx = unsafe { &mut *ptr };
-    callback(tx)
-}
-
 type PanicHook = Box<dyn Fn(&std::panic::PanicInfo<'_>) + Sync + Send + 'static>;
 
 // TRACK:

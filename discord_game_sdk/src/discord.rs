@@ -1,4 +1,4 @@
-use crate::sys;
+use crate::{sys, ClientID};
 use std::{cell::UnsafeCell, marker::PhantomData, mem::ManuallyDrop};
 
 /// Main interface with SDK
@@ -70,6 +70,21 @@ impl<E> Drop for Discord<'_, E> {
 }
 
 impl<'d, E> Discord<'d, E> {
+    /// The Client ID that was supplied during creation
+    pub fn client_id(&self) -> ClientID {
+        self.inner().client_id
+    }
+
+    /// The [`EventHandler`](trait.EventHandler.html)
+    pub fn event_handler(&self) -> &Option<E> {
+        self.inner().event_handler()
+    }
+
+    /// The [`EventHandler`](trait.EventHandler.html)
+    pub fn event_handler_mut(&mut self) -> &mut Option<E> {
+        self.inner_mut().event_handler_mut()
+    }
+
     pub(crate) fn inner(&self) -> &DiscordInner<'d, E> {
         unsafe { &*self.0 }
     }
