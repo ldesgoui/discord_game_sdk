@@ -1,0 +1,13 @@
+[package]
+name = "interactive_tests"
+version = "0.1.0"
+authors = ["ldesgoui <ldesgoui@ldesgoui.xyz>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+anyhow = "*"
+dialoguer = "*"
+discord_game_sdk = { path = "../discord_game_sdk" }
+log = "*"
+pretty_env_logger = "*"

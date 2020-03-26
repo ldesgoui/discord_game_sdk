@@ -2,4 +2,5 @@
 members = [
     "discord_game_sdk",
     "discord_game_sdk_sys",
+    "interactive_tests",
 ]

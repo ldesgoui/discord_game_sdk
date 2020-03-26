@@ -10,11 +10,10 @@ impl<'d, E> Discord<'d, E> {
     ///
     /// ## Errors
     ///
-    /// Until the event [`CurrentUserUpdate`] is fired, this method will return an error.
+    /// Returns [`Error::NotFound`](enum.Error.html#variant.NotFound) until the event
+    /// [`EventHandler::on_current_user_update`](trait.EventHandler.html#method.on_current_user_update) has fired.
     ///
     /// > [Method in official docs](https://discordapp.com/developers/docs/game-sdk/users#getcurrentuser)
-    ///
-    /// [`CurrentUserUpdate`]: event/struct.CurrentUserUpdate.html
     ///
     /// ```rust
     /// # use discord_game_sdk::*;
