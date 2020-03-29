@@ -19,8 +19,8 @@ fn run() -> anyhow::Result<()> {
     let client_id = env::var("DISCORD_CLIENT_ID")?.parse()?;
     log::info!("starting with client id {}", client_id);
 
-    let mut bob = instance::<()>(client_id, 0)?;
     let mut alice = instance::<()>(client_id, 0)?;
+    let mut bob = instance::<()>(client_id, 1)?;
 
     log::info!("running callbacks for a second");
     for _ in 0..100 {
