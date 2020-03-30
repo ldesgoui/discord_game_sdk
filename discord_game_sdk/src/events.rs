@@ -4,27 +4,30 @@ use crate::{
 };
 use std::{ffi::c_void, mem::ManuallyDrop};
 
-fn with_event_handler<E>(inner: *mut c_void, callback: impl FnOnce(&mut E, &Discord<'_, E>)) {
-    let _guard = utils::prevent_unwind();
+fn with_event_handler<E>(
+    inner: *mut c_void,
+    callback: impl FnOnce(&mut E, &Discord<'_, E>) + std::panic::UnwindSafe,
+) {
+    utils::abort_on_panic(|| {
+        debug_assert!(!inner.is_null());
 
-    debug_assert!(!inner.is_null());
+        let discord = &ManuallyDrop::new(Discord(inner as *mut DiscordInner<'_, E>));
 
-    let discord = &ManuallyDrop::new(Discord(inner as *mut DiscordInner<'_, E>));
+        // SAFETY: Mutating through an immutable reference
+        // - `discord.0.event_handler` is an `UnsafeCell`, inner mutation is legal
+        // - No other part of the code can safely mutate it as they require `&mut DiscordInner`
+        // - `EventHandler` can mutate itself during method but not `&Discord`
+        let mut event_handler = unsafe { (*discord.inner().event_handler.get()).take() };
 
-    // SAFETY: Mutating through an immutable reference
-    // - `discord.0.event_handler` is an `UnsafeCell`, inner mutation is legal
-    // - No other part of the code can safely mutate it as they require `&mut DiscordInner`
-    // - `EventHandler` can mutate itself during method but not `&Discord`
-    let mut event_handler = unsafe { (*discord.inner().event_handler.get()).take() };
+        if let Some(event_handler) = event_handler.as_mut() {
+            callback(event_handler, discord);
+        }
 
-    if let Some(event_handler) = event_handler.as_mut() {
-        callback(event_handler, discord);
-    }
-
-    // SAFETY: See previous
-    unsafe {
-        (*discord.inner().event_handler.get()) = event_handler;
-    }
+        // SAFETY: See previous
+        unsafe {
+            (*discord.inner().event_handler.get()) = event_handler;
+        }
+    })
 }
 
 pub(crate) fn achievement<E: EventHandler>() -> sys::IDiscordAchievementEvents {
