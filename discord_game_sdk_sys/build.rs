@@ -15,15 +15,9 @@ fn dl_sdk(sdkfolder: PathBuf) -> Result<PathBuf, Box<dyn Error>> {
     let mut req = Cursor::new(req.bytes()?);
     let mut archive = ZipArchive::new(&mut req)?;
 
-    let cd = env::current_dir()?;
-    if !sdkfolder.exists() {
-        fs::create_dir_all(&sdkfolder)?;
-    }
-    env::set_current_dir(&sdkfolder)?;
-
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
-        let outpath = file.sanitized_name();
+        let outpath = sdkfolder.join(file.sanitized_name());
 
         if (&*file.name()).ends_with('/') {
             // Folder
@@ -43,13 +37,54 @@ fn dl_sdk(sdkfolder: PathBuf) -> Result<PathBuf, Box<dyn Error>> {
     }
 
     println!("SDK extracted to: \"{}\"", sdkfolder.display());
-    env::set_current_dir(&cd)?;
+
+    rn_sdk(sdkfolder.join("lib/"))?;
     Ok(sdkfolder)
 }
 
 #[cfg(not(feature = "download"))]
 fn dl_sdk(_: PathBuf) -> Result<PathBuf, Box<dyn Error>> {
     Err(std::io::Error::new(std::io::ErrorKind::Other, "Download disabled").into())
+}
+
+#[cfg(feature = "download")]
+fn rn_sdk(libfolder: PathBuf) -> Result<(), Box<dyn Error>> {
+    use std::fs;
+
+    for x in &["x86/", "x86_64/"] {
+        for entry in fs::read_dir(libfolder.join(x))? {
+            let entry = entry?;
+            let path = entry.path();
+            let ext = path
+                .extension()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or_default();
+            let file_name = path
+                .file_name()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or_default();
+
+            if !file_name.starts_with("lib") {
+                match ext {
+                    "so" | "dylib" => {
+                        fs::rename(&path, path.with_file_name("lib".to_owned() + file_name))?;
+                    }
+                    _ => (),
+                }
+            }
+
+            if file_name.ends_with(".dll.lib") {
+                fs::rename(
+                    &path,
+                    path.with_file_name((&file_name[..file_name.len() - 8]).to_owned() + ".lib"),
+                )?;
+            }
+        }
+    }
+
+    Ok(())
 }
 
 fn main() {
