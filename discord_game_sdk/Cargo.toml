@@ -27,5 +27,6 @@ pretty_env_logger = "0.4"
 
 [features]
 default = ["link"]
-link = ["discord_game_sdk_sys/link"]
 doc = ["discord_game_sdk_sys/doc"] # DO NOT RELY ON THIS
+download = ["discord_game_sdk_sys/download"]
+link = ["discord_game_sdk_sys/link"]

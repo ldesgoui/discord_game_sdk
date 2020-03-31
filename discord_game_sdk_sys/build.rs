@@ -1,4 +1,56 @@
-use std::{env, ops::Not, path::PathBuf};
+use std::{env, error::Error, path::PathBuf};
+
+// TODO make sure references are used when they should be
+#[cfg(feature = "download")]
+fn dl_sdk(sdkfolder: PathBuf) -> Result<PathBuf, Box<dyn Error>> {
+    use std::fs::{self, File};
+    use std::io::{self, Cursor};
+
+    use reqwest::blocking::get;
+    use zip::read::ZipArchive;
+
+    // Download and extract SDK
+    let req = get("https://dl-game-sdk.discordapp.net/latest/discord_game_sdk.zip")?
+        .error_for_status()?;
+    let mut req = Cursor::new(req.bytes()?);
+    let mut archive = ZipArchive::new(&mut req)?;
+
+    let cd = env::current_dir()?;
+    if !sdkfolder.exists() {
+        fs::create_dir_all(&sdkfolder)?;
+    }
+    env::set_current_dir(&sdkfolder)?;
+
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)?;
+        let outpath = file.sanitized_name();
+
+        if (&*file.name()).ends_with('/') {
+            // Folder
+            if !outpath.exists() {
+                fs::create_dir_all(&outpath)?;
+            }
+        } else {
+            // File
+            if let Some(p) = outpath.parent() {
+                if !p.exists() {
+                    fs::create_dir_all(&p)?;
+                }
+            }
+            let mut outfile = File::create(&outpath)?;
+            io::copy(&mut file, &mut outfile)?;
+        }
+    }
+
+    println!("SDK extracted to: \"{}\"", sdkfolder.display());
+    env::set_current_dir(&cd)?;
+    Ok(sdkfolder)
+}
+
+#[cfg(not(feature = "download"))]
+fn dl_sdk(_: PathBuf) -> Result<PathBuf, Box<dyn Error>> {
+    Err(std::io::Error::new(std::io::ErrorKind::Other, "Download disabled").into())
+}
 
 fn main() {
     let target = env::var("TARGET").unwrap();
@@ -10,7 +62,9 @@ fn main() {
         return;
     }
 
-    let sdk_path = PathBuf::from(env::var("DISCORD_GAME_SDK_PATH").expect(MISSING_SDK_PATH));
+    let sdk_path = dl_sdk(out_path.join("sdk/")).unwrap_or_else(|_| {
+        PathBuf::from(env::var("DISCORD_GAME_SDK_PATH").expect(MISSING_SDK_PATH))
+    });
 
     println!("cargo:rerun-if-env-changed=DISCORD_GAME_SDK_PATH");
     println!("cargo:rerun-if-changed={}", sdk_path.to_str().unwrap());
@@ -39,7 +93,7 @@ fn main() {
 
     std::fs::copy(out_path.join("bindings.rs"), "src/.generated.rs").unwrap();
 
-    if cfg!(feature = "link").not() {
+    if cfg!(not(feature = "link")) {
         return;
     }
 

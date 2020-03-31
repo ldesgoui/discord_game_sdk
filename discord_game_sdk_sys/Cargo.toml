@@ -16,7 +16,10 @@ features = ["doc"]
 
 [features]
 doc = [] # DO NOT RELY ON THIS
+download = ["reqwest", "zip"]
 link = []
 
 [build-dependencies]
 bindgen = { version = "0.53", default-features = false, features = ["runtime"] }
+reqwest = { version = "0.10", optional = true, features = ["blocking"] }
+zip = { version = "0.5", optional = true }
