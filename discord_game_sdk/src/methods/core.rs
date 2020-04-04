@@ -161,17 +161,17 @@ impl<E> Discord<'_, E> {
             level: sys::EDiscordLogLevel,
             message: *const u8,
         ) {
-            let _guard = utils::prevent_unwind();
+            utils::abort_on_panic(|| {
+                let level = match level {
+                    sys::DiscordLogLevel_Error => log::Level::Error,
+                    sys::DiscordLogLevel_Warn => log::Level::Warn,
+                    sys::DiscordLogLevel_Info => log::Level::Info,
+                    sys::DiscordLogLevel_Debug => log::Level::Debug,
+                    _ => log::Level::Trace,
+                };
 
-            let level = match level {
-                sys::DiscordLogLevel_Error => log::Level::Error,
-                sys::DiscordLogLevel_Warn => log::Level::Warn,
-                sys::DiscordLogLevel_Info => log::Level::Info,
-                sys::DiscordLogLevel_Debug => log::Level::Debug,
-                _ => log::Level::Trace,
-            };
-
-            log::log!(level, "SDK: {}", unsafe { utils::charptr_to_str(message) });
+                log::log!(level, "SDK: {}", unsafe { utils::charptr_to_str(message) });
+            })
         }
 
         unsafe {

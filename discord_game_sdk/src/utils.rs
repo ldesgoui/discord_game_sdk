@@ -1,29 +1,30 @@
-use scopeguard::{OnSuccess, ScopeGuard};
-
-type PanicHook = Box<dyn Fn(&std::panic::PanicInfo<'_>) + Sync + Send + 'static>;
-
 // TRACK:
 // https://github.com/rust-lang/rust/issues/52652
 // https://github.com/rust-lang/rust/issues/58760
 // https://github.com/rust-lang/project-ffi-unwind
-pub(crate) fn prevent_unwind() -> ScopeGuard<PanicHook, fn(PanicHook), OnSuccess> {
+pub(crate) fn abort_on_panic<R>(callback: impl FnOnce() -> R + std::panic::UnwindSafe) -> R {
     const ACROSS_FFI: &str = "[discord_game_sdk]
             The program has encountered a `panic` across FFI bounds, unwinding at this
             point would be undefined behavior, we will abort the process instead.
-            Please report this issue to https://github.com/ldesgoui/discord_game_sdk
-            Here is the panic message:";
+            Please report this issue to https://github.com/ldesgoui/discord_game_sdk";
 
-    let hook = std::panic::take_hook();
+    match std::panic::catch_unwind(callback) {
+        Ok(r) => r,
+        Err(e) => {
+            if let Some(info) = e.downcast_ref::<&str>() {
+                log::error!("panic across FFI bounds: {}", info);
+                eprintln!("\n{}\n\n{}\n", ACROSS_FFI, info);
+            } else if let Some(info) = e.downcast_ref::<String>() {
+                log::error!("panic across FFI bounds: {}", info);
+                eprintln!("\n{}\n\n{}\n", ACROSS_FFI, info);
+            } else {
+                log::error!("panic across FFI bounds");
+                eprintln!("\n{}\n", ACROSS_FFI);
+            }
 
-    std::panic::set_hook(Box::new(|info| {
-        log::error!("panic across FFI bounds: {}", info);
-        eprintln!("\n{}\n\n{}\n", ACROSS_FFI, info);
-        std::process::abort();
-    }));
-
-    ScopeGuard::with_strategy(hook, |hook| {
-        std::panic::set_hook(hook);
-    })
+            std::process::abort();
+        }
+    }
 }
 
 pub(crate) fn charbuf_to_str(charbuf: &[u8]) -> &str {
