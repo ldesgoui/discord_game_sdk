@@ -122,7 +122,7 @@ jobs:
       - name: Test with MIRI
         run: |
           cd discord_game_sdk
-          cargo miri test
+          cargo miri test --features private-docs-rs
 
   fmt-lint:
     name: Check format and lints

@@ -2,7 +2,7 @@ use std::{env, path::*};
 
 fn main() {
     // DO NOT RELY ON THIS
-    if cfg!(any(miri, feature = "private-docs-rs")) {
+    if cfg!(feature = "private-docs-rs") {
         return generate_ffi_bindings(bindgen::builder().header("discord_game_sdk.h"));
     }
 
