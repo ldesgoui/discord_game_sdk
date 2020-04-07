@@ -1,49 +1,29 @@
-use std::{env, ops::Not, path::PathBuf};
+use std::{env, path::*};
 
 fn main() {
-    let target = env::var("TARGET").unwrap();
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-
     // DO NOT RELY ON THIS
-    if cfg!(feature = "doc") {
-        std::fs::copy("src/.generated.rs", out_path.join("bindings.rs")).unwrap();
-        return;
+    if cfg!(any(miri, feature = "private-docs-rs")) {
+        return generate_ffi_bindings(bindgen::builder().header("discord_game_sdk.h"));
     }
 
     let sdk_path = PathBuf::from(env::var("DISCORD_GAME_SDK_PATH").expect(MISSING_SDK_PATH));
-
     println!("cargo:rerun-if-env-changed=DISCORD_GAME_SDK_PATH");
-    println!("cargo:rerun-if-changed={}", sdk_path.to_str().unwrap());
+    println!("cargo:rerun-if-changed={}", sdk_path.display());
 
-    bindgen::builder()
-        .header(sdk_path.join("c/discord_game_sdk.h").to_str().unwrap())
-        .ctypes_prefix("ctypes")
-        .derive_copy(true)
-        .derive_debug(true)
-        .derive_default(true)
-        .derive_eq(true)
-        .derive_hash(true)
-        .derive_partialeq(true)
-        .generate_comments(false)
-        .impl_debug(true)
-        .impl_partialeq(true)
-        .parse_callbacks(Box::new(Callbacks))
-        .prepend_enum_name(false)
-        .whitelist_function("Discord.+")
-        .whitelist_type("[EI]?Discord.+")
-        .whitelist_var("DISCORD_.+")
-        .generate()
-        .expect("discord_game_sdk_sys: bindgen could not generate bindings")
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("discord_game_sdk_sys: could not write bindings to file");
+    generate_ffi_bindings(
+        bindgen::builder().header(sdk_path.join("c/discord_game_sdk.h").to_str().unwrap()),
+    );
 
-    std::fs::copy(out_path.join("bindings.rs"), "src/.generated.rs").unwrap();
+    if cfg!(feature = "link") {
+        let target = env::var("TARGET").unwrap();
 
-    if cfg!(feature = "link").not() {
-        return;
+        verify_installation(&target, &sdk_path);
+        configure_linkage(&target, &sdk_path);
     }
+}
 
-    match target.as_ref() {
+fn verify_installation(target: &str, sdk_path: &Path) {
+    match target {
         "x86_64-unknown-linux-gnu" => {
             assert!(
                 sdk_path.join("lib/x86_64/libdiscord_game_sdk.so").exists(),
@@ -52,7 +32,6 @@ fn main() {
         }
 
         "x86_64-apple-darwin" => {
-            // TODO: assert SDK is in DYLD_LIBRARY_PATH
             assert!(
                 sdk_path
                     .join("lib/x86_64/libdiscord_game_sdk.dylib")
@@ -77,8 +56,10 @@ fn main() {
 
         _ => panic!(INCOMPATIBLE_PLATFORM),
     }
+}
 
-    match target.as_ref() {
+fn configure_linkage(target: &str, sdk_path: &Path) {
+    match target {
         "x86_64-unknown-linux-gnu"
         | "x86_64-apple-darwin"
         | "x86_64-pc-windows-gnu"
@@ -86,7 +67,7 @@ fn main() {
             println!("cargo:rustc-link-lib=discord_game_sdk");
             println!(
                 "cargo:rustc-link-search={}",
-                sdk_path.join("lib/x86_64").to_str().unwrap()
+                sdk_path.join("lib/x86_64").display()
             );
         }
 
@@ -94,12 +75,37 @@ fn main() {
             println!("cargo:rustc-link-lib=discord_game_sdk");
             println!(
                 "cargo:rustc-link-search={}",
-                sdk_path.join("lib/x86").to_str().unwrap()
+                sdk_path.join("lib/x86").display()
             );
         }
 
         _ => {}
     }
+}
+
+fn generate_ffi_bindings(builder: bindgen::Builder) {
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+
+    builder
+        .ctypes_prefix("ctypes")
+        .derive_copy(true)
+        .derive_debug(true)
+        .derive_default(true)
+        .derive_eq(true)
+        .derive_hash(true)
+        .derive_partialeq(true)
+        .generate_comments(false)
+        .impl_debug(true)
+        .impl_partialeq(true)
+        .parse_callbacks(Box::new(Callbacks))
+        .prepend_enum_name(false)
+        .whitelist_function("Discord.+")
+        .whitelist_type("[EI]?Discord.+")
+        .whitelist_var("DISCORD_.+")
+        .generate()
+        .expect("discord_game_sdk_sys: bindgen could not generate bindings")
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("discord_game_sdk_sys: could not write bindings to file");
 }
 
 #[derive(Debug)]

@@ -11,7 +11,7 @@ categories = ["api-bindings", "game-engines"]
 readme = "README.md"
 
 [package.metadata.docs.rs]
-features = ["discord_game_sdk_sys/doc"]
+features = ["private-docs-rs"]
 no-default-features = true
 
 [dependencies]
@@ -27,4 +27,4 @@ pretty_env_logger = "0.4"
 [features]
 default = ["link"]
 link = ["discord_game_sdk_sys/link"]
-doc = ["discord_game_sdk_sys/doc"] # DO NOT RELY ON THIS
+private-docs-rs = ["discord_game_sdk_sys/private-docs-rs"] # DO NOT RELY ON THIS
