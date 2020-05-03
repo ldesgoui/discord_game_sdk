@@ -51,7 +51,7 @@ jobs:
         working-directory: ${{ runner.temp }}
         if: startsWith(runner.os, 'macos')
         run: |
-          echo "::set-env name=DYLD_LIBRARY_PATH::${DYLD_LIBRARY_PATH:+${D:LD_LIBRARY_PATH}:}$PWD/lib/x86_64"
+          echo "::set-env name=DYLD_LIBRARY_PATH::${DYLD_LIBRARY_PATH:+${DYLD_LIBRARY_PATH}:}$PWD/lib/x86_64"
 
       - name: Cache libclang
         id: cache-libclang
@@ -124,7 +124,7 @@ jobs:
       - name: Test with MIRI
         run: |
           cd discord_game_sdk
-          cargo miri test --features doc
+          cargo miri test --features private-docs-rs
 
   fmt-lint:
     name: Check format and lints

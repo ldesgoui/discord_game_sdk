@@ -12,11 +12,11 @@ readme = "README.md"
 build = "build.rs"
 
 [package.metadata.docs.rs]
-features = ["doc"]
+features = ["private-docs-rs"]
 
 [features]
-doc = [] # DO NOT RELY ON THIS
 link = []
+private-docs-rs = [] # DO NOT RELY ON THIS
 
 [build-dependencies]
 bindgen = { version = "0.53", default-features = false, features = ["runtime"] }
