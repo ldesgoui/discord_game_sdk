@@ -30,7 +30,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-discord_game_sdk = "1.0.0-rc.4"
+discord_game_sdk = "1.0.0"
 ```
 
 Read up on potential [`bindgen` requirements].
