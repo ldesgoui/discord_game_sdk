@@ -1,0 +1,9 @@
+[package]
+name = "example_specs"
+version = "0.1.0"
+authors = ["ldesgoui <ldesgoui@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+discord_game_sdk = { path = "../discord_game_sdk" }
+specs = "*"
