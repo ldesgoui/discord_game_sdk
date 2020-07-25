@@ -62,7 +62,9 @@ impl<E> Drop for Discord<'_, E> {
     fn drop(&mut self) {
         unsafe {
             let core = (*self.0).core;
-            (*core).destroy.unwrap()(core);
+            if !core.is_null() {
+                (*core).destroy.unwrap()(core);
+            }
 
             drop(Box::from_raw(self.0));
         }
