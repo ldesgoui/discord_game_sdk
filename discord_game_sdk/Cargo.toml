@@ -1,6 +1,6 @@
 [package]
 name = "discord_game_sdk"
-version = "1.0.0" # check src/lib.rs
+version = "1.0.1" # check src/lib.rs
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Safe wrapper for the Discord Game SDK"
