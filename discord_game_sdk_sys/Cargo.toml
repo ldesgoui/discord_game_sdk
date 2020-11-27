@@ -19,4 +19,4 @@ link = []
 private-docs-rs = [] # DO NOT RELY ON THIS
 
 [build-dependencies]
-bindgen = { version = "0.54", default-features = false, features = ["runtime"] }
+bindgen = { version = "0.56", default-features = false, features = ["runtime"] }
