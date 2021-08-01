@@ -1,6 +1,6 @@
 [package]
 name = "discord_game_sdk_sys"
-version = "1.0.0" # check sys/src/lib.rs
+version = "1.0.1" # check sys/src/lib.rs
 authors = ["ldesgoui <ldesgoui@gmail.com>"]
 edition = "2018"
 description = "Low-level bindings for the Discord Game SDK"

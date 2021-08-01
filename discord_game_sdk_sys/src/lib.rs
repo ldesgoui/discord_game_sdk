@@ -11,7 +11,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! discord_game_sdk_sys = "1.0.0"
+//! discord_game_sdk_sys = "1.0.1"
 //! ```
 //!
 //! Read up on potential [`bindgen` requirements].
@@ -72,7 +72,7 @@
 //! [official terms of the Discord Game SDK]: https://discordapp.com/developers/docs/legal
 
 #![allow(clippy::all, warnings)]
-#![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys/1.0.0")]
+#![doc(html_root_url = "https://docs.rs/discord_game_sdk_sys/1.0.1")]
 
 // Strings in the SDK are already UTF-8, we rarely end up using CStr/CString because of the
 // development overhead costs, `u8`s mean we have to do less conversions in code.
