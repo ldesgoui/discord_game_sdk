@@ -23,7 +23,7 @@ jobs:
         rust:
           - nightly
           - stable
-          - 1.37.0
+          - 1.47.0
 
     runs-on: ${{ (contains(matrix.target, 'linux') && 'ubuntu-latest') || (contains(matrix.target, 'apple') && 'macos-latest') || 'windows-latest'}}
 
@@ -137,7 +137,7 @@ jobs:
         rust:
           - nightly
           - stable
-          - 1.37.0
+          - 1.47.0
 
     steps:
       - name: Checkout

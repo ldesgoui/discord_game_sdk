@@ -19,7 +19,7 @@ The [Discord Game SDK] provides features such as, but not limited to:
 - Store Transactions
 - Achievements
 
-*Version requirement: Rust 1.37 and up.*
+*Version requirement: Rust 1.47 and up.*
 
 *[Release Notes](https://github.com/ldesgoui/discord_game_sdk/releases)*
 
@@ -107,7 +107,7 @@ conditions.
 
 ## Communication and Support
 
-I can be reached via Discord `twiikuu#0047`, on the [Official Game SDK Server]
+I can be reached via Discord `twiikuu#0044`, on the [Official Game SDK Server]
 (nicked as `ldesgoui (rust wrapper)`), as well as [twitter] and [email].
 I reserve myself no obligation to support you, although I'm generally nice.
 
