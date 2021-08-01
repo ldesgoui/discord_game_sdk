@@ -18,8 +18,8 @@ jobs:
           - x86_64-apple-darwin
           - i686-pc-windows-msvc
           - x86_64-pc-windows-msvc
-        # - i686-pc-windows-gnu #65
-        # - x86_64-pc-windows-gnu #65
+          - i686-pc-windows-gnu
+          - x86_64-pc-windows-gnu
         rust:
           - nightly
           - stable
@@ -45,13 +45,13 @@ jobs:
         working-directory: ${{ runner.temp }}
         if: contains(matrix.target, 'linux')
         run: |
-          echo "::set-env name=LD_LIBRARY_PATH::${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}$PWD/lib/x86_64"
+          echo "LD_LIBRARY_PATH=LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}$PWD/lib/x86_64" >> $GITHUB_ENV
 
       - name: Set DYLD_LIBRARY_PATH
         working-directory: ${{ runner.temp }}
         if: startsWith(runner.os, 'macos')
         run: |
-          echo "::set-env name=DYLD_LIBRARY_PATH::${DYLD_LIBRARY_PATH:+${DYLD_LIBRARY_PATH}:}$PWD/lib/x86_64"
+          echo "DYLD_LIBRARY_PATH=DYLD_LIBRARY_PATH:+${DYLD_LIBRARY_PATH}:}$PWD/lib/x86_64" >> $GITHUB_ENV
 
       - name: Cache libclang
         id: cache-libclang
@@ -71,7 +71,7 @@ jobs:
       - name: Set LIBCLANG_PATH
         if: startsWith(runner.os, 'windows')
         run: |
-          echo '::set-env name=LIBCLANG_PATH::C:\just-libclang'
+          echo 'LIBCLANG_PATH=C:\just-libclang' >> $GITHUB_ENV
 
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
