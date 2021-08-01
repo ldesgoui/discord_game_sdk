@@ -105,16 +105,6 @@ license, shall be dual licensed as above, without any additional terms or
 conditions.
 
 
-## Communication and Support
-
-I can be reached via Discord `twiikuu#0044`, on the [Official Game SDK Server]
-(nicked as `ldesgoui (rust wrapper)`), as well as [twitter] and [email].
-I reserve myself no obligation to support you, although I'm generally nice.
-
-
 [Discord Game SDK]: https://discordapp.com/developers/docs/game-sdk/sdk-starter-guide
-[Official Game SDK Server]: https://discord.gg/discord-gamesdk
 [`bindgen` requirements]: https://rust-lang.github.io/rust-bindgen/requirements.html
-[email]: mailto:ldesgoui@ldesgoui.xyz
 [official terms of the Discord Game SDK]: https://discordapp.com/developers/docs/legal
-[twitter]: https://twitter.com/ldesgoui
