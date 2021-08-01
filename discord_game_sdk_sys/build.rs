@@ -27,6 +27,7 @@ fn verify_installation(target: &str, sdk_path: &Path) {
         "x86_64-unknown-linux-gnu" => {
             assert!(
                 sdk_path.join("lib/x86_64/libdiscord_game_sdk.so").exists(),
+                "{}",
                 MISSING_SETUP
             );
         }
@@ -36,6 +37,7 @@ fn verify_installation(target: &str, sdk_path: &Path) {
                 sdk_path
                     .join("lib/x86_64/libdiscord_game_sdk.dylib")
                     .exists(),
+                "{}",
                 MISSING_SETUP
             );
         }
@@ -43,6 +45,7 @@ fn verify_installation(target: &str, sdk_path: &Path) {
         "x86_64-pc-windows-gnu" | "x86_64-pc-windows-msvc" => {
             assert!(
                 sdk_path.join("lib/x86_64/discord_game_sdk.lib").exists(),
+                "{}",
                 MISSING_SETUP
             );
         }
@@ -50,11 +53,12 @@ fn verify_installation(target: &str, sdk_path: &Path) {
         "i686-pc-windows-gnu" | "i686-pc-windows-msvc" => {
             assert!(
                 sdk_path.join("lib/x86/discord_game_sdk.lib").exists(),
+                "{}",
                 MISSING_SETUP
             );
         }
 
-        _ => panic!(INCOMPATIBLE_PLATFORM),
+        _ => panic!("{}", INCOMPATIBLE_PLATFORM),
     }
 }
 
@@ -99,9 +103,9 @@ fn generate_ffi_bindings(builder: bindgen::Builder) {
         .impl_partialeq(true)
         .parse_callbacks(Box::new(Callbacks))
         .prepend_enum_name(false)
-        .whitelist_function("Discord.+")
-        .whitelist_type("[EI]?Discord.+")
-        .whitelist_var("DISCORD_.+")
+        .allowlist_function("Discord.+")
+        .allowlist_type("[EI]?Discord.+")
+        .allowlist_var("DISCORD_.+")
         .generate()
         .expect("discord_game_sdk_sys: bindgen could not generate bindings")
         .write_to_file(out_path.join("bindings.rs"))

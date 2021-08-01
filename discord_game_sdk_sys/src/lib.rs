@@ -91,19 +91,3 @@ pub(crate) mod ctypes {
 }
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
-
-// `bindgen` knows how to automatically implement PartialEq when it can't be derived
-// but it won't automatically implement Eq, so we do
-impl Eq for DiscordActivity {}
-impl Eq for DiscordActivityAssets {}
-impl Eq for DiscordActivityParty {}
-impl Eq for DiscordActivitySecrets {}
-impl Eq for DiscordFileStat {}
-impl Eq for DiscordInputMode {}
-impl Eq for DiscordLobby {}
-impl Eq for DiscordOAuth2Token {}
-impl Eq for DiscordPresence {}
-impl Eq for DiscordRelationship {}
-impl Eq for DiscordSku {}
-impl Eq for DiscordUser {}
-impl Eq for DiscordUserAchievement {}
